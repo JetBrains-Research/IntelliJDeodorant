@@ -10,20 +10,22 @@ import java.util.Set;
 
 public class ClassInstanceCreationObject extends CreationObject {
 
-	private List<TypeObject> parameterList;
-	private Set<String> thrownExceptions;
-	public ClassInstanceCreationObject(TypeObject type) {
-		super(type);
-		this.parameterList = new ArrayList<TypeObject>();
-		this.thrownExceptions = new LinkedHashSet<String>();
-	}
-	public PsiClass getClassInstanceCreation() {
-		return (PsiClass) this.creation.recoverASTNode();
-	}
+    private List<TypeObject> parameterList;
+    private Set<String> thrownExceptions;
 
-	public void setClassInstanceCreation(PsiClass creation) {
-		this.creation = ASTInformationGenerator.generateASTInformation(creation);
-	}
+    public ClassInstanceCreationObject(TypeObject type) {
+        super(type);
+        this.parameterList = new ArrayList<TypeObject>();
+        this.thrownExceptions = new LinkedHashSet<String>();
+    }
+
+    public PsiClass getClassInstanceCreation() {
+        return (PsiClass) this.creation.recoverASTNode();
+    }
+
+    public void setClassInstanceCreation(PsiClass creation) {
+        this.creation = ASTInformationGenerator.generateASTInformation(creation);
+    }
 
     public boolean addParameter(TypeObject parameterType) {
         return parameterList.add(parameterType);
@@ -32,37 +34,37 @@ public class ClassInstanceCreationObject extends CreationObject {
     public ListIterator<TypeObject> getParameterListIterator() {
         return parameterList.listIterator();
     }
-    
+
     public List<TypeObject> getParameterTypeList() {
-    	return this.parameterList;
+        return this.parameterList;
     }
 
     public List<String> getParameterList() {
-    	List<String> list = new ArrayList<String>();
-    	for(TypeObject typeObject : parameterList)
-    		list.add(typeObject.toString());
-    	return list;
+        List<String> list = new ArrayList<String>();
+        for (TypeObject typeObject : parameterList)
+            list.add(typeObject.toString());
+        return list;
     }
 
     public void addThrownException(String type, PsiClass psiClass) {
-    	thrownExceptions.add(type);
+        thrownExceptions.add(type);
     }
 
     public Set<String> getThrownExceptions() {
-    	return this.thrownExceptions;
+        return this.thrownExceptions;
     }
 
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("new ");
-		sb.append(getType().toString());
-		sb.append("(");
-		if(!parameterList.isEmpty()) {
-			for(int i=0; i<parameterList.size()-1; i++)
-				sb.append(parameterList.get(i)).append(", ");
-			sb.append(parameterList.get(parameterList.size()-1));
-		}
-		sb.append(")");
-		return sb.toString();
-	}
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("new ");
+        sb.append(getType().toString());
+        sb.append("(");
+        if (!parameterList.isEmpty()) {
+            for (int i = 0; i < parameterList.size() - 1; i++)
+                sb.append(parameterList.get(i)).append(", ");
+            sb.append(parameterList.get(parameterList.size() - 1));
+        }
+        sb.append(")");
+        return sb.toString();
+    }
 }

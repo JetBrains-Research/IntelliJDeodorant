@@ -1,17 +1,13 @@
 package gr.uom.java.ast;
 
-import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiType;
-
 
 public class ASTInformation {
 
     private PsiType iTypeRoot;
     private int startPosition;
     private int length;
-    //  private PsiType nodeType;
     private volatile int hashCode = 0;
     PsiElement psiElement;
 
@@ -20,7 +16,7 @@ public class ASTInformation {
         if (astNode != null && astNode.getTextRange() != null) {
             this.startPosition = astNode.getTextRange().getStartOffset();
             this.length = astNode.getTextRange().getLength();
-        } else if (astNode == null ) {
+        } else if (astNode == null) {
             this.startPosition = 0;
             this.length = 0;
         } else {
@@ -28,13 +24,9 @@ public class ASTInformation {
             this.length = astNode.getTextLength();
         }
         this.psiElement = astNode;
-        //  this.nodeType = astNode.get
     }
 
     public PsiElement recoverASTNode() {
-        // CompilationUnit compilationUnit = CompilationUnitCache.getInstance().getCompilationUnit(iTypeRoot);
-        //ASTNode astNode = NodeFinder.perform(compilationUnit, startPosition, length);
-        //return astNode;
         return psiElement;
     }
 
@@ -59,8 +51,7 @@ public class ASTInformation {
             ASTInformation astInformation = (ASTInformation) o;
             return this.iTypeRoot.equals(astInformation.iTypeRoot) &&
                     this.startPosition == astInformation.startPosition &&
-                    this.length == astInformation.length;// &&
-            //  this.nodeType == astInformation.nodeType;
+                    this.length == astInformation.length;
         }
         return false;
     }
@@ -71,7 +62,6 @@ public class ASTInformation {
             result = 37 * result + iTypeRoot.hashCode();
             result = 37 * result + startPosition;
             result = 37 * result + length;
-            //  result = 37 * result + nodeType;
             hashCode = result;
         }
         return hashCode;

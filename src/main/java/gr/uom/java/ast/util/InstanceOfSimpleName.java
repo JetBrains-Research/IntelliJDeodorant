@@ -6,10 +6,7 @@ import com.intellij.psi.PsiReferenceExpression;
 public class InstanceOfSimpleName implements ExpressionInstanceChecker {
 
 	public boolean instanceOf(PsiExpression expression) {
-		if(expression instanceof PsiReferenceExpression)
-			return true;
-		else
-			return false;
+		return expression instanceof PsiReferenceExpression;
 	}
 
 }

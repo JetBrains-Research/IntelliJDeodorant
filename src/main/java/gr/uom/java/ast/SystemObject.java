@@ -4,9 +4,7 @@ import com.intellij.psi.PsiFile;
 
 import java.util.*;
 
-
 public class SystemObject {
-
     private List<gr.uom.java.ast.ClassObject> classList;
     //Map that has as key the classname and as value
     //the position of className in the classNameList

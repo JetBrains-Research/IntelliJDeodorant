@@ -27,10 +27,7 @@ import gr.uom.java.ast.decomposition.cfg.AbstractVariable;
 import gr.uom.java.ast.decomposition.cfg.PlainVariable;
 import gr.uom.java.ast.util.MethodDeclarationUtility;
 
-
 import java.util.*;
-
-import static com.intellij.psi.PsiModifier.STATIC;
 
 public abstract class AbstractMethodFragment {
     private AbstractMethodFragment parent;
@@ -46,31 +43,18 @@ public abstract class AbstractMethodFragment {
     private List<LiteralObject> literalList;
     private List<AnonymousClassDeclarationObject> anonymousClassDeclarationList;
     private Set<PsiExpression> exceptionsInThrowStatements;
-    //private Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughFields;
     private Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughFields;
-    //private Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughParameters;
     private Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughParameters;
-    //private Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughLocalVariables;
     private Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughLocalVariables;
-    //private Set<MethodInvocationObject> invokedMethodsThroughThisReference;
     private List<MethodInvocationObject> nonDistinctInvokedMethodsThroughThisReference;
     private List<MethodInvocationObject> nonDistinctInvokedStaticMethods;
-
-    //private Set<AbstractVariable> definedFieldsThroughFields;
     private List<AbstractVariable> nonDistinctDefinedFieldsThroughFields;
-    //private Set<AbstractVariable> usedFieldsThroughFields;
     private List<AbstractVariable> nonDistinctUsedFieldsThroughFields;
-    //private Set<AbstractVariable> definedFieldsThroughParameters;
     private List<AbstractVariable> nonDistinctDefinedFieldsThroughParameters;
-    //private Set<AbstractVariable> usedFieldsThroughParameters;
     private List<AbstractVariable> nonDistinctUsedFieldsThroughParameters;
-    //private Set<AbstractVariable> definedFieldsThroughLocalVariables;
     private List<AbstractVariable> nonDistinctDefinedFieldsThroughLocalVariables;
-    //private Set<AbstractVariable> usedFieldsThroughLocalVariables;
     private List<AbstractVariable> nonDistinctUsedFieldsThroughLocalVariables;
-    //private Set<PlainVariable> definedFieldsThroughThisReference;
     private List<PlainVariable> nonDistinctDefinedFieldsThroughThisReference;
-    //private Set<PlainVariable> usedFieldsThroughThisReference;
     private List<PlainVariable> nonDistinctUsedFieldsThroughThisReference;
 
     private Set<PlainVariable> declaredLocalVariables;
@@ -94,31 +78,19 @@ public abstract class AbstractMethodFragment {
         this.literalList = new ArrayList<LiteralObject>();
         this.anonymousClassDeclarationList = new ArrayList<AnonymousClassDeclarationObject>();
         this.exceptionsInThrowStatements = new LinkedHashSet<PsiExpression>();
-        //this.invokedMethodsThroughFields = new LinkedHashMap<AbstractVariable, LinkedHashSet<MethodInvocationObject>>();
+
         this.nonDistinctInvokedMethodsThroughFields = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
-        //this.invokedMethodsThroughParameters = new LinkedHashMap<AbstractVariable, LinkedHashSet<MethodInvocationObject>>();
         this.nonDistinctInvokedMethodsThroughParameters = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
-        //this.invokedMethodsThroughLocalVariables = new LinkedHashMap<AbstractVariable, LinkedHashSet<MethodInvocationObject>>();
         this.nonDistinctInvokedMethodsThroughLocalVariables = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
-        //this.invokedMethodsThroughThisReference = new LinkedHashSet<MethodInvocationObject>();
         this.nonDistinctInvokedMethodsThroughThisReference = new ArrayList<MethodInvocationObject>();
         this.nonDistinctInvokedStaticMethods = new ArrayList<MethodInvocationObject>();
-
-        //this.definedFieldsThroughFields = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctDefinedFieldsThroughFields = new ArrayList<AbstractVariable>();
-        //this.usedFieldsThroughFields = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctUsedFieldsThroughFields = new ArrayList<AbstractVariable>();
-        //this.definedFieldsThroughParameters = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctDefinedFieldsThroughParameters = new ArrayList<AbstractVariable>();
-        //this.usedFieldsThroughParameters = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctUsedFieldsThroughParameters = new ArrayList<AbstractVariable>();
-        //this.definedFieldsThroughLocalVariables = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctDefinedFieldsThroughLocalVariables = new ArrayList<AbstractVariable>();
-        //this.usedFieldsThroughLocalVariables = new LinkedHashSet<AbstractVariable>();
         this.nonDistinctUsedFieldsThroughLocalVariables = new ArrayList<AbstractVariable>();
-        //this.definedFieldsThroughThisReference = new LinkedHashSet<PlainVariable>();
         this.nonDistinctDefinedFieldsThroughThisReference = new ArrayList<PlainVariable>();
-        //this.usedFieldsThroughThisReference = new LinkedHashSet<PlainVariable>();
         this.nonDistinctUsedFieldsThroughThisReference = new ArrayList<PlainVariable>();
 
         this.declaredLocalVariables = new LinkedHashSet<PlainVariable>();
@@ -138,7 +110,7 @@ public abstract class AbstractMethodFragment {
                                     List<PsiExpression> postfixExpressions, List<PsiExpression> prefixExpressions) {
         for (PsiExpression variableInstruction : variableInstructions) {
             Collection<PsiField> fields = PsiTreeUtil.findChildrenOfType(variableInstruction, PsiField.class);
-            for (PsiField psiField: fields) {
+            for (PsiField psiField : fields) {
                 String originClassName = psiField.getContainingClass().getName();
                 String qualifiedName = psiField.getType().getCanonicalText();
                 TypeObject fieldType = TypeObject.extractTypeObject(qualifiedName);
@@ -180,20 +152,15 @@ public abstract class AbstractMethodFragment {
                             handleUsedField(variable);
                         }
                     }
-
                 }
             }
-            
-           // PsiElement simpleName = variableInstruction.getOriginalElement();
-            if (variableInstruction instanceof PsiReferenceExpression) {
-                final PsiReferenceExpression argumentReference = (PsiReferenceExpression)variableInstruction;
-                final PsiElement simpleName = argumentReference.resolve();
-/*                if (argumentTarget instanceof PsiField) {
 
-                }*/
+            if (variableInstruction instanceof PsiReferenceExpression) {
+                final PsiReferenceExpression argumentReference = (PsiReferenceExpression) variableInstruction;
+                final PsiElement simpleName = argumentReference.resolve();
                 if (simpleName instanceof PsiField) {
                     if (((PsiField) simpleName).getContainingClass() != null) {
-                        PsiField psiField = (PsiField) simpleName; 
+                        PsiField psiField = (PsiField) simpleName;
                         String originClassName = psiField.getContainingClass().getName();
                         String qualifiedName = psiField.getType().getCanonicalText();
                         TypeObject fieldType = TypeObject.extractTypeObject(qualifiedName);
@@ -238,7 +205,6 @@ public abstract class AbstractMethodFragment {
                         }
                     }
                 } else {
-                    //psiTreeParent instanceof PsiLocalVariable
                     if (simpleName != null && simpleName.getParent() instanceof PsiLocalVariable) {
                         String variableName = ((PsiVariable) simpleName).getName();
                         String variableType = ((PsiVariable) simpleName).getType().getCanonicalText();
@@ -252,7 +218,6 @@ public abstract class AbstractMethodFragment {
                             addDeclaredLocalVariable(variable);
                         } else {
                             LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
-                            //localVariable.setSimpleName(simpleName);
                             addLocalVariableInstruction(localVariable);
                             Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(simpleName, assignments);
                             Set<PsiPostfixExpression> localVariablePostfixAssignments = getMatchingPostfixAssignments(simpleName, postfixExpressions);
@@ -332,44 +297,6 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-/*    protected void processConstructorInvocation(ConstructorInvocation constructorInvocation) {
-        IMethodBinding methodBinding = constructorInvocation.resolveConstructorBinding();
-        String originClassName = methodBinding.getDeclaringClass().getQualifiedName();
-        TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
-        String methodInvocationName = methodBinding.getName();
-        String qualifiedName = methodBinding.getReturnType().getQualifiedName();
-        TypeObject returnType = TypeObject.extractTypeObject(qualifiedName);
-        ConstructorInvocationObject constructorInvocationObject = new ConstructorInvocationObject(originClassTypeObject, methodInvocationName, returnType);
-        constructorInvocationObject.setConstructorInvocation(constructorInvocation);
-        ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-        for (ITypeBinding parameterType : parameterTypes) {
-            String qualifiedParameterName = parameterType.getQualifiedName();
-            TypeObject typeObject = TypeObject.extractTypeObject(qualifiedParameterName);
-            constructorInvocationObject.addParameter(typeObject);
-        }
-        ITypeBinding[] thrownExceptionTypes = methodBinding.getExceptionTypes();
-        for (ITypeBinding thrownExceptionType : thrownExceptionTypes) {
-            constructorInvocationObject.addThrownException(thrownExceptionType.getQualifiedName());
-        }
-        if ((methodBinding.getModifiers() & Modifier.STATIC) != 0)
-            constructorInvocationObject.setStatic(true);
-        addConstructorInvocation(constructorInvocationObject);
-        List<Expression> arguments = constructorInvocation.arguments();
-        for (Expression argument : arguments) {
-            if (argument instanceof SimpleName) {
-                SimpleName argumentName = (SimpleName) argument;
-                IBinding binding = argumentName.resolveBinding();
-                if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-                    IVariableBinding variableBinding = (IVariableBinding) binding;
-                    if (variableBinding.isParameter()) {
-                        PlainVariable variable = new PlainVariable(variableBinding);
-                        addParameterPassedAsArgumentInConstructorInvocation(variable, constructorInvocationObject);
-                    }
-                }
-            }
-        }
-    }*/
-
     protected void processMethodInvocations(List<PsiExpression> methodInvocations) {
         for (PsiExpression expression : methodInvocations) {
             if (expression instanceof PsiMethodCallExpression) {
@@ -382,7 +309,7 @@ public abstract class AbstractMethodFragment {
                 TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
                 String methodInvocationName = methodBinding.getName();
                 String qualifiedName = methodBinding.getName();
-                PsiType returnTypeBinding = methodBinding.getReturnType(); 
+                PsiType returnTypeBinding = methodBinding.getReturnType();
                 TypeObject returnType = TypeObject.extractTypeObject(returnTypeBinding == null ? "Object" : returnTypeBinding.getCanonicalText());
                 MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
                 methodInvocationObject.setMethodInvocation(methodInvocation);
@@ -427,14 +354,6 @@ public abstract class AbstractMethodFragment {
                 for (PsiExpression argument : arguments) {
                     if (argument instanceof PsiReferenceExpression) {
                         PsiReferenceExpression argumentName = (PsiReferenceExpression) argument;
-                  //      IBinding binding = argumentName.resolveBinding();
-/*                        if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-                            IVariableBinding variableBinding = (IVariableBinding) binding;
-                            if (variableBinding.isParameter()) {
-                                PlainVariable variable = new PlainVariable(variableBinding);
-                                addParameterPassedAsArgumentInMethodInvocation(variable, methodInvocationObject);
-                            }
-                        }*/
                     }
                 }
             } else if (expression instanceof PsiSuperExpression) {
@@ -462,20 +381,6 @@ public abstract class AbstractMethodFragment {
                 if ((methodBinding1.hasModifier(JvmModifier.STATIC)))
                     superMethodInvocationObject.setStatic(true);
                 addSuperMethodInvocation(superMethodInvocationObject);
-/*                List<PsiExpression> arguments = superMethodInvocation.get();
-                for (PsiExpression argument : arguments) {
-                    if (argument instanceof SimpleName) {
-                        SimpleName argumentName = (SimpleName) argument;
-                        IBinding binding = argumentName.resolveBinding();
-                        if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-                            IVariableBinding variableBinding = (IVariableBinding) binding;
-                            if (variableBinding.isParameter()) {
-                                PlainVariable variable = new PlainVariable(variableBinding);
-                                addParameterPassedAsArgumentInSuperMethodInvocation(variable, superMethodInvocationObject);
-                            }
-                        }
-                    }
-                }*/
             }
         }
     }
@@ -504,30 +409,22 @@ public abstract class AbstractMethodFragment {
     protected void processClassInstanceCreations(List<PsiExpression> classInstanceCreations) {
         for (PsiExpression classInstanceCreationExpression : classInstanceCreations) {
             PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreationExpression;
-            //      IMethodBinding constructorBinding = classInstanceCreation.resolveConstructorBinding();
-            if (classInstanceCreation != null&&classInstanceCreationExpression.getOriginalElement() instanceof PsiClass) {
-                PsiClass psiClass = (PsiClass) classInstanceCreationExpression.getOriginalElement(); 
-                PsiType type = classInstanceCreation.getType();
-                //    ITypeBinding typeBinding = type.resolveBinding();
-                // String qualifiedTypeName = classInstanceCreation.getOriginalElement();
+            if (classInstanceCreation != null && classInstanceCreationExpression.getOriginalElement() instanceof PsiClass) {
+                PsiClass psiClass = (PsiClass) classInstanceCreationExpression.getOriginalElement();
                 TypeObject typeObject = null;
                 if (classInstanceCreation.getType() != null) {
                     typeObject = TypeObject.extractTypeObject(classInstanceCreation.getType().getCanonicalText());
                 }
                 ClassInstanceCreationObject creationObject = new ClassInstanceCreationObject(typeObject);
                 creationObject.setClassInstanceCreation((PsiClass) classInstanceCreation.getOriginalElement());
-                //    ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
                 if (psiClass.getTypeParameterList() != null) {
                     for (PsiTypeParameter parameterType : psiClass.getTypeParameterList().getTypeParameters()) {
-                        String qualifiedParameterName = parameterType.getQualifiedName() == null? "Object" : parameterType.getQualifiedName();
+                        String qualifiedParameterName = parameterType.getQualifiedName() == null ? "Object" : parameterType.getQualifiedName();
                         TypeObject parameterTypeObject = TypeObject.extractTypeObject(qualifiedParameterName);
                         creationObject.addParameter(parameterTypeObject);
                     }
                 }
-                // ITypeBinding[] thrownExceptionTypes = constructorBinding.getExceptionTypes();
-/*                for (ITypeBinding thrownExceptionType : thrownExceptionTypes) {
-                    creationObject.addThrownException(thrownExceptionType.getQualifiedName());
-                }*/
+
                 PsiAnonymousClass anonymous = classInstanceCreation.getAnonymousClass();
                 if (anonymous != null) {
                     final AnonymousClassDeclarationObject anonymousClassObject = new AnonymousClassDeclarationObject();
@@ -544,17 +441,10 @@ public abstract class AbstractMethodFragment {
                     PsiMethod[] methods = anonymous.getMethods();
 
                     for (PsiField psiField : fields) {
-                        PsiType fieldType = psiField.getType();
-  /*                          //ITypeBinding binding = fieldType.resolveBinding();
-                            List<VariableDeclarationFragment> fragments = psiField.get();
-                            for (VariableDeclarationFragment fragment : fragments) {
-                                String qualifiedName = binding.getQualifiedName();*/
                         TypeObject typeObject2 = TypeObject.extractTypeObject(psiField.getType().getCanonicalText());
                         typeObject2.setArrayDimension(typeObject2.getArrayDimension());
                         FieldObject fieldObject = new FieldObject(typeObject2, psiField);
                         fieldObject.setClassName(anonymousClassObject.getName());
-                        //  fieldObject.setVariableDeclarationFragment(fragment);
-
                         if ((psiField.hasModifier(JvmModifier.PUBLIC)))
                             fieldObject.setAccess(Access.PUBLIC);
                         else if (psiField.hasModifier(JvmModifier.PROTECTED))
@@ -570,7 +460,6 @@ public abstract class AbstractMethodFragment {
                         anonymousClassObject.addField(fieldObject);
                     }
                     for (PsiMethod psiMethod : methods) {
-                        //  MethodDeclaration methodDeclaration = (MethodDeclaration) bodyDeclaration;
                         String methodName = psiMethod.getName();
                         final ConstructorObject constructorObject = new ConstructorObject();
                         constructorObject.setMethodDeclaration(psiMethod);
@@ -588,9 +477,6 @@ public abstract class AbstractMethodFragment {
 
                         List<PsiParameter> parameters = Arrays.asList(psiMethod.getParameterList().getParameters());
                         for (PsiParameter parameter : parameters) {
-                            PsiType parameterType = parameter.getType();
-                            // ITypeBinding binding = parameterType.resolveBinding();
-                            //String qualifiedName = binding.getQualifiedName();
                             TypeObject typeObject2 = TypeObject.extractTypeObject(Objects.requireNonNull(parameter.getName()));
                             typeObject2.setArrayDimension(typeObject2.getArrayDimension());
                             if (parameter.isVarArgs()) {
@@ -618,8 +504,6 @@ public abstract class AbstractMethodFragment {
                             }
                         }
                         PsiType returnType = psiMethod.getReturnType();
-                        // ITypeBinding binding = returnType.resolveBinding();
-                        // String qualifiedName = binding.getQualifiedName();
                         TypeObject typeObject2 = TypeObject.extractTypeObject(returnType.getCanonicalText());
                         methodObject.setReturnType(typeObject2);
                         if ((psiMethod.hasModifier(JvmModifier.ABSTRACT)))
@@ -637,52 +521,12 @@ public abstract class AbstractMethodFragment {
 
                 }
             }
-            PlainVariable variable = null;
-/*            if (classInstanceCreation.getParent() instanceof PsiAssignmentExpression) {
-                PsiAssignmentExpression assignment = (PsiAssignmentExpression) classInstanceCreation.getParent();
-                if (classInstanceCreation.equals(assignment.getRExpression())) {
-                    if (assignment.getLExpression() instanceof PsiReferenceExpression) {
-                        PsiReferenceExpression simpleName = (PsiReferenceExpression) assignment.getLExpression();
-                        //IBinding binding = simpleName.resolveBinding();
-                        if (simpleName != null) {
-                           // IVariableBinding variableBinding = (IVariableBinding) binding;
-                        //    variable = new PlainVariable(simpleName.get);
-                        }
-                    } else if (assignment.getLExpression() instanceof FieldAccess) {
-                        FieldAccess fieldAccess = (FieldAccess) assignment.getLExpression();
-                        SimpleName simpleName = (SimpleName) fieldAccess.getName();
-                        IBinding binding = simpleName.resolveBinding();
-                        if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-                            IVariableBinding variableBinding = (IVariableBinding) binding;
-                            variable = new PlainVariable(variableBinding);
-                        }
-                    }
-                }
-            } else if (classInstanceCreation.getParent() instanceof VariableDeclarationFragment) {
-                VariableDeclarationFragment fragment = (VariableDeclarationFragment) classInstanceCreation.getParent();
-                if (classInstanceCreation.equals(fragment.getInitializer())) {
-                    SimpleName simpleName = fragment.getName();
-                    IBinding binding = simpleName.resolveBinding();
-                    if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-                        IVariableBinding variableBinding = (IVariableBinding) binding;
-                        variable = new PlainVariable(variableBinding);
-                    }
-                }
-            }*/
-/*            if (variable != null) {
-                addVariableAssignedWithClassInstanceCreation(variable, creationObject);
-            }
-            addCreation(creationObject);*/
         }
     }
 
     protected void processArrayCreations(List<PsiExpression> arrayCreations) {
-        String[] asd = new String[10];
         for (PsiExpression arrayCreationExpression : arrayCreations) {
             PsiNewExpression arrayCreation = (PsiNewExpression) arrayCreationExpression;
-            PsiType type = arrayCreation.getType();
-            //    ITypeBinding typeBinding = type.resolveBinding();
-            //    String qualifiedTypeName = PsiType.getQualifiedName();
             TypeObject typeObject = TypeObject.extractTypeObject(arrayCreation.getText());
             ArrayCreationObject creationObject = new ArrayCreationObject(typeObject);
             creationObject.setArrayCreation(arrayCreation);
@@ -730,22 +574,6 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    /*
-        private void addInvokedMethodThroughField(AbstractVariable field, MethodInvocationObject methodInvocation) {
-            if(invokedMethodsThroughFields.containsKey(field)) {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughFields.get(field);
-                methodInvocations.add(methodInvocation);
-            }
-            else {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = new LinkedHashSet<MethodInvocationObject>();
-                methodInvocations.add(methodInvocation);
-                invokedMethodsThroughFields.put(field, methodInvocations);
-            }
-            if(parent != null) {
-                parent.addInvokedMethodThroughField(field, methodInvocation);
-            }
-        }
-    */
     private void addNonDistinctInvokedMethodThroughField(AbstractVariable field, MethodInvocationObject methodInvocation) {
         if (nonDistinctInvokedMethodsThroughFields.containsKey(field)) {
             ArrayList<MethodInvocationObject> methodInvocations = nonDistinctInvokedMethodsThroughFields.get(field);
@@ -760,22 +588,6 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    /*
-        private void addInvokedMethodThroughParameter(AbstractVariable parameter, MethodInvocationObject methodInvocation) {
-            if(invokedMethodsThroughParameters.containsKey(parameter)) {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughParameters.get(parameter);
-                methodInvocations.add(methodInvocation);
-            }
-            else {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = new LinkedHashSet<MethodInvocationObject>();
-                methodInvocations.add(methodInvocation);
-                invokedMethodsThroughParameters.put(parameter, methodInvocations);
-            }
-            if(parent != null) {
-                parent.addInvokedMethodThroughParameter(parameter, methodInvocation);
-            }
-        }
-    */
     private void addNonDistinctInvokedMethodThroughParameter(AbstractVariable parameter, MethodInvocationObject methodInvocation) {
         if (nonDistinctInvokedMethodsThroughParameters.containsKey(parameter)) {
             ArrayList<MethodInvocationObject> methodInvocations = nonDistinctInvokedMethodsThroughParameters.get(parameter);
@@ -790,22 +602,6 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    /*
-        private void addInvokedMethodThroughLocalVariable(AbstractVariable localVariable, MethodInvocationObject methodInvocation) {
-            if(invokedMethodsThroughLocalVariables.containsKey(localVariable)) {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughLocalVariables.get(localVariable);
-                methodInvocations.add(methodInvocation);
-            }
-            else {
-                LinkedHashSet<MethodInvocationObject> methodInvocations = new LinkedHashSet<MethodInvocationObject>();
-                methodInvocations.add(methodInvocation);
-                invokedMethodsThroughLocalVariables.put(localVariable, methodInvocations);
-            }
-            if(parent != null) {
-                parent.addInvokedMethodThroughLocalVariable(localVariable, methodInvocation);
-            }
-        }
-    */
     private void addNonDistinctInvokedMethodThroughLocalVariable(AbstractVariable localVariable, MethodInvocationObject methodInvocation) {
         if (nonDistinctInvokedMethodsThroughLocalVariables.containsKey(localVariable)) {
             ArrayList<MethodInvocationObject> methodInvocations = nonDistinctInvokedMethodsThroughLocalVariables.get(localVariable);
@@ -820,14 +616,6 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    /*
-        private void addInvokedMethodThroughThisReference(MethodInvocationObject methodInvocation) {
-            invokedMethodsThroughThisReference.add(methodInvocation);
-            if(parent != null) {
-                parent.addInvokedMethodThroughThisReference(methodInvocation);
-            }
-        }
-    */
     private void addNonDistinctInvokedMethodThroughThisReference(MethodInvocationObject methodInvocation) {
         nonDistinctInvokedMethodsThroughThisReference.add(methodInvocation);
         if (parent != null) {
@@ -946,17 +734,13 @@ public abstract class AbstractMethodFragment {
         if (variable != null) {
             PlainVariable initialVariable = variable.getInitialVariable();
             if (variable instanceof PlainVariable) {
-                //definedFieldsThroughThisReference.add((PlainVariable)variable);
                 nonDistinctDefinedFieldsThroughThisReference.add((PlainVariable) variable);
             } else {
                 if (initialVariable.isField()) {
-                    //definedFieldsThroughFields.add(variable);
                     nonDistinctDefinedFieldsThroughFields.add(variable);
                 } else if (initialVariable.isParameter()) {
-                    //definedFieldsThroughParameters.add(variable);
                     nonDistinctDefinedFieldsThroughParameters.add(variable);
                 } else {
-                    //definedFieldsThroughLocalVariables.add(variable);
                     nonDistinctDefinedFieldsThroughLocalVariables.add(variable);
                 }
             }
@@ -970,17 +754,13 @@ public abstract class AbstractMethodFragment {
         if (variable != null) {
             PlainVariable initialVariable = variable.getInitialVariable();
             if (variable instanceof PlainVariable) {
-                //usedFieldsThroughThisReference.add((PlainVariable)variable);
                 nonDistinctUsedFieldsThroughThisReference.add((PlainVariable) variable);
             } else {
                 if (initialVariable.isField()) {
-                    //usedFieldsThroughFields.add(variable);
                     nonDistinctUsedFieldsThroughFields.add(variable);
                 } else if (initialVariable.isParameter()) {
-                    //usedFieldsThroughParameters.add(variable);
                     nonDistinctUsedFieldsThroughParameters.add(variable);
                 } else {
-                    //usedFieldsThroughLocalVariables.add(variable);
                     nonDistinctUsedFieldsThroughLocalVariables.add(variable);
                 }
             }

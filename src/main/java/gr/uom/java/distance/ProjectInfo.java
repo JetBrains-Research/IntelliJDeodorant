@@ -1,3 +1,5 @@
+package gr.uom.java.distance;
+
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;

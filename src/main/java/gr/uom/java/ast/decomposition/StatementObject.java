@@ -1,12 +1,10 @@
 package gr.uom.java.ast.decomposition;
 
 import com.intellij.psi.*;
-import com.intellij.psi.impl.search.ConstructorReferencesSearcher;
 import gr.uom.java.ast.util.ExpressionExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /*
  * StatementObject represents the following AST Statement subclasses:
@@ -36,14 +34,10 @@ public class StatementObject extends AbstractStatement {
 		processMethodInvocations(expressionExtractor.getMethodInvocations(statement));
 		processClassInstanceCreations(expressionExtractor.getClassInstanceCreations(statement));
 		processArrayCreations(expressionExtractor.getArrayCreations(statement));
-		//processArrayAccesses(expressionExtractor.getArrayAccesses(statement));
 		processLiterals(expressionExtractor.getLiterals(statement));
 		if(statement instanceof PsiThrowStatement) {
 			processThrowStatement((PsiThrowStatement)statement);
 		}
-/*		if(statement instanceof ConstructorReferencesSearcher) {
-			processConstructorInvocation((PsiJavaCodeReferenceElement)statement);
-		}*/
 	}
 
 	public String toString() {

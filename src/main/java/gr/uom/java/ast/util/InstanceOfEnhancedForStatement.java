@@ -6,10 +6,7 @@ import com.intellij.psi.PsiStatement;
 public class InstanceOfEnhancedForStatement implements StatementInstanceChecker {
 
 	public boolean instanceOf(PsiStatement statement) {
-		if(statement instanceof PsiForeachStatement)
-			return true;
-		else
-			return false;
+		return statement instanceof PsiForeachStatement;
 	}
 
 }

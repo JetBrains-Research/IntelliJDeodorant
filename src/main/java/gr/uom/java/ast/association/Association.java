@@ -11,15 +11,15 @@ public class Association {
 
     public Association(FieldObject fieldObject, String from, String to) {
         this.fieldObject = fieldObject;
-    	this.from = from;
+        this.from = from;
         this.to = to;
         this.container = false;
     }
-    
+
     public FieldObject getFieldObject() {
-    	return fieldObject;
+        return fieldObject;
     }
-    
+
     public String getTo() {
         return to;
     }
@@ -37,14 +37,14 @@ public class Association {
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
 
         if (o instanceof Association) {
-            Association association = (Association)o;
+            Association association = (Association) o;
             return this.from.equals(association.from) && this.to.equals(association.to) &&
-            	this.fieldObject.equals(association.fieldObject) && this.container == association.container;
+                    this.fieldObject.equals(association.fieldObject) && this.container == association.container;
         }
         return false;
     }
@@ -52,7 +52,7 @@ public class Association {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(from).append(" -->");
-        if(container)
+        if (container)
             sb.append("(*) ");
         else
             sb.append("(1) ");

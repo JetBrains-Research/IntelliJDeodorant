@@ -3,22 +3,22 @@ package gr.uom.java.ast;
 import com.intellij.psi.PsiArrayAccessExpression;
 
 public class ArrayAccessObject {
-	private TypeObject type;
-	private ASTInformation arrayAccess;
+    private TypeObject type;
+    private ASTInformation arrayAccess;
 	
-	public ArrayAccessObject(TypeObject type) {
-		this.type = type;
-	}
-	
-	public TypeObject getType() {
-		return type;
-	}
+    public ArrayAccessObject(TypeObject type) {
+        this.type = type;
+    }
 
-	public PsiArrayAccessExpression getArrayAccess() {
-		return (PsiArrayAccessExpression)this.arrayAccess.recoverASTNode();
-	}
+    public TypeObject getType() {
+        return type;
+    }
 
-	public void setArrayAccess(PsiArrayAccessExpression arrayAccess) {
-		this.arrayAccess = ASTInformationGenerator.generateASTInformation(arrayAccess);
-	}
+    public PsiArrayAccessExpression getArrayAccess() {
+        return (PsiArrayAccessExpression) this.arrayAccess.recoverASTNode();
+    }
+
+    public void setArrayAccess(PsiArrayAccessExpression arrayAccess) {
+        this.arrayAccess = ASTInformationGenerator.generateASTInformation(arrayAccess);
+    }
 }

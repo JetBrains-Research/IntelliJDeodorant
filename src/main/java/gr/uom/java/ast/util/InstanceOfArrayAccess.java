@@ -6,10 +6,7 @@ import com.intellij.psi.PsiExpression;
 public class InstanceOfArrayAccess implements ExpressionInstanceChecker {
 
 	public boolean instanceOf(PsiExpression expression) {
-		if(expression instanceof PsiArrayAccessExpression)
-			return true;
-		else
-			return false;
+		return expression instanceof PsiArrayAccessExpression;
 	}
 
 }

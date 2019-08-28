@@ -5,7 +5,6 @@ import gr.uom.java.ast.decomposition.cfg.AbstractVariable;
 import gr.uom.java.ast.decomposition.cfg.CompositeVariable;
 import gr.uom.java.ast.decomposition.cfg.PlainVariable;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
 public class MethodDeclarationUtility {
 
     public static PsiMethodCallExpression isDelegate(PsiMethod methodDeclaration) {
-        PsiElement parentClass = (PsiElement) methodDeclaration.getParent();
+        PsiElement parentClass = methodDeclaration.getParent();
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         if (methodBody != null) {
             List<PsiStatement> statements = Arrays.asList(methodBody.getStatements());
@@ -36,11 +35,6 @@ public class MethodDeclarationUtility {
                     if (methodInvocationExpression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
                         List<PsiMethod> parentClassMethods = new ArrayList<PsiMethod>();
-/*	    				if(parentClass instanceof PsiClass) {
-	    					PsiMethod[] parentClassMethodArray = ((PsiClass)parentClass).getMethods();
-							parentClassMethods.addAll(Arrays.asList(parentClassMethodArray));
-	    				}
-	    				else */
                         if (parentClass instanceof PsiClass) {
                             PsiClass enumDeclaration = (PsiClass) parentClass;
                             List<PsiMethod> bodyDeclarations = Arrays.asList(enumDeclaration.getMethods());
@@ -100,10 +94,6 @@ public class MethodDeclarationUtility {
                     if (returnStatementExpression != null) {
                         return returnStatementExpression;
                     }
-/*	    			else if(returnStatementExpression instanceof FieldAccess) {
-	    				FieldAccess fieldAccess = (FieldAccess)returnStatementExpression;
-	    				return fieldAccess.getName();
-	    			}*/
                 }
             }
         }
@@ -143,15 +133,9 @@ public class MethodDeclarationUtility {
             currentVariable = new PlainVariable(simpleName);
         else
             currentVariable = new CompositeVariable(simpleName, rightPart);
-            
-/*
-            if(simpleName.getParent() instanceof QualifiedName) {
-                    return createVariable(simpleName, currentVariable);
-            }*/
-        /*  else */
+
         if (simpleName.getParent() instanceof PsiReference) {
             PsiReference fieldAccess = (PsiReference) simpleName.getParent();
-            //   PsiExpression fieldAccessExpression = fieldAccess.getExpression();
             if (fieldAccess instanceof PsiReferenceExpression) {
                 PsiReferenceExpression fieldAccess2 = (PsiReferenceExpression) fieldAccess;
                 return createVariable(fieldAccess2.getElement(), currentVariable);
@@ -166,48 +150,9 @@ public class MethodDeclarationUtility {
 
     public static AbstractVariable processMethodInvocationExpression(PsiExpression expression) {
         if (expression instanceof PsiReferenceExpression) {
-                PsiElement qualifiedName = ((PsiReferenceExpression) expression).resolve();
-                return createVariable(qualifiedName, null);
-/*                return createVariable(qualifiedName, null);
-            } else if (expression.getOriginalElement() instanceof PsiField
-                    || ((expression instanceof PsiReferenceExpression) && ((((PsiReferenceExpression)expression).resolve()) instanceof PsiField))) {
-                //FieldAccess fieldAccess = (FieldAccess)expression;
-                return createVariable(expression.getOriginalElement(), null);
-            } else {
-                return createVariable(((PsiReferenceExpression)expression).resolve(), null);
-            }*/
-
+            PsiElement qualifiedName = ((PsiReferenceExpression) expression).resolve();
+            return createVariable(qualifiedName, null);
         } else return null;
     }
-
-/*	public static PsiElement getRightMostSimpleName(PsiExpression expression) {
-		PsiElement simpleName = null;
-		if(expression != null) {
-			simpleName = expression;
-		}
-		else if(expression instanceof PsiReferenceExpression) {
-			QualifiedName leftHandSideQualifiedName = (QualifiedName)expression;
-			simpleName = leftHandSideQualifiedName.getName();
-		}
-		else if(expression instanceof PsiClassObjectAccessExpression) {
-			FieldAccess leftHandSideFieldAccess = (FieldAccess)expression;
-			simpleName = leftHandSideFieldAccess.getName();
-		}
-		else if(expression instanceof PsiArrayAccessExpression) {
-			ArrayAccess leftHandSideArrayAccess = (ArrayAccess)expression;
-			Expression array = leftHandSideArrayAccess.getArray();
-			if(array instanceof PsiElement) {
-				simpleName = (PsiElement)array;
-			}
-			else if(array instanceof QualifiedName) {
-				QualifiedName arrayQualifiedName = (QualifiedName)array;
-				simpleName = arrayQualifiedName.getName();
-			}
-			else if(array instanceof FieldAccess) {
-				FieldAccess arrayFieldAccess = (FieldAccess)array;
-				simpleName = arrayFieldAccess.getName();
-			}
-		}
-		return simpleName;
-	}*/
+    
 }

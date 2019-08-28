@@ -1,15 +1,12 @@
 package gr.uom.java.ast.util;
 
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.PsiDeclarationStatement;
+import com.intellij.psi.PsiStatement;
 
-public class InstanceOfVariableDeclarationExpression implements ExpressionInstanceChecker {
+public class InstanceOfVariableDeclarationExpression implements StatementInstanceChecker {
 
-	public boolean instanceOf(PsiExpression expression) {
-		if(expression instanceof PsiVariable)
-			return true;
-		else
-			return false;
+	public boolean instanceOf(PsiStatement statement) {
+		return statement instanceof PsiDeclarationStatement;
 	}
 
 }

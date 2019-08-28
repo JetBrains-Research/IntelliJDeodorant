@@ -6,10 +6,7 @@ import com.intellij.psi.PsiTypeCastExpression;
 public class InstanceOfCastExpression implements ExpressionInstanceChecker {
 
 	public boolean instanceOf(PsiExpression expression) {
-		if(expression instanceof PsiTypeCastExpression)
-			return true;
-		else
-			return false;
+		return expression instanceof PsiTypeCastExpression;
 	}
 
 }

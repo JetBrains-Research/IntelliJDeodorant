@@ -15,12 +15,10 @@ public class SuperMethodInvocationObject extends AbstractMethodInvocationObject 
     }
 
     public void setSuperMethodInvocation(PsiSuperExpression superMethodInvocation) {
-    	//this.superMethodInvocation = superMethodInvocation;
-    	this.methodInvocation = ASTInformationGenerator.generateASTInformation(superMethodInvocation);
+        this.methodInvocation = ASTInformationGenerator.generateASTInformation(superMethodInvocation);
     }
 
     public PsiSuperExpression getSuperMethodInvocation() {
-    	//return this.superMethodInvocation;
-    	return (PsiSuperExpression)this.methodInvocation.recoverASTNode();
+        return (PsiSuperExpression) this.methodInvocation.recoverASTNode();
     }
 }

@@ -3,7 +3,6 @@ package gr.uom.java.ast.util;
 import java.util.*;
 
 import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
 
 public class ExpressionExtractor {
     ExpressionInstanceChecker instanceChecker;
@@ -154,13 +153,13 @@ public class ExpressionExtractor {
 
     // returns a List of InstanceofExpression objects
     public List<PsiExpression> getInstanceofExpressions(PsiStatement statement) {
-        instanceChecker = new InstanceOfInstanceofExpression();
+        instanceChecker = new InstanceOfInstanceOfExpression();
         return getExpressions(statement);
     }
 
     // returns a List of InstanceofExpression objects
     public List<PsiExpression> getInstanceofExpressions(PsiExpression expression) {
-        instanceChecker = new InstanceOfInstanceofExpression();
+        instanceChecker = new InstanceOfInstanceOfExpression();
         return getExpressions(expression);
     }
 
@@ -197,18 +196,6 @@ public class ExpressionExtractor {
     // returns a List of PrefixExpression objects
     public List<PsiExpression> getPrefixExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfPrefixExpression();
-        return getExpressions(expression);
-    }
-
-    // returns a List of VariableDeclarationExpression objects
-    public List<PsiExpression> getVariableDeclarationExpressions(PsiStatement statement) {
-        instanceChecker = new InstanceOfVariableDeclarationExpression();
-        return getExpressions(statement);
-    }
-
-    // returns a List of VariableDeclarationExpression objects
-    public List<PsiExpression> getVariableDeclarationExpressions(PsiExpression expression) {
-        instanceChecker = new InstanceOfVariableDeclarationExpression();
         return getExpressions(expression);
     }
 
@@ -261,14 +248,12 @@ public class ExpressionExtractor {
             PsiStatement updaters = forStatement.getUpdate();
             expressionList.addAll(getExpressions(updaters));
             expressionList.addAll(getExpressions(forStatement.getBody()));
-        }
-		else if(statement instanceof PsiForeachStatement) {
-            PsiForeachStatement enhancedForStatement = (PsiForeachStatement)statement;
-			PsiExpression expression = enhancedForStatement.getIteratedValue();
-			expressionList.addAll(getExpressions(expression));
-			expressionList.addAll(getExpressions(enhancedForStatement.getBody()));
-		}
-        else if (statement instanceof PsiWhileStatement) {
+        } else if (statement instanceof PsiForeachStatement) {
+            PsiForeachStatement enhancedForStatement = (PsiForeachStatement) statement;
+            PsiExpression expression = enhancedForStatement.getIteratedValue();
+            expressionList.addAll(getExpressions(expression));
+            expressionList.addAll(getExpressions(enhancedForStatement.getBody()));
+        } else if (statement instanceof PsiWhileStatement) {
             PsiWhileStatement whileStatement = (PsiWhileStatement) statement;
             PsiExpression expression = whileStatement.getCondition();
             expressionList.addAll(getExpressions(expression));
@@ -289,8 +274,7 @@ public class ExpressionExtractor {
             List<PsiStatement> switchStatements = Arrays.asList(switchStatement.getBody().getStatements());
             for (PsiStatement switchStatement2 : switchStatements)
                 expressionList.addAll(getExpressions(switchStatement2));
-        }
-        else if (statement instanceof PsiAssertStatement) {
+        } else if (statement instanceof PsiAssertStatement) {
             PsiAssertStatement assertStatement = (PsiAssertStatement) statement;
             PsiExpression expression = assertStatement.getAssertCondition();
             expressionList.addAll(getExpressions(expression));
@@ -336,8 +320,7 @@ public class ExpressionExtractor {
         } else if (statement instanceof PsiSuperExpression) {
             PsiSuperExpression superInvocation = (PsiSuperExpression) statement;
             expressionList.add(superInvocation);
-        }
-        else if (statement instanceof PsiBreakStatement) {
+        } else if (statement instanceof PsiBreakStatement) {
             PsiBreakStatement breakStatement = (PsiBreakStatement) statement;
             if (breakStatement.getLabelExpression() != null)
                 expressionList.addAll(getExpressions(breakStatement.getLabelExpression()));

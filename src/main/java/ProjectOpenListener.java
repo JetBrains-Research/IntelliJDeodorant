@@ -1,10 +1,10 @@
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import distance.ProjectInfo;
 import gr.uom.java.ast.ASTReader;
 import gr.uom.java.ast.Standalone;
 import gr.uom.java.distance.MoveMethodCandidateRefactoring;
+import gr.uom.java.distance.ProjectInfo;
 
 import java.util.List;
 

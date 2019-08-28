@@ -33,7 +33,7 @@ public class PsiUtils {
     }
 
     public static List<PsiMethod> extractMethods(PsiClass psiClass) {
-        return Arrays.asList(psiClass.getAllMethods());
+        return Arrays.asList(psiClass.getMethods());
     }
 
 }

@@ -33,7 +33,7 @@ public class MethodBodyObject {
     public CompositeStatementObject getCompositeStatement() {
         return compositeStatement;
     }
-    
+
     public List<FieldInstructionObject> getFieldInstructions() {
         return compositeStatement.getFieldInstructions();
     }
@@ -354,7 +354,7 @@ public class MethodBodyObject {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
             parent.addStatement(child);
-           // processStatement(child, tryStatement);
+            // processStatement(child, tryStatement);
             List<PsiCodeBlock> catchClauses = Arrays.asList(tryStatement.getCatchBlocks());
             for (PsiCodeBlock catchClause : catchClauses) {
                 CatchClauseObject catchClauseObject = new CatchClauseObject();
@@ -379,8 +379,8 @@ public class MethodBodyObject {
             Collection<PsiMethodCallExpression> methodCallExpressions =
                     PsiTreeUtil.findChildrenOfType(variableDeclarationStatement, PsiMethodCallExpression.class);
             for (PsiMethodCallExpression elem : methodCallExpressions) {
-                    AbstractExpression abstractExpression = new AbstractExpression(elem);
-                    parent.addExpression(abstractExpression);
+                AbstractExpression abstractExpression = new AbstractExpression(elem);
+                parent.addExpression(abstractExpression);
             }
         } else if (statement instanceof PsiBreakStatement) {
             PsiBreakStatement breakStatement = (PsiBreakStatement) statement;

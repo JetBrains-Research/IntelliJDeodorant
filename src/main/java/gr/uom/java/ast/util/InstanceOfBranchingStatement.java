@@ -7,11 +7,9 @@ import com.intellij.psi.PsiStatement;
 
 public class InstanceOfBranchingStatement implements StatementInstanceChecker {
 
-	public boolean instanceOf(PsiStatement statement) {
-		if(statement instanceof PsiBreakStatement || statement instanceof PsiContinueStatement || statement instanceof PsiReturnStatement)
-			return true;
-		else
-			return false;
-	}
+    public boolean instanceOf(PsiStatement statement) {
+        return statement instanceof PsiBreakStatement || statement instanceof PsiContinueStatement
+                || statement instanceof PsiReturnStatement;
+    }
 
 }

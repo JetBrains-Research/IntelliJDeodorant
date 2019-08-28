@@ -32,6 +32,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         this.testAnnotation = false;
         this.psiMethod = psiMethod;
     }
+
     public PsiMethod getPsiMethod() {
         return this.psiMethod;
     }
@@ -185,102 +186,75 @@ public class MethodObject implements AbstractMethodDeclaration {
     }
 
     public MethodInvocationObject isDelegate() {
-        if(getMethodBody() != null) {
+        if (getMethodBody() != null) {
             PsiMethod methodDeclaration = getMethodDeclaration();
             PsiElement parentClass = methodDeclaration.getParent();
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
-            if(abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
-                StatementObject statementObject = (StatementObject)abstractStatements.get(0);
+            if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
+                StatementObject statementObject = (StatementObject) abstractStatements.get(0);
                 PsiStatement statement = statementObject.getStatement();
                 PsiMethodCallExpression methodInvocation = null;
-                if(statement instanceof PsiReturnStatement) {
-                    PsiReturnStatement returnStatement = (PsiReturnStatement)statement;
-                    if(returnStatement.getReturnValue() instanceof PsiMethodCallExpression) {
-                        methodInvocation = (PsiMethodCallExpression)returnStatement.getReturnValue();
+                if (statement instanceof PsiReturnStatement) {
+                    PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
+                    if (returnStatement.getReturnValue() instanceof PsiMethodCallExpression) {
+                        methodInvocation = (PsiMethodCallExpression) returnStatement.getReturnValue();
+                    }
+                } else if (statement instanceof PsiExpressionStatement) {
+                    PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
+                    if (expressionStatement.getExpression() instanceof PsiMethodCallExpression) {
+                        methodInvocation = (PsiMethodCallExpression) expressionStatement.getExpression();
                     }
                 }
-                else if(statement instanceof PsiExpressionStatement) {
-                    PsiExpressionStatement expressionStatement = (PsiExpressionStatement)statement;
-                    if(expressionStatement.getExpression() instanceof PsiMethodCallExpression) {
-                        methodInvocation = (PsiMethodCallExpression)expressionStatement.getExpression();
-                    }
-                }
-                if(methodInvocation != null) {
+                if (methodInvocation != null) {
                     PsiExpression methodInvocationExpression = methodInvocation.getMethodExpression();
                     List<MethodInvocationObject> methodInvocations = statementObject.getMethodInvocations();
-                    if(methodInvocationExpression instanceof PsiMethodCallExpression) {
-                        PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression)methodInvocationExpression;
+                    if (methodInvocationExpression instanceof PsiMethodCallExpression) {
+                        PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
                         List<PsiMethod> parentClassMethods = new ArrayList<PsiMethod>();
-                        if(parentClass instanceof PsiClass) {
+                        if (parentClass instanceof PsiClass) {
                             PsiMethod[] parentClassMethodArray = ((PsiClass) parentClass).getMethods();
                             parentClassMethods.addAll(Arrays.asList(parentClassMethodArray));
                         }
-/*                        else if(parentClass instanceof PsiEnumConstant) {
-                            EnumDeclaration enumDeclaration = (EnumDeclaration)parentClass;
-                            List<BodyDeclaration> bodyDeclarations = enumDeclaration.bodyDeclarations();
-                            for(BodyDeclaration bodyDeclaration : bodyDeclarations) {
-                                if(bodyDeclaration instanceof MethodDeclaration) {
-                                    parentClassMethods.add((MethodDeclaration)bodyDeclaration);
-                                }
-                            }
-                        }*/
                         boolean isDelegationChain = false;
                         boolean foundInParentClass = false;
-                        for(PsiMethod parentClassMethod : parentClassMethods) {
-                            if(parentClassMethod.getReference().equals(previousChainedMethodInvocation.getReference())) {
+                        for (PsiMethod parentClassMethod : parentClassMethods) {
+                            if (parentClassMethod.getReference().equals(previousChainedMethodInvocation.getReference())) {
                                 foundInParentClass = true;
                                 PsiElement getterField = MethodDeclarationUtility.isGetter(parentClassMethod);
-                                if(getterField == null)
+                                if (getterField == null)
                                     isDelegationChain = true;
                                 break;
                             }
                         }
-                        if(!isDelegationChain && foundInParentClass) {
-                            for(MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                if(methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                        if (!isDelegationChain && foundInParentClass) {
+                            for (MethodInvocationObject methodInvocationObject : methodInvocations) {
+                                if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
                                     return methodInvocationObject;
                                 }
                             }
                         }
-                    }
-                    else if(methodInvocationExpression instanceof PsiReferenceExpression) {
-                        PsiReferenceExpression fieldAccess = (PsiReferenceExpression)methodInvocationExpression;
+                    } else if (methodInvocationExpression instanceof PsiReferenceExpression) {
+                        PsiReferenceExpression fieldAccess = (PsiReferenceExpression) methodInvocationExpression;
                         PsiElement variableBinding = fieldAccess.resolve();
                         assert variableBinding != null;
-                        if(variableBinding.getClass().equals(parentClass.getClass()))
-                                //|| parentClass.getClass().is(variableBinding.getClass()))
+                        if (variableBinding.getClass().equals(parentClass.getClass()))
+                        //|| parentClass.getClass().is(variableBinding.getClass()))
                         {
-                            for(MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                if(methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                            for (MethodInvocationObject methodInvocationObject : methodInvocations) {
+                                if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
                                     return methodInvocationObject;
                                 }
                             }
                         }
-                    }
-/*                    else if(methodInvocationExpression instanceof PsiReferenceExpression) {
-                        PsiElement simpleName = (PsiElement)methodInvocationExpression;
-                        PsiReferenceExpression binding = simpleName.getReference();
-                        if(binding != null && binding.getKind() == IBinding.VARIABLE) {
-                            IVariableBinding variableBinding = (IVariableBinding)binding;
-                            if(variableBinding.isField() || variableBinding.isParameter()) {
-                                for(MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                    if(methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
-                                        return methodInvocationObject;
-                                    }
-                                }
-                            }
-                        }
-                    }*/
-                    else if(methodInvocationExpression instanceof PsiThisExpression) {
-                        for(MethodInvocationObject methodInvocationObject : methodInvocations) {
-                            if(methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                    } else if (methodInvocationExpression instanceof PsiThisExpression) {
+                        for (MethodInvocationObject methodInvocationObject : methodInvocations) {
+                            if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
                                 return methodInvocationObject;
                             }
                         }
-                    }
-                    else if(methodInvocationExpression == null) {
-                        for(MethodInvocationObject methodInvocationObject : methodInvocations) {
-                            if(methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                    } else if (methodInvocationExpression == null) {
+                        for (MethodInvocationObject methodInvocationObject : methodInvocations) {
+                            if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
                                 return methodInvocationObject;
                             }
                         }
@@ -354,25 +328,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         return false;
     }
 
-/*    public boolean containsFieldAccessOfEnclosingClass() {
-        //check for field access like SegmentedTimeline.this.segmentsIncluded
-        List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
-        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            SimpleName simpleName = fieldInstruction.getSimpleName();
-            if (simpleName.getParent() instanceof FieldAccess) {
-                FieldAccess fieldAccess = (FieldAccess) simpleName.getParent();
-                Expression fieldAccessExpression = fieldAccess.getExpression();
-                if (fieldAccessExpression instanceof ThisExpression) {
-                    ThisExpression thisExpression = (ThisExpression) fieldAccessExpression;
-                    if (thisExpression.getQualifier() != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }*/
-
     public boolean containsMethodCallWithThisExpressionAsArgument() {
         List<MethodInvocationObject> methodInvocations = getMethodInvocations();
         for (MethodInvocationObject methodInvocation : methodInvocations) {
@@ -391,7 +346,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 List<PsiMethod> arguments = Arrays.asList(classInstanceCreation.getConstructors());
                 for (PsiMethod argument : arguments) {
                     if ((Arrays.asList(argument.getBody().getStatements()).contains(this))
-                    || (argument instanceof PsiThisExpression))
+                            || (argument instanceof PsiThisExpression))
                         return true;
                 }
             }
@@ -407,16 +362,16 @@ public class MethodObject implements AbstractMethodDeclaration {
                 if (nullLiteral instanceof PsiBinaryExpression) {
                     PsiBinaryExpression infixExpression = (PsiBinaryExpression) nullLiteral.getParent();
                     PsiExpression leftOperand = infixExpression.getLOperand();
-                  //  PsiClass typeBinding = leftOperand.getType();
+                    //  PsiClass typeBinding = leftOperand.getType();
                     if (leftOperand.getOriginalElement().getClass().equals(targetClass.getName()) && infixExpression.getOperationSign().equals(JavaTokenType.EQEQ)) {
                         if (leftOperand instanceof PsiReferenceExpression) {
                             PsiReferenceExpression simpleName = (PsiReferenceExpression) leftOperand;
                             //IBinding binding = simpleName.resolveBinding();
                             if (((PsiReferenceExpression) leftOperand).getElement() instanceof PsiVariable) {
-                          //      IVariableBinding variableBinding = (IVariableBinding) binding;
-                             //   if (variableBinding.isParameter() || variableBinding.isField()) {
-                                    return true;
-                               // }
+                                //      IVariableBinding variableBinding = (IVariableBinding) binding;
+                                //   if (variableBinding.isParameter() || variableBinding.isField()) {
+                                return true;
+                                // }
                             }
                         } else return false; /*if (leftOperand instanceof FieldAccess) {
                             FieldAccess fieldAccess = (FieldAccess) leftOperand;
@@ -749,8 +704,6 @@ public class MethodObject implements AbstractMethodDeclaration {
             sb.append(constructorObject.parameterList.get(constructorObject.parameterList.size() - 1).toString());
         }
         sb.append(")");
-        /*if(constructorObject.methodBody != null)
-        	sb.append("\n").append(constructorObject.methodBody.toString());*/
         return sb.toString();
     }
 

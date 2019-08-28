@@ -24,12 +24,12 @@ public class MyAttribute extends Entity {
     }
 
     public FieldObject getFieldObject() {
-		return fieldObject;
-	}
+        return fieldObject;
+    }
 
-	public void setFieldObject(FieldObject fieldObject) {
-		this.fieldObject = fieldObject;
-	}
+    public void setFieldObject(FieldObject fieldObject) {
+        this.fieldObject = fieldObject;
+    }
 
     public String getAccess() {
         return access;
@@ -40,7 +40,7 @@ public class MyAttribute extends Entity {
     }
 
     public MyAttributeInstruction generateAttributeInstruction() {
-        MyAttributeInstruction instruction = new MyAttributeInstruction(this.classOrigin,this.classType,this.name);
+        MyAttributeInstruction instruction = new MyAttributeInstruction(this.classOrigin, this.classType, this.name);
         instruction.setReference(this.reference);
         return instruction;
     }
@@ -74,8 +74,8 @@ public class MyAttribute extends Entity {
     }
 
     public void addMethod(MyMethod method) {
-    	if(!methodList.contains(method))
-    		methodList.add(method);
+        if (!methodList.contains(method))
+            methodList.add(method);
     }
 
     public ListIterator<MyMethod> getMethodIterator() {
@@ -84,32 +84,32 @@ public class MyAttribute extends Entity {
 
     public boolean equals(MyAttributeInstruction attributeInstruction) {
         return this.classOrigin.equals(attributeInstruction.getClassOrigin()) &&
-            this.classType.equals(attributeInstruction.getClassType()) &&
-            this.name.equals(attributeInstruction.getName());
+                this.classType.equals(attributeInstruction.getClassType()) &&
+                this.name.equals(attributeInstruction.getName());
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
 
-        if(o instanceof MyAttribute) {
-            MyAttribute attribute = (MyAttribute)o;
+        if (o instanceof MyAttribute) {
+            MyAttribute attribute = (MyAttribute) o;
             return this.classOrigin.equals(attribute.classOrigin) && this.classType.equals(attribute.classType) &&
-                this.name.equals(attribute.name);
+                    this.name.equals(attribute.name);
         }
         return false;
     }
 
     public int hashCode() {
-    	if(hashCode == 0) {
-    		int result = 17;
-    		result = 37*result + classOrigin.hashCode();
-    		result = 37*result + classType.hashCode();
-    		result = 37*result + name.hashCode();
-    		hashCode = result;
-    	}
-    	return hashCode;
+        if (hashCode == 0) {
+            int result = 17;
+            result = 37 * result + classOrigin.hashCode();
+            result = 37 * result + classType.hashCode();
+            result = 37 * result + name.hashCode();
+            hashCode = result;
+        }
+        return hashCode;
     }
 
     public String toString() {
@@ -122,20 +122,20 @@ public class MyAttribute extends Entity {
 
     public Set<String> getEntitySet() {
         Set<String> set = new HashSet<String>();
-        if(!this.isReference()) {
-            for(MyMethod method : methodList) {
+        if (!this.isReference()) {
+            for (MyMethod method : methodList) {
                 set.add(method.toString());
             }
         }
         return set;
     }
 
-	public Set<String> getFullEntitySet() {
-		Set<String> set = new HashSet<String>();
-		set.add(this.toString());
-            for(MyMethod method : methodList) {
-                set.add(method.toString());
-            }
+    public Set<String> getFullEntitySet() {
+        Set<String> set = new HashSet<String>();
+        set.add(this.toString());
+        for (MyMethod method : methodList) {
+            set.add(method.toString());
+        }
         return set;
-	}
+    }
 }

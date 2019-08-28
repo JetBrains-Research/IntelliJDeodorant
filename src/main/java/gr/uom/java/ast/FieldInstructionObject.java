@@ -8,7 +8,6 @@ public class FieldInstructionObject {
     private TypeObject type;
     private String name;
     private boolean _static;
-    //private SimpleName simpleName;
     private ASTInformation simpleName;
     private volatile int hashCode = 0;
     private String variableBindingKey;
@@ -38,10 +37,10 @@ public class FieldInstructionObject {
     }
 
     public String getVariableBindingKey() {
-		return variableBindingKey;
-	}
+        return variableBindingKey;
+    }
 
-	public boolean isStatic() {
+    public boolean isStatic() {
         return _static;
     }
 
@@ -50,45 +49,44 @@ public class FieldInstructionObject {
     }
 
     public void setSimpleName(PsiElement simpleName) {
-    	//this.simpleName = simpleName;
-    	this.variableBindingKey = simpleName.getText();
-    	this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
+        //this.simpleName = simpleName;
+        this.variableBindingKey = simpleName.getText();
+        this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
     }
 
     public PsiElement getSimpleName() {
-    	//return this.simpleName;
-    	return (PsiElement)this.simpleName.recoverASTNode();
+        //return this.simpleName;
+        return (PsiElement) this.simpleName.recoverASTNode();
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
 
         if (o instanceof FieldInstructionObject) {
-            FieldInstructionObject fio = (FieldInstructionObject)o;
+            FieldInstructionObject fio = (FieldInstructionObject) o;
             return this.ownerClass.equals(fio.ownerClass) && this.name.equals(fio.name) && this.type.equals(fio.type) &&
-            		this.variableBindingKey.equals(fio.variableBindingKey);
+                    this.variableBindingKey.equals(fio.variableBindingKey);
         }
         return false;
     }
 
     public int hashCode() {
-    	if(hashCode == 0) {
-    		int result = 17;
-    		result = 37*result + ownerClass.hashCode();
-    		result = 37*result + name.hashCode();
-    		result = 37*result + type.hashCode();
-    		result = 37*result + variableBindingKey.hashCode();
-    		hashCode = result;
-    	}
-    	return hashCode;
+        if (hashCode == 0) {
+            int result = 17;
+            result = 37 * result + ownerClass.hashCode();
+            result = 37 * result + name.hashCode();
+            result = 37 * result + type.hashCode();
+            result = 37 * result + variableBindingKey.hashCode();
+            hashCode = result;
+        }
+        return hashCode;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(ownerClass).append("::");
-        //sb.append(type).append(" ");
         sb.append(name);
         return sb.toString();
     }

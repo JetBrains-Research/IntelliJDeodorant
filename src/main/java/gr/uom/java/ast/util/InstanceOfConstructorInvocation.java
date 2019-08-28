@@ -7,10 +7,7 @@ import com.intellij.psi.PsiSuperExpression;
 public class InstanceOfConstructorInvocation implements StatementInstanceChecker {
 
 	public boolean instanceOf(PsiStatement statement) {
-		if(statement instanceof PsiConstructorCall)
-			return true;
-		else
-			return false;
+		return statement instanceof PsiConstructorCall;
 	}
 
 }

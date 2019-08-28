@@ -13,119 +13,119 @@ import gr.uom.java.ast.decomposition.MethodBodyObject;
 import gr.uom.java.ast.decomposition.cfg.AbstractVariable;
 import gr.uom.java.ast.decomposition.cfg.PlainVariable;
 
-public interface AbstractMethodDeclaration {
+interface AbstractMethodDeclaration {
 
-    public String getName();
+    String getName();
 
-	public Access getAccess();
+    Access getAccess();
 
-    public PsiMethod getMethodDeclaration();
+    PsiMethod getMethodDeclaration();
 
-    public MethodBodyObject getMethodBody();
+    MethodBodyObject getMethodBody();
 
-    public String getClassName();
+    String getClassName();
 
-    public ListIterator<CommentObject> getCommentListIterator();
-    
-    public ListIterator<ParameterObject> getParameterListIterator();
+    ListIterator<CommentObject> getCommentListIterator();
 
-    public ParameterObject getParameter(int position);
+    ListIterator<ParameterObject> getParameterListIterator();
 
-    public List<MethodInvocationObject> getMethodInvocations();
+    ParameterObject getParameter(int position);
 
-    public List<SuperMethodInvocationObject> getSuperMethodInvocations();
+    List<MethodInvocationObject> getMethodInvocations();
 
-    public List<ConstructorInvocationObject> getConstructorInvocations();
+    List<SuperMethodInvocationObject> getSuperMethodInvocations();
 
-    public List<FieldInstructionObject> getFieldInstructions();
+    List<ConstructorInvocationObject> getConstructorInvocations();
 
-    public List<SuperFieldInstructionObject> getSuperFieldInstructions();
+    List<FieldInstructionObject> getFieldInstructions();
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarations();
-    
-    public List<LocalVariableInstructionObject> getLocalVariableInstructions();
+    List<SuperFieldInstructionObject> getSuperFieldInstructions();
 
-	public List<CreationObject> getCreations();
+    List<LocalVariableDeclarationObject> getLocalVariableDeclarations();
 
-	public List<LiteralObject> getLiterals();
-	
-	public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations();
+    List<LocalVariableInstructionObject> getLocalVariableInstructions();
 
-	public Set<PsiExpression> getExceptionsInThrowStatements();
-	
-	public Set<String> getExceptionsInJavaDocThrows();
+    List<CreationObject> getCreations();
 
-    public boolean containsMethodInvocation(MethodInvocationObject methodInvocation);
+    List<LiteralObject> getLiterals();
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction);
+    List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations();
 
-    public boolean containsSuperMethodInvocation(SuperMethodInvocationObject superMethodInvocation);
+    Set<PsiExpression> getExceptionsInThrowStatements();
 
-	public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughFields();
+    Set<String> getExceptionsInJavaDocThrows();
 
-	public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughFields();
+    boolean containsMethodInvocation(MethodInvocationObject methodInvocation);
 
-	public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughParameters();
+    boolean containsFieldInstruction(FieldInstructionObject fieldInstruction);
 
-	public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughParameters();
+    boolean containsSuperMethodInvocation(SuperMethodInvocationObject superMethodInvocation);
 
-	public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughLocalVariables();
+    Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughFields();
 
-	public Set<MethodInvocationObject> getInvokedMethodsThroughThisReference();
+    Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughFields();
 
-	public List<MethodInvocationObject> getNonDistinctInvokedMethodsThroughThisReference();
+    Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughParameters();
 
-	public Set<MethodInvocationObject> getInvokedStaticMethods();
+    Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughParameters();
 
-	public Set<AbstractVariable> getDefinedFieldsThroughFields();
+    Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughLocalVariables();
 
-	public Set<AbstractVariable> getUsedFieldsThroughFields();
+    Set<MethodInvocationObject> getInvokedMethodsThroughThisReference();
 
-	public List<AbstractVariable> getNonDistinctDefinedFieldsThroughFields();
+    List<MethodInvocationObject> getNonDistinctInvokedMethodsThroughThisReference();
 
-	public List<AbstractVariable> getNonDistinctUsedFieldsThroughFields();
+    Set<MethodInvocationObject> getInvokedStaticMethods();
 
-	public Set<AbstractVariable> getDefinedFieldsThroughParameters();
+    Set<AbstractVariable> getDefinedFieldsThroughFields();
 
-	public Set<AbstractVariable> getUsedFieldsThroughParameters();
+    Set<AbstractVariable> getUsedFieldsThroughFields();
 
-	public List<AbstractVariable> getNonDistinctDefinedFieldsThroughParameters();
+    List<AbstractVariable> getNonDistinctDefinedFieldsThroughFields();
 
-	public List<AbstractVariable> getNonDistinctUsedFieldsThroughParameters();
+    List<AbstractVariable> getNonDistinctUsedFieldsThroughFields();
 
-	public Set<AbstractVariable> getDefinedFieldsThroughLocalVariables();
+    Set<AbstractVariable> getDefinedFieldsThroughParameters();
 
-	public Set<AbstractVariable> getUsedFieldsThroughLocalVariables();
+    Set<AbstractVariable> getUsedFieldsThroughParameters();
 
-	public Set<PlainVariable> getDefinedFieldsThroughThisReference();
+    List<AbstractVariable> getNonDistinctDefinedFieldsThroughParameters();
 
-	public List<PlainVariable> getNonDistinctDefinedFieldsThroughThisReference();
+    List<AbstractVariable> getNonDistinctUsedFieldsThroughParameters();
 
-	public Set<PlainVariable> getUsedFieldsThroughThisReference();
+    Set<AbstractVariable> getDefinedFieldsThroughLocalVariables();
 
-	public List<PlainVariable> getNonDistinctUsedFieldsThroughThisReference();
+    Set<AbstractVariable> getUsedFieldsThroughLocalVariables();
 
-	public Set<PlainVariable> getDeclaredLocalVariables();
+    Set<PlainVariable> getDefinedFieldsThroughThisReference();
 
-	public Set<PlainVariable> getDefinedLocalVariables();
+    List<PlainVariable> getNonDistinctDefinedFieldsThroughThisReference();
 
-	public Set<PlainVariable> getUsedLocalVariables();
+    Set<PlainVariable> getUsedFieldsThroughThisReference();
 
-	public Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> getParametersPassedAsArgumentsInMethodInvocations();
+    List<PlainVariable> getNonDistinctUsedFieldsThroughThisReference();
 
-	public Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations();
+    Set<PlainVariable> getDeclaredLocalVariables();
 
-	public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations();
+    Set<PlainVariable> getDefinedLocalVariables();
 
-    public boolean containsSuperMethodInvocation();
+    Set<PlainVariable> getUsedLocalVariables();
 
-    public boolean containsSuperFieldAccess();
+    Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> getParametersPassedAsArgumentsInMethodInvocations();
 
-    public List<TypeObject> getParameterTypeList();
+    Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations();
 
-    public List<String> getParameterList();
+    Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations();
 
-    public String getSignature();
+    boolean containsSuperMethodInvocation();
 
-    public boolean isAbstract();
+    boolean containsSuperFieldAccess();
+
+    List<TypeObject> getParameterTypeList();
+
+    List<String> getParameterList();
+
+    String getSignature();
+
+    boolean isAbstract();
 }
