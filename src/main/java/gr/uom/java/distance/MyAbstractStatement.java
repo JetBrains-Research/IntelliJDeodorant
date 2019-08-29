@@ -19,11 +19,11 @@ public abstract class MyAbstractStatement {
     private List<MyMethodInvocation> methodInvocationList;
     private List<MyAttributeInstruction> attributeInstructionList;
 
-    public MyAbstractStatement(AbstractStatement statement) {
+    MyAbstractStatement(AbstractStatement statement) {
         this.statement = statement;
         this.parent = null;
-        this.methodInvocationList = new ArrayList<MyMethodInvocation>();
-        this.attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+        this.methodInvocationList = new ArrayList<>();
+        this.attributeInstructionList = new ArrayList<>();
         SystemObject system = ASTReader.getSystemObject();
         List<FieldInstructionObject> fieldInstructions = statement.getFieldInstructions();
         for (FieldInstructionObject fio : fieldInstructions) {
@@ -82,42 +82,39 @@ public abstract class MyAbstractStatement {
 
     private boolean delegationLoop(MethodInvocationObject methodInvocation, MethodInvocationObject delegation, SystemObject system) {
         MethodInvocationObject delegation2;
-        if ((delegation2 = system.containsDelegate(delegation)) != null && delegation2.equals(methodInvocation)) {
-            return true;
-        }
-        return false;
+        return (delegation2 = system.containsDelegate(delegation)) != null && delegation2.equals(methodInvocation);
     }
 
-    public MyAbstractStatement(List<MyAbstractStatement> statementList) {
+    MyAbstractStatement(List<MyAbstractStatement> statementList) {
         this.statement = null;
         this.parent = null;
-        this.methodInvocationList = new ArrayList<MyMethodInvocation>();
-        this.attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+        this.methodInvocationList = new ArrayList<>();
+        this.attributeInstructionList = new ArrayList<>();
         for (MyAbstractStatement myAbstractStatement : statementList) {
             methodInvocationList.addAll(myAbstractStatement.methodInvocationList);
             attributeInstructionList.addAll(myAbstractStatement.attributeInstructionList);
         }
     }
 
-    public MyAbstractStatement(MyMethodInvocation methodInvocation) {
+    MyAbstractStatement(MyMethodInvocation methodInvocation) {
         this.statement = null;
         this.parent = null;
-        this.methodInvocationList = new ArrayList<MyMethodInvocation>();
-        this.attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+        this.methodInvocationList = new ArrayList<>();
+        this.attributeInstructionList = new ArrayList<>();
         this.methodInvocationList.add(methodInvocation);
     }
 
-    protected MyAbstractStatement() {
+    MyAbstractStatement() {
         this.parent = null;
-        this.methodInvocationList = new ArrayList<MyMethodInvocation>();
-        this.attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+        this.methodInvocationList = new ArrayList<>();
+        this.attributeInstructionList = new ArrayList<>();
     }
 
-    public void setMethodInvocationList(List<MyMethodInvocation> list) {
+    void setMethodInvocationList(List<MyMethodInvocation> list) {
         this.methodInvocationList = list;
     }
 
-    public void setAttributeInstructionList(List<MyAttributeInstruction> list) {
+    void setAttributeInstructionList(List<MyAttributeInstruction> list) {
         this.attributeInstructionList = list;
     }
 
@@ -134,7 +131,7 @@ public abstract class MyAbstractStatement {
             methodInvocationList.add(myMethodInvocation);
     }
 
-    public void addAttributeInstruction(MyAttributeInstruction myAttributeInstruction) {
+    void addAttributeInstruction(MyAttributeInstruction myAttributeInstruction) {
         if (!attributeInstructionList.contains(myAttributeInstruction))
             attributeInstructionList.add(myAttributeInstruction);
     }
@@ -163,11 +160,11 @@ public abstract class MyAbstractStatement {
         return attributeInstructionList;
     }
 
-    public void setParent(MyCompositeStatement parent) {
+    void setParent(MyCompositeStatement parent) {
         this.parent = parent;
     }
 
-    public MyCompositeStatement getParent() {
+    MyCompositeStatement getParent() {
         return this.parent;
     }
 
@@ -183,7 +180,7 @@ public abstract class MyAbstractStatement {
         return this.statement.toString();
     }
 
-    public void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
+    void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
         int index = attributeInstructionList.indexOf(myAttributeInstruction);
         if (index != -1) {
             MyAttributeInstruction attributeInstruction = attributeInstructionList.get(index);
@@ -191,15 +188,15 @@ public abstract class MyAbstractStatement {
         }
     }
 
-    public MyAbstractStatement getAbstractStatement(AbstractStatement statement) {
+    MyAbstractStatement getAbstractStatement(AbstractStatement statement) {
         if (this.statement.equals(statement))
             return this;
         else
             return null;
     }
 
-    public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+    Set<String> getEntitySet() {
+        Set<String> set = new HashSet<>();
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
         while (attributeInstructionIterator.hasNext()) {
             MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();

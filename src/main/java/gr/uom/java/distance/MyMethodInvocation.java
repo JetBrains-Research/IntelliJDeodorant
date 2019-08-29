@@ -4,9 +4,9 @@ import java.util.List;
 
 public class MyMethodInvocation {
     private String classOrigin;
-    private String methodName;
-    private String returnType;
-    private List<String> parameterList;
+    private final String methodName;
+    private final String returnType;
+    private final List<String> parameterList;
 
     public MyMethodInvocation(String classOrigin, String methodName, String returnType, List<String> parameterList) {
         this.classOrigin = classOrigin;

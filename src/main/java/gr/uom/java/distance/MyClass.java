@@ -6,17 +6,17 @@ import java.util.*;
 
 public class MyClass {
 
-    private String name;
+    private final String name;
     private String superclass;
-    private List<MyAttribute> attributeList;
-    private List<MyMethod> methodList;
+    private final List<MyAttribute> attributeList;
+    private final List<MyMethod> methodList;
     private ClassObject classObject;
     private volatile int hashCode = 0;
 
     public MyClass(String name) {
         this.name = name;
-        this.attributeList = new ArrayList<MyAttribute>();
-        this.methodList = new ArrayList<MyMethod>();
+        this.attributeList = new ArrayList<>();
+        this.methodList = new ArrayList<>();
     }
 
     public String getName() {
@@ -98,7 +98,7 @@ public class MyClass {
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         for (MyAttribute attribute : attributeList) {
             if (!attribute.isReference())
                 set.add(attribute.toString());

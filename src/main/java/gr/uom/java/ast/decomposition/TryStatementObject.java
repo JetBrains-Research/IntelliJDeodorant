@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 public class TryStatementObject extends CompositeStatementObject {
-    private List<CatchClauseObject> catchClauses;
+    private final List<CatchClauseObject> catchClauses;
     private CompositeStatementObject finallyClause;
 
     public TryStatementObject(PsiStatement statement, AbstractMethodFragment parent) {
         super(statement, StatementType.TRY, parent);
-        this.catchClauses = new ArrayList<CatchClauseObject>();
+        this.catchClauses = new ArrayList<>();
     }
 
     public List<AbstractStatement> getStatementsInsideTryBlock() {
@@ -45,8 +45,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<AbstractExpression> getExpressions() {
-        List<AbstractExpression> expressions = new ArrayList<AbstractExpression>();
-        expressions.addAll(super.getExpressions());
+        List<AbstractExpression> expressions = new ArrayList<>(super.getExpressions());
         for (CatchClauseObject catchClause : catchClauses) {
             expressions.addAll(catchClause.getExpressions());
         }
@@ -54,8 +53,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<String> stringRepresentation() {
-        List<String> stringRepresentation = new ArrayList<String>();
-        stringRepresentation.addAll(super.stringRepresentation());
+        List<String> stringRepresentation = new ArrayList<>(super.stringRepresentation());
         for (CatchClauseObject catchClause : catchClauses) {
             stringRepresentation.addAll(catchClause.stringRepresentation());
         }
@@ -66,8 +64,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<CompositeStatementObject> getIfStatements() {
-        List<CompositeStatementObject> ifStatements = new ArrayList<CompositeStatementObject>();
-        ifStatements.addAll(super.getIfStatements());
+        List<CompositeStatementObject> ifStatements = new ArrayList<>(super.getIfStatements());
         for (CatchClauseObject catchClause : catchClauses) {
             ifStatements.addAll(catchClause.getIfStatements());
         }
@@ -78,8 +75,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<CompositeStatementObject> getSwitchStatements() {
-        List<CompositeStatementObject> switchStatements = new ArrayList<CompositeStatementObject>();
-        switchStatements.addAll(super.getSwitchStatements());
+        List<CompositeStatementObject> switchStatements = new ArrayList<>(super.getSwitchStatements());
         for (CatchClauseObject catchClause : catchClauses) {
             switchStatements.addAll(catchClause.getSwitchStatements());
         }
@@ -90,8 +86,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<TryStatementObject> getTryStatements() {
-        List<TryStatementObject> tryStatements = new ArrayList<TryStatementObject>();
-        tryStatements.addAll(super.getTryStatements());
+        List<TryStatementObject> tryStatements = new ArrayList<>(super.getTryStatements());
         for (CatchClauseObject catchClause : catchClauses) {
             tryStatements.addAll(catchClause.getTryStatements());
         }

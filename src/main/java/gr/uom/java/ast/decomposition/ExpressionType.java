@@ -29,6 +29,6 @@ public enum ExpressionType {
     SUPER_METHOD_INVOCATION,
     THIS,
     TYPE_LITERAL,
-    VARIABLE_DECLARATION;
+    VARIABLE_DECLARATION
 
 }

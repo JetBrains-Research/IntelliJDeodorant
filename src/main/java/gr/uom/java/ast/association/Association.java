@@ -4,10 +4,10 @@ import gr.uom.java.ast.FieldObject;
 
 public class Association {
 
-    private String from;
-    private String to;
+    private final String from;
+    private final String to;
     private boolean container;
-    private FieldObject fieldObject;
+    private final FieldObject fieldObject;
 
     public Association(FieldObject fieldObject, String from, String to) {
         this.fieldObject = fieldObject;

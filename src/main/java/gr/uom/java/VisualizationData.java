@@ -1,7 +1,7 @@
 package gr.uom.java;
 
-public interface VisualizationData {
-    public int getDistinctSourceDependencies();
+interface VisualizationData {
+    int getDistinctSourceDependencies();
 
-    public int getDistinctTargetDependencies();
+    int getDistinctTargetDependencies();
 }

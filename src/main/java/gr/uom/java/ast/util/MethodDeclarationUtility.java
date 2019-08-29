@@ -34,13 +34,13 @@ public class MethodDeclarationUtility {
                     PsiReferenceExpression methodInvocationExpression = methodInvocation.getMethodExpression();
                     if (methodInvocationExpression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
-                        List<PsiMethod> parentClassMethods = new ArrayList<PsiMethod>();
+                        List<PsiMethod> parentClassMethods = new ArrayList<>();
                         if (parentClass instanceof PsiClass) {
                             PsiClass enumDeclaration = (PsiClass) parentClass;
-                            List<PsiMethod> bodyDeclarations = Arrays.asList(enumDeclaration.getMethods());
+                            PsiMethod[] bodyDeclarations = enumDeclaration.getMethods();
                             for (PsiMethod bodyDeclaration : bodyDeclarations) {
                                 if (bodyDeclaration != null) {
-                                    parentClassMethods.add((PsiMethod) bodyDeclaration);
+                                    parentClassMethods.add(bodyDeclaration);
                                 }
                             }
                         }
@@ -91,9 +91,7 @@ public class MethodDeclarationUtility {
                 if (statement instanceof PsiReturnStatement) {
                     PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
                     PsiExpression returnStatementExpression = returnStatement.getReturnValue();
-                    if (returnStatementExpression != null) {
-                        return returnStatementExpression;
-                    }
+                    return returnStatementExpression;
                 }
             }
         }

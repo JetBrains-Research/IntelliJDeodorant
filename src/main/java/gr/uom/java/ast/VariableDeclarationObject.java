@@ -3,11 +3,11 @@ package gr.uom.java.ast;
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiReference;
 
-public abstract class VariableDeclarationObject {
+abstract class VariableDeclarationObject {
 
-    protected PsiReference variableBindingKey;
+    PsiReference variableBindingKey;
 
-    public PsiReference getVariableBindingKey() {
+    PsiReference getVariableBindingKey() {
         return variableBindingKey;
     }
 

@@ -3,8 +3,8 @@ package gr.uom.java.ast;
 import com.intellij.psi.PsiDeclarationStatement;
 
 public class LocalVariableDeclarationObject extends VariableDeclarationObject {
-    private TypeObject type;
-    private String name;
+    private final TypeObject type;
+    private final String name;
     private PsiDeclarationStatement variableDeclaration;
     private volatile int hashCode = 0;
 
@@ -58,9 +58,6 @@ public class LocalVariableDeclarationObject extends VariableDeclarationObject {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(type).append(" ");
-        sb.append(name);
-        return sb.toString();
+        return type + " " + name;
     }
 }

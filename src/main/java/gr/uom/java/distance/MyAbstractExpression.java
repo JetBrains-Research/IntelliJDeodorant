@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-public class MyAbstractExpression {
+class MyAbstractExpression {
 
     private AbstractExpression expression;
     private MyCompositeStatement owner;
@@ -22,8 +22,8 @@ public class MyAbstractExpression {
     public MyAbstractExpression(AbstractExpression expression) {
         this.expression = expression;
         this.owner = null;
-        this.methodInvocationList = new ArrayList<MyMethodInvocation>();
-        this.attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+        this.methodInvocationList = new ArrayList<>();
+        this.attributeInstructionList = new ArrayList<>();
         SystemObject system = ASTReader.getSystemObject();
 
         List<FieldInstructionObject> fieldInstructions = expression.getFieldInstructions();
@@ -151,7 +151,7 @@ public class MyAbstractExpression {
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
         while (attributeInstructionIterator.hasNext()) {
             MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();

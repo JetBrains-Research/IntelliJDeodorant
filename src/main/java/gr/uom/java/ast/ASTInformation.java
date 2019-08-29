@@ -5,11 +5,11 @@ import com.intellij.psi.PsiType;
 
 public class ASTInformation {
 
-    private PsiType iTypeRoot;
-    private int startPosition;
-    private int length;
+    private final PsiType iTypeRoot;
+    private final int startPosition;
+    private final int length;
     private volatile int hashCode = 0;
-    PsiElement psiElement;
+    private final PsiElement psiElement;
 
     public ASTInformation(PsiType iTypeRoot, PsiElement astNode) {
         this.iTypeRoot = iTypeRoot;
@@ -30,15 +30,15 @@ public class ASTInformation {
         return psiElement;
     }
 
-    public PsiType getITypeRoot() {
+    PsiType getITypeRoot() {
         return iTypeRoot;
     }
 
-    public int getStartPosition() {
+    int getStartPosition() {
         return startPosition;
     }
 
-    public int getLength() {
+    int getLength() {
         return length;
     }
 

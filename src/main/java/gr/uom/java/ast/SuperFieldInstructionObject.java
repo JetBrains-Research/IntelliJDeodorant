@@ -4,9 +4,9 @@ import com.intellij.psi.PsiElement;
 
 public class SuperFieldInstructionObject {
 
-    private String ownerClass;
-    private TypeObject type;
-    private String name;
+    private final String ownerClass;
+    private final TypeObject type;
+    private final String name;
     private boolean _static;
     private ASTInformation simpleName;
     private volatile int hashCode = 0;
@@ -70,10 +70,8 @@ public class SuperFieldInstructionObject {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ownerClass).append("::");
-        //sb.append(type).append(" ");
-        sb.append(name);
-        return sb.toString();
+        return ownerClass + "::" +
+                //sb.append(type).append(" ");
+                name;
     }
 }

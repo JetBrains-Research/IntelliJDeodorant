@@ -2,7 +2,6 @@ package gr.uom.java.ast.decomposition;
 
 import java.util.List;
 
-import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiStatement;
 import gr.uom.java.ast.ASTInformation;
@@ -10,10 +9,10 @@ import gr.uom.java.ast.ASTInformationGenerator;
 
 public abstract class AbstractStatement extends AbstractMethodFragment {
 
-    private ASTInformation statement;
-    private StatementType type;
+    private final ASTInformation statement;
+    private final StatementType type;
 
-    public AbstractStatement(PsiElement statement, StatementType type, AbstractMethodFragment parent) {
+    AbstractStatement(PsiElement statement, StatementType type, AbstractMethodFragment parent) {
         super(parent);
         this.type = type;
         this.statement = ASTInformationGenerator.generateASTInformation(statement);
@@ -25,7 +24,7 @@ public abstract class AbstractStatement extends AbstractMethodFragment {
         return (PsiStatement) element;
     }
 
-    public StatementType getType() {
+    StatementType getType() {
         return type;
     }
 
@@ -41,5 +40,5 @@ public abstract class AbstractStatement extends AbstractMethodFragment {
         return depth;
     }
 
-    public abstract List<String> stringRepresentation();
+    protected abstract List<String> stringRepresentation();
 }

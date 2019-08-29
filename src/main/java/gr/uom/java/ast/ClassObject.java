@@ -9,23 +9,23 @@ import java.util.ListIterator;
 
 public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
 
-    private List<gr.uom.java.ast.ConstructorObject> constructorList;
-    private List<gr.uom.java.ast.EnumConstantDeclarationObject> enumConstantDeclarationList;
+    private final List<gr.uom.java.ast.ConstructorObject> constructorList;
+    private final List<gr.uom.java.ast.EnumConstantDeclarationObject> enumConstantDeclarationList;
     private TypeObject superclass;
-    private List<TypeObject> interfaceList;
+    private final List<TypeObject> interfaceList;
     private boolean _abstract;
     private boolean _interface;
     private boolean _static;
     private boolean _enum;
     private gr.uom.java.ast.Access access;
     private gr.uom.java.ast.ASTInformation typeDeclaration;
-    private PsiFile iFile;
+ //   private PsiFile iFile;
 
     public ClassObject(PsiClass psiClass) {
         this.name = psiClass.getName();
-        this.constructorList = new ArrayList<gr.uom.java.ast.ConstructorObject>();
-        this.interfaceList = new ArrayList<TypeObject>();
-        this.enumConstantDeclarationList = new ArrayList<gr.uom.java.ast.EnumConstantDeclarationObject>();
+        this.constructorList = new ArrayList<>();
+        this.interfaceList = new ArrayList<>();
+        this.enumConstantDeclarationList = new ArrayList<>();
         this._abstract = psiClass.hasModifier(JvmModifier.ABSTRACT);
         this._interface = psiClass.isInterface();
         this._static = psiClass.hasModifier(JvmModifier.STATIC);
@@ -49,6 +49,7 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
         return typeDeclaration.getITypeRoot();
     }
 
+/*
     public PsiFile getIFile() {
         return iFile;
     }
@@ -56,8 +57,9 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
     public void setIFile(PsiFile file) {
         iFile = file;
     }
+*/
 
-    public boolean isFriend(String className) {
+    private boolean isFriend(String className) {
         if (superclass != null) {
             if (superclass.getClassType().equals(className))
                 return true;
@@ -113,9 +115,7 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
     private boolean checkFriendship(TypeObject type, String className) {
         if (type.getClassType().equals(className))
             return true;
-        if (type.getGenericType() != null && type.getGenericType().contains(className))
-            return true;
-        return false;
+        return type.getGenericType() != null && type.getGenericType().contains(className);
     }
 
     public void setAccess(Access access) {
@@ -142,7 +142,7 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
         return enumConstantDeclarationList.add(f);
     }
 
-    public ListIterator<ConstructorObject> getConstructorIterator() {
+    private ListIterator<ConstructorObject> getConstructorIterator() {
         return constructorList.listIterator();
     }
 
@@ -151,7 +151,7 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
     }
 
     public ListIterator<TypeObject> getSuperclassIterator() {
-        List<TypeObject> superclassList = new ArrayList<TypeObject>(interfaceList);
+        List<TypeObject> superclassList = new ArrayList<>(interfaceList);
         superclassList.add(superclass);
         return superclassList.listIterator();
     }

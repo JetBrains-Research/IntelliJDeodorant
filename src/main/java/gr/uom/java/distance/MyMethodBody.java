@@ -10,10 +10,10 @@ import gr.uom.java.ast.decomposition.CompositeStatementObject;
 import gr.uom.java.ast.decomposition.MethodBodyObject;
 import gr.uom.java.ast.decomposition.StatementObject;
 
-public class MyMethodBody {
+class MyMethodBody {
 
-    private MyCompositeStatement compositeStatement;
-    private MethodBodyObject methodBodyObject;
+    private final MyCompositeStatement compositeStatement;
+    private final MethodBodyObject methodBodyObject;
 
     public MyMethodBody(MethodBodyObject methodBody) {
         this.methodBodyObject = methodBody;

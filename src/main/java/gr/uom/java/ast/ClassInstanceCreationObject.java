@@ -10,13 +10,13 @@ import java.util.Set;
 
 public class ClassInstanceCreationObject extends CreationObject {
 
-    private List<TypeObject> parameterList;
-    private Set<String> thrownExceptions;
+    private final List<TypeObject> parameterList;
+    private final Set<String> thrownExceptions;
 
     public ClassInstanceCreationObject(TypeObject type) {
         super(type);
-        this.parameterList = new ArrayList<TypeObject>();
-        this.thrownExceptions = new LinkedHashSet<String>();
+        this.parameterList = new ArrayList<>();
+        this.thrownExceptions = new LinkedHashSet<>();
     }
 
     public PsiClass getClassInstanceCreation() {
@@ -40,7 +40,7 @@ public class ClassInstanceCreationObject extends CreationObject {
     }
 
     public List<String> getParameterList() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (TypeObject typeObject : parameterList)
             list.add(typeObject.toString());
         return list;

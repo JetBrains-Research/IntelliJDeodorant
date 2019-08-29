@@ -9,13 +9,13 @@ import java.util.*;
 
 public class MySystem {
 
-    private Map<String, MyClass> classMap;
-    private AssociationDetection associationDetection;
-    private SystemObject systemObject;
+    private final Map<String, MyClass> classMap;
+    private final AssociationDetection associationDetection;
+    private final SystemObject systemObject;
 
     public MySystem(SystemObject systemObject, boolean includeStaticMembers) {
         this.systemObject = systemObject;
-        this.classMap = new HashMap<String, MyClass>();
+        this.classMap = new HashMap<>();
         this.associationDetection = new AssociationDetection(systemObject);
         if (includeStaticMembers)
             generateSystemWithStaticMembers();
@@ -129,7 +129,7 @@ public class MySystem {
                 if (systemObject.containsGetter(mo.generateMethodInvocation()) == null &&
                         systemObject.containsSetter(mo.generateMethodInvocation()) == null && systemObject.containsCollectionAdder(mo.generateMethodInvocation()) == null) {
                     MethodInvocationObject delegation = systemObject.containsDelegate(mo.generateMethodInvocation());
-                    if (delegation == null || (delegation != null && systemObject.getClassObject(delegation.getOriginClassName()) == null)) {
+                    if (delegation == null || systemObject.getClassObject(delegation.getOriginClassName()) == null) {
                         MyMethod myMethod = new MyMethod(mo.getClassName(), mo.getName(),
                                 mo.getReturnType().toString(), mo.getParameterList());
                         if (mo.isAbstract())
@@ -174,9 +174,7 @@ public class MySystem {
     }
 
     public void removeClass(MyClass oldClass) {
-        if (classMap.containsKey(oldClass.getName())) {
-            classMap.remove(oldClass.getName());
-        }
+        classMap.remove(oldClass.getName());
     }
 
     public SystemObject getSystemObject() {

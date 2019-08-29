@@ -4,9 +4,9 @@ import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
 
 public class ParameterObject extends VariableDeclarationObject {
-    private TypeObject type;
-    private String name;
-    private boolean varargs;
+    private final TypeObject type;
+    private final String name;
+    private final boolean varargs;
     private ASTInformation singleVariableDeclaration;
     private volatile int hashCode = 0;
 
@@ -66,10 +66,7 @@ public class ParameterObject extends VariableDeclarationObject {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(type.toString()).append(" ");
-        sb.append(name);
-        return sb.toString();
+        return type.toString() + " " + name;
     }
 
     public PsiDeclarationStatement getVariableDeclaration() {

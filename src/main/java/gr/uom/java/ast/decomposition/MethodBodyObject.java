@@ -20,7 +20,7 @@ import java.util.*;
 
 public class MethodBodyObject {
 
-    private CompositeStatementObject compositeStatement;
+    private final CompositeStatementObject compositeStatement;
 
     public MethodBodyObject(PsiCodeBlock methodBody) {
         this.compositeStatement = new CompositeStatementObject(methodBody, StatementType.BLOCK, null);
@@ -211,16 +211,13 @@ public class MethodBodyObject {
     public boolean containsSuperFieldAccess() {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         List<PsiExpression> superFieldAccesses = expressionExtractor.getSuperFieldAccesses(compositeStatement.getStatement());
-        if (!superFieldAccesses.isEmpty())
-            return true;
-        else
-            return false;
+        return !superFieldAccesses.isEmpty();
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;
-            List<PsiStatement> blockStatements = Arrays.asList(block.getStatements());
+            PsiStatement[] blockStatements = block.getStatements();
             CompositeStatementObject child = new CompositeStatementObject(block.getStatements()[0], StatementType.BLOCK, parent);
             parent.addStatement(child);
             for (PsiStatement blockStatement : blockStatements) {
@@ -305,7 +302,7 @@ public class MethodBodyObject {
             child.addExpression(abstractExpression);
             //processExpression(child, switchStatement.getExpression());
             parent.addStatement(child);
-            List<PsiStatement> switchStatements = Arrays.asList(switchStatement.getBody().getStatements());
+            PsiStatement[] switchStatements = switchStatement.getBody().getStatements();
             for (PsiStatement switchStatement2 : switchStatements)
                 processStatement(child, switchStatement2);
         }/* else if (statement instanceof PsiSwitchStatement) {
@@ -355,7 +352,7 @@ public class MethodBodyObject {
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
             parent.addStatement(child);
             // processStatement(child, tryStatement);
-            List<PsiCodeBlock> catchClauses = Arrays.asList(tryStatement.getCatchBlocks());
+            PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
             for (PsiCodeBlock catchClause : catchClauses) {
                 CatchClauseObject catchClauseObject = new CatchClauseObject();
                 PsiStatement[] catchClauseBody = catchClause.getStatements();
@@ -366,7 +363,7 @@ public class MethodBodyObject {
             PsiCodeBlock finallyBlock = tryStatement.getFinallyBlock();
             if (finallyBlock != null) {
                 CompositeStatementObject finallyClauseStatementObject = new CompositeStatementObject(finallyBlock.getStatements()[0], StatementType.BLOCK, null);
-                List<PsiStatement> blockStatements = Arrays.asList(finallyBlock.getStatements());
+                PsiStatement[] blockStatements = finallyBlock.getStatements();
                 for (PsiStatement blockStatement : blockStatements) {
                     processStatement(finallyClauseStatementObject, blockStatement);
                 }

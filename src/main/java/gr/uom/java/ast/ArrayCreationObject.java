@@ -1,6 +1,5 @@
 package gr.uom.java.ast;
 
-import com.intellij.psi.PsiArrayInitializerExpression;
 import com.intellij.psi.PsiNewExpression;
 
 public class ArrayCreationObject extends CreationObject {

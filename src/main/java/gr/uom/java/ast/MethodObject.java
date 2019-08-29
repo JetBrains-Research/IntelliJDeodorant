@@ -1,6 +1,8 @@
 package gr.uom.java.ast;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import gr.uom.java.ast.association.Association;
 import gr.uom.java.ast.decomposition.AbstractStatement;
 import gr.uom.java.ast.decomposition.MethodBodyObject;
@@ -18,10 +20,10 @@ public class MethodObject implements AbstractMethodDeclaration {
     private boolean _static;
     private boolean _synchronized;
     private boolean _native;
-    private ConstructorObject constructorObject;
+    private final ConstructorObject constructorObject;
     private boolean testAnnotation;
     private volatile int hashCode = 0;
-    private PsiMethod psiMethod;
+    private final PsiMethod psiMethod;
 
     public MethodObject(PsiMethod psiMethod, ConstructorObject co) {
         this.constructorObject = co;
@@ -161,7 +163,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                         statementObject.getLocalVariableDeclarations().size() == 0 && statementObject.getLocalVariableInstructions().size() == 1 && this.constructorObject.parameterList.size() == 1) {
                     String methodName = statementObject.getMethodInvocations().get(0).getMethodName();
                     String originClassName = statementObject.getMethodInvocations().get(0).getOriginClassName();
-                    List<String> acceptableOriginClassNames = new ArrayList<String>();
+                    List<String> acceptableOriginClassNames = new ArrayList<>();
                     acceptableOriginClassNames.add("java.util.Collection");
                     acceptableOriginClassNames.add("java.util.AbstractCollection");
                     acceptableOriginClassNames.add("java.util.List");
@@ -210,7 +212,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                     List<MethodInvocationObject> methodInvocations = statementObject.getMethodInvocations();
                     if (methodInvocationExpression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
-                        List<PsiMethod> parentClassMethods = new ArrayList<PsiMethod>();
+                        List<PsiMethod> parentClassMethods = new ArrayList<>();
                         if (parentClass instanceof PsiClass) {
                             PsiMethod[] parentClassMethodArray = ((PsiClass) parentClass).getMethods();
                             parentClassMethods.addAll(Arrays.asList(parentClassMethodArray));
@@ -236,7 +238,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                     } else if (methodInvocationExpression instanceof PsiReferenceExpression) {
                         PsiReferenceExpression fieldAccess = (PsiReferenceExpression) methodInvocationExpression;
                         PsiElement variableBinding = fieldAccess.resolve();
-                        assert variableBinding != null;
+                        if (variableBinding == null) return null;
                         if (variableBinding.getClass().equals(parentClass.getClass()))
                         //|| parentClass.getClass().is(variableBinding.getClass()))
                         {
@@ -265,6 +267,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
+    //TODO: Fix it
     public boolean validTargetObject(ClassObject sourceClass, ClassObject targetClass) {
         ASTInformation targetClassBinding = targetClass.getAbstractTypeDeclaration();
         List<LocalVariableInstructionObject> localVariableInstructions = getLocalVariableInstructions();
@@ -272,7 +275,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
                 for (LocalVariableDeclarationObject variableDeclaration : getLocalVariableDeclarations()) {
                     if (variableDeclaration.getVariableDeclaration().equals(
-                            localVariableInstruction.getSimpleName()))
+                            localVariableInstruction.getSimpleName().resolve()))
                         return false;
                 }
             }
@@ -289,9 +292,10 @@ public class MethodObject implements AbstractMethodDeclaration {
         }
         List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
         for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            PsiClass fieldTypeBinding = (PsiClass) fieldInstruction.getSimpleName();
-            if (fieldInstruction.getType().getClassType().equals(targetClass.getName()) || fieldTypeBinding.equals(targetClassBinding) ||
-                    targetClassBinding.equals(fieldTypeBinding.getSuperClass())) {
+            PsiElement fieldTypeBinding = fieldInstruction.getSimpleName();
+            if (fieldTypeBinding != null && fieldInstruction.getType() != null &&
+                    fieldInstruction.getType().getClassType() != null && fieldInstruction.getType().getClassType().equals(targetClass.getName())
+                    || targetClassBinding != null && fieldTypeBinding != null && fieldTypeBinding.equals(targetClassBinding.recoverASTNode())) {
                 ListIterator<FieldObject> fieldIterator = sourceClass.getFieldIterator();
                 while (fieldIterator.hasNext()) {
                     FieldObject field = fieldIterator.next();
@@ -332,7 +336,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         List<MethodInvocationObject> methodInvocations = getMethodInvocations();
         for (MethodInvocationObject methodInvocation : methodInvocations) {
             PsiMethodCallExpression invocation = methodInvocation.getMethodInvocation();
-            List<PsiExpression> arguments = Arrays.asList(invocation.getArgumentList().getExpressions());
+            PsiExpression[] arguments = invocation.getArgumentList().getExpressions();
             for (PsiExpression argument : arguments) {
                 if (argument instanceof PsiThisExpression)
                     return true;
@@ -343,7 +347,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             if (creation instanceof ClassInstanceCreationObject) {
                 ClassInstanceCreationObject classInstanceCreationObject = (ClassInstanceCreationObject) creation;
                 PsiClass classInstanceCreation = classInstanceCreationObject.getClassInstanceCreation();
-                List<PsiMethod> arguments = Arrays.asList(classInstanceCreation.getConstructors());
+                PsiMethod[] arguments = classInstanceCreation.getConstructors();
                 for (PsiMethod argument : arguments) {
                     if ((Arrays.asList(argument.getBody().getStatements()).contains(this))
                             || (argument instanceof PsiThisExpression))
@@ -357,33 +361,15 @@ public class MethodObject implements AbstractMethodDeclaration {
     public boolean containsNullCheckForTargetObject(ClassObject targetClass) {
         List<LiteralObject> literals = getLiterals();
         for (LiteralObject literal : literals) {
-            if (literal.getLiteralType().equals(LiteralType.NULL)) {
+            if (literal != null && (LiteralType.NULL).equals(literal.getLiteralType())) {
                 PsiExpression nullLiteral = literal.getLiteral();
                 if (nullLiteral instanceof PsiBinaryExpression) {
                     PsiBinaryExpression infixExpression = (PsiBinaryExpression) nullLiteral.getParent();
                     PsiExpression leftOperand = infixExpression.getLOperand();
-                    //  PsiClass typeBinding = leftOperand.getType();
-                    if (leftOperand.getOriginalElement().getClass().equals(targetClass.getName()) && infixExpression.getOperationSign().equals(JavaTokenType.EQEQ)) {
+                    if (leftOperand.getOriginalElement().getClass().getName().equals(targetClass.getName()) && infixExpression.getOperationSign().equals(JavaTokenType.EQEQ)) {
                         if (leftOperand instanceof PsiReferenceExpression) {
-                            PsiReferenceExpression simpleName = (PsiReferenceExpression) leftOperand;
-                            //IBinding binding = simpleName.resolveBinding();
-                            if (((PsiReferenceExpression) leftOperand).getElement() instanceof PsiVariable) {
-                                //      IVariableBinding variableBinding = (IVariableBinding) binding;
-                                //   if (variableBinding.isParameter() || variableBinding.isField()) {
-                                return true;
-                                // }
-                            }
-                        } else return false; /*if (leftOperand instanceof FieldAccess) {
-                            FieldAccess fieldAccess = (FieldAccess) leftOperand;
-                            SimpleName simpleName = fieldAccess.getName();
-                            IBinding binding = simpleName.resolveBinding();
-                            if (binding.getKind() == IBinding.VARIABLE) {
-                                IVariableBinding variableBinding = (IVariableBinding) binding;
-                                if (variableBinding.isField()) {
-                                    return true;
-                                }
-                            }
-                        }*/
+                            if (PsiTreeUtil.findChildrenOfType(leftOperand, PsiField.class).size() > 0) return true;
+                        }
                     }
                 }
             }
@@ -393,48 +379,9 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean overridesMethod() {
         PsiMethod methodBinding = getMethodDeclaration();
-        return methodBinding.findSuperMethods().length > 0;
-/*        PsiClass declaringClassTypeBinding = methodBinding.getContainingClass();
-       Set<PsiClass> typeBindings = new LinkedHashSet<PsiClass>();
-        PsiClass superClassTypeBinding = declaringClassTypeBinding.getSuperClass();
-        if (superClassTypeBinding != null)
-            typeBindings.add(superClassTypeBinding);
-        PsiClass[] interfaceTypeBindings = declaringClassTypeBinding.getInterfaces();
-        for (PsiClass interfaceTypeBinding : interfaceTypeBindings)
-            typeBindings.add(interfaceTypeBinding);
-        return overridesMethod(typeBindings);*/
+        return !(AnnotationUtil.findAnnotation(methodBinding, "Override") == null &&
+                methodBinding.findSuperMethods().length == 0);
     }
-
-/*    private boolean overridesMethod(Set<PsiClass> typeBindings) {
-        PsiClass methodBinding = getMethodDeclaration().getContainingClass().getSuperClass();
-        Set<PsiClass> superTypeBindings = new LinkedHashSet<PsiClass>();
-        for (PsiClass typeBinding : typeBindings) {
-            PsiClass superClassTypeBinding = typeBinding.getSuperClass();
-            if (superClassTypeBinding != null)
-                superTypeBindings.add(superClassTypeBinding);
-            PsiClass[] interfaceTypeBindings = typeBinding.getInterfaces();
-            for (PsiClass interfaceTypeBinding : interfaceTypeBindings)
-                superTypeBindings.add(interfaceTypeBinding);
-            if (typeBinding.isInterface()) {
-                PsiMethod[] interfaceMethodBindings = typeBinding.getMethods();
-                for (PsiMethod interfaceMethodBinding : interfaceMethodBindings) {
-                    if (methodBinding.overrides(interfaceMethodBinding) || methodBinding.toString().equals(interfaceMethodBinding.toString()))
-                        return true;
-                }
-            } else {
-                PsiMethod[] superClassMethodBindings = typeBinding.getMethods();
-                for (PsiMethod superClassMethodBinding : superClassMethodBindings) {
-                    if (methodBinding.overrides(superClassMethodBinding) || (methodBinding.toString().equals(superClassMethodBinding.toString())
-                            && (superClassMethodBinding.hasModifier(JvmModifier.PRIVATE))))
-                        return true;
-                }
-            }
-        }
-        if (!superTypeBindings.isEmpty()) {
-            return overridesMethod(superTypeBindings);
-        } else
-            return false;
-    }*/
 
     public String getClassName() {
         return constructorObject.getClassName();

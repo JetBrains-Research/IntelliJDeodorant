@@ -3,8 +3,8 @@ package gr.uom.java.distance;
 public class MyAttributeInstruction {
 
     private String classOrigin;
-    private String classType;
-    private String name;
+    private final String classType;
+    private final String name;
     private boolean reference;
 
     public MyAttributeInstruction(String classOrigin, String classType, String name) {
@@ -52,10 +52,8 @@ public class MyAttributeInstruction {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(classOrigin).append("::");
-        sb.append(classType).append(" ");
-        sb.append(name);
-        return sb.toString();
+        return classOrigin + "::" +
+                classType + " " +
+                name;
     }
 }

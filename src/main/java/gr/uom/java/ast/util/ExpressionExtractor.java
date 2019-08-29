@@ -5,7 +5,7 @@ import java.util.*;
 import com.intellij.psi.*;
 
 public class ExpressionExtractor {
-    ExpressionInstanceChecker instanceChecker;
+    private ExpressionInstanceChecker instanceChecker;
 
     // returns a List of SimpleName objects
     public List<PsiExpression> getVariableInstructions(PsiStatement statement) {
@@ -151,13 +151,11 @@ public class ExpressionExtractor {
         return getExpressions(expression);
     }
 
-    // returns a List of InstanceofExpression objects
     public List<PsiExpression> getInstanceofExpressions(PsiStatement statement) {
         instanceChecker = new InstanceOfInstanceOfExpression();
         return getExpressions(statement);
     }
 
-    // returns a List of InstanceofExpression objects
     public List<PsiExpression> getInstanceofExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfInstanceOfExpression();
         return getExpressions(expression);
@@ -224,10 +222,10 @@ public class ExpressionExtractor {
     }
 
     private List<PsiExpression> getExpressions(PsiStatement statement) {
-        List<PsiExpression> expressionList = new ArrayList<PsiExpression>();
+        List<PsiExpression> expressionList = new ArrayList<>();
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;
-            List<PsiStatement> blockStatements = Arrays.asList(block.getStatements());
+            PsiStatement[] blockStatements = block.getStatements();
             for (PsiStatement blockStatement : blockStatements)
                 expressionList.addAll(getExpressions(blockStatement));
         } else if (statement instanceof PsiIfStatement) {
@@ -271,7 +269,7 @@ public class ExpressionExtractor {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             PsiExpression expression = switchStatement.getExpression();
             expressionList.addAll(getExpressions(expression));
-            List<PsiStatement> switchStatements = Arrays.asList(switchStatement.getBody().getStatements());
+            PsiStatement[] switchStatements = switchStatement.getBody().getStatements();
             for (PsiStatement switchStatement2 : switchStatements)
                 expressionList.addAll(getExpressions(switchStatement2));
         } else if (statement instanceof PsiAssertStatement) {
@@ -303,7 +301,7 @@ public class ExpressionExtractor {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             List<PsiStatement> tryStatements = Arrays.asList(tryStatement.getTryBlock().getStatements());
             tryStatements.forEach(s -> expressionList.addAll(getExpressions(s)));
-            List<PsiCodeBlock> catchClauses = Arrays.asList(tryStatement.getCatchBlocks());
+            PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
             for (PsiCodeBlock catchClause : catchClauses) {
                 List<PsiStatement> statements = Arrays.asList(catchClause.getStatements());
                 statements.forEach(s -> expressionList.addAll(getExpressions(s)));
@@ -314,7 +312,7 @@ public class ExpressionExtractor {
             }
         } else if (statement instanceof PsiConstructorCall) {
             PsiConstructorCall constructorInvocation = (PsiConstructorCall) statement;
-            List<PsiExpression> arguments = Arrays.asList(constructorInvocation.getArgumentList().getExpressions());
+            PsiExpression[] arguments = constructorInvocation.getArgumentList().getExpressions();
             for (PsiExpression argument : arguments)
                 expressionList.addAll(getExpressions(argument));
         } else if (statement instanceof PsiSuperExpression) {
@@ -357,9 +355,11 @@ public class ExpressionExtractor {
             PsiNewExpression classInstanceCreation = (PsiNewExpression) expression;
             if (classInstanceCreation.getClassReference() != null)
                 expressionList.add(classInstanceCreation);
-            List<PsiExpression> arguments = Arrays.asList(classInstanceCreation.getArgumentList().getExpressions());
-            for (PsiExpression argument : arguments)
-                expressionList.addAll(getExpressions(argument));
+            if (classInstanceCreation.getArgumentList() != null) {
+                PsiExpression[] arguments = classInstanceCreation.getArgumentList().getExpressions();
+                for (PsiExpression argument : arguments)
+                    expressionList.addAll(getExpressions(argument));
+            }
             if (instanceChecker.instanceOf(classInstanceCreation))
                 expressionList.add(classInstanceCreation);
             PsiAnonymousClass anonymousClassDeclaration = classInstanceCreation.getAnonymousClass();
@@ -377,7 +377,7 @@ public class ExpressionExtractor {
             PsiBinaryExpression infixExpression = (PsiBinaryExpression) expression;
             expressionList.addAll(getExpressions(infixExpression.getLOperand()));
             expressionList.addAll(getExpressions(infixExpression.getROperand()));
-            List<PsiExpression> extendedOperands = Arrays.asList(infixExpression.getOperands());
+            PsiExpression[] extendedOperands = infixExpression.getOperands();
             for (PsiExpression operand : extendedOperands)
                 expressionList.addAll(getExpressions(operand));
             if (instanceChecker.instanceOf(infixExpression))
@@ -410,7 +410,7 @@ public class ExpressionExtractor {
                 expressionList.add(arrayAccess);
         } else if (expression instanceof PsiArrayInitializerExpression) {
             PsiArrayInitializerExpression arrayInitializer = (PsiArrayInitializerExpression) expression;
-            List<PsiExpression> expressions = Arrays.asList(arrayInitializer.getInitializers());
+            PsiExpression[] expressions = arrayInitializer.getInitializers();
             for (PsiExpression arrayInitializerExpression : expressions)
                 expressionList.addAll(getExpressions(arrayInitializerExpression));
             if (instanceChecker.instanceOf(arrayInitializer))
@@ -421,7 +421,7 @@ public class ExpressionExtractor {
                 expressionList.add(simpleName);
         } else if (expression instanceof PsiQualifiedExpression) {
             PsiQualifiedExpression qualifiedName = (PsiQualifiedExpression) expression;
-            expressionList.addAll(getExpressions(qualifiedName));
+            //expressionList.addAll(getExpressions(qualifiedName));
             if (instanceChecker.instanceOf(qualifiedName))
                 expressionList.add(qualifiedName);
         } else if (expression instanceof PsiLiteralExpression) {
@@ -439,7 +439,7 @@ public class ExpressionExtractor {
             if (bodyDeclaration != null) {
                 PsiCodeBlock body = bodyDeclaration.getBody();
                 if (body != null) {
-                    List<PsiStatement> statements = Arrays.asList(body.getStatements());
+                    PsiStatement[] statements = body.getStatements();
                     for (PsiStatement statement : statements) {
                         expressionList.addAll(getExpressions(statement));
                     }

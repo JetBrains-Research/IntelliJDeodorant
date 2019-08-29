@@ -7,25 +7,25 @@ import java.util.ListIterator;
 import java.util.Set;
 
 public abstract class AbstractMethodInvocationObject {
-    private TypeObject originClassType;
-    private String methodName;
-    private TypeObject returnType;
-    private List<TypeObject> parameterList;
+    private final TypeObject originClassType;
+    private final String methodName;
+    private final TypeObject returnType;
+    private final List<TypeObject> parameterList;
     private Set<String> thrownExceptions;
     private boolean _static;
-    protected ASTInformation methodInvocation;
+    ASTInformation methodInvocation;
     private volatile int hashCode = 0;
 
-    public AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
+    AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
         this.originClassType = originClassType;
         this.methodName = methodName;
         this.returnType = returnType;
-        this.parameterList = new ArrayList<TypeObject>();
-        this.thrownExceptions = new LinkedHashSet<String>();
+        this.parameterList = new ArrayList<>();
+        this.thrownExceptions = new LinkedHashSet<>();
         this._static = false;
     }
 
-    public AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType, List<TypeObject> parameterList) {
+    AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType, List<TypeObject> parameterList) {
         this.originClassType = originClassType;
         this.methodName = methodName;
         this.returnType = returnType;
@@ -62,7 +62,7 @@ public abstract class AbstractMethodInvocationObject {
     }
 
     public List<String> getParameterList() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (TypeObject typeObject : parameterList)
             list.add(typeObject.toString());
         return list;

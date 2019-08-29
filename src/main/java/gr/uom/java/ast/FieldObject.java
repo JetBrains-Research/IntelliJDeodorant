@@ -11,14 +11,14 @@ import java.util.ListIterator;
 
 public class FieldObject extends VariableDeclarationObject {
 
-    private String name;
-    private TypeObject type;
-    private List<CommentObject> commentList;
+    private final String name;
+    private final TypeObject type;
+    private final List<CommentObject> commentList;
     private boolean _static;
     private Access access;
     private String className;
     private ASTInformation fragment;
-    private PsiField psiField;
+    private final PsiField psiField;
     private volatile int hashCode = 0;
 
     public FieldObject(TypeObject type, PsiField field) {
@@ -26,7 +26,7 @@ public class FieldObject extends VariableDeclarationObject {
         this.name = field.getName();
         this._static = false;
         this.access = Access.NONE;
-        this.commentList = new ArrayList<CommentObject>();
+        this.commentList = new ArrayList<>();
         this.psiField = field;
     }
 
@@ -35,7 +35,7 @@ public class FieldObject extends VariableDeclarationObject {
         this.fragment = ASTInformationGenerator.generateASTInformation(fragment);
     }
 
-    public PsiDeclarationStatement getVariableDeclarationFragment() {
+    private PsiDeclarationStatement getVariableDeclarationFragment() {
         //return this.fragment;
         PsiElement node = this.fragment.recoverASTNode();
         if (node instanceof PsiReferenceExpression) {
@@ -82,7 +82,7 @@ public class FieldObject extends VariableDeclarationObject {
     }
 
     public FieldInstructionObject generateFieldInstruction() {
-        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, this.variableBindingKey.getCanonicalText());
+        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, this.variableBindingKey);
         fieldInstruction.setStatic(this._static);
         return fieldInstruction;
     }
@@ -111,7 +111,7 @@ public class FieldObject extends VariableDeclarationObject {
 
     public boolean equals(FieldInstructionObject fio) {
         return this.className.equals(fio.getOwnerClass()) &&
-                this.name.equals(fio.getName()) && this.type.equals(fio.getType()) && this.variableBindingKey.equals(fio.getVariableBindingKey());
+                this.name.equals(fio.getName()) && this.type.equals(fio.getType()) && this.variableBindingKey.resolve().equals(fio.getVariableBindingKey());
     }
 
     public int hashCode() {

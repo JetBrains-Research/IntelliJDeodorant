@@ -13,12 +13,12 @@ import java.util.ListIterator;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class AssociationDetection {
-    private List<Association> associationList;
-    private List<String> acceptableOriginClassNames;
+    private final List<Association> associationList;
+    private final List<String> acceptableOriginClassNames;
 
     public AssociationDetection(SystemObject system) {
-        this.associationList = new ArrayList<Association>();
-        acceptableOriginClassNames = new ArrayList<String>();
+        this.associationList = new ArrayList<>();
+        acceptableOriginClassNames = new ArrayList<>();
         acceptableOriginClassNames.add("java.util.Collection");
         acceptableOriginClassNames.add("java.util.AbstractCollection");
         acceptableOriginClassNames.add("java.util.List");
@@ -44,7 +44,7 @@ public class AssociationDetection {
     }
 
     public List<Association> getAssociationsOfClass(ClassObject classObject) {
-        List<Association> associations = new ArrayList<Association>();
+        List<Association> associations = new ArrayList<>();
         for (Association association : associationList) {
             if (association.getFrom().equals(classObject.getName()))
                 associations.add(association);
@@ -165,7 +165,7 @@ public class AssociationDetection {
     }
 
     private List<Association> getAssociationsEndingTo(String to) {
-        List<Association> list = new ArrayList<Association>();
+        List<Association> list = new ArrayList<>();
         for (Association association : associationList) {
             if (association.getTo().equals(to))
                 list.add(association);

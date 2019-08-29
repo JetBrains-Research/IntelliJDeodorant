@@ -35,7 +35,7 @@ public class ASTReader {
 
     private ClassObject processTypeDeclaration(PsiClass psiClass) {
         final ClassObject classObject = new ClassObject(psiClass);
-        classObject.setIFile(psiClass.getContainingFile());
+        //classObject.setIFile(psiClass.getContainingFile());
         classObject.setName(psiClass.getQualifiedName());
         if (psiClass.isInterface()) {
             classObject.setInterface(true);
@@ -62,7 +62,7 @@ public class ASTReader {
             classObject.setSuperclass(typeObject);
         }
 
-        List<JvmReferenceType> superInterfaceTypes = Arrays.asList(psiClass.getInterfaceTypes());
+        JvmReferenceType[] superInterfaceTypes = psiClass.getInterfaceTypes();
         for (JvmReferenceType interfaceType : superInterfaceTypes) {
             TypeObject typeObject = TypeObject.extractTypeObject(interfaceType.getName());
             classObject.addInterface(typeObject);
@@ -81,7 +81,7 @@ public class ASTReader {
     }
 
     private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        List<CommentObject> fieldDeclarationComments = new ArrayList<CommentObject>();
+        List<CommentObject> fieldDeclarationComments = new ArrayList<>();
         int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
         int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
         for (CommentObject comment : classObject.commentList) {
@@ -138,7 +138,7 @@ public class ASTReader {
         else
             constructorObject.setAccess(Access.NONE);
 
-        List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());
+        PsiParameter[] parameters = methodDeclaration.getParameterList().getParameters();
         for (PsiParameter parameter : parameters) {
             String qualifiedName = parameter.getName();
             TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
@@ -174,7 +174,7 @@ public class ASTReader {
             classObject.addConstructor(constructorObject);
         } else {
             MethodObject methodObject = new MethodObject(methodDeclaration, constructorObject);
-            List<PsiAnnotation> extendedModifiers = Arrays.asList(methodDeclaration.getAnnotations());
+            PsiAnnotation[] extendedModifiers = methodDeclaration.getAnnotations();
             for (PsiAnnotation extendedModifier : extendedModifiers) {
                 if (extendedModifier.getQualifiedName().equals("Test")) {
                     methodObject.setTestAnnotation(true);

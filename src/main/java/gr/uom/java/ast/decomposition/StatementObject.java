@@ -45,7 +45,7 @@ public class StatementObject extends AbstractStatement {
 	}
 
 	public List<String> stringRepresentation() {
-		List<String> stringRepresentation = new ArrayList<String>();
+		List<String> stringRepresentation = new ArrayList<>();
 		stringRepresentation.add(this.toString());
 		return stringRepresentation;
 	}

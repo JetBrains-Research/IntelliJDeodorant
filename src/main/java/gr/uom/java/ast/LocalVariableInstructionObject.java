@@ -4,8 +4,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceExpression;
 
 public class LocalVariableInstructionObject {
-    private TypeObject type;
-    private String name;
+    private final TypeObject type;
+    private final String name;
     private ASTInformation simpleName;
     private volatile int hashCode = 0;
     private String variableBindingKey;
@@ -70,9 +70,6 @@ public class LocalVariableInstructionObject {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(type).append(" ");
-        sb.append(name);
-        return sb.toString();
+        return type + " " + name;
     }
 }

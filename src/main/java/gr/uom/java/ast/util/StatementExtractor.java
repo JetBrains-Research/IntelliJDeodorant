@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.intellij.psi.*;
 
-public class StatementExtractor {
+class StatementExtractor {
 
     private StatementInstanceChecker instanceChecker;
 
@@ -81,10 +81,10 @@ public class StatementExtractor {
     }
 
     private List<PsiStatement> getStatements(PsiStatement statement) {
-        List<PsiStatement> statementList = new ArrayList<PsiStatement>();
+        List<PsiStatement> statementList = new ArrayList<>();
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;
-            List<PsiStatement> blockStatements = Arrays.asList(block.getStatements());
+            PsiStatement[] blockStatements = block.getStatements();
             for (PsiStatement blockStatement : blockStatements)
                 statementList.addAll(getStatements(blockStatement));
         } else if (statement instanceof PsiIfStatement) {
@@ -142,7 +142,7 @@ public class StatementExtractor {
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             statementList.addAll(getStatements(tryStatement));
-            List<PsiCodeBlock> catchClauses = Arrays.asList(tryStatement.getCatchBlocks());
+            PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
             for (PsiCodeBlock catchClause : catchClauses) {
                 Arrays.asList(catchClause.getStatements()).forEach(s -> statementList.addAll(getStatements(s)));
             }
@@ -178,11 +178,11 @@ public class StatementExtractor {
         return statementList;
     }
 
-    public int getTotalNumberOfStatements(PsiStatement statement) {
+    private int getTotalNumberOfStatements(PsiStatement statement) {
         int statementCounter = 0;
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;
-            List<PsiStatement> blockStatements = Arrays.asList(block.getStatements());
+            PsiStatement[] blockStatements = block.getStatements();
             for (PsiStatement blockStatement : blockStatements)
                 statementCounter += getTotalNumberOfStatements(blockStatement);
         } else if (statement instanceof PsiIfStatement) {

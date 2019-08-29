@@ -15,10 +15,8 @@ public class ProjectInfo {
     private final List<PsiJavaFile> psiFiles;
     private final List<PsiClass> psiClasses;
     private final List<PsiMethod> psiMethods;
-    private final Project project;
 
     public ProjectInfo(Project project) {
-        this.project = project;
         this.psiFiles = PsiUtils.extractFiles(project);
         this.psiClasses = psiFiles.stream()
                 .flatMap(psiFile -> PsiUtils.extractClasses(psiFile).stream())
@@ -27,13 +25,6 @@ public class ProjectInfo {
         this.psiMethods = psiClasses.stream()
                 .flatMap(psiClass -> PsiUtils.extractMethods(psiClass).stream())
                 .collect(Collectors.toList());
-
-    }
-
-    public boolean isApplicable(PsiMethod psiMethod, ProjectInfo projectInfo) {
-        return !psiMethod.hasModifierProperty(PsiModifier.SYNCHRONIZED) && !containsSuperMethodInvocation(psiMethod)
-                && !overridesMethod(psiMethod);
-                //&& !containsFieldAssignment(psiMethod, projectInfo);
     }
 
     public boolean containsSuperMethodInvocation(final @NotNull PsiMethod psiMethod) {
@@ -70,9 +61,5 @@ public class ProjectInfo {
 
     public List<PsiJavaFile> getPsiFiles() {
         return psiFiles;
-    }
-
-    public Project getProject() {
-        return project;
     }
 }

@@ -8,8 +8,8 @@ public class MyAttribute extends Entity {
 
     private String classOrigin;
     private String classType;
-    private String name;
-    private List<MyMethod> methodList;
+    private final String name;
+    private final List<MyMethod> methodList;
     private boolean reference;
     private String access;
     private FieldObject fieldObject;
@@ -19,7 +19,7 @@ public class MyAttribute extends Entity {
         this.classOrigin = classOrigin;
         this.classType = classType;
         this.name = name;
-        this.methodList = new ArrayList<MyMethod>();
+        this.methodList = new ArrayList<>();
         this.reference = false;
     }
 
@@ -113,15 +113,14 @@ public class MyAttribute extends Entity {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(classOrigin).append("::");
-        sb.append(classType).append(" ");
-        sb.append(name);
-        return sb.toString();
+        String sb = classOrigin + "::" +
+                classType + " " +
+                name;
+        return sb;
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         if (!this.isReference()) {
             for (MyMethod method : methodList) {
                 set.add(method.toString());
@@ -131,7 +130,7 @@ public class MyAttribute extends Entity {
     }
 
     public Set<String> getFullEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         set.add(this.toString());
         for (MyMethod method : methodList) {
             set.add(method.toString());

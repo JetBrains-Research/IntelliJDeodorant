@@ -6,16 +6,16 @@ import gr.uom.java.ast.decomposition.AbstractExpression;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnumConstantDeclarationObject {
-    private String name;
-    private List<AbstractExpression> arguments;
+class EnumConstantDeclarationObject {
+    private final String name;
+    private final List<AbstractExpression> arguments;
     private String enumName;
     private ASTInformation enumConstantDeclaration;
     private volatile int hashCode = 0;
 
     public EnumConstantDeclarationObject(String name) {
         this.name = name;
-        this.arguments = new ArrayList<AbstractExpression>();
+        this.arguments = new ArrayList<>();
     }
 
     public void setEnumConstantDeclaration(PsiDeclarationStatement enumConstantDeclaration) {

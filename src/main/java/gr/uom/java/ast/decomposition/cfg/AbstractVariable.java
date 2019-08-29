@@ -6,14 +6,14 @@ import com.intellij.psi.*;
 import java.util.Arrays;
 
 public abstract class AbstractVariable {
-    protected String variableBindingKey;
-    protected String variableName;
-    protected String variableType;
-    protected boolean isField;
-    protected boolean isParameter;
-    protected boolean isStatic;
+    final String variableBindingKey;
+    final String variableName;
+    final String variableType;
+    final boolean isField;
+    final boolean isParameter;
+    final boolean isStatic;
 
-    public AbstractVariable(PsiElement name) {
+    AbstractVariable(PsiElement name) {
         this.variableBindingKey = name.getText();
         this.variableName = ((PsiNamedElement) name).getName();
         if (name instanceof PsiVariable) {
@@ -33,7 +33,7 @@ public abstract class AbstractVariable {
                 false, (variableBinding.hasModifier(JvmModifier.STATIC)));
     }
 
-    public AbstractVariable(String variableBindingKey, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
+    AbstractVariable(String variableBindingKey, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
         this.variableBindingKey = variableBindingKey;
         this.variableName = variableName;
         this.variableType = variableType;
@@ -46,7 +46,7 @@ public abstract class AbstractVariable {
         return variableBindingKey;
     }
 
-    public String getVariableName() {
+    String getVariableName() {
         return variableName;
     }
 
@@ -62,13 +62,13 @@ public abstract class AbstractVariable {
         return isParameter;
     }
 
-    public boolean isStatic() {
+    boolean isStatic() {
         return isStatic;
     }
 
-    public abstract boolean containsPlainVariable(PlainVariable variable);
+    protected abstract boolean containsPlainVariable(PlainVariable variable);
 
-    public abstract boolean startsWithVariable(AbstractVariable variable);
+    protected abstract boolean startsWithVariable(AbstractVariable variable);
 
     public abstract PlainVariable getInitialVariable();
 }

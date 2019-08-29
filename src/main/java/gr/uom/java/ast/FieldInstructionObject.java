@@ -1,16 +1,17 @@
 package gr.uom.java.ast;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
 public class FieldInstructionObject {
 
-    private String ownerClass;
-    private TypeObject type;
-    private String name;
+    private final String ownerClass;
+    private final TypeObject type;
+    private final String name;
     private boolean _static;
     private ASTInformation simpleName;
     private volatile int hashCode = 0;
-    private String variableBindingKey;
+    private PsiReference variableBindingKey;
 
     public FieldInstructionObject(String ownerClass, TypeObject type, String name) {
         this.ownerClass = ownerClass;
@@ -19,7 +20,7 @@ public class FieldInstructionObject {
         this._static = false;
     }
 
-    public FieldInstructionObject(String ownerClass, TypeObject type, String name, String variableBindingKey) {
+    public FieldInstructionObject(String ownerClass, TypeObject type, String name, PsiReference variableBindingKey) {
         this(ownerClass, type, name);
         this.variableBindingKey = variableBindingKey;
     }
@@ -36,7 +37,7 @@ public class FieldInstructionObject {
         return name;
     }
 
-    public String getVariableBindingKey() {
+    public PsiReference getVariableBindingKey() {
         return variableBindingKey;
     }
 
@@ -50,13 +51,13 @@ public class FieldInstructionObject {
 
     public void setSimpleName(PsiElement simpleName) {
         //this.simpleName = simpleName;
-        this.variableBindingKey = simpleName.getText();
+        this.variableBindingKey = simpleName.getReference();
         this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
     }
 
     public PsiElement getSimpleName() {
         //return this.simpleName;
-        return (PsiElement) this.simpleName.recoverASTNode();
+        return this.simpleName.recoverASTNode();
     }
 
     public boolean equals(Object o) {
@@ -78,16 +79,13 @@ public class FieldInstructionObject {
             result = 37 * result + ownerClass.hashCode();
             result = 37 * result + name.hashCode();
             result = 37 * result + type.hashCode();
-            result = 37 * result + variableBindingKey.hashCode();
+          //  result = 37 * result + variableBindingKey.hashCode();
             hashCode = result;
         }
         return hashCode;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ownerClass).append("::");
-        sb.append(name);
-        return sb.toString();
+        return ownerClass + "::" + name;
     }
 }

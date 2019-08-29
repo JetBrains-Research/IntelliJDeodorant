@@ -1,19 +1,17 @@
 package gr.uom.java.ast;
 
-import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiType;
 
 public class ASTInformationGenerator {
 
-	private static PsiType iTypeRoot;
-	
-	public static void setCurrentITypeRoot(PsiType typeRoot) {
-		iTypeRoot = typeRoot;
-	}
+    private static PsiType iTypeRoot;
 
-	public static ASTInformation generateASTInformation(PsiElement astNode) {
-		return new ASTInformation(iTypeRoot, astNode);
-	}
+    public static void setCurrentITypeRoot(PsiType typeRoot) {
+        iTypeRoot = typeRoot;
+    }
+
+    public static ASTInformation generateASTInformation(PsiElement astNode) {
+        return new ASTInformation(iTypeRoot, astNode);
+    }
 }

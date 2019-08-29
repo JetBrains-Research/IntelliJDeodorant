@@ -8,7 +8,7 @@ import gr.uom.java.distance.ProjectInfo;
 
 import java.util.List;
 
-public class ProjectOpenListener implements ProjectComponent {
+class ProjectOpenListener implements ProjectComponent {
     private final Project project;
     private ProjectInfo projectInfo;
 

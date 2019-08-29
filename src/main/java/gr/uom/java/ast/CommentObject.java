@@ -3,12 +3,12 @@ package gr.uom.java.ast;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiType;
 
-public class CommentObject {
+class CommentObject {
     private ASTInformation comment;
-    private String text;
-    private CommentType type;
-    private int startLine;
-    private int endLine;
+    private final String text;
+    private final CommentType type;
+    private final int startLine;
+    private final int endLine;
     private volatile int hashCode = 0;
 
     public CommentObject(String text, CommentType type, int startLine, int endLine) {
@@ -43,7 +43,7 @@ public class CommentObject {
         return endLine;
     }
 
-    public PsiType getITypeRoot() {
+    private PsiType getITypeRoot() {
         return comment.getITypeRoot();
     }
 
@@ -81,11 +81,10 @@ public class CommentObject {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
         //sb.append(comment.getITypeRoot().getPath()).append("\n");
-        sb.append("Start line: " + startLine).append("\n");
-        sb.append("End line:" + endLine).append("\n");
-        sb.append(text);
-        return sb.toString();
+        String sb = "Start line: " + startLine + "\n" +
+                "End line:" + endLine + "\n" +
+                text;
+        return sb;
     }
 }

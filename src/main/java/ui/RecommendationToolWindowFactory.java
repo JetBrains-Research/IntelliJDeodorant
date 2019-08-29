@@ -21,7 +21,7 @@ public class RecommendationToolWindowFactory implements ToolWindowFactory {
         jPanel.add(button);
         Content content = contentFactory.createContent(jPanel, "", false);
         toolWindow.getContentManager().addContent(content);
-        init(project);
+       // init(project);
     }
 
     private void init(Project project) {

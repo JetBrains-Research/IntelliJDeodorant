@@ -9,19 +9,19 @@ import java.util.Set;
 
 public class MyCompositeStatement extends MyAbstractStatement {
 	
-	private List<MyAbstractStatement> statementList;
-	private List<MyAbstractExpression> expressionList;
+	private final List<MyAbstractStatement> statementList;
+	private final List<MyAbstractExpression> expressionList;
 	
 	public MyCompositeStatement(AbstractStatement statement) {
 		super(statement);
-		this.statementList = new ArrayList<MyAbstractStatement>();
-		this.expressionList = new ArrayList<MyAbstractExpression>();
+		this.statementList = new ArrayList<>();
+		this.expressionList = new ArrayList<>();
 	}
 
 	public MyCompositeStatement(List<MyAbstractStatement> statementList) {
 		super(statementList);
 		this.statementList = statementList;
-		this.expressionList = new ArrayList<MyAbstractExpression>();
+		this.expressionList = new ArrayList<>();
 	}
 
 	public void addStatement(MyAbstractStatement statement) {
@@ -69,8 +69,8 @@ public class MyCompositeStatement extends MyAbstractStatement {
     }
 
     private void update() {
-    	List<MyMethodInvocation> methodInvocationList = new ArrayList<MyMethodInvocation>();
-    	List<MyAttributeInstruction> attributeInstructionList = new ArrayList<MyAttributeInstruction>();
+    	List<MyMethodInvocation> methodInvocationList = new ArrayList<>();
+    	List<MyAttributeInstruction> attributeInstructionList = new ArrayList<>();
     	for(MyAbstractExpression myAbstractExpression : expressionList) {
     		ListIterator<MyMethodInvocation> methodInvocationIterator = myAbstractExpression.getMethodInvocationIterator();
     		while(methodInvocationIterator.hasNext()) {
@@ -133,8 +133,7 @@ public class MyCompositeStatement extends MyAbstractStatement {
     		methodInvocation.setParent(this);
     		statementList.add(index, methodInvocation);
     		update();
-    		return;
-    	}
+		}
     	else {
     		for(MyAbstractStatement myAbstractStatement : statementList) {
     			if(myAbstractStatement instanceof MyCompositeStatement) {
@@ -149,8 +148,7 @@ public class MyCompositeStatement extends MyAbstractStatement {
     	if(statementList.contains(statementToRemove)) {
     		statementList.remove(statementToRemove);
     		update();
-    		return;
-    	}
+		}
     	else {
     		for(MyAbstractStatement statement : statementList) {
     			if(statement instanceof MyCompositeStatement) {
@@ -175,8 +173,7 @@ public class MyCompositeStatement extends MyAbstractStatement {
     		methodInvocation.setParent(this);
     		statementList.add(lastIndexRemoved, methodInvocation);
     		update();
-    		return;
-    	}
+		}
     	else {
     		for(MyAbstractStatement myAbstractStatement : statementList) {
     			if(myAbstractStatement instanceof MyCompositeStatement) {
@@ -187,17 +184,16 @@ public class MyCompositeStatement extends MyAbstractStatement {
     	}
     }
 
-    public void removeAllStatementsExceptFromSiblingStatements(List<MyAbstractStatement> statementsToKeep) {
+    private void removeAllStatementsExceptFromSiblingStatements(List<MyAbstractStatement> statementsToKeep) {
     	if(statementList.contains(statementsToKeep.get(0))) {
-    		List<MyAbstractStatement> statementsToRemove = new ArrayList<MyAbstractStatement>();
+    		List<MyAbstractStatement> statementsToRemove = new ArrayList<>();
 			for(MyAbstractStatement statement : statementList) {
 				if(!statementsToKeep.contains(statement))
 					statementsToRemove.add(statement);
 			}
 			statementList.removeAll(statementsToRemove);
 			update();
-			return;
-    	}
+		}
     	else {
 			for(MyAbstractStatement statement : statementList) {
 				if(statement instanceof MyCompositeStatement) {

@@ -1,7 +1,6 @@
 package gr.uom.java.distance;
 
 import com.intellij.psi.*;
-import com.intellij.psi.impl.source.PsiFieldImpl;
 import com.intellij.psi.util.PsiTreeUtil;
 import gr.uom.java.ast.MethodObject;
 import gr.uom.java.ast.decomposition.AbstractStatement;
@@ -12,8 +11,8 @@ public class MyMethod extends Entity {
 
     private String classOrigin;
     private String methodName;
-    private String returnType;
-    private List<String> parameterList;
+    private final String returnType;
+    private final List<String> parameterList;
     private MyMethodBody methodBody;
     private boolean isAbstract;
     private String access;
@@ -29,11 +28,11 @@ public class MyMethod extends Entity {
     }
 
     public void setMethodObject(MethodObject methodObject) {
-    	this.methodObject = methodObject;
+        this.methodObject = methodObject;
     }
 
     public MethodObject getMethodObject() {
-    	return this.methodObject;
+        return this.methodObject;
     }
 
     public String getAccess() {
@@ -45,11 +44,11 @@ public class MyMethod extends Entity {
     }
 
     public void setMethodBody(MyMethodBody methodBody) {
-    	this.methodBody = methodBody;
+        this.methodBody = methodBody;
     }
 
     public MyMethodInvocation generateMethodInvocation() {
-        return new MyMethodInvocation(this.classOrigin,this.methodName,this.returnType,this.parameterList);
+        return new MyMethodInvocation(this.classOrigin, this.methodName, this.returnType, this.parameterList);
     }
 
     public boolean isAbstract() {
@@ -61,8 +60,8 @@ public class MyMethod extends Entity {
     }
 
     public boolean containsParameter(String p) {
-        for(String parameter : parameterList) {
-            if(parameter.equals(p))
+        for (String parameter : parameterList) {
+            if (parameter.equals(p))
                 return true;
         }
         return false;
@@ -77,7 +76,7 @@ public class MyMethod extends Entity {
     }
 
     public void addParameter(String parameter) {
-        if(!parameterList.contains(parameter))
+        if (!parameterList.contains(parameter))
             parameterList.add(parameter);
     }
 
@@ -90,10 +89,10 @@ public class MyMethod extends Entity {
     }
 
     public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
+        this.methodName = methodName;
+    }
 
-	public String getReturnType() {
+    public String getReturnType() {
         return returnType;
     }
 
@@ -102,43 +101,43 @@ public class MyMethod extends Entity {
     }
 
     public void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
-    	if(this.methodBody != null)
-    		this.methodBody.setAttributeInstructionReference(myAttributeInstruction, reference);
+        if (this.methodBody != null)
+            this.methodBody.setAttributeInstructionReference(myAttributeInstruction, reference);
     }
 
     public MyAbstractStatement getAbstractStatement(AbstractStatement statement) {
-    	if(this.methodBody != null)
-    		return this.methodBody.getAbstractStatement(statement);
-    	else
-    		return null;
+        if (this.methodBody != null)
+            return this.methodBody.getAbstractStatement(statement);
+        else
+            return null;
     }
 
-    public ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
-        
-    	if(this.methodBody != null)
-    		return this.methodBody.getMethodInvocationIterator();
-    	else
-    		return new ArrayList<MyMethodInvocation>().listIterator();
+    private ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
+
+        if (this.methodBody != null)
+            return this.methodBody.getMethodInvocationIterator();
+        else
+            return new ArrayList<MyMethodInvocation>().listIterator();
     }
 
     public ListIterator<MyAttributeInstruction> getAttributeInstructionIterator() {
-    	if(this.methodBody != null)
-    		return this.methodBody.getAttributeInstructionIterator();
-    	else
-    		return new ArrayList<MyAttributeInstruction>().listIterator();
+        if (this.methodBody != null)
+            return this.methodBody.getAttributeInstructionIterator();
+        else
+            return new ArrayList<MyAttributeInstruction>().listIterator();
     }
 
     public int getNumberOfAttributeInstructions() {
-    	if(this.methodBody != null)
-    		return this.methodBody.getNumberOfAttributeInstructions();
-    	else
-    		return 0;
+        if (this.methodBody != null)
+            return this.methodBody.getNumberOfAttributeInstructions();
+        else
+            return 0;
     }
 
     public int getNumberOfMethodInvocations() {
-    	if(this.methodBody != null)
-    		return this.methodBody.getNumberOfMethodInvocations();
-    	else return 0;
+        if (this.methodBody != null)
+            return this.methodBody.getNumberOfMethodInvocations();
+        else return 0;
     }
 
     public int getNumberOfParameters() {
@@ -147,121 +146,120 @@ public class MyMethod extends Entity {
 
     public boolean equals(MyMethodInvocation methodInvocation) {
         return this.classOrigin.equals(methodInvocation.getClassOrigin()) &&
-            this.methodName.equals(methodInvocation.getMethodName()) &&
-            this.returnType.equals(methodInvocation.getReturnType()) &&
-            this.parameterList.equals(methodInvocation.getParameterList());
+                this.methodName.equals(methodInvocation.getMethodName()) &&
+                this.returnType.equals(methodInvocation.getReturnType()) &&
+                this.parameterList.equals(methodInvocation.getParameterList());
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
 
         if (o instanceof MyMethod) {
-            MyMethod method = (MyMethod)o;
+            MyMethod method = (MyMethod) o;
             return this.classOrigin.equals(method.classOrigin) &&
-                this.methodName.equals(method.methodName) &&
-                this.returnType.equals(method.returnType) &&
-                this.parameterList.equals(method.parameterList);
+                    this.methodName.equals(method.methodName) &&
+                    this.returnType.equals(method.returnType) &&
+                    this.parameterList.equals(method.parameterList);
         }
         return false;
     }
 
     public int hashCode() {
-    	if(hashCode == 0) {
-    		int result = 17;
-    		result = 37*result + classOrigin.hashCode();
-    		result = 37*result + methodName.hashCode();
-    		result = 37*result + returnType.hashCode();
-    		for(String parameter : parameterList) {
-    			result = 37*result + parameter.hashCode();
-    		}
-    		hashCode = result;
-    	}
-    	return hashCode;
+        if (hashCode == 0) {
+            int result = 17;
+            result = 37 * result + classOrigin.hashCode();
+            result = 37 * result + methodName.hashCode();
+            result = 37 * result + returnType.hashCode();
+            for (String parameter : parameterList) {
+                result = 37 * result + parameter.hashCode();
+            }
+            hashCode = result;
+        }
+        return hashCode;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if(!classOrigin.equals(methodName))
+        if (!classOrigin.equals(methodName))
             sb.append(classOrigin).append("::");
         sb.append(methodName);
         sb.append("(");
-        if(!parameterList.isEmpty()) {
-            for(int i=0; i<parameterList.size()-1; i++)
+        if (!parameterList.isEmpty()) {
+            for (int i = 0; i < parameterList.size() - 1; i++)
                 sb.append(parameterList.get(i)).append(", ");
-            sb.append(parameterList.get(parameterList.size()-1));
+            sb.append(parameterList.get(parameterList.size() - 1));
         }
         sb.append(")");
-        if(returnType != null)
+        if (returnType != null)
             sb.append(":").append(returnType);
         return sb.toString();
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
 
         PsiMethod method = this.methodObject.getPsiMethod();
-        Collection< PsiReferenceExpression> usedFields = PsiTreeUtil.findChildrenOfType(method, PsiReferenceExpression.class);
-        Collection< PsiMethodCallExpression> usedMethods = PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class);
-        for (PsiReferenceExpression fieldd: usedFields) {
-            if (!(fieldd.resolve() instanceof PsiField)) continue;
-            PsiField field = (PsiField)fieldd.resolve();
-            if(field.getClass().equals(method.getClass())) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(field.getContainingClass().getQualifiedName()).append("::");
-                sb.append(field.getType().getCanonicalText()).append(" ");
-                sb.append(field.getName());
-                set.add(sb.toString());
+        Collection<PsiReferenceExpression> usedFields = PsiTreeUtil.findChildrenOfType(method, PsiReferenceExpression.class);
+        Collection<PsiMethodCallExpression> usedMethods = PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class);
+        for (PsiReferenceExpression field : usedFields) {
+            if (!(field.resolve() instanceof PsiField)) continue;
+            PsiField psiField = (PsiField) field.resolve();
+            if (psiField != null && psiField.getContainingClass() != null && psiField.getContainingClass().equals(method.getContainingClass())) {
+                String sb = psiField.getContainingClass().getQualifiedName() + "::" +
+                        psiField.getType().getCanonicalText() + " " +
+                        psiField.getName();
+                set.add(sb);
             }
         }
-        for (PsiMethodCallExpression methodd: usedMethods) {
-            PsiMethod method1 = methodd.resolveMethod();
+        for (PsiMethodCallExpression usedMethod : usedMethods) {
+            PsiMethod resolveMethod = usedMethod.resolveMethod();
             StringBuilder sb = new StringBuilder();
-            if (method1 == null || method1.getContainingClass()==null) continue;
-            sb.append(method1.getContainingClass().getQualifiedName()).append("::");
-            sb.append(method1.getName());
+            if (resolveMethod == null || resolveMethod.getContainingClass() == null) continue;
+            sb.append(resolveMethod.getContainingClass().getQualifiedName()).append("::");
+            sb.append(resolveMethod.getName());
             sb.append("(");
-            if(!method1.getParameterList().isEmpty()) {
-               List<PsiParameter> parameters = Arrays.asList(method1.getParameterList().getParameters());
-                for(int i=0; i<parameters.size()-1; i++)
+            if (!resolveMethod.getParameterList().isEmpty()) {
+                List<PsiParameter> parameters = Arrays.asList(resolveMethod.getParameterList().getParameters());
+                for (int i = 0; i < parameters.size() - 1; i++)
                     sb.append(parameters.get(i).getType().getCanonicalText()).append(", ");
-                sb.append(parameters.get(parameters.size()-1).getType().getCanonicalText());
+                sb.append(parameters.get(parameters.size() - 1).getType().getCanonicalText());
             }
             sb.append(")");
-            if(method1.getReturnType() != null)
-                sb.append(":").append(method1.getReturnType().getCanonicalText());
+            if (resolveMethod.getReturnType() != null)
+                sb.append(":").append(resolveMethod.getReturnType().getCanonicalText());
             set.add(sb.toString());
         }
 
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
-        while(attributeInstructionIterator.hasNext()) {
-        	MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();
-            if(!attributeInstruction.isReference())
+        while (attributeInstructionIterator.hasNext()) {
+            MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();
+            if (!attributeInstruction.isReference())
                 set.add(attributeInstruction.toString());
         }
         ListIterator<MyMethodInvocation> methodInvocationIterator = getMethodInvocationIterator();
-        while(methodInvocationIterator.hasNext()) {
-        	MyMethodInvocation methodInvocation = methodInvocationIterator.next();
-            if(!this.equals(methodInvocation))
-            	set.add(methodInvocation.toString());
+        while (methodInvocationIterator.hasNext()) {
+            MyMethodInvocation methodInvocation = methodInvocationIterator.next();
+            if (!this.equals(methodInvocation))
+                set.add(methodInvocation.toString());
         }
         return set;
     }
 
-	public Set<String> getFullEntitySet() {
-		Set<String> set = new HashSet<String>();
-		set.add(this.toString());
+    public Set<String> getFullEntitySet() {
+        Set<String> set = new HashSet<>();
+        set.add(this.toString());
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
-        while(attributeInstructionIterator.hasNext()) {
-        	MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();
+        while (attributeInstructionIterator.hasNext()) {
+            MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();
             set.add(attributeInstruction.toString());
         }
         ListIterator<MyMethodInvocation> methodInvocationIterator = getMethodInvocationIterator();
-        while(methodInvocationIterator.hasNext()) {
-        	MyMethodInvocation methodInvocation = methodInvocationIterator.next();
+        while (methodInvocationIterator.hasNext()) {
+            MyMethodInvocation methodInvocation = methodInvocationIterator.next();
             set.add(methodInvocation.toString());
         }
         return set;
-	}
+    }
 }

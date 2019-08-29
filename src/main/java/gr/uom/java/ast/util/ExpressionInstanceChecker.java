@@ -2,6 +2,6 @@ package gr.uom.java.ast.util;
 
 import com.intellij.psi.PsiExpression;
 
-public interface ExpressionInstanceChecker {
+interface ExpressionInstanceChecker {
     boolean instanceOf(PsiExpression expression);
 }

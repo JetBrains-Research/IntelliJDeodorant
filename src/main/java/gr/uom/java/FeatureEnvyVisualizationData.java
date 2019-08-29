@@ -16,52 +16,52 @@ import gr.uom.java.ast.decomposition.cfg.PlainVariable;
 
 public class FeatureEnvyVisualizationData implements VisualizationData {
 
-    private Map<MethodInvocationObject, Integer> sourceMethodInvocationMap;
-    private Map<MethodInvocationObject, Integer> targetMethodInvocationMap;
-    private Map<FieldInstructionObject, Integer> sourceFieldReadMap;
-    private Map<FieldInstructionObject, Integer> sourceFieldWriteMap;
-    private Map<FieldInstructionObject, Integer> targetFieldReadMap;
-    private Map<FieldInstructionObject, Integer> targetFieldWriteMap;
-    private ClassObject sourceClass;
-    private MethodObject methodToBeMoved;
-    private ClassObject targetClass;
+    private final Map<MethodInvocationObject, Integer> sourceMethodInvocationMap;
+    private final Map<MethodInvocationObject, Integer> targetMethodInvocationMap;
+    private final Map<FieldInstructionObject, Integer> sourceFieldReadMap;
+    private final Map<FieldInstructionObject, Integer> sourceFieldWriteMap;
+    private final Map<FieldInstructionObject, Integer> targetFieldReadMap;
+    private final Map<FieldInstructionObject, Integer> targetFieldWriteMap;
+    private final ClassObject sourceClass;
+    private final MethodObject methodToBeMoved;
+    private final ClassObject targetClass;
 
     public FeatureEnvyVisualizationData(ClassObject sourceClass, MethodObject methodToBeMoved, ClassObject targetClass) {
         this.sourceClass = sourceClass;
         this.methodToBeMoved = methodToBeMoved;
         this.targetClass = targetClass;
-        this.sourceMethodInvocationMap = new LinkedHashMap<MethodInvocationObject, Integer>();
-        List<MethodInvocationObject> sourceMethodInvocations = new ArrayList<MethodInvocationObject>(methodToBeMoved.getNonDistinctInvokedMethodsThroughThisReference());
+        this.sourceMethodInvocationMap = new LinkedHashMap<>();
+        List<MethodInvocationObject> sourceMethodInvocations = new ArrayList<>(methodToBeMoved.getNonDistinctInvokedMethodsThroughThisReference());
 
-        this.targetMethodInvocationMap = new LinkedHashMap<MethodInvocationObject, Integer>();
-        List<FieldInstructionObject> fieldInstructions = new ArrayList<FieldInstructionObject>(methodToBeMoved.getFieldInstructions());
-        List<LocalVariableInstructionObject> localVariableInstructions = new ArrayList<LocalVariableInstructionObject>(methodToBeMoved.getLocalVariableInstructions());
-        Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMap = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
+        this.targetMethodInvocationMap = new LinkedHashMap<>();
+        List<FieldInstructionObject> fieldInstructions = new ArrayList<>(methodToBeMoved.getFieldInstructions());
+        List<LocalVariableInstructionObject> localVariableInstructions = new ArrayList<>(methodToBeMoved.getLocalVariableInstructions());
+        Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMap = new LinkedHashMap<>();
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughFields = methodToBeMoved.getNonDistinctInvokedMethodsThroughFields();
         for (AbstractVariable key : copyFromNonDistinctInvokedMethodsThroughFields.keySet()) {
-            ArrayList<MethodInvocationObject> value = new ArrayList<MethodInvocationObject>(copyFromNonDistinctInvokedMethodsThroughFields.get(key));
+            ArrayList<MethodInvocationObject> value = new ArrayList<>(copyFromNonDistinctInvokedMethodsThroughFields.get(key));
             externalMethodInvocationsThroughFieldsMap.put(key, value);
         }
-        Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughParametersMap = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
+        Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughParametersMap = new LinkedHashMap<>();
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughParameters = methodToBeMoved.getNonDistinctInvokedMethodsThroughParameters();
         for (AbstractVariable key : copyFromNonDistinctInvokedMethodsThroughParameters.keySet()) {
-            ArrayList<MethodInvocationObject> value = new ArrayList<MethodInvocationObject>(copyFromNonDistinctInvokedMethodsThroughParameters.get(key));
+            ArrayList<MethodInvocationObject> value = new ArrayList<>(copyFromNonDistinctInvokedMethodsThroughParameters.get(key));
             externalMethodInvocationsThroughParametersMap.put(key, value);
         }
 
-        this.sourceFieldReadMap = new LinkedHashMap<FieldInstructionObject, Integer>();
-        List<PlainVariable> usedFieldsThroughThisReference = new ArrayList<PlainVariable>(methodToBeMoved.getNonDistinctUsedFieldsThroughThisReference());
+        this.sourceFieldReadMap = new LinkedHashMap<>();
+        List<PlainVariable> usedFieldsThroughThisReference = new ArrayList<>(methodToBeMoved.getNonDistinctUsedFieldsThroughThisReference());
 
-        this.sourceFieldWriteMap = new LinkedHashMap<FieldInstructionObject, Integer>();
-        List<PlainVariable> definedFieldsThroughThisReference = new ArrayList<PlainVariable>(methodToBeMoved.getNonDistinctDefinedFieldsThroughThisReference());
+        this.sourceFieldWriteMap = new LinkedHashMap<>();
+        List<PlainVariable> definedFieldsThroughThisReference = new ArrayList<>(methodToBeMoved.getNonDistinctDefinedFieldsThroughThisReference());
 
-        this.targetFieldReadMap = new LinkedHashMap<FieldInstructionObject, Integer>();
-        List<AbstractVariable> usedFieldsThroughFields = new ArrayList<AbstractVariable>(methodToBeMoved.getNonDistinctUsedFieldsThroughFields());
-        List<AbstractVariable> usedFieldsThroughParameters = new ArrayList<AbstractVariable>(methodToBeMoved.getNonDistinctUsedFieldsThroughParameters());
+        this.targetFieldReadMap = new LinkedHashMap<>();
+        List<AbstractVariable> usedFieldsThroughFields = new ArrayList<>(methodToBeMoved.getNonDistinctUsedFieldsThroughFields());
+        List<AbstractVariable> usedFieldsThroughParameters = new ArrayList<>(methodToBeMoved.getNonDistinctUsedFieldsThroughParameters());
 
-        this.targetFieldWriteMap = new LinkedHashMap<FieldInstructionObject, Integer>();
-        List<AbstractVariable> definedFieldsThroughFields = new ArrayList<AbstractVariable>(methodToBeMoved.getNonDistinctDefinedFieldsThroughFields());
-        List<AbstractVariable> definedFieldsThroughParameters = new ArrayList<AbstractVariable>(methodToBeMoved.getNonDistinctDefinedFieldsThroughParameters());
+        this.targetFieldWriteMap = new LinkedHashMap<>();
+        List<AbstractVariable> definedFieldsThroughFields = new ArrayList<>(methodToBeMoved.getNonDistinctDefinedFieldsThroughFields());
+        List<AbstractVariable> definedFieldsThroughParameters = new ArrayList<>(methodToBeMoved.getNonDistinctDefinedFieldsThroughParameters());
 
         for (MethodInvocationObject methodInvocation : sourceMethodInvocations) {
             boolean delegatesToTarget = false;
@@ -71,12 +71,12 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 if (delegateMethodInvocation != null && delegateMethodInvocation.getOriginClassName().equals(targetClass.getName())) {
                     delegatesToTarget = true;
                     //include delegate method in the analysis
-                    fieldInstructions.addAll(new ArrayList<FieldInstructionObject>(delegateMethod.getFieldInstructions()));
-                    localVariableInstructions.addAll(new ArrayList<LocalVariableInstructionObject>(delegateMethod.getLocalVariableInstructions()));
-                    Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMapDelegate = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
+                    fieldInstructions.addAll(new ArrayList<>(delegateMethod.getFieldInstructions()));
+                    localVariableInstructions.addAll(new ArrayList<>(delegateMethod.getLocalVariableInstructions()));
+                    Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMapDelegate = new LinkedHashMap<>();
                     Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughFieldsDelegate = delegateMethod.getNonDistinctInvokedMethodsThroughFields();
                     for (AbstractVariable key : copyFromNonDistinctInvokedMethodsThroughFieldsDelegate.keySet()) {
-                        ArrayList<MethodInvocationObject> value = new ArrayList<MethodInvocationObject>(copyFromNonDistinctInvokedMethodsThroughFieldsDelegate.get(key));
+                        ArrayList<MethodInvocationObject> value = new ArrayList<>(copyFromNonDistinctInvokedMethodsThroughFieldsDelegate.get(key));
                         externalMethodInvocationsThroughFieldsMapDelegate.put(key, value);
                     }
                     for (AbstractVariable variable : externalMethodInvocationsThroughFieldsMapDelegate.keySet()) {
@@ -86,10 +86,10 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                             externalMethodInvocationsThroughFieldsMap.put(variable, externalMethodInvocationsThroughFieldsMapDelegate.get(variable));
                         }
                     }
-                    Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughParametersMapDelegate = new LinkedHashMap<AbstractVariable, ArrayList<MethodInvocationObject>>();
+                    Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughParametersMapDelegate = new LinkedHashMap<>();
                     Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughParametersDelegate = delegateMethod.getNonDistinctInvokedMethodsThroughParameters();
                     for (AbstractVariable key : copyFromNonDistinctInvokedMethodsThroughParametersDelegate.keySet()) {
-                        ArrayList<MethodInvocationObject> value = new ArrayList<MethodInvocationObject>(copyFromNonDistinctInvokedMethodsThroughParametersDelegate.get(key));
+                        ArrayList<MethodInvocationObject> value = new ArrayList<>(copyFromNonDistinctInvokedMethodsThroughParametersDelegate.get(key));
                         externalMethodInvocationsThroughParametersMapDelegate.put(key, value);
                     }
                     for (AbstractVariable variable : externalMethodInvocationsThroughParametersMapDelegate.keySet()) {
@@ -99,12 +99,12 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                             externalMethodInvocationsThroughParametersMap.put(variable, externalMethodInvocationsThroughParametersMapDelegate.get(variable));
                         }
                     }
-                    usedFieldsThroughThisReference.addAll(new ArrayList<PlainVariable>(delegateMethod.getNonDistinctUsedFieldsThroughThisReference()));
-                    definedFieldsThroughThisReference.addAll(new ArrayList<PlainVariable>(delegateMethod.getNonDistinctDefinedFieldsThroughThisReference()));
-                    usedFieldsThroughFields.addAll(new ArrayList<AbstractVariable>(delegateMethod.getNonDistinctUsedFieldsThroughFields()));
-                    usedFieldsThroughParameters.addAll(new ArrayList<AbstractVariable>(delegateMethod.getNonDistinctUsedFieldsThroughParameters()));
-                    definedFieldsThroughFields.addAll(new ArrayList<AbstractVariable>(delegateMethod.getNonDistinctDefinedFieldsThroughFields()));
-                    definedFieldsThroughParameters.addAll(new ArrayList<AbstractVariable>(delegateMethod.getNonDistinctDefinedFieldsThroughParameters()));
+                    usedFieldsThroughThisReference.addAll(new ArrayList<>(delegateMethod.getNonDistinctUsedFieldsThroughThisReference()));
+                    definedFieldsThroughThisReference.addAll(new ArrayList<>(delegateMethod.getNonDistinctDefinedFieldsThroughThisReference()));
+                    usedFieldsThroughFields.addAll(new ArrayList<>(delegateMethod.getNonDistinctUsedFieldsThroughFields()));
+                    usedFieldsThroughParameters.addAll(new ArrayList<>(delegateMethod.getNonDistinctUsedFieldsThroughParameters()));
+                    definedFieldsThroughFields.addAll(new ArrayList<>(delegateMethod.getNonDistinctDefinedFieldsThroughFields()));
+                    definedFieldsThroughParameters.addAll(new ArrayList<>(delegateMethod.getNonDistinctDefinedFieldsThroughParameters()));
                 }
             }
             if (!delegatesToTarget) {
@@ -185,7 +185,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             }
             ASTInformation targetClassBinding = targetClass.getAbstractTypeDeclaration();
             if (variable.getVariableType().equals(targetClass.getName()) ||
-                    (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getClass().getSuperclass()))) {
+                    (variableTypeBinding != null && targetClassBinding.recoverASTNode().getClass().equals(variableTypeBinding.getClass().getSuperclass()))) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
                 if (targetFieldReadMap.containsKey(fieldInstruction)) {
                     targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
@@ -249,7 +249,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     private void processExternalMethodInvocations(Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationMap,
                                                   List<FieldInstructionObject> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClass) {
         for (AbstractVariable abstractVariable : externalMethodInvocationMap.keySet()) {
-            PlainVariable variable = null;
+            PlainVariable variable;
             if (abstractVariable instanceof CompositeVariable) {
                 variable = ((CompositeVariable) abstractVariable).getFinalVariable();
             } else {
@@ -280,27 +280,27 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         }
     }
 
-    public Map<MethodInvocationObject, Integer> getSourceMethodInvocationMap() {
+    private Map<MethodInvocationObject, Integer> getSourceMethodInvocationMap() {
         return sourceMethodInvocationMap;
     }
 
-    public Map<MethodInvocationObject, Integer> getTargetMethodInvocationMap() {
+    private Map<MethodInvocationObject, Integer> getTargetMethodInvocationMap() {
         return targetMethodInvocationMap;
     }
 
-    public Map<FieldInstructionObject, Integer> getSourceFieldReadMap() {
+    private Map<FieldInstructionObject, Integer> getSourceFieldReadMap() {
         return sourceFieldReadMap;
     }
 
-    public Map<FieldInstructionObject, Integer> getSourceFieldWriteMap() {
+    private Map<FieldInstructionObject, Integer> getSourceFieldWriteMap() {
         return sourceFieldWriteMap;
     }
 
-    public Map<FieldInstructionObject, Integer> getTargetFieldReadMap() {
+    private Map<FieldInstructionObject, Integer> getTargetFieldReadMap() {
         return targetFieldReadMap;
     }
 
-    public Map<FieldInstructionObject, Integer> getTargetFieldWriteMap() {
+    private Map<FieldInstructionObject, Integer> getTargetFieldWriteMap() {
         return targetFieldWriteMap;
     }
 
@@ -353,14 +353,14 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     public int getDistinctSourceDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<FieldInstructionObject>();
+        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
         fields.addAll(sourceFieldReadMap.keySet());
         fields.addAll(sourceFieldWriteMap.keySet());
         return fields.size() + sourceMethodInvocationMap.size();
     }
 
     public int getDistinctTargetDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<FieldInstructionObject>();
+        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
         fields.addAll(targetFieldReadMap.keySet());
         fields.addAll(targetFieldWriteMap.keySet());
         return fields.size() + targetMethodInvocationMap.size();

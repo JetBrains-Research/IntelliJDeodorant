@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TypeObject {
-    private String classType;
+    private final String classType;
     private String genericType;
     private int arrayDimension;
     private volatile int hashCode = 0;
 
-    public TypeObject(String type) {
+    private TypeObject(String type) {
         this.classType = type;
     }
 
@@ -21,7 +21,7 @@ public class TypeObject {
         return genericType;
     }
 
-    public void setGeneric(String g) {
+    private void setGeneric(String g) {
         this.genericType = g;
     }
 
@@ -48,16 +48,16 @@ public class TypeObject {
             //remove < > , and whitespace 
             String[] thisTokens = this.genericType.split("<|>|,|\\s");
             String[] otherTokens = typeObject.genericType.split("<|>|,|\\s");
-            List<String> singleLetters1 = new ArrayList<String>();
-            List<String> words1 = new ArrayList<String>();
+            List<String> singleLetters1 = new ArrayList<>();
+            List<String> words1 = new ArrayList<>();
             for (String token : thisTokens) {
                 if (token.length() == 1)
                     singleLetters1.add(token);
                 else if (token.length() > 1)
                     words1.add(token);
             }
-            List<String> singleLetters2 = new ArrayList<String>();
-            List<String> words2 = new ArrayList<String>();
+            List<String> singleLetters2 = new ArrayList<>();
+            List<String> words2 = new ArrayList<>();
             for (String token : otherTokens) {
                 if (token.length() == 1)
                     singleLetters2.add(token);
@@ -115,7 +115,6 @@ public class TypeObject {
     }
 
     public static TypeObject extractTypeObject(String qualifiedName) {
-        //TODO: FIX IT
         if (qualifiedName == null) return new TypeObject("Object");
         int arrayDimension = 0;
         String generic = null;
@@ -125,7 +124,7 @@ public class TypeObject {
                 arrayDimension++;
             }
         }
-        if (qualifiedName.contains("<") && qualifiedName.contains(">")) {
+        if (qualifiedName.contains("<") && qualifiedName.contains(">") && qualifiedName.lastIndexOf(">") - qualifiedName.indexOf("<") > 0) {
             generic = qualifiedName.substring(qualifiedName.indexOf("<"), qualifiedName.lastIndexOf(">") + 1);
             qualifiedName = qualifiedName.substring(0, qualifiedName.indexOf("<"));
         }

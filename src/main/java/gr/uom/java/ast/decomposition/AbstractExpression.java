@@ -9,7 +9,7 @@ import gr.uom.java.ast.util.ExpressionExtractor;
 
 public class AbstractExpression extends AbstractMethodFragment {
 
-    private ASTInformation expression;
+    private final ASTInformation expression;
 
     public AbstractExpression(PsiExpression expression) {
         super(null);
@@ -35,7 +35,7 @@ public class AbstractExpression extends AbstractMethodFragment {
         processLiterals(expressionExtractor.getLiterals(expression));
     }
 
-    public PsiExpression getExpression() {
+    private PsiExpression getExpression() {
         return (PsiExpression) this.expression.recoverASTNode();
     }
 

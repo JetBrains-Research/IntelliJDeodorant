@@ -1,9 +1,6 @@
 package gr.uom.java.ast;
 
-import gr.uom.java.distance.ProjectInfo;
-import gr.uom.java.distance.DistanceMatrix;
-import gr.uom.java.distance.MoveMethodCandidateRefactoring;
-import gr.uom.java.distance.MySystem;
+import gr.uom.java.distance.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,18 +14,18 @@ public class Standalone {
         SystemObject systemObject = new SystemObject();
         new ASTReader(project, systemObject);
 
-        List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<MoveMethodCandidateRefactoring>();
-        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<ClassObject>(systemObject.getClassObjects());
+        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
 
-        Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
+        Set<String> classNamesToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : classObjectsToBeExamined) {
-            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator())
+            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
                 classNamesToBeExamined.add(classObject.getName());
         }
         MySystem system = new MySystem(systemObject, false);
         DistanceMatrix distanceMatrix = new DistanceMatrix(system);
 
-        moveMethodCandidateList.addAll(distanceMatrix.getMoveMethodCandidateRefactoringsByAccess(classNamesToBeExamined));
+        List<MoveMethodCandidateRefactoring> candidateRefactoring = distanceMatrix.getMoveMethodCandidateRefactoringsByAccess(classNamesToBeExamined);
+        List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<>(candidateRefactoring);
         Collections.sort(moveMethodCandidateList);
         return moveMethodCandidateList;
     }

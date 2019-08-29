@@ -3,7 +3,7 @@ package gr.uom.java.ast.decomposition.cfg;
 import com.intellij.psi.PsiElement;
 
 public class CompositeVariable extends AbstractVariable {
-    private AbstractVariable rightPart;
+    private final AbstractVariable rightPart;
     private volatile int hashCode = 0;
 
     public CompositeVariable(PsiElement referenceName, AbstractVariable rightPart) {
@@ -22,7 +22,7 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     //if composite variable is "one.two.three" then right part is "two.three"
-    public AbstractVariable getRightPart() {
+    private AbstractVariable getRightPart() {
         return rightPart;
     }
 
@@ -58,7 +58,7 @@ public class CompositeVariable extends AbstractVariable {
 
     public boolean startsWithVariable(AbstractVariable variable) {
         if (variable instanceof PlainVariable) {
-            return this.getInitialVariable().equals((PlainVariable) variable);
+            return this.getInitialVariable().equals(variable);
         } else {
             CompositeVariable composite = (CompositeVariable) variable;
             if (this.getInitialVariable().equals(composite.getInitialVariable())) {
@@ -68,9 +68,9 @@ public class CompositeVariable extends AbstractVariable {
         }
     }
 
-    public AbstractVariable getRightPartAfterPrefix(AbstractVariable variable) {
+    private AbstractVariable getRightPartAfterPrefix(AbstractVariable variable) {
         if (variable instanceof PlainVariable) {
-            if (this.getInitialVariable().equals((PlainVariable) variable))
+            if (this.getInitialVariable().equals(variable))
                 return this.getRightPart();
         } else {
             CompositeVariable composite = (CompositeVariable) variable;
@@ -106,10 +106,9 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(variableName);
-        sb.append(".");
-        sb.append(rightPart.toString());
-        return sb.toString();
+        String sb = variableName +
+                "." +
+                rightPart.toString();
+        return sb;
     }
 }

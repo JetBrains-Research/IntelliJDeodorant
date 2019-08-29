@@ -6,13 +6,13 @@ import java.util.List;
 public class CatchClauseObject {
 
     private CompositeStatementObject body;
-    private List<AbstractExpression> expressionList;
-    private List<String> exceptionTypes;
+    private final List<AbstractExpression> expressionList;
+    private final List<String> exceptionTypes;
     private TryStatementObject parent;
 
     public CatchClauseObject() {
-        this.expressionList = new ArrayList<AbstractExpression>();
-        this.exceptionTypes = new ArrayList<String>();
+        this.expressionList = new ArrayList<>();
+        this.exceptionTypes = new ArrayList<>();
         this.parent = null;
     }
 
@@ -49,28 +49,22 @@ public class CatchClauseObject {
     }
 
     public List<String> stringRepresentation() {
-        List<String> stringRepresentation = new ArrayList<String>();
+        List<String> stringRepresentation = new ArrayList<>();
         stringRepresentation.add(this.toString());
         stringRepresentation.addAll(body.stringRepresentation());
         return stringRepresentation;
     }
 
     public List<CompositeStatementObject> getIfStatements() {
-        List<CompositeStatementObject> ifStatements = new ArrayList<CompositeStatementObject>();
-        ifStatements.addAll(body.getIfStatements());
-        return ifStatements;
+        return new ArrayList<>(body.getIfStatements());
     }
 
     public List<CompositeStatementObject> getSwitchStatements() {
-        List<CompositeStatementObject> switchStatements = new ArrayList<CompositeStatementObject>();
-        switchStatements.addAll(body.getSwitchStatements());
-        return switchStatements;
+        return new ArrayList<>(body.getSwitchStatements());
     }
 
     public List<TryStatementObject> getTryStatements() {
-        List<TryStatementObject> tryStatements = new ArrayList<TryStatementObject>();
-        tryStatements.addAll(body.getTryStatements());
-        return tryStatements;
+        return new ArrayList<>(body.getTryStatements());
     }
 
     public String toString() {

@@ -2,8 +2,8 @@ package gr.uom.java.ast;
 
 import com.intellij.psi.PsiArrayAccessExpression;
 
-public class ArrayAccessObject {
-    private TypeObject type;
+class ArrayAccessObject {
+    private final TypeObject type;
     private ASTInformation arrayAccess;
 	
     public ArrayAccessObject(TypeObject type) {
