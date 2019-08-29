@@ -47,7 +47,7 @@ public class ParameterObject extends VariableDeclarationObject {
         if (o instanceof ParameterObject) {
             ParameterObject parameterObject = (ParameterObject) o;
             return this.type.equals(parameterObject.type) && this.name.equals(parameterObject.name) &&
-                    this.varargs == parameterObject.varargs && this.variableBindingKey.equals(parameterObject.variableBindingKey);
+                    this.varargs == parameterObject.varargs /*&& this.variableBindingKey.equals(parameterObject.variableBindingKey)*/;
         }
 
         return false;

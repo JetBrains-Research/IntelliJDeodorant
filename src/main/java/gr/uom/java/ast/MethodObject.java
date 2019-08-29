@@ -308,6 +308,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         for (MethodInvocationObject methodInvocation : methodInvocations) {
             if (methodInvocation.getOriginClassName().equals(sourceClass.getName())) {
                 MethodObject invokedMethod = sourceClass.getMethod(methodInvocation);
+                if (invokedMethod == null) continue;
                 FieldInstructionObject fieldInstruction = invokedMethod.isGetter();
                 if (fieldInstruction != null && fieldInstruction.getType().getClassType().equals(targetClass.getName()))
                     return true;

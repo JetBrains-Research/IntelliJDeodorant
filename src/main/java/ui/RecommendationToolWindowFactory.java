@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.content.ContentManager;
 import gr.uom.java.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,11 +17,9 @@ public class RecommendationToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        jPanel.add(button);
-        Content content = contentFactory.createContent(jPanel, "", false);
-        toolWindow.getContentManager().addContent(content);
-       // init(project);
+        ContentManager contentManager = toolWindow.getContentManager();
+        Content content = contentManager.getFactory().createContent(new MoveMethodRefactoringPanel(true, true, project), null, false);
+        contentManager.addContent(content);
     }
 
     private void init(Project project) {

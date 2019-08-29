@@ -305,11 +305,10 @@ public abstract class AbstractMethodFragment {
                 String originClassName = null;
                 if (methodBinding == null) continue;
                 if (methodBinding.getContainingClass() != null) {
-                    originClassName = methodBinding.getContainingClass().getName();
+                    originClassName = methodBinding.getContainingClass().getQualifiedName();
                 }
                 TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
                 String methodInvocationName = methodBinding.getName();
-                String qualifiedName = methodBinding.getName();
                 PsiType returnTypeBinding = methodBinding.getReturnType();
                 TypeObject returnType = TypeObject.extractTypeObject(returnTypeBinding == null ? "Object" : returnTypeBinding.getCanonicalText());
                 MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);

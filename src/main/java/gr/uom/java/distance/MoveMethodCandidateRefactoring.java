@@ -9,7 +9,6 @@ import gr.uom.java.ast.MethodInvocationObject;
 import gr.uom.java.ast.MethodObject;
 import gr.uom.java.ast.TypeObject;
 import gr.uom.java.ast.decomposition.cfg.PlainVariable;
-//import gr.uom.java.ast.visualization.FeatureEnvyVisualizationData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -42,13 +41,15 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
                     !system.getSystemObject().containsMethodInvocation(methodInvocation, sourceClass.getClassObject())) {
                 MethodObject invokedMethod = sourceClass.getClassObject().getMethod(methodInvocation);
                 boolean systemMemberAccessed = false;
-                for (MethodInvocationObject methodInvocationObject : invokedMethod.getMethodInvocations()) {
-                    if (system.getSystemObject().getClassObject(methodInvocationObject.getOriginClassName()) != null) {
-                        systemMemberAccessed = true;
-                        break;
+                if (invokedMethod != null) {
+                    for (MethodInvocationObject methodInvocationObject : invokedMethod.getMethodInvocations()) {
+                        if (system.getSystemObject().getClassObject(methodInvocationObject.getOriginClassName()) != null) {
+                            systemMemberAccessed = true;
+                            break;
+                        }
                     }
                 }
-                if (!systemMemberAccessed) {
+                if (!systemMemberAccessed && invokedMethod != null) {
                     for (FieldInstructionObject fieldInstructionObject : invokedMethod.getFieldInstructions()) {
                         if (system.getSystemObject().getClassObject(fieldInstructionObject.getOwnerClass()) != null) {
                             systemMemberAccessed = true;
@@ -56,7 +57,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
                         }
                     }
                 }
-                if (!systemMemberAccessed && !additionalMethodsToBeMoved.containsKey(methodInvocation.getMethodInvocation()))
+                if (invokedMethod != null && !systemMemberAccessed && !additionalMethodsToBeMoved.containsKey(methodInvocation.getMethodInvocation()))
                     additionalMethodsToBeMoved.put(methodInvocation.getMethodInvocation(), invokedMethod.getMethodDeclaration());
             }
         }
@@ -66,7 +67,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 
     boolean isApplicable() {
         return !isSynchronized() && !containsSuperMethodInvocation() && !overridesMethod() && !containsFieldAssignment() && !isTargetClassAnInterface() &&
-                /*validTargetObject() && */!oneToManyRelationshipWithTargetClass() && !containsAssignmentToTargetClassVariable() &&
+                /*validTargetObject() &&*/ !oneToManyRelationshipWithTargetClass() && !containsAssignmentToTargetClassVariable() &&
                 !containsMethodCallWithThisExpressionAsArgument() && !isTargetClassAnEnum() && !isSourceClassATestClass() && !targetClassContainsMethodWithSourceMethodSignature() &&
                 !containsNullCheckForTargetObject();
     }

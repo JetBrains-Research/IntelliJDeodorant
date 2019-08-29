@@ -30,6 +30,7 @@
 
     <project-components>
         <component><implementation-class>ProjectOpenListener</implementation-class></component>
+        <component><implementation-class>ui.MySideBar</implementation-class></component>
     </project-components>
 
 </idea-plugin>

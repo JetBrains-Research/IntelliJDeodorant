@@ -1,12 +1,7 @@
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import gr.uom.java.ast.ASTReader;
-import gr.uom.java.ast.Standalone;
-import gr.uom.java.distance.MoveMethodCandidateRefactoring;
 import gr.uom.java.distance.ProjectInfo;
-
-import java.util.List;
 
 class ProjectOpenListener implements ProjectComponent {
     private final Project project;
@@ -21,9 +16,9 @@ class ProjectOpenListener implements ProjectComponent {
     public void projectOpened() {
         final DumbService dumbService = DumbService.getInstance(project);
         dumbService.runWhenSmart(() -> {
-            this.projectInfo = new ProjectInfo(project);
+/*          this.projectInfo = new ProjectInfo(project);
             new ASTReader(projectInfo);
-            List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo);
+            List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo);*/
         });
 
     }

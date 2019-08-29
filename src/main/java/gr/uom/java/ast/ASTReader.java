@@ -1,7 +1,6 @@
 package gr.uom.java.ast;
 
 import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.lang.jvm.types.JvmReferenceType;
 import com.intellij.psi.*;
 
 import gr.uom.java.distance.ProjectInfo;
@@ -35,7 +34,6 @@ public class ASTReader {
 
     private ClassObject processTypeDeclaration(PsiClass psiClass) {
         final ClassObject classObject = new ClassObject(psiClass);
-        //classObject.setIFile(psiClass.getContainingFile());
         classObject.setName(psiClass.getQualifiedName());
         if (psiClass.isInterface()) {
             classObject.setInterface(true);
@@ -54,17 +52,15 @@ public class ASTReader {
 
         if ((psiClass.hasModifier(JvmModifier.STATIC)))
             classObject.setStatic(true);
-
-        JvmReferenceType superclassType = psiClass.getSuperClassType();
-        if (superclassType != null) {
-            String qualifiedName = superclassType.getName();
-            TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
+        if (psiClass.getSuperClass() != null) {
+            String superclassType = psiClass.getSuperClass().getQualifiedName();
+            TypeObject typeObject = TypeObject.extractTypeObject(superclassType);
             classObject.setSuperclass(typeObject);
         }
 
-        JvmReferenceType[] superInterfaceTypes = psiClass.getInterfaceTypes();
-        for (JvmReferenceType interfaceType : superInterfaceTypes) {
-            TypeObject typeObject = TypeObject.extractTypeObject(interfaceType.getName());
+        PsiClass[] superInterfaceTypes = psiClass.getInterfaces();
+        for (PsiClass interfaceType : superInterfaceTypes) {
+            TypeObject typeObject = TypeObject.extractTypeObject(interfaceType.getQualifiedName());
             classObject.addInterface(typeObject);
         }
 
