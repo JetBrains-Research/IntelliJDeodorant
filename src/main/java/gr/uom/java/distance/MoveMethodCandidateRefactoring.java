@@ -67,7 +67,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
 
     boolean isApplicable() {
         return !isSynchronized() && !containsSuperMethodInvocation() && !overridesMethod() && !containsFieldAssignment() && !isTargetClassAnInterface() &&
-                /*validTargetObject() &&*/ !oneToManyRelationshipWithTargetClass() && !containsAssignmentToTargetClassVariable() &&
+                validTargetObject() && !oneToManyRelationshipWithTargetClass() && !containsAssignmentToTargetClassVariable() &&
                 !containsMethodCallWithThisExpressionAsArgument() && !isTargetClassAnEnum() && !isSourceClassATestClass() && !targetClassContainsMethodWithSourceMethodSignature() &&
                 !containsNullCheckForTargetObject();
     }

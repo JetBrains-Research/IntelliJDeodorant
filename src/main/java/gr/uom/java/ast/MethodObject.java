@@ -267,9 +267,8 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    //TODO: Fix it
     public boolean validTargetObject(ClassObject sourceClass, ClassObject targetClass) {
-        ASTInformation targetClassBinding = targetClass.getAbstractTypeDeclaration();
+        String targetClassType = targetClass.getPsiType();
         List<LocalVariableInstructionObject> localVariableInstructions = getLocalVariableInstructions();
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
@@ -280,22 +279,42 @@ public class MethodObject implements AbstractMethodDeclaration {
                 }
             }
         }
-        for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
-                ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
-                while (parameterIterator.hasNext()) {
-                    ParameterObject parameter = parameterIterator.next();
-                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimension() == 0)
-                        return true;
-                }
+
+        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
+        for (PsiMethodCallExpression methodInvocation : methodInvocations) {
+            PsiMethod method = methodInvocation.resolveMethod();
+            if (method != null && method.getContainingClass() != null && sourceClass.getName().equals(method.getContainingClass().getQualifiedName())) {
+                return false;
             }
         }
+
+        Collection<PsiReferenceExpression> fieldAccessed = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiReferenceExpression.class);
+        for (PsiReferenceExpression referenceExpression : fieldAccessed) {
+            if (!(referenceExpression.resolve() instanceof PsiField)) continue;
+            PsiField psiField = (PsiField) referenceExpression.resolve();
+            if (psiField != null && psiField.getType().getCanonicalText().equals(targetClass.getName())) {
+                return true;
+            }
+        }
+
+        PsiParameter[] parameters = getPsiMethod().getParameterList().getParameters();
+        for (PsiParameter psiParameter : parameters) {
+            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiType())) return true;
+        }
+
+        Collection<PsiField> elements = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiField.class);
+        for (PsiField field : elements) {
+            if (field.getType().getCanonicalText().equals(targetClass.getPsiType())) {
+                return true;
+            }
+        }
+
         List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
         for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            PsiElement fieldTypeBinding = fieldInstruction.getSimpleName();
+            String fieldTypeBinding = fieldInstruction.getType().getClassType();
             if (fieldTypeBinding != null && fieldInstruction.getType() != null &&
                     fieldInstruction.getType().getClassType() != null && fieldInstruction.getType().getClassType().equals(targetClass.getName())
-                    || targetClassBinding != null && fieldTypeBinding != null && fieldTypeBinding.equals(targetClassBinding.recoverASTNode())) {
+                    || fieldTypeBinding != null && fieldTypeBinding.equals(targetClassType)) {
                 ListIterator<FieldObject> fieldIterator = sourceClass.getFieldIterator();
                 while (fieldIterator.hasNext()) {
                     FieldObject field = fieldIterator.next();
@@ -304,19 +323,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 }
             }
         }
-        List<MethodInvocationObject> methodInvocations = getMethodInvocations();
-        for (MethodInvocationObject methodInvocation : methodInvocations) {
-            if (methodInvocation.getOriginClassName().equals(sourceClass.getName())) {
-                MethodObject invokedMethod = sourceClass.getMethod(methodInvocation);
-                if (invokedMethod == null) continue;
-                FieldInstructionObject fieldInstruction = invokedMethod.isGetter();
-                if (fieldInstruction != null && fieldInstruction.getType().getClassType().equals(targetClass.getName()))
-                    return true;
-                MethodInvocationObject delegation = invokedMethod.isDelegate();
-                if (delegation != null && delegation.getOriginClassName().equals(targetClass.getName()))
-                    return true;
-            }
-        }
+
         return false;
     }
 

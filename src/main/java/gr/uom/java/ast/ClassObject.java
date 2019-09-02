@@ -19,9 +19,10 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
     private boolean _enum;
     private gr.uom.java.ast.Access access;
     private gr.uom.java.ast.ASTInformation typeDeclaration;
- //   private PsiFile iFile;
+    private String psiType;
 
     public ClassObject(PsiClass psiClass) {
+        this.psiType = psiClass.getQualifiedName();
         this.name = psiClass.getName();
         this.constructorList = new ArrayList<>();
         this.interfaceList = new ArrayList<>();
@@ -31,6 +32,7 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
         this._static = psiClass.hasModifier(JvmModifier.STATIC);
         this._enum = psiClass.isEnum();
         this.access = gr.uom.java.ast.Access.NONE;
+        this.typeDeclaration = gr.uom.java.ast.ASTInformationGenerator.generateASTInformation(psiClass);
     }
 
     public void setAbstractTypeDeclaration(PsiDeclarationStatement typeDeclaration) {
@@ -49,15 +51,9 @@ public class ClassObject extends gr.uom.java.ast.ClassDeclarationObject {
         return typeDeclaration.getITypeRoot();
     }
 
-/*
-    public PsiFile getIFile() {
-        return iFile;
+    public String getPsiType() {
+        return psiType;
     }
-
-    public void setIFile(PsiFile file) {
-        iFile = file;
-    }
-*/
 
     private boolean isFriend(String className) {
         if (superclass != null) {
