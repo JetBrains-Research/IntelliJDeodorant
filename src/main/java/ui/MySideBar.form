@@ -9,10 +9,19 @@
     </properties>
     <border type="none" title="Candidates"/>
     <children>
-      <component id="3de5e" class="com.intellij.ui.components.JBList" binding="list">
-        <constraints border-constraint="Center"/>
+      <scrollpane id="d7bbe" binding="scrollPane">
+        <constraints border-constraint="West"/>
         <properties/>
-      </component>
+        <border type="none"/>
+        <children>
+          <component id="3de5e" class="com.intellij.ui.components.JBList" binding="list">
+            <constraints/>
+            <properties>
+              <model/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
     </children>
   </grid>
 </form>

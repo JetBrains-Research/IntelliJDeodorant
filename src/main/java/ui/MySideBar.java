@@ -18,11 +18,11 @@ import java.util.List;
 public class MySideBar implements ProjectComponent {
     private JBList<Reference> list;
     private JPanel panel;
+    private JScrollPane scrollPane;
     private Project project;
     private final String panelTitle = "Candidates";
     private final String moveMenuItemName = "Move method";
 
-    //TODO: Make panel scrollable
     MySideBar(Project project) {
         this.project = project;
         list.setCellRenderer(new ReferenceListCellRenderer());
@@ -105,6 +105,9 @@ public class MySideBar implements ProjectComponent {
         panel.setBorder(BorderFactory.createTitledBorder(panelTitle));
         list = new JBList();
         panel.add(list, BorderLayout.CENTER);
+        scrollPane = new JScrollPane();
+        scrollPane.setViewportView(list);
+        panel.add(scrollPane, BorderLayout.CENTER);
     }
 
     /**
