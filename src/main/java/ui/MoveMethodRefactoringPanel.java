@@ -20,7 +20,7 @@ public class MoveMethodRefactoringPanel extends SimpleToolWindowPanel {
     private final MySideBar sideBar;
     private ProjectInfo projectInfo;
 
-    public MoveMethodRefactoringPanel(Project project) {
+    MoveMethodRefactoringPanel(Project project) {
         super(false, true);
         sideBar = new MySideBar(project);
         refresh(project);

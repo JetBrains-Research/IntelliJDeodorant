@@ -48,7 +48,7 @@ public class Reference {
         String fullPackageName = "default";
         try {
             PsiPackage psiPackage = JavaDirectoryService.getInstance().getPackage(psiElement.getContainingFile().getContainingDirectory());
-            if (!psiPackage.getQualifiedName().trim().equals(""))
+            if (psiPackage != null && !psiPackage.getQualifiedName().trim().equals(""))
                 fullPackageName = psiPackage.getQualifiedName();
         } catch (NullPointerException e) {
             fullPackageName = "default";
@@ -79,11 +79,18 @@ public class Reference {
 
         if (getPsiMethod() != null)
             description.append(PsiUtils.calculateSignature(getPsiMethod()));
-        if ((containingClass != null && !"".equals(containingClass.getName())) || !"".equals(containingFile.getName()) 
+        if ((containingClass != null && !"".equals(containingClass.getName())) || !"".equals(containingFile.getName())
                 || (containingMethod != null && !containingMethod.getName().equals("")))
             description.append("    Move to    ");
         description.append(targetClassName);
         return description.toString();
     }
-    
+
+    public String getTargetClassName() {
+        return targetClassName;
+    }
+
+    public PsiMethod getPsiElement() {
+        return psiElement;
+    }
 }
