@@ -21,16 +21,11 @@
     -->
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="ui.RecommendationToolWindowFactory"/>
+        <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="ui.RefactoringsToolWindowFactory"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
     </actions>
-
-    <project-components>
-        <component><implementation-class>ProjectOpenListener</implementation-class></component>
-        <component><implementation-class>ui.MySideBar</implementation-class></component>
-    </project-components>
 
 </idea-plugin>

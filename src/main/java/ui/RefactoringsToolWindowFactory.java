@@ -7,12 +7,12 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import org.jetbrains.annotations.NotNull;
 
-public class RecommendationToolWindowFactory implements ToolWindowFactory {
+public class RefactoringsToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         ContentManager contentManager = toolWindow.getContentManager();
-        Content content = contentManager.getFactory().createContent(new MoveMethodRefactoringPanel(project), null, false);
+        Content content = contentManager.getFactory().createContent(new RefactoringsPanel(project), null, false);
         contentManager.addContent(content);
     }
     

@@ -14,7 +14,7 @@ apply plugin: 'org.jetbrains.intellij'
 
 intellij {
     version '2019.1'
-    pluginName 'jdeodorant-intellij-plugin'
+    pluginName 'IntelliJDeodorant'
     downloadSources true
     intellij.updateSinceUntilBuild false
 }
