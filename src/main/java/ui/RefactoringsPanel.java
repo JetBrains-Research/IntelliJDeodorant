@@ -24,8 +24,4 @@ public class RefactoringsPanel extends SimpleToolWindowPanel {
         setContent(jTabbedPane);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-    }
 }

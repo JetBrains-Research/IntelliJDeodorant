@@ -15,10 +15,10 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TableSpeedSearch;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.table.JBTable;
-import gr.uom.java.ast.ASTReader;
-import gr.uom.java.ast.Standalone;
-import gr.uom.java.distance.MoveMethodCandidateRefactoring;
-import gr.uom.java.distance.ProjectInfo;
+import core.ast.ASTReader;
+import core.ast.Standalone;
+import core.distance.MoveMethodCandidateRefactoring;
+import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.MoveMethodRefactoring;
@@ -59,7 +59,7 @@ class MoveMethodPanel extends JPanel {
     private final JLabel infoLabel = new JLabel();
     private final JLabel info = new JLabel();
     private final JButton refreshButton = new JButton();
-    private List<MoveMethodRefactoring> refactorings = new ArrayList<>();
+    private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
