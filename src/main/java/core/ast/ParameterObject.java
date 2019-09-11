@@ -1,6 +1,5 @@
 package core.ast;
 
-import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
 
 public class ParameterObject extends VariableDeclarationObject {
@@ -29,14 +28,12 @@ public class ParameterObject extends VariableDeclarationObject {
     }
 
     public void setSingleVariableDeclaration(PsiElement singleVariableDeclaration) {
-        //this.singleVariableDeclaration = singleVariableDeclaration;
-        this.variableBindingKey = singleVariableDeclaration.getReference();
+        this.variableBindingKey = singleVariableDeclaration.getText();
         this.singleVariableDeclaration = ASTInformationGenerator.generateASTInformation(singleVariableDeclaration);
     }
 
-    public PsiDeclarationStatement getSingleVariableDeclaration() {
-        //return this.singleVariableDeclaration;
-        return (PsiDeclarationStatement) this.singleVariableDeclaration.recoverASTNode();
+    public PsiElement getSingleVariableDeclaration() {
+        return this.singleVariableDeclaration.recoverASTNode();
     }
 
     public boolean equals(Object o) {
@@ -46,8 +43,10 @@ public class ParameterObject extends VariableDeclarationObject {
 
         if (o instanceof ParameterObject) {
             ParameterObject parameterObject = (ParameterObject) o;
-            return this.type.equals(parameterObject.type) && this.name.equals(parameterObject.name) &&
-                    this.varargs == parameterObject.varargs /*&& this.variableBindingKey.equals(parameterObject.variableBindingKey)*/;
+            return this.type.equals(parameterObject.type)
+                    && this.name.equals(parameterObject.name)
+                    && this.varargs == parameterObject.varargs
+                    && this.variableBindingKey.equals(parameterObject.variableBindingKey);
         }
 
         return false;
@@ -69,7 +68,7 @@ public class ParameterObject extends VariableDeclarationObject {
         return type.toString() + " " + name;
     }
 
-    public PsiDeclarationStatement getVariableDeclaration() {
+    public PsiElement getVariableDeclaration() {
         return getSingleVariableDeclaration();
     }
 }

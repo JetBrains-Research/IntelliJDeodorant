@@ -121,7 +121,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
         for (PlainVariable variable : usedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
+            if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
                 //the used field in inherited from a superclass which is the target
                 if (targetFieldReadMap.containsKey(fieldInstruction)) {
                     targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
@@ -139,7 +139,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
         for (PlainVariable variable : definedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
+            if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
                 //the defined field in inherited from a superclass which is the target
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
@@ -184,7 +184,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                     variableTypeBinding = localVariableInstruction.getSimpleName();
             }
             ASTInformation targetClassBinding = targetClass.getAbstractTypeDeclaration();
-            if (variable.getVariableType().equals(targetClass.getName()) ||
+            if (variable.getType().equals(targetClass.getName()) ||
                     (variableTypeBinding != null && targetClassBinding.recoverASTNode().getClass().equals(variableTypeBinding.getClass().getSuperclass()))) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
                 if (targetFieldReadMap.containsKey(fieldInstruction)) {
@@ -218,8 +218,8 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                     variableTypeBinding = localVariableInstruction.getSimpleName();
             }
             PsiClass targetClassBinding = (PsiClass) targetClass.getAbstractTypeDeclaration().recoverASTNode();
-            if (variable.getVariableType().equals(targetClass.getName()) ||
-                    (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getClass().getSuperclass()))) {
+            if (variable.getType().equals(targetClass.getName()) ||
+                    (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getOriginalElement()))) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
@@ -232,7 +232,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
     private FieldInstructionObject findFieldInstruction(PlainVariable variable, List<FieldInstructionObject> fieldInstructions) {
         for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            if (fieldInstruction.getSimpleName().getText().equals(variable.getVariableBindingKey()))
+            if (fieldInstruction.getSimpleName().getText().equals(variable.getName()))
                 return fieldInstruction;
         }
         return null;
@@ -240,7 +240,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
     private LocalVariableInstructionObject findLocalVariableInstruction(PlainVariable variable, List<LocalVariableInstructionObject> localVariableInstructions) {
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getSimpleName().getText().equals(variable.getVariableBindingKey()))
+            if (localVariableInstruction.getSimpleName().getText().equals(variable.getQualifiedName()))
                 return localVariableInstruction;
         }
         return null;
@@ -255,19 +255,19 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             } else {
                 variable = (PlainVariable) abstractVariable;
             }
-            PsiElement variableTypeBinding = null;
+            PsiElement variableType = null;
             if (variable.isField()) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableTypeBinding = fieldInstruction.getSimpleName();
+                    variableType = fieldInstruction.getSimpleName();
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
-                    variableTypeBinding = localVariableInstruction.getSimpleName();
+                    variableType = localVariableInstruction.getSimpleName();
             }
-            PsiElement targetClassBinding = targetClass.getAbstractTypeDeclaration().recoverASTNode();
-            if (variable.getVariableType().equals(targetClass.getName()) ||
-                    (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getClass().getSuperclass()))) {
+            PsiElement targetPsiClass = targetClass.getAbstractTypeDeclaration().recoverASTNode();
+            if (variable.getType().equals(targetClass.getName()) ||
+                    (variableType != null && targetPsiClass.getText().equals(variableType.getText()))) {
                 List<MethodInvocationObject> externalMethodInvocations = externalMethodInvocationMap.get(abstractVariable);
                 for (MethodInvocationObject methodInvocation : externalMethodInvocations) {
                     if (targetMethodInvocationMap.containsKey(methodInvocation)) {

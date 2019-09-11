@@ -5,80 +5,10 @@ import core.ast.decomposition.cfg.CompositeVariable;
 import core.ast.decomposition.cfg.PlainVariable;
 import core.ast.decomposition.cfg.AbstractVariable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MethodDeclarationUtility {
-
-    public static PsiMethodCallExpression isDelegate(PsiMethod methodDeclaration) {
-        PsiElement parentClass = methodDeclaration.getParent();
-        PsiCodeBlock methodBody = methodDeclaration.getBody();
-        if (methodBody != null) {
-            List<PsiStatement> statements = Arrays.asList(methodBody.getStatements());
-            if (statements.size() == 1) {
-                PsiStatement statement = statements.get(0);
-                PsiMethodCallExpression methodInvocation = null;
-                if (statement instanceof PsiReturnStatement) {
-                    PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
-                    if (returnStatement.getReturnValue() instanceof PsiMethodCallExpression) {
-                        methodInvocation = (PsiMethodCallExpression) returnStatement.getReturnValue();
-                    }
-                } else if (statement instanceof PsiExpressionStatement) {
-                    PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
-                    if (expressionStatement.getExpression() instanceof PsiMethodCallExpression) {
-                        methodInvocation = (PsiMethodCallExpression) expressionStatement.getExpression();
-                    }
-                }
-                if (methodInvocation != null) {
-                    PsiReferenceExpression methodInvocationExpression = methodInvocation.getMethodExpression();
-                    if (methodInvocationExpression instanceof PsiMethodCallExpression) {
-                        PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
-                        List<PsiMethod> parentClassMethods = new ArrayList<>();
-                        if (parentClass instanceof PsiClass) {
-                            PsiClass enumDeclaration = (PsiClass) parentClass;
-                            PsiMethod[] bodyDeclarations = enumDeclaration.getMethods();
-                            for (PsiMethod bodyDeclaration : bodyDeclarations) {
-                                if (bodyDeclaration != null) {
-                                    parentClassMethods.add(bodyDeclaration);
-                                }
-                            }
-                        }
-                        boolean isDelegationChain = false;
-                        boolean foundInParentClass = false;
-                        for (PsiMethod parentClassMethod : parentClassMethods) {
-                            if (parentClassMethod.getReference().equals(previousChainedMethodInvocation.getReference())) {
-                                foundInParentClass = true;
-                                PsiElement getterField = isGetter(parentClassMethod);
-                                if (getterField == null)
-                                    isDelegationChain = true;
-                                break;
-                            }
-                        }
-                        if (!isDelegationChain && foundInParentClass) {
-                            return methodInvocation;
-                        }
-                    } else if (methodInvocationExpression.getOriginalElement() instanceof PsiField) {
-                        PsiField fieldAccess = (PsiField) methodInvocationExpression;
-                        //		IVariableBinding variableBinding = fieldAccess.resolveFieldBinding();
-                        if (fieldAccess.getContainingClass().equals(parentClass)/* ||
-	    						parentClass.resolveBinding().isSubTypeCompatible(variableBinding.getDeclaringClass())*/) {
-                            return methodInvocation;
-                        }
-                    } else {
-                        PsiElement binding = methodInvocationExpression.resolve();
-                        if (binding != null) {
-                            PsiReference variableBinding = binding.getReference();
-                            if (variableBinding instanceof PsiField) {
-                                return methodInvocation;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
     public static PsiElement isGetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
@@ -96,7 +26,7 @@ public class MethodDeclarationUtility {
         return null;
     }
 
-    public static PsiReferenceExpression isSetter(PsiMethod methodDeclaration) {
+    public static PsiElement isSetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());
         if (methodBody != null) {
@@ -110,10 +40,13 @@ public class MethodDeclarationUtility {
                         PsiAssignmentExpression assignment = (PsiAssignmentExpression) expressionStatementExpression;
                         PsiExpression rightHandSide = assignment.getRExpression();
                         if (rightHandSide instanceof PsiReferenceExpression) {
-                            PsiReferenceExpression rightHandSideSimpleName = (PsiReferenceExpression) rightHandSide;
-                            PsiExpression leftHandSide = assignment.getLExpression();
-                            if (leftHandSide instanceof PsiReferenceExpression) {
-                                return (PsiReferenceExpression) leftHandSide;
+                            PsiReferenceExpression rightHandSideReference = (PsiReferenceExpression) rightHandSide;
+                            PsiElement resolvedElement = rightHandSideReference.resolve();
+                            if (resolvedElement != null && resolvedElement.equals(parameters.get(0).getOriginalElement())) {
+                                PsiExpression leftHandSide = assignment.getLExpression();
+                                if (leftHandSide instanceof PsiReferenceExpression) {
+                                    return ((PsiReferenceExpression) leftHandSide).resolve();
+                                }
                             }
                         }
                     }
@@ -123,19 +56,21 @@ public class MethodDeclarationUtility {
         return null;
     }
 
-    public static AbstractVariable createVariable(PsiElement simpleName, AbstractVariable rightPart) {
+    public static AbstractVariable createVariable(PsiVariable psiVariable, AbstractVariable rightPart) {
         AbstractVariable currentVariable;
         if (rightPart == null)
-            currentVariable = new PlainVariable(simpleName);
+            currentVariable = new PlainVariable(psiVariable);
         else
-            currentVariable = new CompositeVariable(simpleName, rightPart);
+            currentVariable = new CompositeVariable(psiVariable, rightPart);
 
-        if (simpleName.getParent() instanceof PsiReference) {
-            PsiReference fieldAccess = (PsiReference) simpleName.getParent();
-            if (fieldAccess instanceof PsiReferenceExpression) {
-                PsiReferenceExpression fieldAccess2 = (PsiReferenceExpression) fieldAccess;
-                return createVariable(fieldAccess2.getElement(), currentVariable);
-            } else if (simpleName.getParent() instanceof PsiThisExpression) {
+        if (psiVariable.getParent() instanceof PsiReferenceExpression) {
+            PsiReferenceExpression fieldAccess = (PsiReferenceExpression) psiVariable.getParent();
+            if (fieldAccess.resolve() instanceof PsiReferenceExpression) {
+                PsiElement resolvedReference = fieldAccess.resolve();
+                if (resolvedReference instanceof PsiVariable) {
+                    return createVariable((PsiVariable) resolvedReference, currentVariable);
+                }
+            } else if (psiVariable.getParent() instanceof PsiThisExpression) {
                 return currentVariable;
             }
         } else {
@@ -146,9 +81,15 @@ public class MethodDeclarationUtility {
 
     public static AbstractVariable processMethodInvocationExpression(PsiExpression expression) {
         if (expression instanceof PsiReferenceExpression) {
-            PsiElement qualifiedName = ((PsiReferenceExpression) expression).resolve();
-            return createVariable(qualifiedName, null);
-        } else return null;
+            PsiElement resolvedReference = ((PsiReferenceExpression) expression).resolve();
+            if (resolvedReference instanceof PsiVariable) {
+                return createVariable((PsiVariable) resolvedReference, null);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
-    
+
 }

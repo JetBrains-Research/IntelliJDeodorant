@@ -81,7 +81,6 @@ class CommentObject {
     }
 
     public String toString() {
-        //sb.append(comment.getITypeRoot().getPath()).append("\n");
         return "Start line: " + startLine + "\n" +
                 "End line:" + endLine + "\n" +
                 text;

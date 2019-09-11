@@ -3,55 +3,42 @@ package core.ast.decomposition.cfg;
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 
-import java.util.Arrays;
-
 public abstract class AbstractVariable {
-    final String variableBindingKey;
-    final String variableName;
-    final String variableType;
+    final String qualifiedName;
+    final String name;
+    final String type;
     final boolean isField;
     final boolean isParameter;
     final boolean isStatic;
 
-    AbstractVariable(PsiElement name) {
-        this.variableBindingKey = name.getText();
-        this.variableName = ((PsiNamedElement) name).getName();
-        if (name instanceof PsiVariable) {
-            this.variableType = ((PsiVariable) name).getType().getCanonicalText();
-        } else {
-            this.variableType = ((PsiNamedElement) name).getName();
-        }
-        this.isField = (name instanceof PsiField);
-        this.isParameter = false;
-        this.isStatic = ((name instanceof PsiModifierListOwner) 
-				&& ((PsiModifierListOwner) name).hasModifier(JvmModifier.STATIC));
+    AbstractVariable(PsiVariable psiVariable) {
+        this.qualifiedName = psiVariable.getType().getCanonicalText();
+        this.name = psiVariable.getText();
+        this.type = psiVariable.getType().getPresentableText();
+        this.isField = (psiVariable instanceof PsiField);
+        this.isParameter = (psiVariable instanceof PsiParameter);
+        this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
     }
 
-    public AbstractVariable(PsiVariable variableBinding) {
-        this(variableBinding.getName(), variableBinding.getName(), variableBinding.getType().getCanonicalText(),
-                Arrays.asList(variableBinding.getClass().getFields()).contains(variableBinding),
-                false, (variableBinding.hasModifier(JvmModifier.STATIC)));
-    }
-
-    AbstractVariable(String variableBindingKey, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
-        this.variableBindingKey = variableBindingKey;
-        this.variableName = variableName;
-        this.variableType = variableType;
+    AbstractVariable(String qualifiedName, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
+        this.qualifiedName = qualifiedName;
+        this.name = name;
+        this.type = type;
         this.isField = isField;
         this.isParameter = isParameter;
         this.isStatic = isStatic;
     }
 
-    public String getVariableBindingKey() {
-        return variableBindingKey;
+    public String getQualifiedName() {
+        return qualifiedName;
     }
 
-    String getVariableName() {
-        return variableName;
+    public String getName() {
+        return name;
     }
 
-    public String getVariableType() {
-        return variableType;
+    public String getType() {
+        return type;
     }
 
     public boolean isField() {

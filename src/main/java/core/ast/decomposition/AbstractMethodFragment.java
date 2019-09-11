@@ -136,7 +136,7 @@ public abstract class AbstractMethodFragment {
                             handleDefinedField(variable);
                             for (PsiAssignmentExpression assignment : fieldAssignments) {
                                 PsiJavaToken operator = assignment.getOperationSign();
-                                if (!operator.equals(JavaTokenType.EQ))
+                                if (!JavaTokenType.EQ.equals(operator.getTokenType()))
                                     handleUsedField(variable);
                             }
                         }
@@ -157,9 +157,9 @@ public abstract class AbstractMethodFragment {
 
             if (variableInstruction instanceof PsiReferenceExpression) {
                 final PsiReferenceExpression argumentReference = (PsiReferenceExpression) variableInstruction;
-                final PsiElement psiReference = argumentReference.resolve();
-                if (psiReference instanceof PsiField) {
-                    PsiField psiField = (PsiField) psiReference;
+                final PsiElement resolvedReference = argumentReference.resolve();
+                if (resolvedReference instanceof PsiField) {
+                    PsiField psiField = (PsiField) resolvedReference;
                     if (psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
                         String qualifiedName = PsiUtil.getMemberQualifiedName(psiField);
@@ -168,25 +168,25 @@ public abstract class AbstractMethodFragment {
                         if (originClassName != null && !originClassName.equals("")) {
                             if (variableInstruction instanceof PsiSuperExpression) {
                                 SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, fieldType, fieldName);
-                                superFieldInstruction.setSimpleName(psiReference);
+                                superFieldInstruction.setSimpleName(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
                                 FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, fieldType, fieldName);
-                                fieldInstruction.setSimpleName(psiReference);
+                                fieldInstruction.setSimpleName(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(PsiUtil.getName(psiField), assignments);
                                 Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(PsiUtil.getName(psiField), postfixExpressions);
                                 Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(PsiUtil.getName(psiField), prefixExpressions);
-                                AbstractVariable variable = MethodDeclarationUtility.createVariable(psiReference, null);
+                                AbstractVariable variable = MethodDeclarationUtility.createVariable(psiField, null);
                                 if (!fieldAssignments.isEmpty()) {
                                     handleDefinedField(variable);
                                     for (PsiAssignmentExpression assignment : fieldAssignments) {
                                         PsiJavaToken operator = assignment.getOperationSign();
-                                        if (!operator.equals(JavaTokenType.EQ))
+                                        if (!JavaTokenType.EQ.equals(operator.getTokenType()))
                                             handleUsedField(variable);
                                     }
                                 }
@@ -205,15 +205,15 @@ public abstract class AbstractMethodFragment {
                         }
                     }
                 } else {
-                    if (psiReference instanceof PsiLocalVariable) {
-                        PsiLocalVariable resolvedVariable = (PsiLocalVariable) psiReference.getOriginalElement();
+                    if (resolvedReference instanceof PsiLocalVariable) {
+                        PsiLocalVariable resolvedVariable = (PsiLocalVariable) resolvedReference;
                         String variableName = resolvedVariable.getName();
                         String variableType = resolvedVariable.getType().getCanonicalText();
                         TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
-                        PlainVariable variable = new PlainVariable(psiReference);
-                        if (psiReference.getParent() instanceof PsiDeclarationStatement) {
+                        PlainVariable variable = new PlainVariable(resolvedVariable);
+                        if (resolvedReference.getParent() instanceof PsiDeclarationStatement) {
                             LocalVariableDeclarationObject localVariable = new LocalVariableDeclarationObject(localVariableType, variableName);
-                            PsiDeclarationStatement variableDeclaration = (PsiDeclarationStatement) psiReference.getParent();
+                            PsiDeclarationStatement variableDeclaration = (PsiDeclarationStatement) resolvedReference.getParent();
                             localVariable.setVariableDeclaration(variableDeclaration);
                             addLocalVariableDeclaration(localVariable);
                             addDeclaredLocalVariable(variable);
@@ -227,7 +227,7 @@ public abstract class AbstractMethodFragment {
                                 addDefinedLocalVariable(variable);
                                 for (PsiAssignmentExpression assignment : localVariableAssignments) {
                                     PsiJavaToken operator = assignment.getOperationSign();
-                                    if (!operator.equals(JavaTokenType.EQ))
+                                    if (!JavaTokenType.EQ.equals(operator.getTokenType()))
                                         addUsedLocalVariable(variable);
                                 }
                             }
@@ -378,7 +378,7 @@ public abstract class AbstractMethodFragment {
                 superMethodInvocationObject.setSuperMethodInvocation(psiSuperExpression);
                 PsiParameter[] psiParameters = resolvedMethod.getParameterList().getParameters();
                 for (PsiParameter parameter : psiParameters) {
-                    String qualifiedParameterName = parameter.getName();
+                    String qualifiedParameterName = parameter.getType().getCanonicalText();
                     TypeObject typeObject = TypeObject.extractTypeObject(qualifiedParameterName);
                     superMethodInvocationObject.addParameter(typeObject);
                 }
@@ -483,7 +483,7 @@ public abstract class AbstractMethodFragment {
 
                         PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
                         for (PsiParameter parameter : parameters) {
-                            TypeObject parameterType = TypeObject.extractTypeObject(Objects.requireNonNull(parameter.getName()));
+                            TypeObject parameterType = TypeObject.extractTypeObject(parameter.getType().getCanonicalText());
                             parameterType.setArrayDimension(parameterType.getArrayDimension());
                             if (parameter.isVarArgs()) {
                                 parameterType.setArrayDimension(1);

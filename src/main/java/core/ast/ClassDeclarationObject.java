@@ -25,9 +25,7 @@ public abstract class ClassDeclarationObject {
     public abstract PsiType getITypeRoot();
 
     public abstract ClassObject getClassObject();
-
-/*    public abstract PsiFile getIFile();*/
-
+    
     protected abstract TypeObject getSuperclass();
 
     public void addMethod(MethodObject method) {

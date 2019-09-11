@@ -1,23 +1,24 @@
 package core.ast.decomposition.cfg;
 
-import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiVariable;
 
 public class CompositeVariable extends AbstractVariable {
     private final AbstractVariable rightPart;
     private volatile int hashCode = 0;
 
-    public CompositeVariable(PsiElement referenceName, AbstractVariable rightPart) {
+    public CompositeVariable(PsiVariable referenceName, AbstractVariable rightPart) {
         super(referenceName);
         this.rightPart = rightPart;
     }
 
     public CompositeVariable(AbstractVariable argument, AbstractVariable rightPart) {
-        this(argument.getVariableBindingKey(), argument.getVariableName(),
-                argument.getVariableType(), argument.isField(), argument.isParameter(), argument.isStatic(), rightPart);
+        this(argument.getQualifiedName(), argument.getName(),
+                argument.getType(), argument.isField(), argument.isParameter(), argument.isStatic(), rightPart);
     }
 
-    private CompositeVariable(String variableBindingKey, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic, AbstractVariable rightPart) {
-        super(variableBindingKey, variableName, variableType, isField, isParameter, isStatic);
+    private CompositeVariable(String variableQualifiedName, String variableName, String variableType,
+                              boolean isField, boolean isParameter, boolean isStatic, AbstractVariable rightPart) {
+        super(variableQualifiedName, variableName, variableType, isField, isParameter, isStatic);
         this.rightPart = rightPart;
     }
 
@@ -29,10 +30,10 @@ public class CompositeVariable extends AbstractVariable {
     //if composite variable is "one.two.three" then left part is "one.two"
     public AbstractVariable getLeftPart() {
         if (rightPart instanceof PlainVariable) {
-            return new PlainVariable(variableBindingKey, variableName, variableType, isField, isParameter, isStatic);
+            return new PlainVariable(qualifiedName, name, type, isField, isParameter, isStatic);
         } else {
             CompositeVariable compositeVariable = (CompositeVariable) rightPart;
-            return new CompositeVariable(variableBindingKey, variableName, variableType, isField, isParameter, isStatic, compositeVariable.getLeftPart());
+            return new CompositeVariable(qualifiedName, name, type, isField, isParameter, isStatic, compositeVariable.getLeftPart());
         }
     }
 
@@ -47,11 +48,11 @@ public class CompositeVariable extends AbstractVariable {
 
     //if composite variable is "one.two.three" then initial variable is "one"
     public PlainVariable getInitialVariable() {
-        return new PlainVariable(variableBindingKey, variableName, variableType, isField, isParameter, isStatic);
+        return new PlainVariable(qualifiedName, name, type, isField, isParameter, isStatic);
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        if (this.variableBindingKey.equals(variable.variableBindingKey))
+        if (this.qualifiedName.equals(variable.qualifiedName))
             return true;
         return rightPart.containsPlainVariable(variable);
     }
@@ -89,8 +90,8 @@ public class CompositeVariable extends AbstractVariable {
         }
         if (o instanceof CompositeVariable) {
             CompositeVariable composite = (CompositeVariable) o;
-            return this.variableBindingKey.equals(composite.variableBindingKey) &&
-                    this.rightPart.equals(composite.rightPart);
+            return this.qualifiedName.equals(composite.qualifiedName)
+                    && this.rightPart.equals(composite.rightPart);
         }
         return false;
     }
@@ -98,7 +99,7 @@ public class CompositeVariable extends AbstractVariable {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + variableBindingKey.hashCode();
+            result = 31 * result + qualifiedName.hashCode();
             result = 31 * result + rightPart.hashCode();
             hashCode = result;
         }
@@ -106,7 +107,7 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     public String toString() {
-        return variableName +
+        return name +
                 "." +
                 rightPart.toString();
     }

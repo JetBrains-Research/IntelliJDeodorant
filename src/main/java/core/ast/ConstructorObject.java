@@ -490,8 +490,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             sb.append(parameterList.get(parameterList.size() - 1).toString());
         }
         sb.append(")");
-        /*if(methodBody != null)
-        	sb.append("\n").append(methodBody.toString());*/
         return sb.toString();
     }
 

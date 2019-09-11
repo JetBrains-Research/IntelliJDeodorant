@@ -36,14 +36,17 @@ public class LocalVariableDeclarationObject extends VariableDeclarationObject {
 
         if (o instanceof LocalVariableDeclarationObject) {
             LocalVariableDeclarationObject lvdo = (LocalVariableDeclarationObject) o;
-            return this.name.equals(lvdo.name) && this.type.equals(lvdo.type) &&
-                    this.variableBindingKey.equals(lvdo.variableBindingKey);
+            return this.name.equals(lvdo.name) 
+                    && this.type.equals(lvdo.type) 
+                    && this.variableBindingKey.equals(lvdo.variableBindingKey);
         }
         return false;
     }
 
     public boolean equals(LocalVariableInstructionObject lvio) {
-        return this.name.equals(lvio.getName()) && this.type.equals(lvio.getType()) && this.variableBindingKey.equals(lvio.getVariableBindingKey());
+        return this.name.equals(lvio.getName()) 
+                && this.type.equals(lvio.getType()) 
+                && this.variableBindingKey.equals(lvio.getVariableBindingKey());
     }
 
     public int hashCode() {

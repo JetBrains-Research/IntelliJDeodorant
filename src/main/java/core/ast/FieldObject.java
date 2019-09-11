@@ -27,13 +27,7 @@ public class FieldObject extends VariableDeclarationObject {
         this.commentList = new ArrayList<>();
     }
 
-    public void setVariableDeclarationFragment(PsiDeclarationStatement fragment) {
-        this.variableBindingKey = fragment.getReference();
-        this.fragment = ASTInformationGenerator.generateASTInformation(fragment);
-    }
-
     private PsiDeclarationStatement getVariableDeclarationFragment() {
-        //return this.fragment;
         PsiElement node = this.fragment.recoverASTNode();
         if (node instanceof PsiReferenceExpression) {
             return (PsiDeclarationStatement) node.getParent();
@@ -78,12 +72,6 @@ public class FieldObject extends VariableDeclarationObject {
         _static = s;
     }
 
-    public FieldInstructionObject generateFieldInstruction() {
-        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, this.variableBindingKey);
-        fieldInstruction.setStatic(this._static);
-        return fieldInstruction;
-    }
-
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -107,8 +95,9 @@ public class FieldObject extends VariableDeclarationObject {
     }
 
     public boolean equals(FieldInstructionObject fio) {
-        return this.className.equals(fio.getOwnerClass()) &&
-                this.name.equals(fio.getName()) && this.type.equals(fio.getType()) && this.variableBindingKey.resolve().equals(fio.getVariableBindingKey());
+        return this.className.equals(fio.getOwnerClass())
+                && this.name.equals(fio.getName())
+                && this.type.equals(fio.getType());
     }
 
     public int hashCode() {

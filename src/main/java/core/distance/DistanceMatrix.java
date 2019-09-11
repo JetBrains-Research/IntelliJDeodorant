@@ -1,9 +1,6 @@
 package core.distance;
 
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.*;
 import core.ast.ClassObject;
 import core.ast.FieldInstructionObject;
 import core.ast.association.Association;
@@ -24,8 +21,6 @@ public class DistanceMatrix {
     //holds the entity set of each class
     private final Map<String, Set<String>> classMap;
     private final MySystem system;
-    private int maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate;
-    private int maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate;
 
     public DistanceMatrix(MySystem system) {
         this.system = system;
@@ -99,7 +94,7 @@ public class DistanceMatrix {
                                 for (PsiExpression expression : invocationArguments) {
                                     if (expression instanceof PsiReferenceExpression) {
                                         PsiReferenceExpression argumentName = (PsiReferenceExpression) expression;
-                                        if (parameter.getSingleVariableDeclaration().getReference().equals(argumentName.getReference()))
+                                        if (parameter.getSingleVariableDeclaration().equals(argumentName.resolve()))
                                             parameterIsPassedAsArgument = true;
                                     }
                                 }
@@ -142,8 +137,7 @@ public class DistanceMatrix {
                                             if (candidate.isApplicable()) {
                                                 int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                                                 int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                                if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate &&
-                                                        sourceClassDependencies < targetClassDependencies) {
+                                                if (sourceClassDependencies < targetClassDependencies) {
                                                     candidateRefactoringList.add(candidate);
                                                 }
                                             }
@@ -236,8 +230,7 @@ public class DistanceMatrix {
                                         if (candidate.isApplicable() && !targetClassInheritedByAnotherCandidateTargetClass(targetClass, accessMap.keySet())) {
                                             int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                                             int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                            if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate &&
-                                                    sourceClassDependencies <= targetClassDependencies) {
+                                            if (sourceClassDependencies <= targetClassDependencies) {
                                                 candidateRefactoringList.add(candidate);
                                             }
                                             candidateFound = true;
@@ -282,7 +275,7 @@ public class DistanceMatrix {
         }
         return accessMap;
     }
-	
+
     public double[][] getJaccardDistanceMatrix(MyClass sourceClass) {
         ArrayList<Entity> entities = new ArrayList<>();
         entities.addAll(sourceClass.getAttributeList());

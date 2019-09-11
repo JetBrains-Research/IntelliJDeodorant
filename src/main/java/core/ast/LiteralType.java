@@ -1,5 +1,12 @@
 package core.ast;
 
 public enum LiteralType {
-	BOOLEAN, CHARACTER, NULL, NUMBER, STRING, TYPE
+	
+    BOOLEAN,
+    CHARACTER,
+    NULL,
+    NUMBER,
+    STRING,
+    TYPE
+
 }

@@ -53,7 +53,9 @@ public class SuperFieldInstructionObject {
 
         if (o instanceof SuperFieldInstructionObject) {
             SuperFieldInstructionObject sfio = (SuperFieldInstructionObject) o;
-            return this.ownerClass.equals(sfio.ownerClass) && this.name.equals(sfio.name) && this.type.equals(sfio.type);
+            return this.ownerClass.equals(sfio.ownerClass)
+                    && this.name.equals(sfio.name)
+                    && this.type.equals(sfio.type);
         }
         return false;
     }
@@ -71,7 +73,6 @@ public class SuperFieldInstructionObject {
 
     public String toString() {
         return ownerClass + "::" +
-                //sb.append(type).append(" ");
                 name;
     }
 }

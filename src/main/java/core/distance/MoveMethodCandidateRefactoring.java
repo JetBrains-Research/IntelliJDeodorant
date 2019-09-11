@@ -131,7 +131,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     private boolean containsAssignmentToTargetClassVariable() {
         Set<PlainVariable> definedVariables = sourceMethod.getMethodObject().getDefinedLocalVariables();
         for (PlainVariable variable : definedVariables) {
-            if (variable.isParameter() && variable.getVariableType().equals(targetClass.getName()))
+            if (variable.isParameter() && variable.getType().equals(targetClass.getName()))
                 return true;
         }
         return false;

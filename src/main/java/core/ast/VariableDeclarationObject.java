@@ -1,17 +1,16 @@
 package core.ast;
 
-import com.intellij.psi.PsiDeclarationStatement;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiElement;
 
 abstract class VariableDeclarationObject {
 
-    PsiReference variableBindingKey;
+    String variableBindingKey;
 
-    PsiReference getVariableBindingKey() {
+    String getVariableBindingKey() {
         return variableBindingKey;
     }
 
-    public abstract PsiDeclarationStatement getVariableDeclaration();
+    public abstract PsiElement getVariableDeclaration();
 
     public abstract String getName();
 }

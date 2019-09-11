@@ -43,8 +43,10 @@ public class Association {
 
         if (o instanceof Association) {
             Association association = (Association) o;
-            return this.from.equals(association.from) && this.to.equals(association.to) &&
-                    this.fieldObject.equals(association.fieldObject) && this.container == association.container;
+            return this.from.equals(association.from) 
+                    && this.to.equals(association.to) 
+                    && this.fieldObject.equals(association.fieldObject) 
+                    && this.container == association.container;
         }
         return false;
     }

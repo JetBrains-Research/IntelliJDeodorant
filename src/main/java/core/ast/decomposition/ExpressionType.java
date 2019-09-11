@@ -1,7 +1,8 @@
 package core.ast.decomposition;
 
 public enum ExpressionType {
-	NORMAL_ANNOTATION,
+    
+    NORMAL_ANNOTATION,
     MARKER_ANNOTATION,
     SINGLE_MEMBER_ANNOTATION,
     ARRAY_ACCESS,

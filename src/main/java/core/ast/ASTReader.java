@@ -136,8 +136,8 @@ public class ASTReader {
 
         PsiParameter[] parameters = methodDeclaration.getParameterList().getParameters();
         for (PsiParameter parameter : parameters) {
-            String qualifiedName = parameter.getName();
-            TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
+            String parameterType = parameter.getType().getCanonicalText();
+            TypeObject typeObject = TypeObject.extractTypeObject(parameterType);
             if (parameter.isVarArgs()) {
                 typeObject.setArrayDimension(1);
             }
@@ -172,13 +172,13 @@ public class ASTReader {
             MethodObject methodObject = new MethodObject(methodDeclaration, constructorObject);
             PsiAnnotation[] extendedModifiers = methodDeclaration.getAnnotations();
             for (PsiAnnotation extendedModifier : extendedModifiers) {
-                if (extendedModifier.getQualifiedName().equals("Test")) {
+                if ("Test".equals(extendedModifier.getQualifiedName())) {
                     methodObject.setTestAnnotation(true);
                     break;
                 }
             }
             PsiType returnType = methodDeclaration.getReturnType();
-            String qualifiedName = returnType.getCanonicalText();
+            String qualifiedName = returnType != null ? returnType.getCanonicalText() : null;
             TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
             methodObject.setReturnType(typeObject);
             if (methodDeclaration.hasModifier(JvmModifier.ABSTRACT))

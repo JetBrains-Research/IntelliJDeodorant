@@ -390,7 +390,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                         if (resolvedElement instanceof PsiVariable && !(resolvedElement instanceof PsiLocalVariable)) {
                             PsiVariable psiVariable = (PsiVariable) resolvedElement;
                             if (targetClass.getName().equals(psiVariable.getType().getCanonicalText())
-                                    && infixExpression.getOperationSign().equals(JavaTokenType.EQEQ)) {
+                                    && JavaTokenType.EQEQ.equals(infixExpression.getOperationSign().getTokenType())) {
                                 return true;
                             }
                         }

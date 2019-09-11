@@ -14,4 +14,10 @@ public class ASTInformationGenerator {
     public static ASTInformation generateASTInformation(PsiElement astNode) {
         return new ASTInformation(iTypeRoot, astNode);
     }
+
+    public static ASTInformation generateASTInformation(PsiType psiType, PsiElement astNode) {
+        return new ASTInformation(psiType, astNode);
+    }
+
+
 }

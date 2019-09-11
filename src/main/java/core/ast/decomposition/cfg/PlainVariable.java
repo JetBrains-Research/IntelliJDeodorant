@@ -1,20 +1,20 @@
 package core.ast.decomposition.cfg;
 
-import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiVariable;
 
 public class PlainVariable extends AbstractVariable {
     private volatile int hashCode = 0;
 
-    public PlainVariable(PsiElement variableName) {
+    public PlainVariable(PsiVariable variableName) {
         super(variableName);
     }
 
-    public PlainVariable(String variableBindingKey, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
-        super(variableBindingKey, variableName, variableType, isField, isParameter, isStatic);
+    public PlainVariable(String variableQualifiedName, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
+        super(variableQualifiedName, variableName, variableType, isField, isParameter, isStatic);
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        return this.variableBindingKey.equals(variable.variableBindingKey);
+        return this.qualifiedName.equals(variable.qualifiedName);
     }
 
     public boolean startsWithVariable(AbstractVariable variable) {
@@ -34,7 +34,7 @@ public class PlainVariable extends AbstractVariable {
         }
         if (o instanceof PlainVariable) {
             PlainVariable plain = (PlainVariable) o;
-            return this.variableBindingKey.equals(plain.variableBindingKey);
+            return this.qualifiedName.equals(plain.qualifiedName);
         }
         return false;
     }
@@ -42,13 +42,13 @@ public class PlainVariable extends AbstractVariable {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + variableBindingKey.hashCode();
+            result = 31 * result + qualifiedName.hashCode();
             hashCode = result;
         }
         return hashCode;
     }
 
     public String toString() {
-        return variableName;
+        return name;
     }
 }
