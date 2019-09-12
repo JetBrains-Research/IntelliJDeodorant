@@ -1,5 +1,7 @@
 # IntelliJDeodorant
-An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
+An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. 
+
+Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
 
 The original tool supports five code smells, namely **Feature Envy**, **Type/State Checking**, **Long Method**, **God Class** and **Duplicated Code**. 
 
@@ -14,7 +16,7 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 
 ## Installation
 
-* Clone repository
+* Clone this repository
 * Build .jar ```./gradlew jar``` 
 * Go to ```Settings-> Plugins-> Install plugin from disk```
 * Locate and select result .jar from the first step
@@ -22,4 +24,4 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 
 ## Usage
 
-The ```JDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of the panel contains a button ```Refresh``` allows detecting corresponding code smell in the whole project and table with results. To apply any refactoring, you must check the corresponding checkbox in the leftmost column of the table and click the ```Refactor``` button.
+The ```JDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of the panel contains a ```Refresh``` button allows detecting corresponding code smell in the whole project and table with results. To apply any refactoring, you must check the corresponding checkbox in the leftmost column of the table and click the ```Refactor``` button.
