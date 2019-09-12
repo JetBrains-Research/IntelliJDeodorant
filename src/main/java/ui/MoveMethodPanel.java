@@ -141,7 +141,7 @@ class MoveMethodPanel extends JPanel {
         ProjectInfo projectInfo = new ProjectInfo(project);
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
-                IntelliJDeodorantBundle.message(DETECT_FEATURE_ENVY_INDICATOR_STATUS_TEXT_KEY), false) {
+                IntelliJDeodorantBundle.message(DETECT_FEATURE_ENVY_INDICATOR_STATUS_TEXT_KEY), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
