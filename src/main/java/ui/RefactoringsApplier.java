@@ -85,7 +85,7 @@ public class RefactoringsApplier {
         }
         MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(method, available);
         dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(method));
-        dialog.show();
+        TransactionGuard.getInstance().submitTransactionAndWait(dialog::show);
         return dialog.getExitCode() == DialogWrapper.OK_EXIT_CODE;
     }
 
