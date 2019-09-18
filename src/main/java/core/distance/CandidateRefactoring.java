@@ -14,6 +14,9 @@ abstract class CandidateRefactoring {
 
     protected abstract Set<String> getEntitySet();
 
+    public abstract int getDistinctSourceDependencies();
+    
+    public abstract int getDistinctTargetDependencies();
 
     public String getAnnotationText() {
         Map<String, ArrayList<String>> accessMap = new LinkedHashMap<>();

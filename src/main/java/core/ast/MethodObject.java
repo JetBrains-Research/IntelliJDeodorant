@@ -289,14 +289,6 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
-        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
-        for (PsiMethodCallExpression methodInvocation : methodInvocations) {
-            PsiMethod method = methodInvocation.resolveMethod();
-            if (method != null && method.getContainingClass() != null && sourceClass.getName().equals(method.getContainingClass().getQualifiedName())) {
-                return false;
-            }
-        }
-
         Collection<PsiReferenceExpression> fieldAccessed = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiReferenceExpression.class);
         for (PsiReferenceExpression referenceExpression : fieldAccessed) {
             if (!(referenceExpression.resolve() instanceof PsiField)) continue;
@@ -333,6 +325,13 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
+        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
+        for (PsiMethodCallExpression methodInvocation : methodInvocations) {
+            PsiMethod method = methodInvocation.resolveMethod();
+            if (method != null && method.getContainingClass() != null && sourceClass.getName().equals(method.getContainingClass().getQualifiedName())) {
+                return false;
+            }
+        }
         return false;
     }
 

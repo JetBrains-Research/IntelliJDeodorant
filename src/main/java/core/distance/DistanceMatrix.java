@@ -1,5 +1,6 @@
 package core.distance;
 
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.*;
 import core.ast.ClassObject;
 import core.ast.FieldInstructionObject;
@@ -8,6 +9,7 @@ import core.ast.ASTReader;
 import core.ast.MethodInvocationObject;
 import core.ast.MethodObject;
 import core.ast.ParameterObject;
+import utils.IntelliJDeodorantBundle;
 
 import java.util.*;
 
@@ -21,6 +23,7 @@ public class DistanceMatrix {
     //holds the entity set of each class
     private final Map<String, Set<String>> classMap;
     private final MySystem system;
+    private final String IDENTIFICATION_INDICATOR_TEXT_KEY = "feature.envy.identification.indicator";
 
     public DistanceMatrix(MySystem system) {
         this.system = system;
@@ -168,9 +171,14 @@ public class DistanceMatrix {
         return false;
     }
 
-    public List<MoveMethodCandidateRefactoring> getMoveMethodCandidateRefactoringsByAccess(Set<String> classNamesToBeExamined) {
+    public List<MoveMethodCandidateRefactoring> getMoveMethodCandidateRefactoringsByAccess(Set<String> classNamesToBeExamined, ProgressIndicator indicator) {
         List<MoveMethodCandidateRefactoring> candidateRefactoringList = new ArrayList<>();
+        indicator.setText(IntelliJDeodorantBundle.message(IDENTIFICATION_INDICATOR_TEXT_KEY));
+        indicator.setFraction(0.0);
+        int entityCount = entityList.size();
+        int processedEntities = 0;
         for (Entity entity : entityList) {
+            processedEntities += 1;
             if (entity instanceof MyMethod) {
                 String sourceClass = entity.getClassOrigin();
                 if (classNamesToBeExamined.contains(sourceClass)) {
@@ -230,7 +238,7 @@ public class DistanceMatrix {
                                         if (candidate.isApplicable() && !targetClassInheritedByAnotherCandidateTargetClass(targetClass, accessMap.keySet())) {
                                             int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                                             int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                            if (sourceClassDependencies <= targetClassDependencies) {
+                                            if (sourceClassDependencies < targetClassDependencies) {
                                                 candidateRefactoringList.add(candidate);
                                             }
                                             candidateFound = true;
@@ -243,7 +251,9 @@ public class DistanceMatrix {
                     }
                 }
             }
+            indicator.setFraction((double) processedEntities * 100 / entityCount);
         }
+        indicator.setFraction(1.0);
         return candidateRefactoringList;
     }
 

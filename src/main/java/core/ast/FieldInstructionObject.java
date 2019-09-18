@@ -8,7 +8,7 @@ public class FieldInstructionObject {
     private final TypeObject type;
     private final String name;
     private boolean _static;
-    private ASTInformation simpleName;
+    private ASTInformation element;
     private volatile int hashCode = 0;
 
     public FieldInstructionObject(String ownerClass, TypeObject type, String name) {
@@ -38,12 +38,12 @@ public class FieldInstructionObject {
         _static = s;
     }
 
-    public void setSimpleName(PsiElement simpleName) {
-        this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
+    public void setElement(PsiElement element) {
+        this.element = ASTInformationGenerator.generateASTInformation(element);
     }
 
-    public PsiElement getSimpleName() {
-        return this.simpleName.recoverASTNode();
+    public PsiElement getElement() {
+        return this.element.recoverASTNode();
     }
 
     public boolean equals(Object o) {

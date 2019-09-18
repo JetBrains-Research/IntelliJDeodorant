@@ -15,7 +15,6 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TableSpeedSearch;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.table.JBTable;
-import core.ast.ASTReader;
 import core.ast.Standalone;
 import core.distance.MoveMethodCandidateRefactoring;
 import core.distance.ProjectInfo;
@@ -45,7 +44,7 @@ class MoveMethodPanel extends JPanel {
     private static final String DESELECT_ALL_BUTTON_TEXT_KEY = "deselect.all.button";
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String DETECT_FEATURE_ENVY_INDICATOR_STATUS_TEXT_KEY = "detect.feature.envy.indicator.status";
+    private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "feature.envy.detect.indicator.status";
     private static final String TOTAL_LABEL_TEXT_KEY = "total.label";
 
     @NotNull
@@ -63,9 +62,8 @@ class MoveMethodPanel extends JPanel {
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
-
         setLayout(new BorderLayout());
-        model = new MoveMethodTableModel((refactorings));
+        model = new MoveMethodTableModel(refactorings);
         setupGUI();
     }
 
@@ -114,7 +112,11 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
-        refreshButton.addActionListener(l -> calculateRefactorings());
+        refreshButton.addActionListener(l -> {
+            refactorings.clear();
+            model.clearTable();
+            calculateRefactorings();
+        });
         buttonsPanel.add(refreshButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
@@ -141,12 +143,11 @@ class MoveMethodPanel extends JPanel {
         ProjectInfo projectInfo = new ProjectInfo(project);
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
-                IntelliJDeodorantBundle.message(DETECT_FEATURE_ENVY_INDICATOR_STATUS_TEXT_KEY), true) {
+                IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    new ASTReader(projectInfo);
-                    List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo);
+                    List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo, indicator);
                     final List<MoveMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
                             .map(x -> new MoveMethodRefactoring(x.getSourceMethodDeclaration(),
                                     PsiUtils.findClass(x.getTargetClass().getName(), project))).collect(Collectors.toList());

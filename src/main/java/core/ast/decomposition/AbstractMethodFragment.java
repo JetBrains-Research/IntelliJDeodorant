@@ -124,7 +124,7 @@ public abstract class AbstractMethodFragment {
                         addSuperFieldInstruction(superFieldInstruction);
                     } else {
                         FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, fieldType, fieldName);
-                        fieldInstruction.setSimpleName(psiField);
+                        fieldInstruction.setElement(psiField);
                         if ((psiField.hasModifier(JvmModifier.STATIC)))
                             fieldInstruction.setStatic(true);
                         addFieldInstruction(fieldInstruction);
@@ -162,19 +162,19 @@ public abstract class AbstractMethodFragment {
                     PsiField psiField = (PsiField) resolvedReference;
                     if (psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
-                        String qualifiedName = PsiUtil.getMemberQualifiedName(psiField);
-                        TypeObject fieldType = TypeObject.extractTypeObject(qualifiedName);
+                        String fieldType = psiField.getType().getCanonicalText();
+                        TypeObject typeObject = TypeObject.extractTypeObject(fieldType);
                         String fieldName = psiField.getName();
                         if (originClassName != null && !originClassName.equals("")) {
                             if (variableInstruction instanceof PsiSuperExpression) {
-                                SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, fieldType, fieldName);
+                                SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
                                 superFieldInstruction.setSimpleName(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
-                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, fieldType, fieldName);
-                                fieldInstruction.setSimpleName(resolvedReference);
+                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName);
+                                fieldInstruction.setElement(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
@@ -341,8 +341,7 @@ public abstract class AbstractMethodFragment {
                     if (methodInvocationObject.isStatic())
                         addStaticallyInvokedMethod(methodInvocationObject);
                     else {
-                        methodInvocation.getMethodExpression();
-                        if (methodInvocation.getMethodExpression() instanceof PsiThisExpression) {
+                        if (methodInvocation.getFirstChild() instanceof PsiThisExpression) {
                             addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
                         }
                     }

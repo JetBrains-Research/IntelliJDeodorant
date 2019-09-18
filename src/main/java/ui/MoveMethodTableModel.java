@@ -35,12 +35,7 @@ public class MoveMethodTableModel extends AbstractTableModel {
     private boolean[] isActive;
 
     MoveMethodTableModel(List<MoveMethodRefactoring> refactorings) {
-        this.refactorings.addAll(refactorings);
-        isSelected = new boolean[refactorings.size()];
-        isActive = new boolean[refactorings.size()];
-        Arrays.fill(isActive, true);
-        IntStream.range(0, refactorings.size())
-                .forEachOrdered(virtualRows::add);
+        updateTable(refactorings);
     }
 
     void updateTable(List<MoveMethodRefactoring> refactorings) {
@@ -51,6 +46,12 @@ public class MoveMethodTableModel extends AbstractTableModel {
         Arrays.fill(isActive, true);
         IntStream.range(0, refactorings.size())
                 .forEachOrdered(virtualRows::add);
+        fireTableDataChanged();
+    }
+
+    void clearTable() {
+        this.refactorings.clear();
+        this.virtualRows.clear();
         fireTableDataChanged();
     }
 

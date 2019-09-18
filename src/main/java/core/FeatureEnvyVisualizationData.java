@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
 import core.ast.*;
 import core.ast.decomposition.cfg.CompositeVariable;
 import core.ast.decomposition.cfg.PlainVariable;
@@ -128,7 +129,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 } else {
                     targetFieldReadMap.put(fieldInstruction, 1);
                 }
-            } else {
+            } else if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(sourceClass.getName())) {
                 if (sourceFieldReadMap.containsKey(fieldInstruction)) {
                     sourceFieldReadMap.put(fieldInstruction, sourceFieldReadMap.get(fieldInstruction) + 1);
                 } else {
@@ -146,7 +147,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 } else {
                     targetFieldWriteMap.put(fieldInstruction, 1);
                 }
-            } else {
+            } else if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(sourceClass.getName())) {
                 if (sourceFieldWriteMap.containsKey(fieldInstruction)) {
                     sourceFieldWriteMap.put(fieldInstruction, sourceFieldWriteMap.get(fieldInstruction) + 1);
                 } else {
@@ -177,7 +178,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             if (variable.isField()) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableTypeBinding = fieldInstruction.getSimpleName();
+                    variableTypeBinding = fieldInstruction.getElement();
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
@@ -211,7 +212,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             if (variable.isField()) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableTypeBinding = fieldInstruction.getSimpleName();
+                    variableTypeBinding = fieldInstruction.getElement();
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
@@ -232,8 +233,12 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
     private FieldInstructionObject findFieldInstruction(PlainVariable variable, List<FieldInstructionObject> fieldInstructions) {
         for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            if (fieldInstruction.getSimpleName().getText().equals(variable.getName()))
-                return fieldInstruction;
+            PsiElement psiElement = fieldInstruction.getElement();
+            if (psiElement instanceof PsiField) {
+                PsiField psiField = (PsiField) psiElement;
+                if (psiField.getName() != null && psiField.getName().equals(variable.getName()))
+                    return fieldInstruction;
+            }
         }
         return null;
     }
@@ -247,7 +252,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     private void processExternalMethodInvocations(Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationMap,
-                                                  List<FieldInstructionObject> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClass) {
+                                                  List<FieldInstructionObject> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClassObject) {
         for (AbstractVariable abstractVariable : externalMethodInvocationMap.keySet()) {
             PlainVariable variable;
             if (abstractVariable instanceof CompositeVariable) {
@@ -259,23 +264,34 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             if (variable.isField()) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableType = fieldInstruction.getSimpleName();
+                    variableType = fieldInstruction.getElement();
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
                     variableType = localVariableInstruction.getSimpleName();
             }
-            PsiElement targetPsiClass = targetClass.getAbstractTypeDeclaration().recoverASTNode();
-            if (variable.getType().equals(targetClass.getName()) ||
-                    (variableType != null && targetPsiClass.getText().equals(variableType.getText()))) {
+            PsiElement targetPsiClass = targetClassObject.getAbstractTypeDeclaration().recoverASTNode();
+            if (variable.getType().equals(targetClassObject.getName())) {
                 List<MethodInvocationObject> externalMethodInvocations = externalMethodInvocationMap.get(abstractVariable);
-                for (MethodInvocationObject methodInvocation : externalMethodInvocations) {
-                    if (targetMethodInvocationMap.containsKey(methodInvocation)) {
-                        targetMethodInvocationMap.put(methodInvocation, targetMethodInvocationMap.get(methodInvocation) + 1);
-                    } else {
-                        targetMethodInvocationMap.put(methodInvocation, 1);
-                    }
+                handleExternalMethodInvocation(externalMethodInvocations);
+            } else if (variableType instanceof PsiClass) {
+                PsiClass psiClass = ((PsiClass) targetPsiClass);
+                PsiClass targetClass = (PsiClass) targetPsiClass;
+                if (targetClass.getQualifiedName() != null && psiClass.getSuperClass() != null
+                        && targetClass.getQualifiedName().equals(psiClass.getSuperClass().getQualifiedName())) {
+                    List<MethodInvocationObject> externalMethodInvocations = externalMethodInvocationMap.get(abstractVariable);
+                    handleExternalMethodInvocation(externalMethodInvocations);
                 }
+            }
+        }
+    }
+
+    private void handleExternalMethodInvocation(List<MethodInvocationObject> externalMethodInvocations) {
+        for (MethodInvocationObject methodInvocation : externalMethodInvocations) {
+            if (targetMethodInvocationMap.containsKey(methodInvocation)) {
+                targetMethodInvocationMap.put(methodInvocation, targetMethodInvocationMap.get(methodInvocation) + 1);
+            } else {
+                targetMethodInvocationMap.put(methodInvocation, 1);
             }
         }
     }

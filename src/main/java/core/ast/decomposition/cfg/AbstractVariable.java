@@ -12,9 +12,9 @@ public abstract class AbstractVariable {
     final boolean isStatic;
 
     AbstractVariable(PsiVariable psiVariable) {
-        this.qualifiedName = psiVariable.getType().getCanonicalText();
-        this.name = psiVariable.getText();
-        this.type = psiVariable.getType().getPresentableText();
+        this.qualifiedName = psiVariable.getText();
+        this.name = psiVariable.getName();
+        this.type = psiVariable.getType().getCanonicalText();
         this.isField = (psiVariable instanceof PsiField);
         this.isParameter = (psiVariable instanceof PsiParameter);
         this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);

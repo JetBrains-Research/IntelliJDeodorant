@@ -1,10 +1,12 @@
 package core.ast;
 
 import com.intellij.lang.jvm.JvmModifier;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.*;
 
 import core.ast.decomposition.MethodBodyObject;
 import core.distance.ProjectInfo;
+import utils.IntelliJDeodorantBundle;
 
 import java.util.*;
 
@@ -12,24 +14,22 @@ public class ASTReader {
 
     private static SystemObject systemObject;
     private static ProjectInfo examinedProject;
+    private final String PARSING_INDICATOR_TEXT_KEY = "feature.envy.parsing.indicator";
 
-    public ASTReader(ProjectInfo project) {
-
+    public ASTReader(ProjectInfo project, ProgressIndicator indicator) {
+        indicator.setText(IntelliJDeodorantBundle.message(PARSING_INDICATOR_TEXT_KEY));
+        indicator.setFraction(0.0);
         systemObject = new SystemObject();
         examinedProject = project;
         List<PsiClass> classes = project.getClasses();
+        int processedClasses = 0;
+        int classesCount = classes.size();
         for (PsiClass c : classes) {
             systemObject.addClass(processTypeDeclaration(c));
+            processedClasses += 1;
+            indicator.setFraction((double) processedClasses * 100 / classesCount);
         }
-    }
-
-    public ASTReader(ProjectInfo iJavaProject, SystemObject existingSystemObject) {
-        examinedProject = iJavaProject;
-        systemObject = existingSystemObject;
-        List<PsiClass> classes = iJavaProject.getClasses();
-        for (PsiClass c : classes) {
-            systemObject.addClass(processTypeDeclaration(c));
-        }
+        indicator.setFraction(1.0);
     }
 
     private ClassObject processTypeDeclaration(PsiClass psiClass) {
