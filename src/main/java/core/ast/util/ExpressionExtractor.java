@@ -7,15 +7,15 @@ import com.intellij.psi.*;
 public class ExpressionExtractor {
     private ExpressionInstanceChecker instanceChecker;
 
-    // returns a List of SimpleName objects
+    // returns a List of Variable objects
     public List<PsiExpression> getVariableInstructions(PsiStatement statement) {
-        instanceChecker = new InstanceOfSimpleName();
+        instanceChecker = new InstanceOfVariable();
         return getExpressions(statement);
     }
 
-    // returns a List of SimpleName objects
+    // returns a List of Variable objects
     public List<PsiExpression> getVariableInstructions(PsiExpression expression) {
-        instanceChecker = new InstanceOfSimpleName();
+        instanceChecker = new InstanceOfVariable();
         return getExpressions(expression);
     }
 
@@ -223,9 +223,10 @@ public class ExpressionExtractor {
 
     private List<PsiExpression> getExpressions(PsiStatement statement) {
         List<PsiExpression> expressionList = new ArrayList<>();
-        if (statement instanceof PsiCodeBlock) {
-            PsiCodeBlock block = (PsiCodeBlock) statement;
-            PsiStatement[] blockStatements = block.getStatements();
+        if (statement instanceof PsiBlockStatement) {
+            PsiBlockStatement psiBlockStatement = (PsiBlockStatement) statement;
+            PsiCodeBlock psiCodeBlock = psiBlockStatement.getCodeBlock();
+            PsiStatement[] blockStatements = psiCodeBlock.getStatements();
             for (PsiStatement blockStatement : blockStatements)
                 expressionList.addAll(getExpressions(blockStatement));
         } else if (statement instanceof PsiIfStatement) {
@@ -243,14 +244,15 @@ public class ExpressionExtractor {
             PsiExpression expression = forStatement.getCondition();
             if (expression != null)
                 expressionList.addAll(getExpressions(expression));
-            PsiStatement updaters = forStatement.getUpdate();
-            expressionList.addAll(getExpressions(updaters));
+            PsiStatement updater = forStatement.getUpdate();
+            expressionList.addAll(getExpressions(updater));
             expressionList.addAll(getExpressions(forStatement.getBody()));
         } else if (statement instanceof PsiForeachStatement) {
             PsiForeachStatement enhancedForStatement = (PsiForeachStatement) statement;
             PsiExpression expression = enhancedForStatement.getIteratedValue();
             expressionList.addAll(getExpressions(expression));
             expressionList.addAll(getExpressions(enhancedForStatement.getBody()));
+            expressionList.addAll(getExpressions(enhancedForStatement.getIterationParameter().getInitializer()));
         } else if (statement instanceof PsiWhileStatement) {
             PsiWhileStatement whileStatement = (PsiWhileStatement) statement;
             PsiExpression expression = whileStatement.getCondition();
@@ -284,6 +286,7 @@ public class ExpressionExtractor {
                 expressionList.addAll(getExpressions(message));
         } else if (statement instanceof PsiLabeledStatement) {
             PsiLabeledStatement labeledStatement = (PsiLabeledStatement) statement;
+            expressionList.addAll(getExpressions(labeledStatement));
             expressionList.addAll(getExpressions(labeledStatement.getStatement()));
         } else if (statement instanceof PsiReturnStatement) {
             PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
@@ -339,9 +342,16 @@ public class ExpressionExtractor {
                 expressionList.addAll(getExpressions(breakStatement.getLabelExpression()));
         } else if (statement instanceof PsiContinueStatement) {
             PsiContinueStatement continueStatement = (PsiContinueStatement) statement;
-            expressionList.addAll(getExpressions(continueStatement));
+            // expressionList.addAll(getExpressions(continueStatement));
+        } else if (statement instanceof PsiDeclarationStatement) {
+            PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
+            PsiElement[] declaredElements = variableDeclarationStatement.getDeclaredElements();
+            for (PsiElement psiElement : declaredElements) {
+                if (psiElement instanceof PsiVariable) {
+                    expressionList.addAll(getExpressions(((PsiVariable) psiElement).getInitializer()));
+                }
+            }
         }
-
         return expressionList;
     }
 
@@ -417,6 +427,10 @@ public class ExpressionExtractor {
             expressionList.addAll(getExpressions(prefixExpression.getOperand()));
             if (instanceChecker.instanceOf(prefixExpression))
                 expressionList.add(prefixExpression);
+        } else if (expression instanceof PsiSuperExpression) {
+            PsiSuperExpression superInvocation = (PsiSuperExpression) expression;
+            if (instanceChecker.instanceOf(superInvocation))
+                expressionList.add(superInvocation);
         } else if (expression instanceof PsiArrayAccessExpression) {
             PsiArrayAccessExpression arrayAccess = (PsiArrayAccessExpression) expression;
             expressionList.addAll(getExpressions(arrayAccess.getArrayExpression()));
@@ -436,13 +450,20 @@ public class ExpressionExtractor {
                 expressionList.add(simpleName);
         } else if (expression instanceof PsiQualifiedExpression) {
             PsiQualifiedExpression qualifiedName = (PsiQualifiedExpression) expression;
-            //expressionList.addAll(getExpressions(qualifiedName));
             if (instanceChecker.instanceOf(qualifiedName))
                 expressionList.add(qualifiedName);
         } else if (expression instanceof PsiLiteralExpression) {
             PsiLiteralExpression typeLiteral = (PsiLiteralExpression) expression;
             if (instanceChecker.instanceOf(typeLiteral))
                 expressionList.add(typeLiteral);
+        } else if (expression instanceof PsiPolyadicExpression) {
+            PsiPolyadicExpression polyadicExpression = (PsiPolyadicExpression) expression;
+            PsiExpression[] psiExpressions = polyadicExpression.getOperands();
+            for (PsiExpression psiExpression : psiExpressions) {
+                expressionList.addAll(getExpressions(psiExpression));
+            }
+            if (instanceChecker.instanceOf(polyadicExpression))
+                expressionList.add(polyadicExpression);
         }
         return expressionList;
     }

@@ -4,6 +4,7 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.psi.*;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import core.ast.association.Association;
 import core.ast.decomposition.AbstractStatement;
@@ -151,7 +152,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                             && statementObject.getFieldInstructions().size() == 1
                             && statementObject.getMethodInvocations().size() == 0
                             && statementObject.getLocalVariableDeclarations().size() == 0
-                            // && statementObject.getLocalVariableInstructions().size() == 1 
+                            && statementObject.getLocalVariableInstructions().size() == 1
                             && this.constructorObject.parameterList.size() == 1) {
                         PsiAssignmentExpression assignment = (PsiAssignmentExpression) expressionStatement.getExpression();
                         if (assignment.getLExpression() instanceof PsiReferenceExpression
@@ -222,8 +223,8 @@ public class MethodObject implements AbstractMethodDeclaration {
                 if (methodInvocation != null) {
                     PsiReferenceExpression methodInvocationExpression = methodInvocation.getMethodExpression();
                     List<MethodInvocationObject> methodInvocations = statementObject.getMethodInvocations();
-                    if (methodInvocationExpression instanceof PsiMethodCallExpression) {
-                        PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
+                    if (methodInvocationExpression.resolve() instanceof PsiMethod) {
+                        PsiMethod previousChainedMethodInvocation = (PsiMethod) methodInvocationExpression.resolve();
                         List<PsiMethod> parentClassMethods = new ArrayList<>();
                         if (parentClass != null) {
                             parentClassMethods.addAll(Arrays.asList(parentClass.getMethods()));
@@ -282,9 +283,19 @@ public class MethodObject implements AbstractMethodDeclaration {
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
                 for (LocalVariableDeclarationObject variableDeclaration : getLocalVariableDeclarations()) {
-                    if (variableDeclaration.getVariableDeclaration().equals(
-                            localVariableInstruction.getSimpleName().resolve()))
+                    if (variableDeclaration.getVariableDeclaration().equals(localVariableInstruction.getSimpleName().resolve()))
                         return false;
+                }
+            }
+        }
+
+        for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
+            if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
+                ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
+                while (parameterIterator.hasNext()) {
+                    ParameterObject parameter = parameterIterator.next();
+                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimension() == 0)
+                        return true;
                 }
             }
         }
@@ -325,11 +336,24 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
-        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
+/*        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
         for (PsiMethodCallExpression methodInvocation : methodInvocations) {
             PsiMethod method = methodInvocation.resolveMethod();
             if (method != null && method.getContainingClass() != null && sourceClass.getName().equals(method.getContainingClass().getQualifiedName())) {
                 return false;
+            }
+        }*/
+        List<MethodInvocationObject> methodInvocations = getMethodInvocations();
+        for (MethodInvocationObject methodInvocation : methodInvocations) {
+            if (methodInvocation.getOriginClassName().equals(sourceClass.getName())) {
+                MethodObject invokedMethod = sourceClass.getMethod(methodInvocation);
+                if (invokedMethod == null) continue;
+                FieldInstructionObject fieldInstruction = invokedMethod.isGetter();
+                if (fieldInstruction != null && fieldInstruction.getType().getClassType().equals(targetClass.getName()))
+                    return true;
+                MethodInvocationObject delegation = invokedMethod.isDelegate();
+                if (delegation != null && delegation.getOriginClassName().equals(targetClass.getName()))
+                    return true;
             }
         }
         return false;
@@ -388,8 +412,9 @@ public class MethodObject implements AbstractMethodDeclaration {
                         PsiElement resolvedElement = ((PsiReferenceExpression) psiElement.getParent()).resolve();
                         if (resolvedElement instanceof PsiVariable && !(resolvedElement instanceof PsiLocalVariable)) {
                             PsiVariable psiVariable = (PsiVariable) resolvedElement;
+                            IElementType variableType = infixExpression.getOperationSign().getTokenType();
                             if (targetClass.getName().equals(psiVariable.getType().getCanonicalText())
-                                    && JavaTokenType.EQEQ.equals(infixExpression.getOperationSign().getTokenType())) {
+                                    && (JavaTokenType.EQEQ.equals(variableType) || JavaTokenType.NE.equals(variableType))) {
                                 return true;
                             }
                         }

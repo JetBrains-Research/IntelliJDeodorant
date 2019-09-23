@@ -24,6 +24,7 @@ public class DistanceMatrix {
     private final Map<String, Set<String>> classMap;
     private final MySystem system;
     private final String IDENTIFICATION_INDICATOR_TEXT_KEY = "feature.envy.identification.indicator";
+    private final int maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate = 2;
 
     public DistanceMatrix(MySystem system) {
         this.system = system;
@@ -140,7 +141,8 @@ public class DistanceMatrix {
                                             if (candidate.isApplicable()) {
                                                 int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                                                 int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                                if (sourceClassDependencies < targetClassDependencies) {
+                                                if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate 
+                                                        && sourceClassDependencies < targetClassDependencies) {
                                                     candidateRefactoringList.add(candidate);
                                                 }
                                             }
@@ -238,7 +240,8 @@ public class DistanceMatrix {
                                         if (candidate.isApplicable() && !targetClassInheritedByAnotherCandidateTargetClass(targetClass, accessMap.keySet())) {
                                             int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                                             int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                            if (sourceClassDependencies < targetClassDependencies) {
+                                            if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate
+                                                    && sourceClassDependencies < targetClassDependencies) {
                                                 candidateRefactoringList.add(candidate);
                                             }
                                             candidateFound = true;

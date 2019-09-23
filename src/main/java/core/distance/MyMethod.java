@@ -1,11 +1,7 @@
 package core.distance;
 
-import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.psi.*;
-import com.intellij.psi.util.PsiTreeUtil;
 import core.ast.MethodObject;
 import core.ast.decomposition.AbstractStatement;
-import utils.PsiUtils;
 
 import java.util.*;
 
@@ -200,43 +196,7 @@ public class MyMethod extends Entity {
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<>();
-        PsiMethod method = this.methodObject.getPsiMethod();
-        Collection<PsiReferenceExpression> usedFields = PsiTreeUtil.findChildrenOfType(method, PsiReferenceExpression.class);
-        Collection<PsiMethodCallExpression> usedMethods = PsiTreeUtil.findChildrenOfType(method, PsiMethodCallExpression.class);
-        for (PsiReferenceExpression field : usedFields) {
-            if (!(field.resolve() instanceof PsiField)) continue;
-            PsiField psiField = (PsiField) field.resolve();
-            if (psiField != null && psiField.hasModifier(JvmModifier.STATIC)) continue;
-            if (psiField != null && psiField.getContainingClass() != null && psiField.getContainingClass().equals(method.getContainingClass())) {
-                String sb = psiField.getContainingClass().getQualifiedName() + "::" +
-                        psiField.getType().getCanonicalText() + " " +
-                        psiField.getName();
-                set.add(sb);
-            }
-        }
-        for (PsiMethodCallExpression usedMethod : usedMethods) {
-            PsiMethod resolveMethod = usedMethod.resolveMethod();
-            StringBuilder sb = new StringBuilder();
-            if (resolveMethod == null || resolveMethod.getContainingClass() == null || resolveMethod.hasModifier(JvmModifier.STATIC))
-                continue;
-            if (PsiUtils.whoseGetter(resolveMethod).isPresent() || PsiUtils.whoseSetter(resolveMethod).isPresent())
-                continue;
-            sb.append(resolveMethod.getContainingClass().getQualifiedName()).append("::");
-            sb.append(resolveMethod.getName());
-            sb.append("(");
-            if (!resolveMethod.getParameterList().isEmpty()) {
-                List<PsiParameter> parameters = Arrays.asList(resolveMethod.getParameterList().getParameters());
-                for (int i = 0; i < parameters.size() - 1; i++)
-                    sb.append(parameters.get(i).getType().getCanonicalText()).append(", ");
-                sb.append(parameters.get(parameters.size() - 1).getType().getCanonicalText());
-            }
-            sb.append(")");
-            if (resolveMethod.getReturnType() != null)
-                sb.append(":").append(resolveMethod.getReturnType().getCanonicalText());
-            set.add(sb.toString());
-        }
-
+        Set<String> set = new HashSet<String>();
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
         while (attributeInstructionIterator.hasNext()) {
             MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();

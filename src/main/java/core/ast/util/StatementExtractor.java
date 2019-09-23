@@ -119,13 +119,14 @@ class StatementExtractor {
             PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
         } else if (statement instanceof PsiSwitchStatement) {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
+            if (switchStatement.getBody() != null) {
+                PsiStatement[] statements = switchStatement.getBody().getStatements();
+                for (PsiStatement psiStatement : statements)
+                    statementList.addAll(getStatements(psiStatement));
+            }
             if (instanceChecker.instanceOf(switchStatement))
                 statementList.add(switchStatement);
-        }
-/*		else if(statement instanceof PsiSwitchStatement) {
-			PsiSwitchStatement switchCase = (PsiSwitchStatement)statement;
-		}*/
-        else if (statement instanceof PsiAssertStatement) {
+        } else if (statement instanceof PsiAssertStatement) {
             PsiAssertStatement assertStatement = (PsiAssertStatement) statement;
         } else if (statement instanceof PsiLabeledStatement) {
             PsiLabeledStatement labeledStatement = (PsiLabeledStatement) statement;
@@ -141,7 +142,13 @@ class StatementExtractor {
             PsiThrowStatement throwStatement = (PsiThrowStatement) statement;
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
-            statementList.addAll(getStatements(tryStatement));
+            PsiCodeBlock tryBlock = tryStatement.getTryBlock();
+            if (tryBlock != null) {
+                PsiStatement[] tryStatements = tryBlock.getStatements();
+                for (PsiStatement psiTryStatement : tryStatements) {
+                    statementList.addAll(getStatements(psiTryStatement));
+                }
+            }
             PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
             for (PsiCodeBlock catchClause : catchClauses) {
                 Arrays.asList(catchClause.getStatements()).forEach(s -> statementList.addAll(getStatements(s)));
@@ -151,18 +158,7 @@ class StatementExtractor {
                 Arrays.asList(finallyBlock.getStatements()).forEach(s -> statementList.addAll(getStatements(s)));
             if (instanceChecker.instanceOf(tryStatement))
                 statementList.add(tryStatement);
-        }
-/*		else if(statement instanceof ConstructorInvocation) {
-			ConstructorInvocation constructorInvocation = (ConstructorInvocation)statement;
-			if(instanceChecker.instanceOf(constructorInvocation))
-				statementList.add(constructorInvocation);
-		}
-		else if(statement instanceof SuperConstructorInvocation) {
-			SuperConstructorInvocation superConstructorInvocation = (SuperConstructorInvocation)statement;
-			if(instanceChecker.instanceOf(superConstructorInvocation))
-				statementList.add(superConstructorInvocation);
-		}*/
-        else if (statement instanceof PsiBreakStatement) {
+        } else if (statement instanceof PsiBreakStatement) {
             PsiBreakStatement breakStatement = (PsiBreakStatement) statement;
             if (instanceChecker.instanceOf(breakStatement))
                 statementList.add(breakStatement);
@@ -247,14 +243,7 @@ class StatementExtractor {
             }
         } else if (statement instanceof PsiDeclarationStatement) {
             statementCounter += 1;
-        }
-/*		else if(statement instanceof ConstructorInvocation) {
-			statementCounter += 1;
-		}
-		else if(statement instanceof SuperConstructorInvocation) {
-			statementCounter += 1;
-		}*/
-        else if (statement instanceof PsiBreakStatement) {
+        } else if (statement instanceof PsiBreakStatement) {
             statementCounter += 1;
         } else if (statement instanceof PsiContinueStatement) {
             statementCounter += 1;

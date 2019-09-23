@@ -215,13 +215,14 @@ public class MethodBodyObject {
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
-        if (statement instanceof PsiCodeBlock) {
-            PsiCodeBlock block = (PsiCodeBlock) statement;
-            PsiStatement[] blockStatements = block.getStatements();
-            CompositeStatementObject child = new CompositeStatementObject(blockStatements[0], StatementType.BLOCK, parent);
-            parent.addStatement(child);
-            for (PsiStatement blockStatement : blockStatements) {
-                processStatement(child, blockStatement);
+        if (statement instanceof PsiBlockStatement) {
+            PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
+            PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
+            PsiStatement[] blockStatements = psiCodeBlock.getStatements();
+            for (PsiStatement psiStatement : blockStatements) {
+                CompositeStatementObject child = new CompositeStatementObject(psiStatement, StatementType.BLOCK, parent);
+                parent.addStatement(child);
+                processStatement(child, psiStatement);
             }
         } else if (statement instanceof PsiIfStatement) {
             PsiIfStatement ifStatement = (PsiIfStatement) statement;
@@ -238,6 +239,8 @@ public class MethodBodyObject {
             CompositeStatementObject child = new CompositeStatementObject(forStatement, StatementType.FOR, parent);
             parent.addStatement(child);
             processStatement(child, forStatement.getBody());
+            processStatement(child, forStatement.getInitialization());
+            processStatement(child, forStatement.getUpdate());
         } else if (statement instanceof PsiForeachStatement) {
             PsiForeachStatement enhancedForStatement = (PsiForeachStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(enhancedForStatement, StatementType.ENHANCED_FOR, parent);
@@ -369,6 +372,10 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiEmptyStatement) {
             PsiEmptyStatement emptyStatement = (PsiEmptyStatement) statement;
             StatementObject child = new StatementObject(emptyStatement, StatementType.EMPTY, parent);
+            parent.addStatement(child);
+        } else if (statement instanceof PsiSwitchLabelStatement) {
+            PsiSwitchLabelStatement switchStatement = (PsiSwitchLabelStatement) statement;
+            StatementObject child = new StatementObject(switchStatement, StatementType.SWITCH_CASE, parent);
             parent.addStatement(child);
         }
     }

@@ -63,6 +63,6 @@ public class AbstractExpression extends AbstractMethodFragment {
     }
 
     public String toString() {
-        return getExpression().toString();
+        return getExpression().getType().getCanonicalText();
     }
 }
