@@ -243,7 +243,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                         }
                         if (!isDelegationChain && foundInParentClass) {
                             for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                                if (methodInvocationExpression.equals(methodInvocation.getMethodExpression())) {
                                     return methodInvocationObject;
                                 }
                             }
@@ -257,7 +257,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                                 if (psiField != null && psiField.getContainingClass() != null && psiField.getContainingClass().equals(parentClass)
                                         || psiField != null && parentClass != null && psiField.getContainingClass() != null && parentClass.isInheritor(psiField.getContainingClass(), true)) {
                                     for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                        if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                                        if (methodInvocationExpression.equals(methodInvocation.getMethodExpression())) {
                                             return methodInvocationObject;
                                         }
                                     }
@@ -289,6 +289,17 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
+        List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
+        if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
+            StatementObject statementObject = (StatementObject) abstractStatements.get(0);
+            PsiStatement statement = statementObject.getStatement();
+            if (statement instanceof PsiReturnStatement) {
+                PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
+                if (returnStatement.getReturnValue() instanceof PsiMethodCallExpression)
+                    return false;
+            }
+        }
+
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
                 ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
@@ -311,7 +322,9 @@ public class MethodObject implements AbstractMethodDeclaration {
 
         PsiParameter[] parameters = getPsiMethod().getParameterList().getParameters();
         for (PsiParameter psiParameter : parameters) {
-            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiType())) return true;
+            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiType())) {
+                return true;
+            }
         }
 
         Collection<PsiField> elements = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiField.class);
@@ -336,13 +349,6 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
-/*        Collection<PsiMethodCallExpression> methodInvocations = PsiTreeUtil.findChildrenOfType(getPsiMethod(), PsiMethodCallExpression.class);
-        for (PsiMethodCallExpression methodInvocation : methodInvocations) {
-            PsiMethod method = methodInvocation.resolveMethod();
-            if (method != null && method.getContainingClass() != null && sourceClass.getName().equals(method.getContainingClass().getQualifiedName())) {
-                return false;
-            }
-        }*/
         List<MethodInvocationObject> methodInvocations = getMethodInvocations();
         for (MethodInvocationObject methodInvocation : methodInvocations) {
             if (methodInvocation.getOriginClassName().equals(sourceClass.getName())) {

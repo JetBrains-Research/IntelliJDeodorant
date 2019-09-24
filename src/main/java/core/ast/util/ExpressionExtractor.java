@@ -286,7 +286,6 @@ public class ExpressionExtractor {
                 expressionList.addAll(getExpressions(message));
         } else if (statement instanceof PsiLabeledStatement) {
             PsiLabeledStatement labeledStatement = (PsiLabeledStatement) statement;
-            expressionList.addAll(getExpressions(labeledStatement));
             expressionList.addAll(getExpressions(labeledStatement.getStatement()));
         } else if (statement instanceof PsiReturnStatement) {
             PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
