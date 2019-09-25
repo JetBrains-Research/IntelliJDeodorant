@@ -59,6 +59,7 @@ class MoveMethodPanel extends JPanel {
     private final JLabel info = new JLabel();
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
+    private JScrollPane scrollPane = new JScrollPane();
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -72,7 +73,7 @@ class MoveMethodPanel extends JPanel {
         add(createButtonsPanel(), BorderLayout.SOUTH);
     }
 
-    private JComponent createTablePanel() {
+    private JScrollPane createTablePanel() {
         new TableSpeedSearch(table);
         table.setModel(model);
         model.setupRenderer(table);
@@ -80,7 +81,9 @@ class MoveMethodPanel extends JPanel {
         table.getSelectionModel().setSelectionMode(SINGLE_SELECTION);
         table.setAutoCreateRowSorter(true);
         setupTableLayout();
-        return ScrollPaneFactory.createScrollPane(table);
+        scrollPane = ScrollPaneFactory.createScrollPane(table);
+        scrollPane.setVisible(false);
+        return scrollPane;
     }
 
     private void setupTableLayout() {
@@ -112,11 +115,7 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
-        refreshButton.addActionListener(l -> {
-            refactorings.clear();
-            model.clearTable();
-            calculateRefactorings();
-        });
+        refreshButton.addActionListener(l -> refreshPanel());
         buttonsPanel.add(refreshButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
@@ -138,6 +137,14 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(true);
     }
 
+    private void refreshPanel() {
+        refactorings.clear();
+        model.clearTable();
+        infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
+        scrollPane.setVisible(false);
+        calculateRefactorings();
+    }
+
     private void calculateRefactorings() {
         Project project = DataManager.getInstance().getDataContext().getData(PlatformDataKeys.PROJECT);
         ProjectInfo projectInfo = new ProjectInfo(project);
@@ -154,6 +161,7 @@ class MoveMethodPanel extends JPanel {
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);
+                    scrollPane.setVisible(true);
                     infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
                 });
             }
