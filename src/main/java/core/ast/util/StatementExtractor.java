@@ -6,7 +6,11 @@ import java.util.List;
 
 import com.intellij.psi.*;
 
-class StatementExtractor {
+public class StatementExtractor {
+    
+    public StatementExtractor() {
+        
+    }
 
     private StatementInstanceChecker instanceChecker;
 
@@ -174,7 +178,7 @@ class StatementExtractor {
         return statementList;
     }
 
-    private int getTotalNumberOfStatements(PsiStatement statement) {
+    public int getTotalNumberOfStatements(PsiStatement statement) {
         int statementCounter = 0;
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;
