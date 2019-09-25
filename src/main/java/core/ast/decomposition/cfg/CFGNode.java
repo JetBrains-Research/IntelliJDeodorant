@@ -23,9 +23,7 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
     }
 
     public boolean isLeader() {
-        if (isFirst() || isJoin() || immediatelyFollowsBranchNode())
-            return true;
-        return false;
+        return isFirst() || isJoin() || immediatelyFollowsBranchNode();
     }
 
     public boolean immediatelyFollowsBranchNode() {
@@ -44,21 +42,15 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
             if (!flow.isLoopbackFlow())
                 numberOfNonLoopbackFlows++;
         }
-        if (numberOfNonLoopbackFlows == 0)
-            return true;
-        return false;
+        return numberOfNonLoopbackFlows == 0;
     }
 
     public boolean isBranch() {
-        if (outgoingEdges.size() > 1 || this instanceof CFGBranchNode)
-            return true;
-        return false;
+        return outgoingEdges.size() > 1 || this instanceof CFGBranchNode;
     }
 
     public boolean isJoin() {
-        if (incomingEdges.size() > 1)
-            return true;
-        return false;
+        return incomingEdges.size() > 1;
     }
 
     public void setBasicBlock(BasicBlock basicBlock) {
@@ -69,6 +61,7 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
         return basicBlock;
     }
 
+    // TODO: uncomment it when PDG construction will be ready
 /*    public PDGNode getPDGNode() {
         return pdgNode;
     }
@@ -102,11 +95,6 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
     }
 
     public int compareTo(CFGNode node) {
-        if (this.getId() > node.getId())
-            return 1;
-        else if (this.getId() < node.getId())
-            return -1;
-        else
-            return 0;
+        return Integer.compare(this.getId(), node.getId());
     }
 }

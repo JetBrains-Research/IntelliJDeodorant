@@ -101,7 +101,7 @@ public abstract class AbstractMethodFragment {
         this.variablesAssignedWithClassInstanceCreations = new LinkedHashMap<>();
     }
 
-    AbstractMethodFragment getParent() {
+    public AbstractMethodFragment getParent() {
         return this.parent;
     }
 

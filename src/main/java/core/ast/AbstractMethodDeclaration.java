@@ -12,7 +12,7 @@ import core.ast.decomposition.MethodBodyObject;
 import core.ast.decomposition.cfg.AbstractVariable;
 import core.ast.decomposition.cfg.PlainVariable;
 
-interface AbstractMethodDeclaration {
+public interface AbstractMethodDeclaration {
 
     String getName();
 
