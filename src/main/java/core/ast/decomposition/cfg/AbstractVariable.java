@@ -1,10 +1,12 @@
 package core.ast.decomposition.cfg;
 
 import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiVariable;
 
 public abstract class AbstractVariable {
-    final String qualifiedName;
+    final PsiVariable origin;
     final String name;
     final String type;
     final boolean isField;
@@ -12,7 +14,7 @@ public abstract class AbstractVariable {
     final boolean isStatic;
 
     AbstractVariable(PsiVariable psiVariable) {
-        this.qualifiedName = psiVariable.getText();
+        this.origin = psiVariable;
         this.name = psiVariable.getName();
         this.type = psiVariable.getType().getCanonicalText();
         this.isField = (psiVariable instanceof PsiField);
@@ -20,8 +22,8 @@ public abstract class AbstractVariable {
         this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
     }
 
-    AbstractVariable(String qualifiedName, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
-        this.qualifiedName = qualifiedName;
+    AbstractVariable(PsiVariable origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
+        this.origin = origin;
         this.name = name;
         this.type = type;
         this.isField = isField;
@@ -29,8 +31,8 @@ public abstract class AbstractVariable {
         this.isStatic = isStatic;
     }
 
-    public String getQualifiedName() {
-        return qualifiedName;
+    public PsiVariable getOrigin() {
+        return origin;
     }
 
     public String getName() {

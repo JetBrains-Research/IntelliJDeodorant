@@ -12,13 +12,13 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     public CompositeVariable(AbstractVariable argument, AbstractVariable rightPart) {
-        this(argument.getQualifiedName(), argument.getName(),
+        this(argument.origin, argument.getName(),
                 argument.getType(), argument.isField(), argument.isParameter(), argument.isStatic(), rightPart);
     }
 
-    private CompositeVariable(String variableQualifiedName, String variableName, String variableType,
+    private CompositeVariable(PsiVariable origin, String variableName, String variableType,
                               boolean isField, boolean isParameter, boolean isStatic, AbstractVariable rightPart) {
-        super(variableQualifiedName, variableName, variableType, isField, isParameter, isStatic);
+        super(origin, variableName, variableType, isField, isParameter, isStatic);
         this.rightPart = rightPart;
     }
 
@@ -30,10 +30,10 @@ public class CompositeVariable extends AbstractVariable {
     //if composite variable is "one.two.three" then left part is "one.two"
     public AbstractVariable getLeftPart() {
         if (rightPart instanceof PlainVariable) {
-            return new PlainVariable(qualifiedName, name, type, isField, isParameter, isStatic);
+            return new PlainVariable(origin, name, type, isField, isParameter, isStatic);
         } else {
             CompositeVariable compositeVariable = (CompositeVariable) rightPart;
-            return new CompositeVariable(qualifiedName, name, type, isField, isParameter, isStatic, compositeVariable.getLeftPart());
+            return new CompositeVariable(origin, name, type, isField, isParameter, isStatic, compositeVariable.getLeftPart());
         }
     }
 
@@ -48,11 +48,11 @@ public class CompositeVariable extends AbstractVariable {
 
     //if composite variable is "one.two.three" then initial variable is "one"
     public PlainVariable getInitialVariable() {
-        return new PlainVariable(qualifiedName, name, type, isField, isParameter, isStatic);
+        return new PlainVariable(origin, name, type, isField, isParameter, isStatic);
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        if (this.qualifiedName.equals(variable.qualifiedName))
+        if (this.origin.equals(variable.origin))
             return true;
         return rightPart.containsPlainVariable(variable);
     }
@@ -90,7 +90,7 @@ public class CompositeVariable extends AbstractVariable {
         }
         if (o instanceof CompositeVariable) {
             CompositeVariable composite = (CompositeVariable) o;
-            return this.qualifiedName.equals(composite.qualifiedName)
+            return this.origin.equals(composite.origin)
                     && this.rightPart.equals(composite.rightPart);
         }
         return false;
@@ -99,7 +99,7 @@ public class CompositeVariable extends AbstractVariable {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + qualifiedName.hashCode();
+            result = 31 * result + origin.hashCode();
             result = 31 * result + rightPart.hashCode();
             hashCode = result;
         }

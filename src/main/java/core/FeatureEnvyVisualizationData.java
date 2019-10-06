@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
+import com.intellij.psi.*;
 import core.ast.*;
 import core.ast.decomposition.cfg.CompositeVariable;
 import core.ast.decomposition.cfg.PlainVariable;
@@ -245,8 +243,10 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
     private LocalVariableInstructionObject findLocalVariableInstruction(PlainVariable variable, List<LocalVariableInstructionObject> localVariableInstructions) {
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getSimpleName().getText().equals(variable.getQualifiedName()))
+            PsiElement resolvedElement = localVariableInstruction.getSimpleName().resolve();
+            if (variable.getOrigin().equals(resolvedElement)) {
                 return localVariableInstruction;
+            }
         }
         return null;
     }
