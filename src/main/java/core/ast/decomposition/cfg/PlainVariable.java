@@ -9,12 +9,12 @@ public class PlainVariable extends AbstractVariable {
         super(variableName);
     }
 
-    public PlainVariable(String variableQualifiedName, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
-        super(variableQualifiedName, variableName, variableType, isField, isParameter, isStatic);
+    public PlainVariable(PsiVariable origin, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
+        super(origin, variableName, variableType, isField, isParameter, isStatic);
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        return this.qualifiedName.equals(variable.qualifiedName);
+        return this.origin.equals(variable.origin);
     }
 
     public boolean startsWithVariable(AbstractVariable variable) {
@@ -34,7 +34,7 @@ public class PlainVariable extends AbstractVariable {
         }
         if (o instanceof PlainVariable) {
             PlainVariable plain = (PlainVariable) o;
-            return this.qualifiedName.equals(plain.qualifiedName);
+            return this.origin.equals(plain.origin);
         }
         return false;
     }
@@ -42,7 +42,7 @@ public class PlainVariable extends AbstractVariable {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + qualifiedName.hashCode();
+            result = 31 * result + origin.hashCode();
             hashCode = result;
         }
         return hashCode;

@@ -109,7 +109,8 @@ public abstract class AbstractMethodFragment {
                           List<PsiExpression> postfixExpressions, List<PsiExpression> prefixExpressions) {
         for (PsiExpression variableInstruction : variableInstructions) {
             if (variableInstruction instanceof PsiReferenceExpression) {
-                PsiElement resolvedElement = ((PsiReferenceExpression) variableInstruction).resolve();
+                PsiReferenceExpression psiReference = (PsiReferenceExpression) variableInstruction;
+                PsiElement resolvedElement = psiReference.resolve();
                 if (resolvedElement instanceof PsiField) {
                     PsiField psiField = (PsiField) resolvedElement;
                     if (psiField.getContainingClass() != null) {
@@ -170,6 +171,7 @@ public abstract class AbstractMethodFragment {
                         addDeclaredLocalVariable(variable);
                     } else {
                         LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
+                        localVariable.setSimpleName(psiReference);
                         addLocalVariableInstruction(localVariable);
                         Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(variableName, assignments);
                         Set<PsiPostfixExpression> localVariablePostfixAssignments =
