@@ -56,12 +56,18 @@ public class MoveMethodTableModel extends AbstractTableModel {
     }
 
     void selectAll() {
-        virtualRows.forEach(i -> isSelected[i] = true);
+        for (int i = 0; i < virtualRows.size(); i++) {
+            setValueAtRowIndex(true, i, false);
+        }
+
         fireTableDataChanged();
     }
 
     void deselectAll() {
-        Arrays.fill(isSelected, false);
+        for (int i = 0; i < virtualRows.size(); i++) {
+            setValueAtRowIndex(false, i, false);
+        }
+
         fireTableDataChanged();
     }
 
@@ -126,8 +132,40 @@ public class MoveMethodTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int virtualRow, int columnIndex) {
-        isSelected[virtualRows.get(virtualRow)] = (Boolean) value;
+        final int rowIndex = virtualRows.get(virtualRow);
+        final boolean select = (Boolean) value;
+        setValueAtRowIndex(select, rowIndex, true);
+
         fireTableCellUpdated(virtualRow, columnIndex);
+        fireTableDataChanged();
+    }
+
+    private void setValueAtRowIndex(boolean select, int rowIndex, boolean forceSelectInConflicts) {
+        if (!isActive[rowIndex]) {
+            return;
+        }
+
+        for (int i = 0; i < refactorings.size(); i++) {
+            if (i == rowIndex) {
+                continue;
+            }
+
+            if (refactorings.get(rowIndex).methodEquals(refactorings.get(i))) {
+                if (select) {
+                    if (!forceSelectInConflicts) {
+                        return;
+                    }
+
+                    isSelected[i] = false;
+                    isActive[i] = false;
+                } else {
+                    isSelected[i] = false;
+                    isActive[i] = true;
+                }
+            }
+        }
+
+        isSelected[rowIndex] = select;
     }
 
     boolean isAnySelected() {
