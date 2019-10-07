@@ -25,6 +25,7 @@ import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -60,6 +61,7 @@ class MoveMethodPanel extends JPanel {
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JScrollPane();
+    private TableModelListener tableRefreshListener;
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -101,6 +103,8 @@ class MoveMethodPanel extends JPanel {
         infoLabel.setPreferredSize(new Dimension(80, 30));
         buttonsPanel.add(infoLabel);
 
+        disableButtonsButRefresh();
+
         selectAllButton.setText(IntelliJDeodorantBundle.message(SELECT_ALL_BUTTON_TEXT_KEY));
         selectAllButton.addActionListener(e -> model.selectAll());
         buttonsPanel.add(selectAllButton);
@@ -111,38 +115,58 @@ class MoveMethodPanel extends JPanel {
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
         doRefactorButton.addActionListener(e -> refactorSelected());
-        model.addTableModelListener(l -> doRefactorButton.setEnabled(model.isAnySelected()));
         buttonsPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
+        refreshButton.setEnabled(true);
         buttonsPanel.add(refreshButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
+
+        tableRefreshListener = l -> enableButtonsOnConditions();
+        model.addTableModelListener(tableRefreshListener);
 
         panel.add(info, BorderLayout.WEST);
         return panel;
     }
 
-    private void refactorSelected() {
+    private void enableButtonsOnConditions() {
+        doRefactorButton.setEnabled(model.isAnySelected());
+        selectAllButton.setEnabled(model.getRowCount() != 0);
+        deselectAllButton.setEnabled(model.isAnySelected());
+    }
+
+    private void disableButtonsButRefresh() {
         doRefactorButton.setEnabled(false);
         selectAllButton.setEnabled(false);
+        deselectAllButton.setEnabled(false);
+    }
+
+    private void refactorSelected() {
+        disableButtonsButRefresh();
         table.setEnabled(false);
 
         final Set<MoveMethodRefactoring> selectedRefactorings = new HashSet<>(model.pullSelected());
 
         Set<MoveMethodRefactoring> appliedRefactorings = RefactoringsApplier.moveRefactoring(new ArrayList<>(selectedRefactorings), scope);
         model.setAppliedRefactorings(new HashSet<>(appliedRefactorings));
-
         table.setEnabled(true);
-        selectAllButton.setEnabled(true);
+
+        enableButtonsOnConditions();
     }
 
     private void refreshPanel() {
+        model.removeTableModelListener(tableRefreshListener);
+        disableButtonsButRefresh();
+
         refactorings.clear();
         model.clearTable();
         infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
         scrollPane.setVisible(false);
         calculateRefactorings();
+
+        enableButtonsOnConditions();
+        model.addTableModelListener(tableRefreshListener);
     }
 
     private void calculateRefactorings() {
