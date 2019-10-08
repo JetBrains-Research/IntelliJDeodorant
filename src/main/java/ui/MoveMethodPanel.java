@@ -134,16 +134,23 @@ class MoveMethodPanel extends JPanel {
         doRefactorButton.setEnabled(model.isAnySelected());
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
+        refreshButton.setEnabled(true);
     }
 
     private void disableButtonsButRefresh() {
         doRefactorButton.setEnabled(false);
         selectAllButton.setEnabled(false);
         deselectAllButton.setEnabled(false);
+        refreshButton.setEnabled(false);
+    }
+
+    private void disableAllButtons() {
+        disableButtonsButRefresh();
+        refreshButton.setEnabled(false);
     }
 
     private void refactorSelected() {
-        disableButtonsButRefresh();
+        disableAllButtons();
         table.setEnabled(false);
 
         final Set<MoveMethodRefactoring> selectedRefactorings = new HashSet<>(model.pullSelected());
@@ -156,17 +163,13 @@ class MoveMethodPanel extends JPanel {
     }
 
     private void refreshPanel() {
-        model.removeTableModelListener(tableRefreshListener);
-        disableButtonsButRefresh();
+        disableAllButtons();
 
         refactorings.clear();
         model.clearTable();
         infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
         scrollPane.setVisible(false);
         calculateRefactorings();
-
-        enableButtonsOnConditions();
-        model.addTableModelListener(tableRefreshListener);
     }
 
     private void calculateRefactorings() {
@@ -187,6 +190,8 @@ class MoveMethodPanel extends JPanel {
                     model.updateTable(refactorings);
                     scrollPane.setVisible(true);
                     infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
+
+                    enableButtonsOnConditions();
                 });
             }
         };
