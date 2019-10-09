@@ -25,7 +25,6 @@ import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
 import javax.swing.*;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -61,7 +60,6 @@ class MoveMethodPanel extends JPanel {
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JScrollPane();
-    private TableModelListener tableRefreshListener;
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -103,7 +101,9 @@ class MoveMethodPanel extends JPanel {
         infoLabel.setPreferredSize(new Dimension(80, 30));
         buttonsPanel.add(infoLabel);
 
-        disableButtonsButRefresh();
+        doRefactorButton.setEnabled(false);
+        selectAllButton.setEnabled(false);
+        deselectAllButton.setEnabled(false);
 
         selectAllButton.setText(IntelliJDeodorantBundle.message(SELECT_ALL_BUTTON_TEXT_KEY));
         selectAllButton.addActionListener(e -> model.selectAll());
@@ -119,12 +119,10 @@ class MoveMethodPanel extends JPanel {
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
-        refreshButton.setEnabled(true);
         buttonsPanel.add(refreshButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
-        tableRefreshListener = l -> enableButtonsOnConditions();
-        model.addTableModelListener(tableRefreshListener);
+        model.addTableModelListener(l -> enableButtonsOnConditions());
 
         panel.add(info, BorderLayout.WEST);
         return panel;
@@ -136,16 +134,10 @@ class MoveMethodPanel extends JPanel {
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
     }
-
-    private void disableButtonsButRefresh() {
+    private void disableAllButtons() {
         doRefactorButton.setEnabled(false);
         selectAllButton.setEnabled(false);
         deselectAllButton.setEnabled(false);
-        refreshButton.setEnabled(false);
-    }
-
-    private void disableAllButtons() {
-        disableButtonsButRefresh();
         refreshButton.setEnabled(false);
     }
 
@@ -164,7 +156,6 @@ class MoveMethodPanel extends JPanel {
 
     private void refreshPanel() {
         disableAllButtons();
-
         refactorings.clear();
         model.clearTable();
         infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
