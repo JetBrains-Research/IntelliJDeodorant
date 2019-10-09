@@ -52,6 +52,8 @@ public class MoveMethodTableModel extends AbstractTableModel {
     void clearTable() {
         this.refactorings.clear();
         this.virtualRows.clear();
+        isSelected = new boolean[0];
+        isActive = new boolean[0];
         fireTableDataChanged();
     }
 
