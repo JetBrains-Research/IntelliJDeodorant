@@ -133,27 +133,40 @@ public class MoveMethodTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int virtualRow, int columnIndex) {
         final int rowIndex = virtualRows.get(virtualRow);
-        final boolean select = (Boolean) value;
-        setValueAtRowIndex(select, rowIndex, true);
+        final boolean isRowSelected = (Boolean) value;
+        setValueAtRowIndex(isRowSelected, rowIndex, true);
 
-        fireTableCellUpdated(virtualRow, columnIndex);
         fireTableDataChanged();
     }
 
-    private void setValueAtRowIndex(boolean select, int rowIndex, boolean forceSelectInConflicts) {
+    private void setValueAtRowIndex(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
         if (!isActive[rowIndex]) {
             return;
         }
 
-        for (int i = 0; i < refactorings.size(); i++) {
+        boolean hasConflicts = updateConflictingRows(isRowSelected, rowIndex, forceSelectInConflicts);
+
+        if (isRowSelected && hasConflicts && !forceSelectInConflicts) {
+            return;
+        }
+
+        isSelected[rowIndex] = isRowSelected;
+    }
+
+    private boolean updateConflictingRows(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
+        boolean hasConflicts = false;
+
+        for(int i = 0; i < refactorings.size(); i++)  {
             if (i == rowIndex) {
                 continue;
             }
 
             if (refactorings.get(rowIndex).methodEquals(refactorings.get(i))) {
-                if (select) {
+                hasConflicts = true;
+
+                if (isRowSelected) {
                     if (!forceSelectInConflicts) {
-                        return;
+                        return true;
                     }
 
                     isSelected[i] = false;
@@ -165,7 +178,7 @@ public class MoveMethodTableModel extends AbstractTableModel {
             }
         }
 
-        isSelected[rowIndex] = select;
+        return hasConflicts;
     }
 
     boolean isAnySelected() {
