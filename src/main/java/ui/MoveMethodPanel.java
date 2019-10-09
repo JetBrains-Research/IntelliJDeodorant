@@ -101,20 +101,19 @@ class MoveMethodPanel extends JPanel {
         infoLabel.setPreferredSize(new Dimension(80, 30));
         buttonsPanel.add(infoLabel);
 
-        doRefactorButton.setEnabled(false);
-        selectAllButton.setEnabled(false);
-        deselectAllButton.setEnabled(false);
-
         selectAllButton.setText(IntelliJDeodorantBundle.message(SELECT_ALL_BUTTON_TEXT_KEY));
         selectAllButton.addActionListener(e -> model.selectAll());
+        selectAllButton.setEnabled(false);
         buttonsPanel.add(selectAllButton);
 
         deselectAllButton.setText(IntelliJDeodorantBundle.message(DESELECT_ALL_BUTTON_TEXT_KEY));
         deselectAllButton.addActionListener(e -> model.deselectAll());
+        deselectAllButton.setEnabled(false);
         buttonsPanel.add(deselectAllButton);
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
         doRefactorButton.addActionListener(e -> refactorSelected());
+        doRefactorButton.setEnabled(false);
         buttonsPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
@@ -134,6 +133,7 @@ class MoveMethodPanel extends JPanel {
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
     }
+
     private void disableAllButtons() {
         doRefactorButton.setEnabled(false);
         selectAllButton.setEnabled(false);
