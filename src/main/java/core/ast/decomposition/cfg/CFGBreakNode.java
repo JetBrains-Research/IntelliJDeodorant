@@ -12,7 +12,7 @@ public class CFGBreakNode extends CFGNode {
         PsiBreakStatement breakStatement = (PsiBreakStatement) statement.getStatement();
         if (breakStatement.getLabelExpression() != null
                 && breakStatement.getLabelExpression().getQualifierExpression() != null)
-            label = breakStatement.getLabelExpression().getQualifierExpression().getText();
+            label = breakStatement.getLabelExpression().getQualifiedName();
     }
 
     public String getLabel() {

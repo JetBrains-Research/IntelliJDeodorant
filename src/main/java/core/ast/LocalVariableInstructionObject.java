@@ -51,11 +51,12 @@ public class LocalVariableInstructionObject {
     }
 
     public boolean equals(LocalVariableDeclarationObject lvdo) {
-        return this.name.equals(lvdo.getName()) && this.type.equals(lvdo.getType()) && this.variableBindingKey.equals(lvdo.getVariableBindingKey());
+        return this.name.equals(lvdo.getName()) && this.type.equals(lvdo.getType());
     }
 
     public boolean equals(ParameterObject parameter) {
-        return this.name.equals(parameter.getName()) && this.type.equals(parameter.getType()) && this.variableBindingKey.equals(parameter.getVariableBindingKey());
+        return this.name.equals(parameter.getName())
+                && this.type.equals(parameter.getType());
     }
 
     public int hashCode() {

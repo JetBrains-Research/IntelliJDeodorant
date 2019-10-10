@@ -2,6 +2,7 @@ package core.ast;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiNewExpression;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -20,8 +21,8 @@ public class ClassInstanceCreationObject extends CreationObject {
         this.thrownExceptions = new LinkedHashSet<>();
     }
 
-    public PsiExpression getClassInstanceCreation() {
-        return (PsiExpression) this.creation.recoverASTNode();
+    public PsiNewExpression getClassInstanceCreation() {
+        return (PsiNewExpression) this.creation.recoverASTNode();
     }
 
     public void setClassInstanceCreation(PsiExpression creation) {

@@ -1,5 +1,6 @@
 package core.ast.decomposition.cfg;
 
+import com.intellij.psi.PsiBlockStatement;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiLabeledStatement;
 import com.intellij.psi.PsiSynchronizedStatement;
@@ -38,8 +39,7 @@ public abstract class CFGBranchNode extends CFGNode {
 
     protected List<BasicBlock> getNestedBasicBlocksToEnd() {
         List<BasicBlock> blocksBetween = new ArrayList<BasicBlock>();
-        BasicBlock srcBlock = getBasicBlock();
-        BasicBlock nextBlock = srcBlock;
+        BasicBlock nextBlock = getBasicBlock();
         while (nextBlock.getNextBasicBlock() != null) {
             nextBlock = nextBlock.getNextBasicBlock();
             blocksBetween.add(nextBlock);
@@ -62,7 +62,8 @@ public abstract class CFGBranchNode extends CFGNode {
                 if (statement.getStatement() instanceof PsiCodeBlock) {
                     CompositeStatementObject blockStatement = (CompositeStatementObject) statement;
                     processBlockStatement(nestedStatements, blockStatement);
-                } else if (statement.getStatement() instanceof PsiLabeledStatement || statement.getStatement() instanceof PsiSynchronizedStatement) {
+                } else if (statement.getStatement() instanceof PsiLabeledStatement
+                        || statement.getStatement() instanceof PsiSynchronizedStatement) {
                     CompositeStatementObject labeledStatement = (CompositeStatementObject) statement;
                     processLabeledStatement(nestedStatements, labeledStatement);
                 } else if (statement instanceof TryStatementObject) {
@@ -93,7 +94,7 @@ public abstract class CFGBranchNode extends CFGNode {
             if (statementInsideBlock instanceof TryStatementObject) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) statementInsideBlock;
                 processTryStatement(nestedStatements, tryStatement);
-            } else if (statementInsideBlock.getStatement() instanceof PsiLabeledStatement 
+            } else if (statementInsideBlock.getStatement() instanceof PsiLabeledStatement
                     || statementInsideBlock.getStatement() instanceof PsiSynchronizedStatement) {
                 CompositeStatementObject labeledStatement = (CompositeStatementObject) statementInsideBlock;
                 processLabeledStatement(nestedStatements, labeledStatement);
@@ -109,7 +110,7 @@ public abstract class CFGBranchNode extends CFGNode {
         List<AbstractStatement> nestedStatements2 = labeledStatement.getStatements();
         if (!nestedStatements2.isEmpty()) {
             AbstractStatement firstStatement = nestedStatements2.get(0);
-            if (firstStatement.getStatement() instanceof PsiCodeBlock) {
+            if (firstStatement.getStatement() instanceof PsiBlockStatement) {
                 CompositeStatementObject blockStatement = (CompositeStatementObject) firstStatement;
                 for (AbstractStatement statementInsideBlock : blockStatement.getStatements()) {
                     if (statementInsideBlock instanceof TryStatementObject) {
@@ -126,7 +127,7 @@ public abstract class CFGBranchNode extends CFGNode {
         }
     }
 
-    protected void processTryStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject tryStatement) {
+    void processTryStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject tryStatement) {
         CompositeStatementObject tryBlock = (CompositeStatementObject) tryStatement.getStatements().get(0);
         for (AbstractStatement statementInsideBlock : tryBlock.getStatements()) {
             if (statementInsideBlock instanceof TryStatementObject) {

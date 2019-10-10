@@ -6,7 +6,7 @@ import core.ast.decomposition.AbstractStatement;
 public class CFGNode extends GraphNode implements Comparable<CFGNode> {
     private AbstractStatement statement;
     private BasicBlock basicBlock;
-    // private PDGNode pdgNode;
+    private PDGNode pdgNode;
     private volatile int hashCode = 0;
 
     public CFGNode(AbstractStatement statement) {
@@ -61,14 +61,13 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
         return basicBlock;
     }
 
-    // TODO: uncomment it when PDG construction will be ready
-/*    public PDGNode getPDGNode() {
+    public PDGNode getPDGNode() {
         return pdgNode;
     }
 
     public void setPDGNode(PDGNode pdgNode) {
         this.pdgNode = pdgNode;
-    }*/
+    }
 
     public boolean equals(Object o) {
         if (this == o)

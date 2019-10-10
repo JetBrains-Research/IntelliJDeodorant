@@ -20,6 +20,7 @@ public class ClassObject extends ClassDeclarationObject {
     private Access access;
     private ASTInformation typeDeclaration;
     private final String psiType;
+    private final PsiFile psiFile;
 
     public ClassObject(PsiClass psiClass) {
         this.psiType = psiClass.getQualifiedName();
@@ -33,6 +34,7 @@ public class ClassObject extends ClassDeclarationObject {
         this._enum = psiClass.isEnum();
         this.access = Access.NONE;
         this.typeDeclaration = ASTInformationGenerator.generateASTInformation(psiClass);
+        this.psiFile = psiClass.getContainingFile();
     }
 
     public void setAbstractTypeDeclaration(PsiDeclarationStatement typeDeclaration) {
@@ -53,6 +55,11 @@ public class ClassObject extends ClassDeclarationObject {
 
     public String getPsiType() {
         return psiType;
+    }
+
+
+    public PsiFile getPsiFile() {
+        return psiFile;
     }
 
     private boolean isFriend(String className) {

@@ -204,6 +204,12 @@ public class PsiUtils {
         return javaFiles;
     }
 
+    public static boolean isPrimitive(PsiType psiType) {
+        List<String> primitiveTypes = Arrays.asList("boolean", "byte", "char", "short", "int", "long",
+                "float", "double", "void");
+        return primitiveTypes.contains(psiType.getPresentableText());
+    }
+
     public static List<PsiClass> extractClasses(PsiJavaFile psiFile) {
         return Arrays.asList(psiFile.getClasses());
     }
