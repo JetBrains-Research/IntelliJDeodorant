@@ -109,7 +109,8 @@ public abstract class AbstractMethodFragment {
                           List<PsiExpression> postfixExpressions, List<PsiExpression> prefixExpressions) {
         for (PsiExpression variableInstruction : variableInstructions) {
             if (variableInstruction instanceof PsiReferenceExpression) {
-                PsiElement resolvedElement = ((PsiReferenceExpression) variableInstruction).resolve();
+                PsiReferenceExpression psiReference = (PsiReferenceExpression) variableInstruction;
+                PsiElement resolvedElement = psiReference.resolve();
                 if (resolvedElement instanceof PsiField) {
                     PsiField psiField = (PsiField) resolvedElement;
                     if (psiField.getContainingClass() != null) {
@@ -130,9 +131,9 @@ public abstract class AbstractMethodFragment {
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
-                                Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField.getName(), assignments);
-                                Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(psiField.getName(), postfixExpressions);
-                                Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(psiField.getName(), prefixExpressions);
+                                Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
+                                Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(psiField, postfixExpressions);
+                                Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(psiField, prefixExpressions);
                                 AbstractVariable variable = MethodDeclarationUtility.createVariable(psiField, null);
                                 if (!fieldAssignments.isEmpty()) {
                                     handleDefinedField(variable);
@@ -162,41 +163,53 @@ public abstract class AbstractMethodFragment {
                     String variableType = resolvedVariable.getType().getCanonicalText();
                     TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
                     PlainVariable variable = new PlainVariable(resolvedVariable);
-                    if (resolvedElement.getParent() instanceof PsiDeclarationStatement) {
-                        LocalVariableDeclarationObject localVariable = new LocalVariableDeclarationObject(localVariableType, variableName);
-                        PsiDeclarationStatement variableDeclaration = (PsiDeclarationStatement) resolvedElement.getParent();
-                        localVariable.setVariableDeclaration(variableDeclaration);
-                        addLocalVariableDeclaration(localVariable);
-                        addDeclaredLocalVariable(variable);
-                    } else {
-                        LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
-                        addLocalVariableInstruction(localVariable);
-                        Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(variableName, assignments);
-                        Set<PsiPostfixExpression> localVariablePostfixAssignments =
-                                getMatchingPostfixAssignments(PsiUtil.getName(resolvedVariable), postfixExpressions);
-                        Set<PsiPrefixExpression> localVariablePrefixAssignments =
-                                getMatchingPrefixAssignments(PsiUtil.getName(resolvedVariable), prefixExpressions);
-                        if (!localVariableAssignments.isEmpty()) {
-                            addDefinedLocalVariable(variable);
-                            for (PsiAssignmentExpression assignment : localVariableAssignments) {
-                                PsiJavaToken operator = assignment.getOperationSign();
-                                if (!JavaTokenType.EQ.equals(operator.getTokenType()))
-                                    addUsedLocalVariable(variable);
-                            }
-                        }
-                        if (!localVariablePostfixAssignments.isEmpty()) {
-                            addDefinedLocalVariable(variable);
-                            addUsedLocalVariable(variable);
-                        }
-                        if (!localVariablePrefixAssignments.isEmpty()) {
-                            addDefinedLocalVariable(variable);
-                            addUsedLocalVariable(variable);
-                        }
-                        if (localVariableAssignments.isEmpty() && localVariablePostfixAssignments.isEmpty()
-                                && localVariablePrefixAssignments.isEmpty()) {
-                            addUsedLocalVariable(variable);
+                    LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
+                    localVariable.setSimpleName(psiReference);
+                    addLocalVariableInstruction(localVariable);
+                    Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(resolvedVariable, assignments);
+                    Set<PsiPostfixExpression> localVariablePostfixAssignments =
+                            getMatchingPostfixAssignments(resolvedVariable, postfixExpressions);
+                    Set<PsiPrefixExpression> localVariablePrefixAssignments =
+                            getMatchingPrefixAssignments(resolvedVariable, prefixExpressions);
+                    if (!localVariableAssignments.isEmpty()) {
+                        addDefinedLocalVariable(variable);
+                        for (PsiAssignmentExpression assignment : localVariableAssignments) {
+                            PsiJavaToken operator = assignment.getOperationSign();
+                            if (!JavaTokenType.EQ.equals(operator.getTokenType()))
+                                addUsedLocalVariable(variable);
                         }
                     }
+                    if (!localVariablePostfixAssignments.isEmpty()) {
+                        addDefinedLocalVariable(variable);
+                        addUsedLocalVariable(variable);
+                    }
+                    if (!localVariablePrefixAssignments.isEmpty()) {
+                        addDefinedLocalVariable(variable);
+                        addUsedLocalVariable(variable);
+                    }
+                    if (localVariableAssignments.isEmpty() && localVariablePostfixAssignments.isEmpty()
+                            && localVariablePrefixAssignments.isEmpty()) {
+                        addUsedLocalVariable(variable);
+                    }
+                }
+            }
+        }
+    }
+
+    void processLocalVariableDeclaration(PsiStatement statement) {
+        if (statement instanceof PsiDeclarationStatement) {
+            PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) statement;
+            PsiElement[] declaredElements = declarationStatement.getDeclaredElements();
+            for (PsiElement element : declaredElements) {
+                if (element instanceof PsiLocalVariable) {
+                    PsiLocalVariable declaredVariable = (PsiLocalVariable) element;
+                    String variableType = declaredVariable.getType().getCanonicalText();
+                    TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
+                    LocalVariableDeclarationObject localVariable =
+                            new LocalVariableDeclarationObject(localVariableType, declaredVariable.getName());
+                    localVariable.setVariableDeclaration(declarationStatement);
+                    addLocalVariableDeclaration(localVariable);
+                    addDeclaredLocalVariable(new PlainVariable(declaredVariable));
                 }
             }
         }
@@ -687,28 +700,31 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    private Set<PsiAssignmentExpression> getMatchingAssignments(String simpleName, List<PsiExpression> assignments) {
+    private Set<PsiAssignmentExpression> getMatchingAssignments(PsiVariable variable, List<PsiExpression> assignments) {
         Set<PsiAssignmentExpression> matchingAssignments = new LinkedHashSet<>();
         for (PsiExpression expression : assignments) {
             if (expression instanceof PsiAssignmentExpression) {
                 PsiAssignmentExpression assignment = (PsiAssignmentExpression) expression;
                 PsiExpression leftHandSide = assignment.getLExpression();
-                if (simpleName.equals(leftHandSide.getLastChild().getText())) {
-                    matchingAssignments.add(assignment);
+                if (leftHandSide instanceof PsiReferenceExpression) {
+                    PsiReferenceExpression referenceExpression = (PsiReferenceExpression) leftHandSide;
+                    PsiElement resolvedElement = referenceExpression.resolve();
+                    if (variable.equals(resolvedElement)) {
+                        matchingAssignments.add(assignment);
+                    }
                 }
             }
         }
         return matchingAssignments;
     }
 
-    private Set<PsiPostfixExpression> getMatchingPostfixAssignments(String simpleName, List<PsiExpression> postfixExpressions) {
+    private Set<PsiPostfixExpression> getMatchingPostfixAssignments(PsiVariable variable, List<PsiExpression> postfixExpressions) {
         Set<PsiPostfixExpression> matchingPostfixAssignments = new LinkedHashSet<>();
         for (PsiExpression expression : postfixExpressions) {
             if (expression instanceof PsiPostfixExpression) {
                 PsiPostfixExpression postfixExpression = (PsiPostfixExpression) expression;
-                PsiElement operand = postfixExpression.getOperand().getLastChild();
-                String operandName = operand.getText();
-                if (operandName != null && operandName.equals(simpleName)) {
+                PsiElement element = postfixExpression.getOperand().getLastChild();
+                if (element != null && element.equals(variable)) {
                     matchingPostfixAssignments.add(postfixExpression);
                 }
             }
@@ -716,15 +732,15 @@ public abstract class AbstractMethodFragment {
         return matchingPostfixAssignments;
     }
 
-    private Set<PsiPrefixExpression> getMatchingPrefixAssignments(String simpleName, List<PsiExpression> prefixExpressions) {
+    private Set<PsiPrefixExpression> getMatchingPrefixAssignments(PsiVariable variable, List<PsiExpression> prefixExpressions) {
         Set<PsiPrefixExpression> matchingPrefixAssignments = new LinkedHashSet<>();
         for (PsiExpression expression : prefixExpressions) {
             if (expression instanceof PsiPrefixExpression) {
                 PsiPrefixExpression prefixExpression = (PsiPrefixExpression) expression;
                 PsiExpression operand = prefixExpression.getOperand();
                 if (operand == null) continue;
-                String operandName = operand.getLastChild().getText();
-                if (operandName.equals(simpleName) && PsiUtil.isIncrementDecrementOperation(operand)) {
+                PsiElement element = operand.getLastChild();
+                if (element != null && element.equals(variable) && PsiUtil.isIncrementDecrementOperation(operand)) {
                     matchingPrefixAssignments.add(prefixExpression);
                 }
             }
