@@ -82,11 +82,12 @@ class StatementExtractor {
 
     private List<PsiStatement> getStatements(PsiStatement statement) {
         List<PsiStatement> statementList = new ArrayList<>();
-        if (statement instanceof PsiCodeBlock) {
-            PsiCodeBlock block = (PsiCodeBlock) statement;
-            PsiStatement[] blockStatements = block.getStatements();
-            for (PsiStatement blockStatement : blockStatements)
-                statementList.addAll(getStatements(blockStatement));
+        if (statement instanceof PsiBlockStatement) {
+            PsiBlockStatement block = (PsiBlockStatement) statement;
+            PsiStatement[] statements = block.getCodeBlock().getStatements();
+            for (PsiStatement psiStatement : statements) {
+                statementList.addAll(getStatements(psiStatement));
+            }
         } else if (statement instanceof PsiIfStatement) {
             PsiIfStatement ifStatement = (PsiIfStatement) statement;
             statementList.addAll(getStatements(ifStatement.getThenBranch()));
@@ -176,11 +177,12 @@ class StatementExtractor {
 
     private int getTotalNumberOfStatements(PsiStatement statement) {
         int statementCounter = 0;
-        if (statement instanceof PsiCodeBlock) {
-            PsiCodeBlock block = (PsiCodeBlock) statement;
-            PsiStatement[] blockStatements = block.getStatements();
-            for (PsiStatement blockStatement : blockStatements)
-                statementCounter += getTotalNumberOfStatements(blockStatement);
+        if (statement instanceof PsiBlockStatement) {
+            PsiBlockStatement block = (PsiBlockStatement) statement;
+            PsiStatement[] statements = block.getCodeBlock().getStatements();
+            for (PsiStatement psiStatement : statements) {
+                statementCounter += getTotalNumberOfStatements(psiStatement);
+            }
         } else if (statement instanceof PsiIfStatement) {
             PsiIfStatement ifStatement = (PsiIfStatement) statement;
             statementCounter += 1;
