@@ -98,6 +98,12 @@ public class MoveMethodRefactoring {
         return method.equals(that.method) && targetClass.equals(that.targetClass);
     }
 
+    public boolean methodEquals(@NotNull MoveMethodRefactoring that) {
+        if (this == that) return true;
+
+        return method.equals(that.method);
+    }
+
     @Override
     public int hashCode() {
         int result = method.hashCode();
