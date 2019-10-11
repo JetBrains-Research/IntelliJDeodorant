@@ -153,10 +153,19 @@ public class MoveMethodTableModel extends AbstractTableModel {
         isSelected[rowIndex] = isRowSelected;
     }
 
+    /**
+     * For all rows that conflict with the newly selected row (has the same method to refactor),
+     * deselects and disables them if user has selected this row and activates otherwise.
+     * @param isRowSelected has user selected or deselected the new row
+     * @param rowIndex index of that row
+     * @param forceSelectInConflicts if false isRowSelected is true, in case of conflicts given row
+     *                               shouldn't be selected and other rows won't be updated.
+     * @return is there any conflicts with the initial row.
+     */
     private boolean updateConflictingRows(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
         boolean hasConflicts = false;
 
-        for(int i = 0; i < refactorings.size(); i++)  {
+        for (int i = 0; i < refactorings.size(); i++) {
             if (i == rowIndex) {
                 continue;
             }
