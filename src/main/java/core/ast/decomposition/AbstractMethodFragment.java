@@ -3,6 +3,7 @@ package core.ast.decomposition;
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.lang.jvm.types.JvmReferenceType;
 import com.intellij.psi.*;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiUtil;
 import core.ast.Access;
 import core.ast.AnonymousClassDeclarationObject;
@@ -417,6 +418,8 @@ public abstract class AbstractMethodFragment {
                         fieldType.setArrayDimension(fieldType.getArrayDimension());
                         FieldObject fieldObject = new FieldObject(fieldType, psiField.getName());
                         fieldObject.setClassName(anonymousClassObject.getName());
+                        fieldObject.setVariableDeclarationFragment(psiField);
+
                         if ((psiField.hasModifier(JvmModifier.PUBLIC)))
                             fieldObject.setAccess(Access.PUBLIC);
                         else if (psiField.hasModifier(JvmModifier.PROTECTED))

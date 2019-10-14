@@ -2,6 +2,8 @@ package core.ast;
 
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
+import core.ast.decomposition.MethodBodyObject;
+import refactoring.TypeCheckElimination;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -45,10 +47,6 @@ public class ClassObject extends ClassDeclarationObject {
 
     public ClassObject getClassObject() {
         return this;
-    }
-
-    public PsiType getITypeRoot() {
-        return typeDeclaration.getITypeRoot();
     }
 
     public String getPsiType() {
@@ -112,6 +110,33 @@ public class ClassObject extends ClassDeclarationObject {
         if (type.getClassType().equals(className))
             return true;
         return type.getGenericType() != null && type.getGenericType().contains(className);
+    }
+
+    public List<TypeCheckElimination> generateTypeCheckEliminations() {
+        List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
+        if(!_enum) {
+            for(MethodObject methodObject : methodList) {
+                MethodBodyObject methodBodyObject = methodObject.getMethodBody();
+                if(methodBodyObject != null) {
+                    List<TypeCheckElimination> list = methodBodyObject.generateTypeCheckEliminations();
+                    for(TypeCheckElimination typeCheckElimination : list) {
+                        if(!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
+                            //TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(typeCheckElimination, typeDeclaration, methodObject.getMethodDeclaration());
+                            TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
+                                    typeCheckElimination,
+                                    (PsiClass)getAbstractTypeDeclaration().recoverASTNode(),
+                                    methodObject.getMethodDeclaration()
+                            );
+                            if((typeCheckElimination.getTypeField() != null || typeCheckElimination.getTypeLocalVariable() != null || typeCheckElimination.getTypeMethodInvocation() != null) &&
+                                    typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType() && typeCheckElimination.isApplicable()) {
+                                typeCheckEliminations.add(typeCheckElimination);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return typeCheckEliminations;
     }
 
     public void setAccess(Access access) {

@@ -5,12 +5,9 @@ import core.distance.DistanceMatrix;
 import core.distance.MoveMethodCandidateRefactoring;
 import core.distance.MySystem;
 import core.distance.ProjectInfo;
+import refactoring.TypeCheckEliminationGroup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Standalone {
 
@@ -31,5 +28,18 @@ public class Standalone {
         List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<>(candidateRefactoring);
         Collections.sort(moveMethodCandidateList);
         return moveMethodCandidateList;
+    }
+
+    public static Set<TypeCheckEliminationGroup> getTypeCheckEliminationRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+        new ASTReader(project, indicator);
+        SystemObject systemObject = ASTReader.getSystemObject();
+
+        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
+        for (ClassObject classObject : systemObject.getClassObjects()) {
+            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+                classObjectsToBeExamined.add(classObject);
+            }
+        }
+        return new TreeSet<>(systemObject.generateTypeCheckEliminations(classObjectsToBeExamined, indicator));
     }
 }

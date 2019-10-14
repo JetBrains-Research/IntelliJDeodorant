@@ -1,6 +1,5 @@
 package core.ast;
 
-import com.intellij.psi.PsiType;
 import core.ast.decomposition.CatchClauseObject;
 import core.ast.decomposition.TryStatementObject;
 
@@ -22,10 +21,8 @@ public abstract class ClassDeclarationObject {
         this.commentList = new ArrayList<>();
     }
 
-    public abstract PsiType getITypeRoot();
-
     public abstract ClassObject getClassObject();
-    
+
     protected abstract TypeObject getSuperclass();
 
     public void addMethod(MethodObject method) {

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.intellij.psi.*;
 
-class StatementExtractor {
+public class StatementExtractor {
 
     private StatementInstanceChecker instanceChecker;
 
@@ -15,7 +15,7 @@ class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getVariableDeclarationStatements(PsiStatement statement) {
+    public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) { // TODO: returns all declaration statements
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
     }
@@ -30,17 +30,17 @@ class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getSwitchStatements(PsiStatement statement) {
+    public List<PsiStatement> getSwitchStatements(PsiElement statement) {
         instanceChecker = new InstanceOfSwitchStatement();
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getIfStatements(PsiStatement statement) {
+    public List<PsiStatement> getIfStatements(PsiElement statement) {
         instanceChecker = new InstanceOfIfStatement();
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getReturnStatements(PsiReturnStatement statement) {
+    public List<PsiStatement> getReturnStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfReturnStatement();
         return getStatements(statement);
     }
@@ -55,7 +55,7 @@ class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getEnhancedForStatements(PsiStatement statement) {
+    public List<PsiStatement> getEnhancedForStatements(PsiElement statement) {
         instanceChecker = new InstanceOfEnhancedForStatement();
         return getStatements(statement);
     }
@@ -80,9 +80,15 @@ class StatementExtractor {
         return getStatements(statement);
     }
 
-    private List<PsiStatement> getStatements(PsiStatement statement) {
+    private List<PsiStatement> getStatements(PsiElement statement) {
         List<PsiStatement> statementList = new ArrayList<>();
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock block = (PsiCodeBlock) statement;
+            PsiStatement[] statements = block.getStatements();
+            for (PsiStatement psiStatement : statements) {
+                statementList.addAll(getStatements(psiStatement));
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement block = (PsiBlockStatement) statement;
             PsiStatement[] statements = block.getCodeBlock().getStatements();
             for (PsiStatement psiStatement : statements) {
@@ -175,7 +181,7 @@ class StatementExtractor {
         return statementList;
     }
 
-    private int getTotalNumberOfStatements(PsiStatement statement) {
+    public int getTotalNumberOfStatements(PsiStatement statement) {
         int statementCounter = 0;
         if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement block = (PsiBlockStatement) statement;

@@ -1,8 +1,7 @@
 package core.ast;
 
-import com.intellij.psi.PsiDeclarationStatement;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.util.PsiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +26,14 @@ public class FieldObject extends VariableDeclarationObject {
         this.commentList = new ArrayList<>();
     }
 
-    private PsiDeclarationStatement getVariableDeclarationFragment() {
-        PsiElement node = this.fragment.recoverASTNode();
-        if (node instanceof PsiReferenceExpression) {
-            return (PsiDeclarationStatement) node.getParent();
-        } else {
-            return (PsiDeclarationStatement) node;
-        }
+    public PsiField getVariableDeclarationFragment() {
+        return (PsiField) this.fragment.recoverASTNode();
+    }
+
+    public void setVariableDeclarationFragment(PsiField fragment) {
+        //this.fragment = fragment;
+        this.variableBindingKey = PsiUtil.getMemberQualifiedName(fragment);
+        this.fragment = ASTInformationGenerator.generateASTInformation(fragment);
     }
 
     public void setAccess(Access access) {
@@ -123,7 +123,7 @@ public class FieldObject extends VariableDeclarationObject {
         return sb.toString();
     }
 
-    public PsiDeclarationStatement getVariableDeclaration() {
+    public PsiField getVariableDeclaration() {
         return getVariableDeclarationFragment();
     }
 }

@@ -1,6 +1,7 @@
 package core.ast.decomposition;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiStatement;
 import core.ast.decomposition.cfg.PlainVariable;
 import core.ast.AnonymousClassDeclarationObject;
 import core.ast.ArrayCreationObject;

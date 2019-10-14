@@ -15,6 +15,8 @@ import core.ast.MethodInvocationObject;
 import core.ast.SuperFieldInstructionObject;
 import core.ast.SuperMethodInvocationObject;
 import core.ast.decomposition.cfg.AbstractVariable;
+import core.ast.util.StatementExtractor;
+import refactoring.TypeCheckElimination;
 
 import java.util.*;
 
@@ -32,6 +34,134 @@ public class MethodBodyObject {
 
     public CompositeStatementObject getCompositeStatement() {
         return compositeStatement;
+    }
+
+    public List<TypeCheckElimination> generateTypeCheckEliminations() {
+        List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
+        StatementExtractor statementExtractor = new StatementExtractor();
+        List<PsiStatement> switchStatements = statementExtractor.getSwitchStatements(compositeStatement.getStatement());
+        List<CompositeStatementObject> switchCompositeStatements = compositeStatement.getSwitchStatements();
+        for (PsiStatement statement : switchStatements) {
+            PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
+            TypeCheckElimination typeCheckElimination = new TypeCheckElimination();
+            typeCheckElimination.setTypeCheckCodeFragment(switchStatement);
+            PsiStatement[] statements = switchStatement.getBody().getStatements();
+            boolean isDefaultCase = false;
+            Set<PsiExpression> switchCaseExpressions = new LinkedHashSet<>();
+            for (PsiStatement statement2 : statements) {
+                if (statement2 instanceof PsiSwitchLabelStatement) {
+                    PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement2;
+                    isDefaultCase = switchCase.isDefaultCase();
+                    if (!isDefaultCase) {
+                        switchCaseExpressions.addAll(Arrays.asList(switchCase.getCaseValues().getExpressions()));
+                    }
+                } else {
+                    if (statement2 instanceof PsiBlockStatement) {
+                        PsiBlockStatement block = (PsiBlockStatement) statement2;
+                        PsiStatement[] statementsInBlock = block.getCodeBlock().getStatements();
+                        for (PsiStatement statementInBlock : statementsInBlock) {
+                            if (!(statementInBlock instanceof PsiBreakStatement)) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    typeCheckElimination.addTypeCheck(expression, statementInBlock);
+                                }
+                                if (isDefaultCase) {
+                                    typeCheckElimination.addDefaultCaseStatement(statementInBlock);
+                                }
+                            }
+                        }
+                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
+                        if (branchingStatements.size() > 0) {
+                            for (PsiExpression expression : switchCaseExpressions) {
+                                if (!typeCheckElimination.containsTypeCheckExpression(expression)) {
+                                    typeCheckElimination.addEmptyTypeCheck(expression);
+                                }
+                            }
+                            switchCaseExpressions.clear();
+                        }
+                    } else {
+                        if (!(statement2 instanceof PsiBreakStatement)) {
+                            for (PsiExpression expression : switchCaseExpressions) {
+                                typeCheckElimination.addTypeCheck(expression, statement2);
+                            }
+                            if (isDefaultCase) {
+                                typeCheckElimination.addDefaultCaseStatement(statement2);
+                            }
+                        }
+                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
+                        if (statement2 instanceof PsiBreakStatement || statement2 instanceof PsiReturnStatement || branchingStatements.size() > 0) {
+                            for (PsiExpression expression : switchCaseExpressions) {
+                                if (!typeCheckElimination.containsTypeCheckExpression(expression))
+                                    typeCheckElimination.addEmptyTypeCheck(expression);
+                            }
+                            switchCaseExpressions.clear();
+                        }
+                    }
+                }
+            }
+            typeCheckEliminations.add(typeCheckElimination);
+            for (CompositeStatementObject composite : switchCompositeStatements) {
+                if (composite.getStatement().toString().equals(switchStatement.toString())) { // TODO: not sure if it will work
+                    typeCheckElimination.setTypeCheckCompositeStatement(composite);
+                    break;
+                }
+            }
+        }
+
+        List<PsiStatement> ifStatements = statementExtractor.getIfStatements(compositeStatement.getStatement());
+        List<CompositeStatementObject> ifCompositeStatements = compositeStatement.getIfStatements();
+        TypeCheckElimination typeCheckElimination = new TypeCheckElimination();
+        int i = 0;
+        for (PsiStatement statement : ifStatements) {
+            PsiIfStatement ifStatement = (PsiIfStatement) statement;
+            PsiExpression ifExpression = ifStatement.getCondition();
+            PsiStatement thenStatement = ifStatement.getThenBranch();
+            if (thenStatement instanceof PsiBlockStatement) {
+                PsiBlockStatement block = (PsiBlockStatement) thenStatement;
+                PsiStatement[] statements = block.getCodeBlock().getStatements();
+                for (PsiStatement statementInBlock : statements) {
+                    typeCheckElimination.addTypeCheck(ifExpression, statementInBlock);
+                }
+            } else {
+                typeCheckElimination.addTypeCheck(ifExpression, thenStatement);
+            }
+            PsiStatement elseStatement = ifStatement.getElseBranch();
+            if (elseStatement != null) {
+                if (elseStatement instanceof PsiBlockStatement) {
+                    PsiBlockStatement block = (PsiBlockStatement) elseStatement;
+                    PsiStatement[] statements = block.getCodeBlock().getStatements();
+                    for (PsiStatement statementInBlock : statements) {
+                        typeCheckElimination.addDefaultCaseStatement(statementInBlock);
+                    }
+                } else if (!(elseStatement instanceof PsiIfStatement)) {
+                    typeCheckElimination.addDefaultCaseStatement(elseStatement);
+                }
+            }
+            if (ifStatements.size() - 1 > i) { // TODO: what is happening here???
+                PsiIfStatement nextIfStatement = (PsiIfStatement) ifStatements.get(i + 1);
+                if (!ifStatement.getParent().equals(nextIfStatement)) {
+                    typeCheckElimination.setTypeCheckCodeFragment(ifStatement);
+                    typeCheckEliminations.add(typeCheckElimination);
+                    for (CompositeStatementObject composite : ifCompositeStatements) {
+                        if (composite.getStatement().toString().equals(ifStatement.toString())) {
+                            typeCheckElimination.setTypeCheckCompositeStatement(composite);
+                            break;
+                        }
+                    }
+                    typeCheckElimination = new TypeCheckElimination();
+                }
+            } else {
+                typeCheckElimination.setTypeCheckCodeFragment(ifStatement);
+                typeCheckEliminations.add(typeCheckElimination);
+                for (CompositeStatementObject composite : ifCompositeStatements) {
+                    if (composite.getStatement().toString().equals(ifStatement.toString())) {
+                        typeCheckElimination.setTypeCheckCompositeStatement(composite);
+                        break;
+                    }
+                }
+            }
+            i++;
+        }
+        return typeCheckEliminations;
     }
 
     public List<FieldInstructionObject> getFieldInstructions() {
@@ -215,7 +345,15 @@ public class MethodBodyObject {
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock codeBlock = (PsiCodeBlock) statement;
+            PsiStatement[] statements = codeBlock.getStatements();
+            CompositeStatementObject child = new CompositeStatementObject(codeBlock, StatementType.BLOCK, parent);
+            parent.addStatement(child);
+            for (PsiStatement psiStatement : statements) {
+                processStatement(child, psiStatement);
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
             PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
             PsiStatement[] blockStatements = psiCodeBlock.getStatements();
