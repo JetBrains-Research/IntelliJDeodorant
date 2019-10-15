@@ -219,9 +219,9 @@ public class MethodBodyObject {
             PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
             PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
             PsiStatement[] blockStatements = psiCodeBlock.getStatements();
+            CompositeStatementObject child = new CompositeStatementObject(blockStatement, StatementType.BLOCK, parent);
+            parent.addStatement(child);
             for (PsiStatement psiStatement : blockStatements) {
-                CompositeStatementObject child = new CompositeStatementObject(psiStatement, StatementType.BLOCK, parent);
-                parent.addStatement(child);
                 processStatement(child, psiStatement);
             }
         } else if (statement instanceof PsiIfStatement) {
