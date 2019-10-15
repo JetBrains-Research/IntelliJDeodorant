@@ -314,6 +314,7 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
+
             PsiResourceList resources = tryStatement.getResourceList();
             if (resources != null)
                 for (PsiResourceListElement resource : resources) {
@@ -324,27 +325,52 @@ public class MethodBodyObject {
                     }
                 }
             parent.addStatement(child);
+
             if (tryStatement.getTryBlock() != null) {
                 PsiStatement[] tryStatements = tryStatement.getTryBlock().getStatements();
                 for (PsiStatement psiStatement : tryStatements) {
                     processStatement(child, psiStatement);
                 }
             }
-            PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
-            for (PsiCodeBlock catchClause : catchClauses) {
+
+            PsiCatchSection[] catchSections = tryStatement.getCatchSections();
+            for (PsiCatchSection section : catchSections) {
                 CatchClauseObject catchClauseObject = new CatchClauseObject();
-                PsiStatement[] catchClauseBody = catchClause.getStatements();
-                for (PsiStatement psiStatement : catchClauseBody) {
-                    CompositeStatementObject catchClauseStatementObject = new CompositeStatementObject(psiStatement, StatementType.BLOCK, null);
-                    processStatement(catchClauseStatementObject, psiStatement);
-                    catchClauseObject.setBody(catchClauseStatementObject);
-                    child.addCatchClause(catchClauseObject);
+                PsiCodeBlock catchClauseBody = section.getCatchBlock();
+                CompositeStatementObject catchClauseStatementObject = new CompositeStatementObject(catchClauseBody, StatementType.BLOCK, null);
+                List<PsiType> caughtExceptionTypes = section.getPreciseCatchTypes();
+                for (PsiType type : caughtExceptionTypes) {
+                    if (type instanceof PsiDisjunctionType) {
+                        PsiDisjunctionType disjunctionType = (PsiDisjunctionType) type;
+                        List<PsiType> disjunctions = disjunctionType.getDisjunctions();
+                        for (PsiType psiType : disjunctions) {
+                            catchClauseObject.addExceptionType(psiType.getCanonicalText());
+                        }
+                    }
+                    catchClauseObject.addExceptionType(type.getCanonicalText());
                 }
+
+                PsiParameter[] catchBlockParameters = tryStatement.getCatchBlockParameters();
+                for (PsiParameter psiParameter : catchBlockParameters) {
+                    if (psiParameter.getInitializer() != null) {
+                        AbstractExpression variableDeclarationInitializer = new AbstractExpression(psiParameter.getInitializer(), child);
+                        catchClauseObject.addExpression(variableDeclarationInitializer);
+                    }
+                }
+
+                if (catchClauseBody != null) {
+                    PsiStatement[] blockStatements = catchClauseBody.getStatements();
+                    for (PsiStatement blockStatement : blockStatements) {
+                        processStatement(catchClauseStatementObject, blockStatement);
+                    }
+                }
+                catchClauseObject.setBody(catchClauseStatementObject);
+                child.addCatchClause(catchClauseObject);
             }
 
             PsiCodeBlock finallyBlock = tryStatement.getFinallyBlock();
             if (finallyBlock != null) {
-                CompositeStatementObject finallyClauseStatementObject = new CompositeStatementObject(finallyBlock.getStatements()[0], StatementType.BLOCK, null);
+                CompositeStatementObject finallyClauseStatementObject = new CompositeStatementObject(finallyBlock, StatementType.BLOCK, null);
                 PsiStatement[] blockStatements = finallyBlock.getStatements();
                 for (PsiStatement blockStatement : blockStatements) {
                     processStatement(finallyClauseStatementObject, blockStatement);
