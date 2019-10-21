@@ -1,18 +1,15 @@
 package core.ast;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiType;
 
 public class ASTInformation {
 
-    private final PsiType iTypeRoot;
     private final int startPosition;
     private final int length;
     private volatile int hashCode = 0;
     private final PsiElement psiElement;
 
-    public ASTInformation(PsiType iTypeRoot, PsiElement astNode) {
-        this.iTypeRoot = iTypeRoot;
+    public ASTInformation(PsiElement astNode) {
         if (astNode != null && astNode.getTextRange() != null) {
             this.startPosition = astNode.getTextRange().getStartOffset();
             this.length = astNode.getTextRange().getLength();
@@ -30,10 +27,6 @@ public class ASTInformation {
         return psiElement;
     }
 
-    PsiType getITypeRoot() {
-        return iTypeRoot;
-    }
-
     int getStartPosition() {
         return startPosition;
     }
@@ -49,17 +42,16 @@ public class ASTInformation {
 
         if (o instanceof ASTInformation) {
             ASTInformation astInformation = (ASTInformation) o;
-            return this.iTypeRoot.equals(astInformation.iTypeRoot) &&
-                    this.startPosition == astInformation.startPosition &&
-                    this.length == astInformation.length;
+            return this.psiElement.equals(astInformation.psiElement)
+                    && this.startPosition == astInformation.startPosition
+                    && this.length == astInformation.length;
         }
         return false;
     }
 
     public int hashCode() {
         if (hashCode == 0) {
-            int result = 17;
-            result = 37 * result + iTypeRoot.hashCode();
+            int result = 17 + psiElement.hashCode();
             result = 37 * result + startPosition;
             result = 37 * result + length;
             hashCode = result;

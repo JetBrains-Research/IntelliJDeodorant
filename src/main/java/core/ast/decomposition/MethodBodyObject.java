@@ -215,7 +215,15 @@ public class MethodBodyObject {
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock codeBlock = (PsiCodeBlock) statement;
+            PsiStatement[] statements = codeBlock.getStatements();
+            CompositeStatementObject child = new CompositeStatementObject(codeBlock, StatementType.BLOCK, parent);
+            parent.addStatement(child);
+            for (PsiStatement psiStatement : statements) {
+                processStatement(child, psiStatement);
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
             PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
             PsiStatement[] blockStatements = psiCodeBlock.getStatements();
