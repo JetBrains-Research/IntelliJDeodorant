@@ -17,7 +17,7 @@ public class CFGBranchDoLoopNode extends CFGBranchNode {
     }
 
     public List<BasicBlock> getNestedBasicBlocks() {
-        List<BasicBlock> blocksBetween = new ArrayList<BasicBlock>();
+        List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock srcBlock = getBasicBlock();
         BasicBlock joinBlock = getJoinNode().getBasicBlock();
         //join node is always before do-loop node

@@ -49,14 +49,9 @@ public class ClassObject extends ClassDeclarationObject {
         return this;
     }
 
-    public PsiType getITypeRoot() {
-        return typeDeclaration.getITypeRoot();
-    }
-
     public String getPsiType() {
         return psiType;
     }
-
 
     public PsiFile getPsiFile() {
         return psiFile;

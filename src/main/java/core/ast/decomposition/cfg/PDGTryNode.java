@@ -31,7 +31,7 @@ public class PDGTryNode extends PDGBlockNode {
         CFGNode cfgNode = getCFGNode();
         if (cfgNode.getStatement() instanceof TryStatementObject) {
             TryStatementObject tryStatement = (TryStatementObject) cfgNode.getStatement();
-            List<AbstractStatement> statementsInCatchClausesAndFinallyBlock = new ArrayList<AbstractStatement>();
+            List<AbstractStatement> statementsInCatchClausesAndFinallyBlock = new ArrayList<>();
             for (CatchClauseObject catchClause : tryStatement.getCatchClauses()) {
                 statementsInCatchClausesAndFinallyBlock.add(catchClause.getBody());
             }

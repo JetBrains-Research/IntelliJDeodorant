@@ -111,14 +111,16 @@ public class MethodObject implements AbstractMethodDeclaration {
     }
 
     public MethodInvocationObject generateMethodInvocation() {
-        return new MethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className), this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
+        return new MethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className),
+                this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
     public SuperMethodInvocationObject generateSuperMethodInvocation() {
-        return new SuperMethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className), this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
+        return new SuperMethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className),
+                this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
-    public FieldInstructionObject isGetter() {
+    FieldInstructionObject isGetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -140,7 +142,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    public FieldInstructionObject isSetter() {
+    FieldInstructionObject isSetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -392,7 +394,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         for (CreationObject creation : creations) {
             if (creation instanceof ClassInstanceCreationObject) {
                 ClassInstanceCreationObject classInstanceCreationObject = (ClassInstanceCreationObject) creation;
-                PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreationObject.getClassInstanceCreation();
+                PsiNewExpression classInstanceCreation = classInstanceCreationObject.getClassInstanceCreation();
                 PsiExpressionList argumentList = classInstanceCreation.getArgumentList();
                 if (argumentList != null) {
                     for (PsiExpression expression : argumentList.getExpressions()) {

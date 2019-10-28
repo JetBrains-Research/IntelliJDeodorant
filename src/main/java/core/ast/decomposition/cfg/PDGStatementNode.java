@@ -75,6 +75,7 @@ class PDGStatementNode extends PDGNode {
             usedVariables.addAll(statement.getUsedFieldsThroughParameters());
             definedVariables.addAll(statement.getDefinedFieldsThroughLocalVariables());
             usedVariables.addAll(statement.getUsedFieldsThroughLocalVariables());
+
             Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughFields = statement.getInvokedMethodsThroughFields();
             for (AbstractVariable variable : invokedMethodsThroughFields.keySet()) {
                 LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughFields.get(variable);

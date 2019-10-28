@@ -196,7 +196,7 @@ public class MyMethod extends Entity {
     }
 
     public Set<String> getEntitySet() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         ListIterator<MyAttributeInstruction> attributeInstructionIterator = getAttributeInstructionIterator();
         while (attributeInstructionIterator.hasNext()) {
             MyAttributeInstruction attributeInstruction = attributeInstructionIterator.next();

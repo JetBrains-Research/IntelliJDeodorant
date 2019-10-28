@@ -1,7 +1,6 @@
 package core.ast.decomposition.cfg;
 
 import com.intellij.psi.PsiBlockStatement;
-import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiLabeledStatement;
 import com.intellij.psi.PsiSynchronizedStatement;
 import core.ast.decomposition.AbstractStatement;
@@ -38,7 +37,7 @@ public abstract class CFGBranchNode extends CFGNode {
     }
 
     protected List<BasicBlock> getNestedBasicBlocksToEnd() {
-        List<BasicBlock> blocksBetween = new ArrayList<BasicBlock>();
+        List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock nextBlock = getBasicBlock();
         while (nextBlock.getNextBasicBlock() != null) {
             nextBlock = nextBlock.getNextBasicBlock();
@@ -52,14 +51,14 @@ public abstract class CFGBranchNode extends CFGNode {
     public abstract List<BasicBlock> getNestedBasicBlocks();
 
     public Set<CFGNode> getImmediatelyNestedNodesFromAST() {
-        Set<CFGNode> nestedNodes = new LinkedHashSet<CFGNode>();
+        Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {
-            Set<AbstractStatement> nestedStatements = new LinkedHashSet<AbstractStatement>();
+            Set<AbstractStatement> nestedStatements = new LinkedHashSet<>();
             CompositeStatementObject composite = (CompositeStatementObject) abstractStatement;
             List<AbstractStatement> statements = composite.getStatements();
             for (AbstractStatement statement : statements) {
-                if (statement.getStatement() instanceof PsiCodeBlock) {
+                if (statement.getStatement() instanceof PsiBlockStatement) {
                     CompositeStatementObject blockStatement = (CompositeStatementObject) statement;
                     processBlockStatement(nestedStatements, blockStatement);
                 } else if (statement.getStatement() instanceof PsiLabeledStatement
@@ -68,7 +67,7 @@ public abstract class CFGBranchNode extends CFGNode {
                     processLabeledStatement(nestedStatements, labeledStatement);
                 } else if (statement instanceof TryStatementObject) {
                     CompositeStatementObject tryStatement = (CompositeStatementObject) statement;
-                    processTryStatement(nestedStatements, tryStatement);
+                    //TODO: processTryStatement(nestedStatements, tryStatement);
                 } else
                     nestedStatements.add(statement);
             }
@@ -93,12 +92,12 @@ public abstract class CFGBranchNode extends CFGNode {
         for (AbstractStatement statementInsideBlock : blockStatement.getStatements()) {
             if (statementInsideBlock instanceof TryStatementObject) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) statementInsideBlock;
-                processTryStatement(nestedStatements, tryStatement);
+                //TODO: processTryStatement(nestedStatements, tryStatement);
             } else if (statementInsideBlock.getStatement() instanceof PsiLabeledStatement
                     || statementInsideBlock.getStatement() instanceof PsiSynchronizedStatement) {
                 CompositeStatementObject labeledStatement = (CompositeStatementObject) statementInsideBlock;
                 processLabeledStatement(nestedStatements, labeledStatement);
-            } else if (statementInsideBlock.getStatement() instanceof PsiCodeBlock) {
+            } else if (statementInsideBlock.getStatement() instanceof PsiBlockStatement) {
                 CompositeStatementObject blockStatement2 = (CompositeStatementObject) statementInsideBlock;
                 processBlockStatement(nestedStatements, blockStatement2);
             } else
@@ -121,7 +120,7 @@ public abstract class CFGBranchNode extends CFGNode {
                 }
             } else if (firstStatement instanceof TryStatementObject) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) firstStatement;
-                processTryStatement(nestedStatements, tryStatement);
+                //TODO: processTryStatement(nestedStatements, tryStatement);
             } else
                 nestedStatements.add(firstStatement);
         }

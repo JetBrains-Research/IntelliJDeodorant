@@ -11,9 +11,9 @@ public class CFGTryNode extends CFGBlockNode {
     private List<String> handledExceptions;
     private boolean hasResources;
 
-    public CFGTryNode(AbstractStatement statement) {
+    CFGTryNode(AbstractStatement statement) {
         super(statement);
-        this.handledExceptions = new ArrayList<String>();
+        this.handledExceptions = new ArrayList<>();
         TryStatementObject tryStatement = (TryStatementObject) statement;
         this.hasResources = tryStatement.hasResources();
         for (CatchClauseObject catchClause : tryStatement.getCatchClauses()) {
@@ -21,7 +21,7 @@ public class CFGTryNode extends CFGBlockNode {
         }
     }
 
-    public boolean hasResources() {
+    boolean hasResources() {
         return hasResources;
     }
 
@@ -29,11 +29,11 @@ public class CFGTryNode extends CFGBlockNode {
         return handledExceptions;
     }
 
-    public boolean hasFinallyClauseClosingVariable(AbstractVariable variable) {
+    boolean hasFinallyClauseClosingVariable(AbstractVariable variable) {
         return ((TryStatementObject) getStatement()).hasFinallyClauseClosingVariable(variable);
     }
 
-    public boolean hasCatchClause() {
+    boolean hasCatchClause() {
         return ((TryStatementObject) getStatement()).hasCatchClause();
     }
 }

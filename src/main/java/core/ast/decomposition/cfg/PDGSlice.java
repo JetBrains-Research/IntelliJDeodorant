@@ -22,14 +22,14 @@ public class PDGSlice extends Graph {
     private Set<PDGNode> indispensableNodes;
     private Set<PDGNode> removableNodes;
     private Set<AbstractVariable> returnedVariablesInOriginalMethod;
-    private PsiFile iFile;
+    private PsiFile psiFile;
     private int methodSize;
 
     public PDGSlice(PDG pdg, BasicBlock boundaryBlock) {
         super();
         this.pdg = pdg;
         this.method = pdg.getMethod();
-        this.iFile = pdg.getIFile();
+        this.psiFile = pdg.getPsiFile();
         this.methodSize = pdg.getTotalNumberOfStatements();
         this.returnedVariablesInOriginalMethod = pdg.getReturnedVariables();
         this.boundaryBlock = boundaryBlock;
@@ -73,18 +73,18 @@ public class PDGSlice extends Graph {
         this(pdg, boundaryBlock);
         this.nodeCriterion = nodeCriterion;
         this.localVariableCriterion = localVariableCriterion;
-        this.sliceNodes = new TreeSet<PDGNode>();
+        this.sliceNodes = new TreeSet<>();
         sliceNodes.addAll(computeSlice(nodeCriterion, localVariableCriterion));
-        this.remainingNodes = new TreeSet<PDGNode>();
+        this.remainingNodes = new TreeSet<>();
         remainingNodes.add(pdg.getEntryNode());
         for (GraphNode node : pdg.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (!sliceNodes.contains(pdgNode))
                 remainingNodes.add(pdgNode);
         }
-        this.passedParameters = new LinkedHashSet<AbstractVariable>();
-        Set<PDGNode> nCD = new LinkedHashSet<PDGNode>();
-        Set<PDGNode> nDD = new LinkedHashSet<PDGNode>();
+        this.passedParameters = new LinkedHashSet<>();
+        Set<PDGNode> nCD = new LinkedHashSet<>();
+        Set<PDGNode> nDD = new LinkedHashSet<>();
         for (GraphEdge edge : pdg.edges) {
             PDGDependence dependence = (PDGDependence) edge;
             PDGNode srcPDGNode = (PDGNode) dependence.src;
@@ -101,7 +101,7 @@ public class PDGSlice extends Graph {
                     nCD.add(srcPDGNode);
             }
         }
-        Set<PDGNode> controlIndispensableNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> controlIndispensableNodes = new LinkedHashSet<>();
         for (PDGNode p : nCD) {
             for (AbstractVariable usedVariable : p.usedVariables) {
                 Set<PDGNode> pSliceNodes = computeSlice(p, usedVariable);
@@ -112,7 +112,7 @@ public class PDGSlice extends Graph {
                 }
             }
         }
-        Set<PDGNode> dataIndispensableNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> dataIndispensableNodes = new LinkedHashSet<>();
         for (PDGNode p : nDD) {
             for (AbstractVariable definedVariable : p.definedVariables) {
                 Set<PDGNode> pSliceNodes = computeSlice(p, definedVariable);
@@ -143,7 +143,7 @@ public class PDGSlice extends Graph {
     }
 
     public PsiFile getIFile() {
-        return iFile;
+        return psiFile;
     }
 
     public int getMethodSize() {
@@ -214,7 +214,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean nodeCriterionIsDuplicated() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         return duplicatedNodes.contains(nodeCriterion);
     }
@@ -258,7 +258,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean declarationOfVariableCriterionIsDuplicated() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode node : duplicatedNodes) {
             if (node.declaresLocalVariable(localVariableCriterion) && !(node instanceof PDGTryNode))
@@ -296,7 +296,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean nonDuplicatedSliceNodeAntiDependsOnNonRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode sliceNode : sliceNodes) {
             if (!duplicatedNodes.contains(sliceNode)) {
@@ -330,7 +330,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean nonDuplicatedSliceNodeOutputDependsOnNonRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode sliceNode : sliceNodes) {
             if (!duplicatedNodes.contains(sliceNode)) {
@@ -349,7 +349,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean duplicatedSliceNodeWithClassInstantiationHasDependenceOnRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode duplicatedNode : duplicatedNodes) {
             if (duplicatedNode.containsClassInstanceCreation()) {
@@ -382,7 +382,7 @@ public class PDGSlice extends Graph {
     }
 
     private boolean containsDuplicateNodeWithStateChangingMethodInvocation() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode node : duplicatedNodes) {
             for (AbstractVariable stateChangingVariable : node.definedVariables) {
@@ -409,15 +409,15 @@ public class PDGSlice extends Graph {
     }
 
     Set<PDGNode> computeSlice(PDGNode nodeCriterion, AbstractVariable localVariableCriterion) {
-        Set<PDGNode> sliceNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> sliceNodes = new LinkedHashSet<>();
         if (nodeCriterion.definesLocalVariable(localVariableCriterion)) {
-            sliceNodes.addAll(traverseBackward(nodeCriterion, new LinkedHashSet<PDGNode>()));
+            sliceNodes.addAll(traverseBackward(nodeCriterion, new LinkedHashSet<>()));
         } else if (nodeCriterion.usesLocalVariable(localVariableCriterion)) {
             Set<PDGNode> defNodes = getDefNodes(nodeCriterion, localVariableCriterion);
             for (PDGNode defNode : defNodes) {
-                sliceNodes.addAll(traverseBackward(defNode, new LinkedHashSet<PDGNode>()));
+                sliceNodes.addAll(traverseBackward(defNode, new LinkedHashSet<>()));
             }
-            sliceNodes.addAll(traverseBackward(nodeCriterion, new LinkedHashSet<PDGNode>()));
+            sliceNodes.addAll(traverseBackward(nodeCriterion, new LinkedHashSet<>()));
         }
         return sliceNodes;
     }
@@ -427,7 +427,7 @@ public class PDGSlice extends Graph {
     }
 
     private Set<PDGNode> getDefNodes(PDGNode node, AbstractVariable localVariable) {
-        Set<PDGNode> defNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> defNodes = new LinkedHashSet<>();
         for (GraphEdge edge : node.incomingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (edges.contains(dependence) && dependence instanceof PDGDataDependence) {
@@ -442,7 +442,7 @@ public class PDGSlice extends Graph {
     }
 
     private Set<PDGNode> traverseBackward(PDGNode node, Set<PDGNode> visitedNodes) {
-        Set<PDGNode> sliceNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> sliceNodes = new LinkedHashSet<>();
         sliceNodes.add(node);
         visitedNodes.add(node);
         for (GraphEdge edge : node.incomingEdges) {

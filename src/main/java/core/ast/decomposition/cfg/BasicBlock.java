@@ -17,8 +17,8 @@ public class BasicBlock {
         this.id = blockNum;
         this.leader = node;
         node.setBasicBlock(this);
-        this.nodes = new ArrayList<CFGNode>();
-        this.tryNodes = new ArrayList<CFGTryNode>();
+        this.nodes = new ArrayList<>();
+        this.tryNodes = new ArrayList<>();
     }
 
     public int getId() {
@@ -34,14 +34,14 @@ public class BasicBlock {
     }
 
     public List<CFGNode> getAllNodes() {
-        List<CFGNode> allNodes = new ArrayList<CFGNode>();
+        List<CFGNode> allNodes = new ArrayList<>();
         allNodes.add(leader);
         allNodes.addAll(nodes);
         return allNodes;
     }
 
     public List<CFGNode> getAllNodesIncludingTry() {
-        List<CFGNode> allNodes = new ArrayList<CFGNode>();
+        List<CFGNode> allNodes = new ArrayList<>();
         allNodes.add(leader);
         allNodes.addAll(nodes);
         allNodes.addAll(tryNodes);

@@ -28,12 +28,12 @@ public class ReachingAliasSet {
             }
         }
         if (!rightHandSideReferenceFound) {
-            LinkedHashSet<PsiVariable> aliasSet = new LinkedHashSet<PsiVariable>();
+            LinkedHashSet<PsiVariable> aliasSet = new LinkedHashSet<>();
             aliasSet.add(leftHandSideReference);
             aliasSet.add(rightHandSideReference);
             aliasSets.add(aliasSet);
         }
-        List<LinkedHashSet<PsiVariable>> aliasSetsToBeRemoved = new ArrayList<LinkedHashSet<PsiVariable>>();
+        List<LinkedHashSet<PsiVariable>> aliasSetsToBeRemoved = new ArrayList<>();
         for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
             if (aliasSet.contains(leftHandSideReference)) {
                 if (!aliasSet.contains(rightHandSideReference))
@@ -48,7 +48,7 @@ public class ReachingAliasSet {
     }
 
     void removeAlias(PsiVariable leftHandSideReference) {
-        List<LinkedHashSet<PsiVariable>> aliasSetsToBeRemoved = new ArrayList<LinkedHashSet<PsiVariable>>();
+        List<LinkedHashSet<PsiVariable>> aliasSetsToBeRemoved = new ArrayList<>();
         for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
             if (aliasSet.contains(leftHandSideReference)) {
                 aliasSet.remove(leftHandSideReference);
@@ -82,7 +82,7 @@ public class ReachingAliasSet {
     public Set<PsiVariable> getAliases(PsiVariable variable) {
         for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
             if (aliasSet.contains(variable)) {
-                Set<PsiVariable> aliases = new LinkedHashSet<PsiVariable>();
+                Set<PsiVariable> aliases = new LinkedHashSet<>();
                 for (PsiVariable alias : aliasSet) {
                     if (!alias.equals(variable))
                         aliases.add(alias);
@@ -103,7 +103,7 @@ public class ReachingAliasSet {
                 }
             }
             if (containsVariable) {
-                Set<PsiVariable> aliases = new LinkedHashSet<PsiVariable>();
+                Set<PsiVariable> aliases = new LinkedHashSet<>();
                 for (PsiVariable alias : aliasSet) {
                     if (!alias.equals(variable.getOrigin()))
                         aliases.add(alias);
@@ -115,9 +115,9 @@ public class ReachingAliasSet {
     }
 
     ReachingAliasSet copy() {
-        List<LinkedHashSet<PsiVariable>> aliasSetsCopy = new ArrayList<LinkedHashSet<PsiVariable>>();
+        List<LinkedHashSet<PsiVariable>> aliasSetsCopy = new ArrayList<>();
         for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
-            LinkedHashSet<PsiVariable> aliasSetCopy = new LinkedHashSet<PsiVariable>(aliasSet);
+            LinkedHashSet<PsiVariable> aliasSetCopy = new LinkedHashSet<>(aliasSet);
             aliasSetsCopy.add(aliasSetCopy);
         }
         return new ReachingAliasSet(aliasSetsCopy);

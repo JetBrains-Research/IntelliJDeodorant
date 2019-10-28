@@ -60,6 +60,7 @@ public class PDGBlockNode extends PDGNode {
                 }
                 definedVariables.addAll(expression.getDefinedLocalVariables());
                 usedVariables.addAll(expression.getUsedLocalVariables());
+
                 Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughLocalVariables =
                         expression.getInvokedMethodsThroughLocalVariables();
                 for (AbstractVariable variable : invokedMethodsThroughLocalVariables.keySet()) {

@@ -12,23 +12,23 @@ public class GraphNode {
     public GraphNode() {
         nodeNum++;
         this.id = nodeNum;
-        this.incomingEdges = new LinkedHashSet<GraphEdge>();
-        this.outgoingEdges = new LinkedHashSet<GraphEdge>();
+        this.incomingEdges = new LinkedHashSet<>();
+        this.outgoingEdges = new LinkedHashSet<>();
     }
 
     public int getId() {
         return id;
     }
 
-    public void addIncomingEdge(GraphEdge edge) {
+    void addIncomingEdge(GraphEdge edge) {
         incomingEdges.add(edge);
     }
 
-    public void addOutgoingEdge(GraphEdge edge) {
+    void addOutgoingEdge(GraphEdge edge) {
         outgoingEdges.add(edge);
     }
 
-    public static void resetNodeNum() {
+    static void resetNodeNum() {
         nodeNum = 0;
     }
 }

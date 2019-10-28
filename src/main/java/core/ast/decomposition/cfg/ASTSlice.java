@@ -7,11 +7,11 @@ import java.util.*;
 
 public class ASTSlice {
     @NotNull
-    private PsiClass sourceTypeDeclaration;
+    private final PsiClass sourceTypeDeclaration;
     @NotNull
     private PsiMethod sourceMethodDeclaration;
     @NotNull
-    private PsiFile iFile;
+    private PsiFile psiFile;
     @NotNull
     private PsiStatement variableCriterionDeclarationStatement;
     @NotNull
@@ -29,7 +29,6 @@ public class ASTSlice {
     private BasicBlock boundaryBlock;
     private boolean isObjectSlice;
     private int methodSize;
-    private Integer userRate;
 
     public ASTSlice(PDGSlice pdgSlice) {
         this.sourceMethodDeclaration = pdgSlice.getMethod().getMethodDeclaration();
@@ -69,7 +68,7 @@ public class ASTSlice {
         this.extractedMethodInvocationInsertionStatement = pdgSlice.getExtractedMethodInvocationInsertionNode().getASTStatement();
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgSlice.declarationOfVariableCriterionBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgSlice.declarationOfVariableCriterionBelongsToRemovableNodes();
-        this.iFile = pdgSlice.getIFile();
+        this.psiFile = pdgSlice.getIFile();
         this.boundaryBlock = pdgSlice.getBoundaryBlock();
         this.isObjectSlice = false;
         this.methodSize = pdgSlice.getMethodSize();
@@ -113,7 +112,7 @@ public class ASTSlice {
         this.extractedMethodInvocationInsertionStatement = pdgSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement();
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgSliceUnion.declarationOfVariableCriterionBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgSliceUnion.declarationOfVariableCriterionBelongsToRemovableNodes();
-        this.iFile = pdgSliceUnion.getIFile();
+        this.psiFile = pdgSliceUnion.getIFile();
         this.boundaryBlock = pdgSliceUnion.getBoundaryBlock();
         this.isObjectSlice = false;
         this.methodSize = pdgSliceUnion.getMethodSize();
@@ -157,7 +156,7 @@ public class ASTSlice {
         this.extractedMethodInvocationInsertionStatement = pdgObjectSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement();
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgObjectSliceUnion.declarationOfObjectReferenceBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgObjectSliceUnion.declarationOfObjectReferenceBelongsToRemovableNodes();
-        this.iFile = pdgObjectSliceUnion.getIFile();
+        this.psiFile = pdgObjectSliceUnion.getIFile();
         this.boundaryBlock = pdgObjectSliceUnion.getBoundaryBlock();
         this.isObjectSlice = true;
         this.methodSize = pdgObjectSliceUnion.getMethodSize();
@@ -239,8 +238,8 @@ public class ASTSlice {
         return declarationOfVariableCriterionBelongsToRemovableNodes;
     }
 
-    public PsiFile getIFile() {
-        return iFile;
+    public PsiFile getPsiFile() {
+        return psiFile;
     }
 
     public BasicBlock getBoundaryBlock() {
@@ -284,11 +283,4 @@ public class ASTSlice {
         return numberOfDuplicatedStatements;
     }
 
-    public Integer getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(Integer userRate) {
-        this.userRate = userRate;
-    }
 }

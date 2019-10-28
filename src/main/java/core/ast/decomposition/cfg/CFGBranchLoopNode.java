@@ -16,7 +16,7 @@ public class CFGBranchLoopNode extends CFGBranchNode {
     }
 
     public List<BasicBlock> getNestedBasicBlocks() {
-        List<BasicBlock> blocksBetween = new ArrayList<BasicBlock>();
+        List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock srcBlock = getBasicBlock();
         Flow falseControlFlow = getFalseControlFlow();
         if (falseControlFlow != null) {

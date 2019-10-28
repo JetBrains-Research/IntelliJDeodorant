@@ -66,7 +66,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public Iterator<GraphEdge> getDependenceIterator() {
-        Set<GraphEdge> allEdges = new LinkedHashSet<GraphEdge>();
+        Set<GraphEdge> allEdges = new LinkedHashSet<>();
         allEdges.addAll(incomingEdges);
         allEdges.addAll(outgoingEdges);
         return allEdges.iterator();
@@ -81,7 +81,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public Set<PDGNode> getControlDependentNodes() {
-        Set<PDGNode> nodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> nodes = new LinkedHashSet<>();
         for (GraphEdge edge : outgoingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGControlDependence) {
@@ -94,7 +94,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public Set<PDGNode> getTrueControlDependentNodes() {
-        Set<PDGNode> nodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> nodes = new LinkedHashSet<>();
         for (GraphEdge edge : outgoingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGControlDependence) {
@@ -161,7 +161,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public Set<AbstractVariable> incomingDataDependencesFromNodesDeclaringOrDefiningVariables() {
-        Set<AbstractVariable> dataDependences = new LinkedHashSet<AbstractVariable>();
+        Set<AbstractVariable> dataDependences = new LinkedHashSet<>();
         for (GraphEdge edge : incomingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGDataDependence) {
@@ -205,7 +205,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                     if (psiReference != null) {
                         PsiClass referencedClass = (PsiClass) psiReference.getElement();
                         PsiClass superClass = referencedClass.getSuperClass();
-                        Set<String> implementedInterfaces = new LinkedHashSet<String>();
+                        Set<String> implementedInterfaces = new LinkedHashSet<>();
                         if (superClass != null && superClass.getInterfaces().length > 0) {
                             for (PsiClass implementedInterface : superClass.getInterfaces()) {
                                 implementedInterfaces.add(implementedInterface.getName());
@@ -262,12 +262,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public int compareTo(PDGNode node) {
-        if (this.getId() > node.getId())
-            return 1;
-        else if (this.getId() < node.getId())
-            return -1;
-        else
-            return 0;
+        return Integer.compare(this.getId(), node.getId());
     }
 
     public String getAnnotation() {
@@ -275,7 +270,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public void updateReachingAliasSet(ReachingAliasSet reachingAliasSet) {
-        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<VariableDeclarationObject>();
+        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiStatement statement = getASTStatement();
@@ -358,7 +353,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     public void applyReachingAliasSet(ReachingAliasSet reachingAliasSet) {
         if (originalDefinedVariables == null)
             originalDefinedVariables = new LinkedHashSet<>(definedVariables);
-        Set<AbstractVariable> defVariablesToBeAdded = new LinkedHashSet<AbstractVariable>();
+        Set<AbstractVariable> defVariablesToBeAdded = new LinkedHashSet<>();
         for (AbstractVariable abstractVariable : originalDefinedVariables) {
             if (abstractVariable instanceof CompositeVariable) {
                 CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
@@ -375,7 +370,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         definedVariables.addAll(defVariablesToBeAdded);
         if (originalUsedVariables == null)
             originalUsedVariables = new LinkedHashSet<>(usedVariables);
-        Set<AbstractVariable> useVariablesToBeAdded = new LinkedHashSet<AbstractVariable>();
+        Set<AbstractVariable> useVariablesToBeAdded = new LinkedHashSet<>();
         for (AbstractVariable abstractVariable : originalUsedVariables) {
             if (abstractVariable instanceof CompositeVariable) {
                 CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
@@ -392,8 +387,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     public Map<PsiVariable, PsiNewExpression> getClassInstantiations() {
-        Map<PsiVariable, PsiNewExpression> classInstantiationMap = new LinkedHashMap<PsiVariable, PsiNewExpression>();
-        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<VariableDeclarationObject>();
+        Map<PsiVariable, PsiNewExpression> classInstantiationMap = new LinkedHashMap<>();
+        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiStatement statement = getASTStatement();
@@ -506,7 +501,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             for (PsiExpression assignmentExpression : assignments) {
                 PsiAssignmentExpression assignment = (PsiAssignmentExpression) assignmentExpression;
                 PsiExpression rightHandSideExpression = assignment.getRExpression();
-                PsiElement rightHandSideSimpleName = null;
+                PsiElement rightHandSideSimpleName;
                 if (rightHandSideExpression instanceof PsiField) {
                     rightHandSideSimpleName = rightHandSideExpression;
                 } else {

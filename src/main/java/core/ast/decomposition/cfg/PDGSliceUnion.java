@@ -32,14 +32,14 @@ public class PDGSliceUnion {
             sliceNodes.addAll(subgraph.computeSlice(nodeCriterion));
         }
         this.method = pdg.getMethod();
-        this.iFile = pdg.getIFile();
+        this.iFile = pdg.getPsiFile();
         this.methodSize = pdg.getTotalNumberOfStatements();
         this.boundaryBlock = boundaryBlock;
         this.nodeCriteria = nodeCriteria;
         this.localVariableCriterion = localVariableCriterion;
         //add any required object-state slices that may be used from the resulting slice
-        Set<PDGNode> nodesToBeAddedToSliceDueToDependenceOnObjectStateSlices = new TreeSet<PDGNode>();
-        Set<PlainVariable> alreadyExaminedObjectReferences = new LinkedHashSet<PlainVariable>();
+        Set<PDGNode> nodesToBeAddedToSliceDueToDependenceOnObjectStateSlices = new TreeSet<>();
+        Set<PlainVariable> alreadyExaminedObjectReferences = new LinkedHashSet<>();
         for (PDGNode sliceNode : sliceNodes) {
             Set<AbstractVariable> usedVariables = sliceNode.usedVariables;
             for (AbstractVariable usedVariable : usedVariables) {
@@ -50,7 +50,7 @@ public class PDGSliceUnion {
                         Map<CompositeVariable, LinkedHashSet<PDGNode>> definedAttributeNodeCriteriaMap =
                                 pdg.getDefinedAttributesOfReference(plainVariable);
                         if (!definedAttributeNodeCriteriaMap.isEmpty()) {
-                            TreeSet<PDGNode> objectSlice = new TreeSet<PDGNode>();
+                            TreeSet<PDGNode> objectSlice = new TreeSet<>();
                             for (CompositeVariable compositeVariable : definedAttributeNodeCriteriaMap.keySet()) {
                                 Set<PDGNode> nodeCriteria2 = definedAttributeNodeCriteriaMap.get(compositeVariable);
                                 for (PDGNode nodeCriterion : nodeCriteria2) {
@@ -67,7 +67,7 @@ public class PDGSliceUnion {
         }
         sliceNodes.addAll(nodesToBeAddedToSliceDueToDependenceOnObjectStateSlices);
         Set<PDGNode> throwStatementNodes = getThrowStatementNodesWithinRegion();
-        Set<PDGNode> nodesToBeAddedToSliceDueToThrowStatementNodes = new TreeSet<PDGNode>();
+        Set<PDGNode> nodesToBeAddedToSliceDueToThrowStatementNodes = new TreeSet<>();
         for (PDGNode throwNode : throwStatementNodes) {
             for (PDGNode sliceNode : sliceNodes) {
                 if (sliceNode instanceof PDGControlPredicateNode && isNestedInside(throwNode, sliceNode)) {
@@ -78,14 +78,14 @@ public class PDGSliceUnion {
             }
         }
         sliceNodes.addAll(nodesToBeAddedToSliceDueToThrowStatementNodes);
-        Set<PDGNode> remainingNodes = new TreeSet<PDGNode>();
+        Set<PDGNode> remainingNodes = new TreeSet<>();
         remainingNodes.add(pdg.getEntryNode());
         for (GraphNode node : pdg.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (!sliceNodes.contains(pdgNode))
                 remainingNodes.add(pdgNode);
         }
-        Set<PDGNode> throwStatementNodesToBeAddedToDuplicatedNodesDueToRemainingNodes = new TreeSet<PDGNode>();
+        Set<PDGNode> throwStatementNodesToBeAddedToDuplicatedNodesDueToRemainingNodes = new TreeSet<>();
         for (PDGNode throwNode : throwStatementNodes) {
             for (PDGNode remainingNode : remainingNodes) {
                 if (remainingNode.getId() != 0 && isNestedInside(throwNode, remainingNode)) {
@@ -94,9 +94,9 @@ public class PDGSliceUnion {
                 }
             }
         }
-        this.passedParameters = new LinkedHashSet<AbstractVariable>();
-        Set<PDGNode> nCD = new LinkedHashSet<PDGNode>();
-        Set<PDGNode> nDD = new LinkedHashSet<PDGNode>();
+        this.passedParameters = new LinkedHashSet<>();
+        Set<PDGNode> nCD = new LinkedHashSet<>();
+        Set<PDGNode> nDD = new LinkedHashSet<>();
         for (GraphEdge edge : pdg.edges) {
             PDGDependence dependence = (PDGDependence) edge;
             PDGNode srcPDGNode = (PDGNode) dependence.src;
@@ -105,15 +105,16 @@ public class PDGSliceUnion {
                 PDGDataDependence dataDependence = (PDGDataDependence) dependence;
                 if (remainingNodes.contains(srcPDGNode) && sliceNodes.contains(dstPDGNode))
                     passedParameters.add(dataDependence.getData());
-                if (sliceNodes.contains(srcPDGNode) && remainingNodes.contains(dstPDGNode) &&
-                        !dataDependence.getData().equals(localVariableCriterion) && !dataDependence.getData().isField())
+                if (sliceNodes.contains(srcPDGNode) && remainingNodes.contains(dstPDGNode)
+                        && !dataDependence.getData().equals(localVariableCriterion)
+                        && !dataDependence.getData().isField())
                     nDD.add(srcPDGNode);
             } else if (dependence instanceof PDGControlDependence) {
                 if (sliceNodes.contains(srcPDGNode) && remainingNodes.contains(dstPDGNode))
                     nCD.add(srcPDGNode);
             }
         }
-        Set<PDGNode> controlIndispensableNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> controlIndispensableNodes = new LinkedHashSet<>();
         for (PDGNode p : nCD) {
             for (AbstractVariable usedVariable : p.usedVariables) {
                 Set<PDGNode> pSliceNodes = subgraph.computeSlice(p, usedVariable);
@@ -132,7 +133,7 @@ public class PDGSliceUnion {
                 }
             }
         }
-        Set<PDGNode> dataIndispensableNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> dataIndispensableNodes = new LinkedHashSet<>();
         for (PDGNode p : nDD) {
             for (AbstractVariable definedVariable : p.definedVariables) {
                 Set<PDGNode> pSliceNodes = subgraph.computeSlice(p, definedVariable);
@@ -146,7 +147,7 @@ public class PDGSliceUnion {
         this.indispensableNodes = new TreeSet<>();
         indispensableNodes.addAll(controlIndispensableNodes);
         indispensableNodes.addAll(dataIndispensableNodes);
-        Set<PDGNode> throwStatementNodesToBeAddedToDuplicatedNodesDueToIndispensableNodes = new TreeSet<PDGNode>();
+        Set<PDGNode> throwStatementNodesToBeAddedToDuplicatedNodesDueToIndispensableNodes = new TreeSet<>();
         for (PDGNode throwNode : throwStatementNodes) {
             for (PDGNode indispensableNode : indispensableNodes) {
                 if (isNestedInside(throwNode, indispensableNode)) {
@@ -161,7 +162,7 @@ public class PDGSliceUnion {
         for (PDGNode throwNode : throwStatementNodesToBeAddedToDuplicatedNodesDueToIndispensableNodes) {
             indispensableNodes.addAll(subgraph.computeSlice(throwNode));
         }
-        this.removableNodes = new LinkedHashSet<PDGNode>();
+        this.removableNodes = new LinkedHashSet<>();
         for (GraphNode node : pdg.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (!remainingNodes.contains(pdgNode) && !indispensableNodes.contains(pdgNode))
@@ -185,7 +186,7 @@ public class PDGSliceUnion {
     }
 
     private Set<PDGNode> getThrowStatementNodesWithinRegion() {
-        Set<PDGNode> throwNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> throwNodes = new LinkedHashSet<>();
         for (GraphNode node : subgraph.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (pdgNode.getCFGNode() instanceof CFGThrowNode) {
@@ -272,7 +273,7 @@ public class PDGSliceUnion {
     }
 
     private boolean allNodeCriteriaAreDuplicated() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode nodeCriterion : nodeCriteria) {
             if (!duplicatedNodes.contains(nodeCriterion))
@@ -310,7 +311,7 @@ public class PDGSliceUnion {
     }
 
     private boolean nonDuplicatedSliceNodeAntiDependsOnNonRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode sliceNode : sliceNodes) {
             if (!duplicatedNodes.contains(sliceNode)) {
@@ -344,7 +345,7 @@ public class PDGSliceUnion {
     }
 
     private boolean nonDuplicatedSliceNodeOutputDependsOnNonRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode sliceNode : sliceNodes) {
             if (!duplicatedNodes.contains(sliceNode)) {
@@ -363,7 +364,7 @@ public class PDGSliceUnion {
     }
 
     private boolean duplicatedSliceNodeWithClassInstantiationHasDependenceOnRemovableNode() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode duplicatedNode : duplicatedNodes) {
             if (duplicatedNode.containsClassInstanceCreation()) {
@@ -374,8 +375,9 @@ public class PDGSliceUnion {
                         if (subgraph.edgeBelongsToBlockBasedRegion(dependence) && dependence != null) {
                             PDGNode dstPDGNode = (PDGNode) dependence.dst;
                             if (removableNodes.contains(dstPDGNode)) {
-                                if (dstPDGNode.changesStateOfReference(variableDeclaration) ||
-                                        dstPDGNode.assignsReference(variableDeclaration) || dstPDGNode.accessesReference(variableDeclaration))
+                                if (dstPDGNode.changesStateOfReference(variableDeclaration)
+                                        || dstPDGNode.assignsReference(variableDeclaration)
+                                        || dstPDGNode.accessesReference(variableDeclaration))
                                     return true;
                             }
                         }
@@ -387,7 +389,7 @@ public class PDGSliceUnion {
     }
 
     private boolean containsDuplicateNodeWithStateChangingMethodInvocation() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode node : duplicatedNodes) {
             for (AbstractVariable stateChangingVariable : node.definedVariables) {
@@ -414,7 +416,7 @@ public class PDGSliceUnion {
     }
 
     private boolean declarationOfVariableCriterionIsDuplicated() {
-        Set<PDGNode> duplicatedNodes = new LinkedHashSet<PDGNode>(sliceNodes);
+        Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         for (PDGNode node : duplicatedNodes) {
             if (node.declaresLocalVariable(localVariableCriterion) && !(node instanceof PDGTryNode))
@@ -505,17 +507,15 @@ public class PDGSliceUnion {
     }
 
     boolean satisfiesRules() {
-        return !sliceEqualsMethodBody() && !sliceContainsOnlyOneNodeCriterionAndDeclarationOfVariableCriterion()
-                && !declarationOfVariableCriterionIsDuplicated() &&
-                !variableCriterionIsReturnedVariableInOriginalMethod()
-                && (sliceNodes.size() > nodeCriteria.size())
-                && !allNodeCriteriaAreDuplicated() && !returnStatementIsControlDependentOnSliceNode()
-                && !sliceContainsReturnStatement() && !containsDuplicateNodeWithStateChangingMethodInvocation()
-                && !nonDuplicatedSliceNodeAntiDependsOnNonRemovableNode()
-                && !nonDuplicatedSliceNodeOutputDependsOnNonRemovableNode()
-                && !duplicatedSliceNodeWithClassInstantiationHasDependenceOnRemovableNode()
-                && complyWithUserThresholds() && !sliceContainsBranchStatementWithoutInnermostLoop()
-                && !variableCriterionIsStreamClosedInFinallyBlock()
-                && !sliceContainsVariableDeclarationClosedInFinallyBlock();
+        return !sliceEqualsMethodBody() && !sliceContainsOnlyOneNodeCriterionAndDeclarationOfVariableCriterion() &&
+                !declarationOfVariableCriterionIsDuplicated() &&
+                !variableCriterionIsReturnedVariableInOriginalMethod() && (sliceNodes.size() > nodeCriteria.size()) &&
+                !allNodeCriteriaAreDuplicated() && !returnStatementIsControlDependentOnSliceNode() && !sliceContainsReturnStatement() &&
+                !containsDuplicateNodeWithStateChangingMethodInvocation() &&
+                !nonDuplicatedSliceNodeAntiDependsOnNonRemovableNode() &&
+                !nonDuplicatedSliceNodeOutputDependsOnNonRemovableNode() &&
+                !duplicatedSliceNodeWithClassInstantiationHasDependenceOnRemovableNode() &&
+                complyWithUserThresholds() && !sliceContainsBranchStatementWithoutInnermostLoop() &&
+                !variableCriterionIsStreamClosedInFinallyBlock() && !sliceContainsVariableDeclarationClosedInFinallyBlock();
     }
 }

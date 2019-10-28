@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class BasicBlockCFG {
+class BasicBlockCFG {
     private List<BasicBlock> basicBlocks;
     private Map<BasicBlock, Set<BasicBlock>> forwardReachableBlocks;
 
-    public BasicBlockCFG(CFG cfg) {
-        this.basicBlocks = new ArrayList<BasicBlock>();
-        this.forwardReachableBlocks = new LinkedHashMap<BasicBlock, Set<BasicBlock>>();
-        TreeSet<GraphNode> allNodes = new TreeSet<GraphNode>(cfg.nodes);
+    BasicBlockCFG(CFG cfg) {
+        this.basicBlocks = new ArrayList<>();
+        this.forwardReachableBlocks = new LinkedHashMap<>();
+        TreeSet<GraphNode> allNodes = new TreeSet<>(cfg.nodes);
         Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks = cfg.getDirectlyNestedNodesInBlocks();
         for (CFGBlockNode blockNode : directlyNestedNodesInBlocks.keySet()) {
             if (blockNode instanceof CFGTryNode) {
@@ -65,7 +65,7 @@ public class BasicBlockCFG {
     public Set<BasicBlock> forwardReachableBlocks(BasicBlock basicBlock) {
         if (forwardReachableBlocks.containsKey(basicBlock))
             return forwardReachableBlocks.get(basicBlock);
-        Set<BasicBlock> reachableBlocks = new LinkedHashSet<BasicBlock>();
+        Set<BasicBlock> reachableBlocks = new LinkedHashSet<>();
         reachableBlocks.add(basicBlock);
         CFGNode lastNode = basicBlock.getLastNode();
         for (GraphEdge edge : lastNode.outgoingEdges) {

@@ -3,7 +3,6 @@ package core.ast;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiVariable;
 import core.ast.decomposition.cfg.*;
-import core.ast.util.StatementExtractor;
 import core.distance.DistanceMatrix;
 import core.distance.MoveMethodCandidateRefactoring;
 import core.distance.MySystem;
@@ -36,7 +35,7 @@ public class Standalone {
         new ASTReader(project, indicator);
 
         SystemObject systemObject = ASTReader.getSystemObject();
-        Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<ASTSliceGroup>();
+        Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<>();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
 
@@ -55,73 +54,68 @@ public class Standalone {
 
     private static void processMethod(final Set<ASTSliceGroup> extractedSliceGroups, ClassObject classObject, MethodObject methodObject) {
         if (methodObject.getMethodBody() != null) {
-            int minimumMethodSize = 0;
-            StatementExtractor statementExtractor = new StatementExtractor();
-            int numberOfStatements = statementExtractor.getTotalNumberOfStatements(methodObject.getMethodBody().getCompositeStatement().getStatement());
-            if (numberOfStatements >= minimumMethodSize) {
-                CFG cfg = new CFG(methodObject);
-                PDG pdg = new PDG(cfg, classObject.getPsiFile(), classObject.getFieldsAccessedInsideMethod(methodObject));
-                for (PsiVariable declaration : pdg.getVariableDeclarationsInMethod()) {
-                    PlainVariable variable = new PlainVariable(declaration);
-                    PDGSliceUnionCollection sliceUnionCollection = new PDGSliceUnionCollection(pdg, variable);
-                    double sumOfExtractedStatementsInGroup = 0.0;
-                    double sumOfDuplicatedStatementsInGroup = 0.0;
-                    double sumOfDuplicationRatioInGroup = 0.0;
-                    int maximumNumberOfExtractedStatementsInGroup = 0;
-                    int groupSize = sliceUnionCollection.getSliceUnions().size();
-                    ASTSliceGroup sliceGroup = new ASTSliceGroup();
-                    for (PDGSliceUnion sliceUnion : sliceUnionCollection.getSliceUnions()) {
-                        ASTSlice slice = new ASTSlice(sliceUnion);
-                        if (!slice.isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement()) {
-                            int numberOfExtractedStatements = slice.getNumberOfSliceStatements();
-                            int numberOfDuplicatedStatements = slice.getNumberOfDuplicatedStatements();
-                            double duplicationRatio = (double) numberOfDuplicatedStatements / (double) numberOfExtractedStatements;
-                            sumOfExtractedStatementsInGroup += numberOfExtractedStatements;
-                            sumOfDuplicatedStatementsInGroup += numberOfDuplicatedStatements;
-                            sumOfDuplicationRatioInGroup += duplicationRatio;
-                            if (numberOfExtractedStatements > maximumNumberOfExtractedStatementsInGroup)
-                                maximumNumberOfExtractedStatementsInGroup = numberOfExtractedStatements;
-                            sliceGroup.addCandidate(slice);
-                        }
-                    }
-                    if (!sliceGroup.getCandidates().isEmpty()) {
-                        sliceGroup.setAverageNumberOfExtractedStatementsInGroup(sumOfExtractedStatementsInGroup / (double) groupSize);
-                        sliceGroup.setAverageNumberOfDuplicatedStatementsInGroup(sumOfDuplicatedStatementsInGroup / (double) groupSize);
-                        sliceGroup.setAverageDuplicationRatioInGroup(sumOfDuplicationRatioInGroup / (double) groupSize);
-                        sliceGroup.setMaximumNumberOfExtractedStatementsInGroup(maximumNumberOfExtractedStatementsInGroup);
-                        extractedSliceGroups.add(sliceGroup);
+            CFG cfg = new CFG(methodObject);
+            PDG pdg = new PDG(cfg, classObject.getPsiFile(), classObject.getFieldsAccessedInsideMethod(methodObject));
+            for (PsiVariable declaration : pdg.getVariableDeclarationsInMethod()) {
+                PlainVariable variable = new PlainVariable(declaration);
+                PDGSliceUnionCollection sliceUnionCollection = new PDGSliceUnionCollection(pdg, variable);
+                double sumOfExtractedStatementsInGroup = 0.0;
+                double sumOfDuplicatedStatementsInGroup = 0.0;
+                double sumOfDuplicationRatioInGroup = 0.0;
+                int maximumNumberOfExtractedStatementsInGroup = 0;
+                int groupSize = sliceUnionCollection.getSliceUnions().size();
+                ASTSliceGroup sliceGroup = new ASTSliceGroup();
+                for (PDGSliceUnion sliceUnion : sliceUnionCollection.getSliceUnions()) {
+                    ASTSlice slice = new ASTSlice(sliceUnion);
+                    if (!slice.isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement()) {
+                        int numberOfExtractedStatements = slice.getNumberOfSliceStatements();
+                        int numberOfDuplicatedStatements = slice.getNumberOfDuplicatedStatements();
+                        double duplicationRatio = (double) numberOfDuplicatedStatements / (double) numberOfExtractedStatements;
+                        sumOfExtractedStatementsInGroup += numberOfExtractedStatements;
+                        sumOfDuplicatedStatementsInGroup += numberOfDuplicatedStatements;
+                        sumOfDuplicationRatioInGroup += duplicationRatio;
+                        if (numberOfExtractedStatements > maximumNumberOfExtractedStatementsInGroup)
+                            maximumNumberOfExtractedStatementsInGroup = numberOfExtractedStatements;
+                        sliceGroup.addCandidate(slice);
                     }
                 }
-                for (PsiVariable declaration : pdg.getVariableDeclarationsAndAccessedFieldsInMethod()) {
-                    PlainVariable variable = new PlainVariable(declaration);
-                    PDGObjectSliceUnionCollection objectSliceUnionCollection = new PDGObjectSliceUnionCollection(pdg, variable);
-                    double sumOfExtractedStatementsInGroup = 0.0;
-                    double sumOfDuplicatedStatementsInGroup = 0.0;
-                    double sumOfDuplicationRatioInGroup = 0.0;
-                    int maximumNumberOfExtractedStatementsInGroup = 0;
-                    int groupSize = objectSliceUnionCollection.getSliceUnions().size();
-                    ASTSliceGroup sliceGroup = new ASTSliceGroup();
-                    for (PDGObjectSliceUnion objectSliceUnion : objectSliceUnionCollection.getSliceUnions()) {
-                        ASTSlice slice = new ASTSlice(objectSliceUnion);
-                        if (!slice.isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement()) {
-                            int numberOfExtractedStatements = slice.getNumberOfSliceStatements();
-                            int numberOfDuplicatedStatements = slice.getNumberOfDuplicatedStatements();
-                            double duplicationRatio = (double) numberOfDuplicatedStatements / (double) numberOfExtractedStatements;
-                            sumOfExtractedStatementsInGroup += numberOfExtractedStatements;
-                            sumOfDuplicatedStatementsInGroup += numberOfDuplicatedStatements;
-                            sumOfDuplicationRatioInGroup += duplicationRatio;
-                            if (numberOfExtractedStatements > maximumNumberOfExtractedStatementsInGroup)
-                                maximumNumberOfExtractedStatementsInGroup = numberOfExtractedStatements;
-                            sliceGroup.addCandidate(slice);
-                        }
+                if (!sliceGroup.getCandidates().isEmpty()) {
+                    sliceGroup.setAverageNumberOfExtractedStatementsInGroup(sumOfExtractedStatementsInGroup / (double) groupSize);
+                    sliceGroup.setAverageNumberOfDuplicatedStatementsInGroup(sumOfDuplicatedStatementsInGroup / (double) groupSize);
+                    sliceGroup.setAverageDuplicationRatioInGroup(sumOfDuplicationRatioInGroup / (double) groupSize);
+                    sliceGroup.setMaximumNumberOfExtractedStatementsInGroup(maximumNumberOfExtractedStatementsInGroup);
+                    extractedSliceGroups.add(sliceGroup);
+                }
+            }
+            for (PsiVariable declaration : pdg.getVariableDeclarationsAndAccessedFieldsInMethod()) {
+                PlainVariable variable = new PlainVariable(declaration);
+                PDGObjectSliceUnionCollection objectSliceUnionCollection = new PDGObjectSliceUnionCollection(pdg, variable);
+                double sumOfExtractedStatementsInGroup = 0.0;
+                double sumOfDuplicatedStatementsInGroup = 0.0;
+                double sumOfDuplicationRatioInGroup = 0.0;
+                int maximumNumberOfExtractedStatementsInGroup = 0;
+                int groupSize = objectSliceUnionCollection.getSliceUnions().size();
+                ASTSliceGroup sliceGroup = new ASTSliceGroup();
+                for (PDGObjectSliceUnion objectSliceUnion : objectSliceUnionCollection.getSliceUnions()) {
+                    ASTSlice slice = new ASTSlice(objectSliceUnion);
+                    if (!slice.isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement()) {
+                        int numberOfExtractedStatements = slice.getNumberOfSliceStatements();
+                        int numberOfDuplicatedStatements = slice.getNumberOfDuplicatedStatements();
+                        double duplicationRatio = (double) numberOfDuplicatedStatements / (double) numberOfExtractedStatements;
+                        sumOfExtractedStatementsInGroup += numberOfExtractedStatements;
+                        sumOfDuplicatedStatementsInGroup += numberOfDuplicatedStatements;
+                        sumOfDuplicationRatioInGroup += duplicationRatio;
+                        if (numberOfExtractedStatements > maximumNumberOfExtractedStatementsInGroup)
+                            maximumNumberOfExtractedStatementsInGroup = numberOfExtractedStatements;
+                        sliceGroup.addCandidate(slice);
                     }
-                    if (!sliceGroup.getCandidates().isEmpty()) {
-                        sliceGroup.setAverageNumberOfExtractedStatementsInGroup(sumOfExtractedStatementsInGroup / (double) groupSize);
-                        sliceGroup.setAverageNumberOfDuplicatedStatementsInGroup(sumOfDuplicatedStatementsInGroup / (double) groupSize);
-                        sliceGroup.setAverageDuplicationRatioInGroup(sumOfDuplicationRatioInGroup / (double) groupSize);
-                        sliceGroup.setMaximumNumberOfExtractedStatementsInGroup(maximumNumberOfExtractedStatementsInGroup);
-                        extractedSliceGroups.add(sliceGroup);
-                    }
+                }
+                if (!sliceGroup.getCandidates().isEmpty()) {
+                    sliceGroup.setAverageNumberOfExtractedStatementsInGroup(sumOfExtractedStatementsInGroup / (double) groupSize);
+                    sliceGroup.setAverageNumberOfDuplicatedStatementsInGroup(sumOfDuplicatedStatementsInGroup / (double) groupSize);
+                    sliceGroup.setAverageDuplicationRatioInGroup(sumOfDuplicationRatioInGroup / (double) groupSize);
+                    sliceGroup.setMaximumNumberOfExtractedStatementsInGroup(maximumNumberOfExtractedStatementsInGroup);
+                    extractedSliceGroups.add(sliceGroup);
                 }
             }
         }

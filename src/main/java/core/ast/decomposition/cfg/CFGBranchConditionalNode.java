@@ -21,7 +21,7 @@ public abstract class CFGBranchConditionalNode extends CFGBranchNode {
     }
 
     public List<BasicBlock> getNestedBasicBlocks() {
-        List<BasicBlock> blocksBetween = new ArrayList<BasicBlock>();
+        List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock srcBlock = getBasicBlock();
         if (joinNode != null) {
             CFGNode dstNode = joinNode;

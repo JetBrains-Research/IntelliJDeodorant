@@ -8,8 +8,8 @@ public class Graph {
     protected Set<GraphEdge> edges;
 
     public Graph() {
-        this.nodes = new LinkedHashSet<GraphNode>();
-        this.edges = new LinkedHashSet<GraphEdge>();
+        this.nodes = new LinkedHashSet<>();
+        this.edges = new LinkedHashSet<>();
     }
 
     public Set<GraphNode> getNodes() {

@@ -18,10 +18,10 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
     }
 
     public Set<CFGNode> getImmediatelyNestedNodesInTrueControlFlow() {
-        Set<CFGNode> nestedNodes = new LinkedHashSet<CFGNode>();
+        Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {
-            Set<AbstractStatement> nestedStatements = new LinkedHashSet<AbstractStatement>();
+            Set<AbstractStatement> nestedStatements = new LinkedHashSet<>();
             CompositeStatementObject composite = (CompositeStatementObject) abstractStatement;
             List<AbstractStatement> statements = composite.getStatements();
             AbstractStatement trueControlFlowStatement = statements.get(0);
@@ -34,7 +34,7 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
                 processLabeledStatement(nestedStatements, labeledStatement);
             } else if (trueControlFlowStatement instanceof PsiTryStatement) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) trueControlFlowStatement;
-                processTryStatement(nestedStatements, tryStatement);
+                //TODO: processTryStatement(nestedStatements, tryStatement);
             } else
                 nestedStatements.add(trueControlFlowStatement);
             List<BasicBlock> nestedBasicBlocks = getNestedBasicBlocks();
@@ -52,10 +52,10 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
     }
 
     public Set<CFGNode> getImmediatelyNestedNodesInFalseControlFlow() {
-        Set<CFGNode> nestedNodes = new LinkedHashSet<CFGNode>();
+        Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {
-            Set<AbstractStatement> nestedStatements = new LinkedHashSet<AbstractStatement>();
+            Set<AbstractStatement> nestedStatements = new LinkedHashSet<>();
             CompositeStatementObject composite = (CompositeStatementObject) abstractStatement;
             List<AbstractStatement> statements = composite.getStatements();
             if (statements.size() == 2) {
@@ -69,7 +69,7 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
                     processLabeledStatement(nestedStatements, labeledStatement);
                 } else if (falseControlFlowStatement instanceof PsiTryStatement) {
                     CompositeStatementObject tryStatement = (CompositeStatementObject) falseControlFlowStatement;
-                    processTryStatement(nestedStatements, tryStatement);
+                    //TODO: processTryStatement(nestedStatements, tryStatement);
                 } else
                     nestedStatements.add(falseControlFlowStatement);
                 List<BasicBlock> nestedBasicBlocks = getNestedBasicBlocks();

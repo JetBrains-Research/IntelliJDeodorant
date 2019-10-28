@@ -12,11 +12,11 @@ public class PDG extends Graph {
     private Set<VariableDeclarationObject> variableDeclarationsInMethod;
     private Set<FieldObject> fieldsAccessedInMethod;
     private Map<PDGNode, Set<BasicBlock>> dominatedBlockMap;
-    private PsiFile iFile;
+    private PsiFile psiFile;
 
-    public PDG(CFG cfg, PsiFile iFile, Set<FieldObject> accessedFields) {
+    public PDG(CFG cfg, PsiFile psiFile, Set<FieldObject> accessedFields) {
         this.cfg = cfg;
-        this.iFile = iFile;
+        this.psiFile = psiFile;
         this.entryNode = new PDGMethodEntryNode(cfg.getMethod());
         this.nestingMap = new LinkedHashMap<>();
         for (GraphNode node : cfg.nodes) {
@@ -55,8 +55,8 @@ public class PDG extends Graph {
         return cfg.getMethod();
     }
 
-    public PsiFile getIFile() {
-        return iFile;
+    public PsiFile getPsiFile() {
+        return psiFile;
     }
 
     public Set<VariableDeclarationObject> getVariableDeclarationObjectsInMethod() {
@@ -64,7 +64,7 @@ public class PDG extends Graph {
     }
 
     public Set<PsiVariable> getVariableDeclarationsInMethod() {
-        Set<PsiVariable> variableDeclarations = new LinkedHashSet<PsiVariable>();
+        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         for (VariableDeclarationObject variableDeclaration : variableDeclarationsInMethod) {
             variableDeclarations.add(variableDeclaration.getVariableDeclaration());
         }
@@ -72,7 +72,7 @@ public class PDG extends Graph {
     }
 
     public Set<PsiVariable> getFieldsAccessedInMethod() {
-        Set<PsiVariable> variableDeclarations = new LinkedHashSet<PsiVariable>();
+        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         for (FieldObject field : fieldsAccessedInMethod) {
             variableDeclarations.add(field.getVariableDeclaration());
         }
@@ -105,8 +105,8 @@ public class PDG extends Graph {
 
     public Set<PDGNode> getNestedNodesWithinBlockNode(PDGBlockNode blockNode) {
         Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks = cfg.getDirectlyNestedNodesInBlocks();
-        List<CFGNode> directlyNestedCFGNodes = directlyNestedNodesInBlocks.get((CFGBlockNode) blockNode.getCFGNode());
-        Set<PDGNode> directlyNestedPDGNodes = new LinkedHashSet<PDGNode>();
+        List<CFGNode> directlyNestedCFGNodes = directlyNestedNodesInBlocks.get(blockNode.getCFGNode());
+        Set<PDGNode> directlyNestedPDGNodes = new LinkedHashSet<>();
         for (CFGNode cfgNode : directlyNestedCFGNodes) {
             directlyNestedPDGNodes.add(cfgNode.getPDGNode());
         }
@@ -114,14 +114,14 @@ public class PDG extends Graph {
     }
 
     public Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
-        Set<PsiVariable> variableDeclarations = new LinkedHashSet<PsiVariable>();
+        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(getVariableDeclarationsInMethod());
         variableDeclarations.addAll(getFieldsAccessedInMethod());
         return variableDeclarations;
     }
 
     public Set<PlainVariable> getVariablesWithMethodBodyScope() {
-        Set<PlainVariable> variables = new LinkedHashSet<PlainVariable>();
+        Set<PlainVariable> variables = new LinkedHashSet<>();
         for (AbstractVariable variable : entryNode.declaredVariables)
             variables.add((PlainVariable) variable);
         for (GraphNode node : nodes) {
@@ -135,7 +135,7 @@ public class PDG extends Graph {
     }
 
     public Set<PlainVariable> getAllDeclaredVariables() {
-        Set<PlainVariable> variables = new LinkedHashSet<PlainVariable>();
+        Set<PlainVariable> variables = new LinkedHashSet<>();
         for (AbstractVariable variable : entryNode.declaredVariables)
             variables.add((PlainVariable) variable);
         for (GraphNode node : nodes) {
@@ -157,7 +157,7 @@ public class PDG extends Graph {
     }
 
     public Map<CompositeVariable, LinkedHashSet<PDGNode>> getDefinedAttributesOfReference(PlainVariable reference) {
-        Map<CompositeVariable, LinkedHashSet<PDGNode>> definedPropertiesMap = new LinkedHashMap<CompositeVariable, LinkedHashSet<PDGNode>>();
+        Map<CompositeVariable, LinkedHashSet<PDGNode>> definedPropertiesMap = new LinkedHashMap<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
             for (AbstractVariable definedVariable : pdgNode.definedVariables) {
@@ -168,7 +168,7 @@ public class PDG extends Graph {
                             LinkedHashSet<PDGNode> nodeCriteria = definedPropertiesMap.get(compositeVariable);
                             nodeCriteria.add(pdgNode);
                         } else {
-                            LinkedHashSet<PDGNode> nodeCriteria = new LinkedHashSet<PDGNode>();
+                            LinkedHashSet<PDGNode> nodeCriteria = new LinkedHashSet<>();
                             nodeCriteria.add(pdgNode);
                             definedPropertiesMap.put(compositeVariable, nodeCriteria);
                         }
@@ -180,7 +180,7 @@ public class PDG extends Graph {
     }
 
     public Set<PDGNode> getAssignmentNodesOfVariableCriterion(AbstractVariable localVariableCriterion) {
-        Set<PDGNode> nodeCriteria = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> nodeCriteria = new LinkedHashSet<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (pdgNode.definesLocalVariable(localVariableCriterion) &&
@@ -191,7 +191,7 @@ public class PDG extends Graph {
     }
 
     public Set<PDGNode> getAssignmentNodesOfVariableCriterionIncludingDeclaration(AbstractVariable localVariableCriterion) {
-        Set<PDGNode> nodeCriteria = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> nodeCriteria = new LinkedHashSet<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (pdgNode.definesLocalVariable(localVariableCriterion))
@@ -250,8 +250,8 @@ public class PDG extends Graph {
     }
 
     private void handleSwitchCaseNodes() {
-        Map<PDGNode, Set<PDGNode>> switchCaseMap = new LinkedHashMap<PDGNode, Set<PDGNode>>();
-        Stack<PDGNode> switchNodeStack = new Stack<PDGNode>();
+        Map<PDGNode, Set<PDGNode>> switchCaseMap = new LinkedHashMap<>();
+        Stack<PDGNode> switchNodeStack = new Stack<>();
         for (GraphNode node : this.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             CFGNode cfgNode = pdgNode.getCFGNode();
@@ -268,7 +268,7 @@ public class PDG extends Graph {
                         if (switchCaseMap.containsKey(currentSwitchNode)) {
                             switchCaseMap.get(currentSwitchNode).add(pdgNode);
                         } else {
-                            Set<PDGNode> switchCaseSet = new LinkedHashSet<PDGNode>();
+                            Set<PDGNode> switchCaseSet = new LinkedHashSet<>();
                             switchCaseSet.add(pdgNode);
                             switchCaseMap.put(currentSwitchNode, switchCaseSet);
                         }
@@ -318,6 +318,7 @@ public class PDG extends Graph {
         Map<PDGNode, PDGNode> jumpNodeMap = getInnerMostLoopNodesForJumpNodes();
         for (PDGNode jumpNode : jumpNodeMap.keySet()) {
             PDGNode innerMostLoopNode = jumpNodeMap.get(jumpNode);
+            if (innerMostLoopNode == null) return;
             CFGNode innerMostLoopCFGNode = innerMostLoopNode.getCFGNode();
             if (innerMostLoopCFGNode instanceof CFGBranchLoopNode
                     || innerMostLoopCFGNode instanceof CFGBranchDoLoopNode
@@ -348,7 +349,7 @@ public class PDG extends Graph {
     }
 
     private Map<PDGNode, PDGNode> getInnerMostLoopNodesForJumpNodes() {
-        Map<PDGNode, PDGNode> map = new LinkedHashMap<PDGNode, PDGNode>();
+        Map<PDGNode, PDGNode> map = new LinkedHashMap<>();
         for (GraphNode node : this.nodes) {
             PDGNode pdgNode = (PDGNode) node;
             CFGNode cfgNode = pdgNode.getCFGNode();
@@ -493,6 +494,7 @@ public class PDG extends Graph {
         return null;
     }
 
+    //TODO: cfgNode is PsiDeclarationStatement
     private void processCFGNode(PDGNode previousNode, CFGNode cfgNode, boolean controlType) {
         if (cfgNode instanceof CFGBranchNode) {
             PDGControlPredicateNode predicateNode = new PDGControlPredicateNode(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
@@ -501,7 +503,7 @@ public class PDG extends Graph {
             edges.add(controlDependence);
             processControlPredicate(predicateNode);
         } else {
-            PDGNode pdgNode = null;
+            PDGNode pdgNode;
             if (cfgNode instanceof CFGExitNode)
                 pdgNode = new PDGExitNode(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
             else if (cfgNode instanceof CFGTryNode)
@@ -549,7 +551,7 @@ public class PDG extends Graph {
         PDGNode firstPDGNode = (PDGNode) nodes.toArray()[0];
         ReachingAliasSet reachingAliasSet = new ReachingAliasSet();
         firstPDGNode.updateReachingAliasSet(reachingAliasSet);
-        aliasSearch(firstPDGNode, new LinkedHashSet<PDGNode>(), false, reachingAliasSet);
+        aliasSearch(firstPDGNode, new LinkedHashSet<>(), false, reachingAliasSet);
     }
 
     private void createDataDependencies() {
@@ -558,11 +560,11 @@ public class PDG extends Graph {
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
             for (AbstractVariable variableInstruction : pdgNode.definedVariables) {
-                dataDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<PDGNode>(), null);
-                outputDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<PDGNode>(), null);
+                dataDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<>(), null);
+                outputDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<>(), null);
             }
             for (AbstractVariable variableInstruction : pdgNode.usedVariables) {
-                antiDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<PDGNode>(), null);
+                antiDependenceSearch(pdgNode, variableInstruction, pdgNode, new LinkedHashSet<>(), null);
             }
         }
     }
@@ -574,7 +576,7 @@ public class PDG extends Graph {
                 edges.add(dataDependence);
             }
             if (!pdgNode.definesLocalVariable(variableInstruction)) {
-                dataDependenceSearch(entryNode, variableInstruction, pdgNode, new LinkedHashSet<PDGNode>(), null);
+                dataDependenceSearch(entryNode, variableInstruction, pdgNode, new LinkedHashSet<>(), null);
             } else if (entryNode.declaresLocalVariable(variableInstruction)) {
                 //create def-order data dependence edge
                 PDGDataDependence dataDependence = new PDGDataDependence(entryNode, pdgNode, variableInstruction, null);
@@ -591,7 +593,7 @@ public class PDG extends Graph {
         CFGNode currentCFGNode = currentNode.getCFGNode();
         for (GraphEdge edge : currentCFGNode.outgoingEdges) {
             Flow flow = (Flow) edge;
-            if (!visitedFromLoopbackFlow || (visitedFromLoopbackFlow && flow.isFalseControlFlow())) {
+            if (!visitedFromLoopbackFlow || flow.isFalseControlFlow()) {
                 CFGNode srcCFGNode = (CFGNode) flow.src;
                 CFGNode dstCFGNode = (CFGNode) flow.dst;
                 PDGNode dstPDGNode = dstCFGNode.getPDGNode();
@@ -725,7 +727,7 @@ public class PDG extends Graph {
     }
 
     private Set<BasicBlock> dominatedBlocks(PDGNode branchNode) {
-        Set<BasicBlock> dominatedBlocks = new LinkedHashSet<BasicBlock>();
+        Set<BasicBlock> dominatedBlocks = new LinkedHashSet<>();
         for (GraphEdge edge : branchNode.outgoingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGControlDependence) {
@@ -741,7 +743,7 @@ public class PDG extends Graph {
     }
 
     public Set<BasicBlock> boundaryBlocks(PDGNode node) {
-        Set<BasicBlock> boundaryBlocks = new LinkedHashSet<BasicBlock>();
+        Set<BasicBlock> boundaryBlocks = new LinkedHashSet<>();
         BasicBlock srcBlock = node.getBasicBlock();
         for (BasicBlock block : getBasicBlocks()) {
             Set<BasicBlock> forwardReachableBlocks = forwardReachableBlocks(block);
@@ -755,7 +757,7 @@ public class PDG extends Graph {
     }
 
     public Set<PDGNode> blockBasedRegion(BasicBlock block) {
-        Set<PDGNode> regionNodes = new LinkedHashSet<PDGNode>();
+        Set<PDGNode> regionNodes = new LinkedHashSet<>();
         Set<BasicBlock> reachableBlocks = forwardReachableBlocks(block);
         for (BasicBlock reachableBlock : reachableBlocks) {
             List<CFGNode> blockNodes = reachableBlock.getAllNodesIncludingTry();
@@ -767,7 +769,7 @@ public class PDG extends Graph {
     }
 
     public Set<AbstractVariable> getReturnedVariables() {
-        Set<AbstractVariable> returnedVariables = new LinkedHashSet<AbstractVariable>();
+        Set<AbstractVariable> returnedVariables = new LinkedHashSet<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
             if (pdgNode instanceof PDGExitNode) {
@@ -790,7 +792,7 @@ public class PDG extends Graph {
     }
 
     public PDGNode getLastUse(PlainVariable variable) {
-        List<GraphNode> reversedNodeList = new ArrayList<GraphNode>(nodes);
+        List<GraphNode> reversedNodeList = new ArrayList<>(nodes);
         Collections.reverse(reversedNodeList);
         for (GraphNode node : reversedNodeList) {
             PDGNode pdgNode = (PDGNode) node;

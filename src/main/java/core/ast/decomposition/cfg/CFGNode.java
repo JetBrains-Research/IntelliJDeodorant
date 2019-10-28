@@ -75,7 +75,8 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
 
         if (o instanceof CFGNode) {
             CFGNode node = (CFGNode) o;
-            return this.getId() == node.getId();
+            return this.basicBlock == node.basicBlock
+                    && this.statement == node.statement;
         }
         return false;
     }
