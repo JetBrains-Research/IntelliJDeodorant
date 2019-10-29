@@ -238,10 +238,6 @@ public class MethodBodyObject {
             PsiForStatement forStatement = (PsiForStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(forStatement, StatementType.FOR, parent);
             parent.addStatement(child);
-
-            AbstractExpression abstractExpression = new AbstractExpression(forStatement.getCondition(), child);
-            child.addExpression(abstractExpression);
-
             processStatement(child, forStatement.getBody());
             processStatement(child, forStatement.getInitialization());
             processStatement(child, forStatement.getUpdate());
@@ -276,10 +272,6 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiExpressionStatement) {
             PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
             StatementObject child = new StatementObject(expressionStatement, StatementType.EXPRESSION, parent);
-
-            AbstractExpression abstractExpression = new AbstractExpression(expressionStatement.getExpression(), child);
-            parent.addExpression(abstractExpression);
-
             parent.addStatement(child);
         } else if (statement instanceof PsiSwitchStatement) {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
@@ -389,10 +381,10 @@ public class MethodBodyObject {
             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
             StatementObject child = new StatementObject(variableDeclarationStatement, StatementType.VARIABLE_DECLARATION, parent);
             parent.addStatement(child);
-            Collection<PsiExpression> expressions =
-                    PsiTreeUtil.findChildrenOfType(variableDeclarationStatement, PsiExpression.class);
-            for (PsiExpression elem : expressions) {
-                AbstractExpression abstractExpression = new AbstractExpression(elem, child);
+            Collection<PsiMethodCallExpression> methodCallExpressions =
+                    PsiTreeUtil.findChildrenOfType(variableDeclarationStatement, PsiMethodCallExpression.class);
+            for (PsiMethodCallExpression elem : methodCallExpressions) {
+                AbstractExpression abstractExpression = new AbstractExpression(elem);
                 parent.addExpression(abstractExpression);
             }
         } else if (statement instanceof PsiBreakStatement) {
@@ -411,15 +403,6 @@ public class MethodBodyObject {
             PsiSwitchLabelStatement switchStatement = (PsiSwitchLabelStatement) statement;
             StatementObject child = new StatementObject(switchStatement, StatementType.SWITCH_CASE, parent);
             parent.addStatement(child);
-        } else if (statement instanceof PsiExpressionListStatement) {
-            PsiExpressionListStatement listStatement = (PsiExpressionListStatement) statement;
-            StatementObject child = new StatementObject(listStatement, StatementType.EXPRESSION_LIST, parent);
-            parent.addStatement(child);
-
-            for (PsiExpression psiExpression : listStatement.getExpressionList().getExpressions()) {
-                AbstractExpression abstractExpression = new AbstractExpression(psiExpression, child);
-                parent.addExpression(abstractExpression);
-            }
         }
     }
 
