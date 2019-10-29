@@ -90,7 +90,7 @@ public class ASTReader {
 
         TypeObject typeObject = TypeObject.extractTypeObject(fieldDeclaration.getType().getCanonicalText());
         typeObject.setArrayDimension(typeObject.getArrayDimension());
-        FieldObject fieldObject = new FieldObject(typeObject, fieldDeclaration.getName());
+        FieldObject fieldObject = new FieldObject(fieldDeclaration, typeObject, fieldDeclaration.getName());
         fieldObject.setClassName(classObject.getName());
         fieldObject.addComments(fieldDeclarationComments);
 
