@@ -3,7 +3,11 @@ package core.ast;
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import core.ast.association.Association;
@@ -13,6 +17,7 @@ import core.ast.decomposition.cfg.PlainVariable;
 import core.ast.decomposition.MethodBodyObject;
 import core.ast.decomposition.cfg.AbstractVariable;
 import core.ast.util.MethodDeclarationUtility;
+import gherkin.lexer.Vi;
 
 import java.util.*;
 
@@ -708,5 +713,40 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public String getSignature() {
         return constructorObject.getSignature();
+    }
+
+    public boolean containsFieldAccessOfEnclosingClass() {
+        //check for field access like SegmentedTimeline.this.segmentsIncluded
+        for (PlainVariable plainVariable : constructorObject.getNonDistinctUsedFieldsThroughThisReference()) {
+            if (!plainVariable.isField() || plainVariable.getOrigin() == null) {
+                continue;
+            }
+
+            PsiElement psiElement = plainVariable.getOrigin().getParent();
+            if (psiElement instanceof PsiClass) {
+                if (!((PsiClass) psiElement).equals(psiMethod.getContainingClass())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
+        /*
+        List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
+        for(FieldInstructionObject fieldInstruction : fieldInstructions) {
+            PsiElement element = fieldInstruction.getElement();
+            if(element.getParent() instanceof  PsiReferenceExpression) {
+                PsiReferenceExpression referenceExpression = (PsiReferenceExpression)  element.getParent();
+                if(referenceExpression.getChildren()[0] instanceof PsiThisExpression) {
+                    PsiThisExpression thisExpression = (PsiThisExpression)referenceExpression.getChildren()[0];
+                    if(thisExpression.getQualifier() != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+         */
     }
 }

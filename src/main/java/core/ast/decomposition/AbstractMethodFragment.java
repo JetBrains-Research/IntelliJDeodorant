@@ -415,7 +415,7 @@ public abstract class AbstractMethodFragment {
                     for (PsiField psiField : fields) {
                         TypeObject fieldType = TypeObject.extractTypeObject(psiField.getType().getCanonicalText());
                         fieldType.setArrayDimension(fieldType.getArrayDimension());
-                        FieldObject fieldObject = new FieldObject(fieldType, psiField.getName());
+                        FieldObject fieldObject = new FieldObject(psiField, fieldType, psiField.getName());
                         fieldObject.setClassName(anonymousClassObject.getName());
                         if ((psiField.hasModifier(JvmModifier.PUBLIC)))
                             fieldObject.setAccess(Access.PUBLIC);
