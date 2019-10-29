@@ -2,7 +2,6 @@ package core.ast;
 
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiReferenceExpression;
 
 import java.util.ArrayList;
@@ -17,11 +16,10 @@ public class FieldObject extends VariableDeclarationObject {
     private boolean _static;
     private Access access;
     private String className;
-    private PsiField psiField;
+    private ASTInformation fragment;
     private volatile int hashCode = 0;
 
-    public FieldObject(PsiField psiField, TypeObject type, String fieldName) {
-        this.psiField = psiField;
+    public FieldObject(TypeObject type, String fieldName) {
         this.type = type;
         this.name = fieldName;
         this._static = false;
@@ -29,10 +27,13 @@ public class FieldObject extends VariableDeclarationObject {
         this.commentList = new ArrayList<>();
     }
 
-    public FieldInstructionObject generateFieldInstruction() {
-        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name);
-        fieldInstruction.setStatic(this._static);
-        return fieldInstruction;
+    private PsiDeclarationStatement getVariableDeclarationFragment() {
+        PsiElement node = this.fragment.recoverASTNode();
+        if (node instanceof PsiReferenceExpression) {
+            return (PsiDeclarationStatement) node.getParent();
+        } else {
+            return (PsiDeclarationStatement) node;
+        }
     }
 
     public void setAccess(Access access) {
@@ -105,7 +106,7 @@ public class FieldObject extends VariableDeclarationObject {
             result = 37 * result + className.hashCode();
             result = 37 * result + name.hashCode();
             result = 37 * result + type.hashCode();
-            //result = 37 * result + variableBindingKey.hashCode();
+            result = 37 * result + variableBindingKey.hashCode();
             hashCode = result;
         }
         return hashCode;
@@ -122,7 +123,7 @@ public class FieldObject extends VariableDeclarationObject {
         return sb.toString();
     }
 
-    public PsiField getVariableDeclaration() {
-        return psiField;
+    public PsiDeclarationStatement getVariableDeclaration() {
+        return getVariableDeclarationFragment();
     }
 }

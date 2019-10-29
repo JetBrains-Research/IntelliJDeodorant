@@ -19,7 +19,6 @@ import java.util.List;
  * 9.	SwitchCase
  * 10.	EmptyStatement
  * 11.	ThrowStatement
- * 12.  ExpressionListStatement
  */
 
 public class StatementObject extends AbstractStatement {

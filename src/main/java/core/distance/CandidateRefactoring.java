@@ -1,13 +1,11 @@
 package core.distance;
 
-import core.ast.ASTInformation;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class CandidateRefactoring {
+abstract class CandidateRefactoring {
     public abstract String getSourceEntity();
 
     public abstract String getSource();
