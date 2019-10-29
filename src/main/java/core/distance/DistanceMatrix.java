@@ -9,7 +9,10 @@ import core.ast.ASTReader;
 import core.ast.MethodInvocationObject;
 import core.ast.MethodObject;
 import core.ast.ParameterObject;
+import org.mozilla.javascript.JavaScriptException;
 import utils.IntelliJDeodorantBundle;
+import core.ast.util.math.Cluster;
+import core.ast.util.math.Clustering;
 
 import java.util.*;
 
@@ -25,6 +28,7 @@ public class DistanceMatrix {
     private final MySystem system;
     private final String IDENTIFICATION_INDICATOR_TEXT_KEY = "feature.envy.identification.indicator";
     private final int maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate = 2;
+    private static final int maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate = 2;
 
     public DistanceMatrix(MySystem system) {
         this.system = system;
@@ -275,6 +279,7 @@ public class DistanceMatrix {
                 if (classMap.containsKey(classOrigin)) accessMap.put(classOrigin, list);
             }
         }
+
         for (String key1 : accessMap.keySet()) {
             ClassObject classObject = ASTReader.getSystemObject().getClassObject(key1);
             if (classObject != null && classObject.getSuperclass() != null) {
@@ -306,4 +311,60 @@ public class DistanceMatrix {
         return jaccardDistanceMatrix;
     }
 
+    public List<ExtractClassCandidateRefactoring> getExtractClassCandidateRefactorings(Set<String> classNamesToBeExamined, ProgressIndicator indicator) {
+        List<ExtractClassCandidateRefactoring> candidateList = new ArrayList<>();
+        Iterator<MyClass> classIt = system.getClassIterator();
+        ArrayList<MyClass> oldClasses = new ArrayList<>();
+
+        while(classIt.hasNext()) {
+            MyClass myClass = classIt.next();
+            if(classNamesToBeExamined.contains(myClass.getName())) {
+                oldClasses.add(myClass);
+            }
+        }
+
+        /*
+        TODO
+        if(indicator != null)
+            indicator.beginTask("Identification of Extract Class refactoring opportunities", oldClasses.size());
+         */
+        for(MyClass sourceClass : oldClasses) {
+            /*
+            if(monitor != null && monitor.isCanceled())
+                throw new OperationCanceledException();
+                TODO
+            */
+            if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
+                double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
+                Clustering clustering = Clustering.getInstance(0, distanceMatrix);
+                ArrayList<Entity> entities = new ArrayList<>();
+                entities.addAll(sourceClass.getAttributeList());
+                entities.addAll(sourceClass.getMethodList());
+                HashSet<Cluster> clusters = clustering.clustering(entities);
+                for (Cluster cluster : clusters) {
+                    ExtractClassCandidateRefactoring candidate = new ExtractClassCandidateRefactoring(system, sourceClass, cluster.getEntities());
+                    if (candidate.isApplicable()) {
+                        int sourceClassDependencies = candidate.getDistinctSourceDependencies();
+                        int extractedClassDependencies = candidate.getDistinctTargetDependencies();
+                        if(sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate &&
+                                sourceClassDependencies < extractedClassDependencies) {
+                            candidateList.add(candidate);
+                        }
+                    }
+                }
+                // Clustering End
+            }
+            /*
+            if(monitor != null)
+                monitor.worked(1);
+                TODO
+             */
+        }
+        /*
+        if(monitor != null)
+            monitor.done();
+            TODO
+         */
+        return candidateList;
+    }
 }

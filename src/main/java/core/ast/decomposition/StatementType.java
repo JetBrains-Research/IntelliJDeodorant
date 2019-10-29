@@ -31,7 +31,8 @@ public enum StatementType {
     TRY,
     TYPE_DECLARATION,
     VARIABLE_DECLARATION,
-    WHILE;
+    WHILE,
+    EXPRESSION_LIST;
 
     public String toString() {
         return name().toLowerCase();
