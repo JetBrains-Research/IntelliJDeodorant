@@ -37,7 +37,7 @@ public class ExtractMethodRefactoring {
     }
 
     /**
-     * Returns method that is moved in this refactoring.
+     * Returns method from which code is proposed to be extracted into separate method.
      */
     public @NotNull
     PsiMethod getMethod() {

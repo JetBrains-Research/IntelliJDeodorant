@@ -115,8 +115,8 @@ class ExtractMethodPanel extends JPanel {
      */
     private void refactorSelected() {
         doRefactorButton.setEnabled(false);
-        ASTSlice res = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
-        TransactionGuard.getInstance().submitTransactionAndWait((doExtract(res)));
+        ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
+        TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
     }
 
     /**
@@ -170,28 +170,28 @@ class ExtractMethodPanel extends JPanel {
      * Extracts statements into new method.
      *
      * @param slice computation slice.
-     * @return runnable.
+     * @return callback to run when "Refactor" button is selected.
      */
     private Runnable doExtract(ASTSlice slice) {
         return () -> {
             Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
-            ArrayList<PDGNode> nodes = new ArrayList<>(slice.getSliceNodes());
-            HashSet<PsiStatement> resultStatements = new HashSet<>();
+            Set<PDGNode> nodes = slice.getSliceNodes();
+            ArrayList<PsiStatement> statementsToExtract = new ArrayList<>();
 
-            for (PDGNode node : nodes) {
-                boolean add = true;
-                for (PDGNode node1 : nodes) {
-                    if (isChild(node1.getASTStatement(), node.getASTStatement())) {
-                        add = false;
+            for (PDGNode pdgNode : nodes) {
+                boolean isNotChild = true;
+                for (PDGNode node : nodes) {
+                    if (isChild(node.getASTStatement(), pdgNode.getASTStatement())) {
+                        isNotChild = false;
                     }
                 }
-                if (add) resultStatements.add(node.getASTStatement());
+                if (isNotChild) {
+                    statementsToExtract.add(pdgNode.getASTStatement());
+                }
             }
 
-            PsiElement[] testStatements = resultStatements.toArray(new PsiElement[0]);
-
             MyExtractMethodProcessor processor = new MyExtractMethodProcessor(scope.getProject(),
-                    editor, testStatements, slice.getLocalVariableCriterion().getType(),
+                    editor, statementsToExtract.toArray(new PsiElement[0]), slice.getLocalVariableCriterion().getType(),
                     IntelliJDeodorantBundle.message(EXTRACT_METHOD_REFACTORING_NAME), "", HelpID.EXTRACT_METHOD,
                     slice.getSourceTypeDeclaration(), slice.getLocalVariableCriterion());
             processor.setOutputVariable();
@@ -210,25 +210,22 @@ class ExtractMethodPanel extends JPanel {
     /**
      * Opens definition of method and highlights statements, which should be extracted or removed.
      *
-     * @param method source method.
-     * @param scope  scope of the current project.
-     * @param slice  computation slice.
+     * @param sourceMethod method from which code is proposed to be extracted into separate method.
+     * @param scope        scope of the current project.
+     * @param slice        computation slice.
      */
-    private static void openDefinition(@Nullable PsiMethod method, AnalysisScope scope, ASTSlice slice) {
+    private static void openDefinition(@Nullable PsiMethod sourceMethod, AnalysisScope scope, ASTSlice slice) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
-            private PsiElement result;
-
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
-                result = method;
             }
 
             @Override
             public void onSuccess() {
-                if (result != null) {
-                    EditorHelper.openInEditor(result);
-                    Editor editor = FileEditorManager.getInstance(result.getProject()).getSelectedTextEditor();
+                if (sourceMethod != null) {
+                    EditorHelper.openInEditor(sourceMethod);
+                    Editor editor = FileEditorManager.getInstance(sourceMethod.getProject()).getSelectedTextEditor();
                     if (editor != null) {
                         TextAttributes attributes = new TextAttributes(editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR),
                                 new JBColor(new Color(84, 168, 78), new Color(16, 105, 15)), null, null, 0);
