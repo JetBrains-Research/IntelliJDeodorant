@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.intellij.psi.*;
 
-public class StatementExtractor {
+class StatementExtractor {
 
     private StatementInstanceChecker instanceChecker;
 
