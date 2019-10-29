@@ -20,6 +20,7 @@ intellij {
 }
 
 dependencies {
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 }
 
 

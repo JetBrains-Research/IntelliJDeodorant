@@ -9,14 +9,22 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import core.ast.Standalone;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase {
     private static final String PATH_TO_TEST_DATA = "src/test/resources/testdata/core/distance/godclass/";
 
+    //TODO add some complicated actual project tests
+
+    @Nullable
     private ExtractClassCandidateGroup getExractClassCandidateGroup(@NotNull String classFileName) {
         myFixture.configureByFile(PATH_TO_TEST_DATA + classFileName);
         Project project = myFixture.getProject();
@@ -25,7 +33,10 @@ public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase 
 
         Set<ExtractClassCandidateGroup> set = Standalone.getExtractClassRefactoringOpportunities(projectInfo, new ProgressIndicatorBase());
 
-        assertTrue(set.iterator().hasNext());
+        if (set.isEmpty()) {
+            return null;
+        }
+
         return set.iterator().next();
     }
 
@@ -34,12 +45,12 @@ public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase 
         ExtractClassCandidateRefactoring extractClassCandidateRefactoring = extractClassCandidateGroup.getCandidates().get(groupNumber);
 
         List<String> extractedFieldsNames = extractClassCandidateRefactoring.getExtractedFieldFragments().stream().map(PsiField::getName).collect(Collectors.toList());
-        assertContainsElements(extractedFieldsNames, expectedFields);
-        assertContainsElements(expectedFields, extractedFieldsNames);
+        assertThat(extractedFieldsNames, containsInAnyOrder((expectedFields.toArray())));
+        assertThat(expectedFields, containsInAnyOrder(extractedFieldsNames.toArray()));
 
         List<String> extractedMethodsNames = extractClassCandidateRefactoring.getExtractedMethods().stream().map(PsiMethod::getName).collect(Collectors.toList());
-        assertContainsElements(extractedMethodsNames, expectedMethods);
-        assertContainsElements(expectedMethods, extractedMethodsNames);
+        assertThat(extractedMethodsNames, containsInAnyOrder(expectedMethods.toArray()));
+        assertThat(expectedMethods, containsInAnyOrder(extractedMethodsNames.toArray()));
     }
 
     public void testSimple() {
@@ -49,6 +60,125 @@ public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase 
 
         ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
 
+        assertNotNull(group);
+
+
         compareExtractClassCandidateRefactoringContains(group, 0, expectedFields, expectedMethods);
+    }
+
+    public void testOnlyFields() {
+        String classFileName = "testOnlyFields.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+    }
+
+
+    public void testSeparateBlocks() {
+        String classFileName = "testSeparateBlocks.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+        assertNotNull(group);
+
+        for (int i = 0; i < 2; i++) {
+            List<String> expectedFields;
+            List<String> expectedMethods;
+
+            if (i == 0) {
+                expectedFields = Arrays.asList("a", "b", "c");
+                expectedMethods = Arrays.asList("fun1");
+            } else {
+                expectedFields = Arrays.asList("d", "e");
+                expectedMethods = Arrays.asList("fun2");
+            }
+
+            compareExtractClassCandidateRefactoringContains(group, i, expectedFields, expectedMethods);
+        }
+    }
+
+    public void testManySeparatesBlocks() {
+        String classFileName = "testSeparateBlocksWithStrictOrder.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+        assertNotNull(group);
+
+        for (int i = 0; i < 6; i++) {
+            List<String> expectedFields;
+            List<String> expectedMethods;
+
+            if (i == 0) {
+                expectedFields = Arrays.asList("aa", "ab", "ac", "ad", "ae", "af", "ag");
+                expectedMethods = Arrays.asList("fun1");
+            } else if (i == 1) {
+                expectedFields = Arrays.asList("ba", "bb", "bc", "bd", "be", "bf");
+                expectedMethods = Arrays.asList("fun2");
+            } else if (i == 2) {
+                expectedFields = Arrays.asList("ca", "cb", "cc", "cd", "ce");
+                expectedMethods = Arrays.asList("fun3");
+            } else if (i == 3) {
+                expectedFields = Arrays.asList("da", "db", "dc", "dd");
+                expectedMethods = Arrays.asList("fun4");
+            } else if (i == 4) {
+                expectedFields = Arrays.asList("ea", "eb", "ec");
+                expectedMethods = Arrays.asList("fun5");
+            } else {
+                expectedFields = Arrays.asList("fa", "fb");
+                expectedMethods = Arrays.asList("fun6");
+            }
+
+            compareExtractClassCandidateRefactoringContains(group, i, expectedFields, expectedMethods);
+        }
+    }
+
+    public void testSynchronizedMethod() {
+        String classFileName = "testSynchronizedMethod.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+    }
+
+    public void testSynchronizedMethodBody() {
+        String classFileName = "testSynchronizedMethodBlock.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        //ORIGINAL PLUGIN ACTUALLY ALLOWS IT, BUT IT SHOULDN'T. PROBABLY A BUG.
+        //assertNull(group);
+    }
+
+    public void testAbstractMethod() {
+        String classFileName = "testAbstractMethod.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+    }
+
+    public void testPublicFields() {
+        String classFileName = "testPublicFields.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+    }
+
+    public void testOverride() {
+        String classFileName = "testOverride.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+
+        //TODO This is a BUG, method overrides toString so should not be extracted. Adding @Override helps, but, ofcourse, this annotation is not obligatory.
+    }
+
+    public void testOnlyMethods() {
+        String classFileName = "testOnlyMethods.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
     }
 }
