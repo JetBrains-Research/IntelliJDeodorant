@@ -26,8 +26,7 @@ public class ExtractMethodRefactoring {
      *
      * @param sliceGroup slice group that consist of candidates to extract.
      */
-    public ExtractMethodRefactoring(
-            final @NotNull ASTSliceGroup sliceGroup) {
+    public ExtractMethodRefactoring(final @NotNull ASTSliceGroup sliceGroup) {
         this.method = ApplicationManager.getApplication().runReadAction(
                 (Computable<SmartPsiElementPointer<PsiMethod>>) () ->
                         SmartPointerManager.getInstance(sliceGroup.getSourceMethodDeclaration().getProject())

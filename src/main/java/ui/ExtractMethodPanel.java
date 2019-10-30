@@ -114,7 +114,6 @@ class ExtractMethodPanel extends JPanel {
      * Preforms selected refactoring.
      */
     private void refactorSelected() {
-        doRefactorButton.setEnabled(false);
         ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
         TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
     }
@@ -123,6 +122,10 @@ class ExtractMethodPanel extends JPanel {
      * Refreshes the panel with suggestions.
      */
     private void refreshPanel() {
+        Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
+        if (editor != null) {
+            editor.getMarkupModel().removeAllHighlighters();
+        }
         refactorings.clear();
         scrollPane.setVisible(false);
         calculateRefactorings();
@@ -194,16 +197,21 @@ class ExtractMethodPanel extends JPanel {
                     editor, statementsToExtract.toArray(new PsiElement[0]), slice.getLocalVariableCriterion().getType(),
                     IntelliJDeodorantBundle.message(EXTRACT_METHOD_REFACTORING_NAME), "", HelpID.EXTRACT_METHOD,
                     slice.getSourceTypeDeclaration(), slice.getLocalVariableCriterion());
+
             processor.setOutputVariable();
             processor.testTargetClass(slice.getSourceTypeDeclaration());
+
             try {
-                processor.prepare();
+                processor.setShowErrorDialogs(true);
+                if (processor.prepare()) {
+                    ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
+                            slice.getSourceMethodDeclaration().getContainingFile(), true);
+                }
             } catch (PrepareFailedException e) {
                 e.printStackTrace();
             }
             processor.setOutputVariable();
-            ExtractMethodHandler.invokeOnElements(scope.getProject(), processor, slice.getSourceMethodDeclaration().getContainingFile(), true);
-            doRefactorButton.setEnabled(true);
+
         };
     }
 

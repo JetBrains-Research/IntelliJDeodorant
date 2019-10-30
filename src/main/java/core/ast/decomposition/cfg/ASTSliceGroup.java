@@ -5,7 +5,6 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
@@ -100,13 +99,14 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
         else if (averageNumberOfExtractedStatements1 > averageNumberOfExtractedStatements2)
             return -1;
 
-        String group1 = this.getSourceTypeDeclaration().getQualifiedName() + "::" +
-                this.getSourceMethodDeclaration().toString() + "::" +
-                Objects.requireNonNull(this.getLocalVariableCriterion().getNameIdentifier()).getText();
+        String nameSeparator = "::";
+        String group1 = this.getSourceTypeDeclaration().getQualifiedName() + nameSeparator +
+                this.getSourceMethodDeclaration().getName() + nameSeparator +
+                this.getLocalVariableCriterion().getName();
 
-        String group2 = other.getSourceTypeDeclaration().getQualifiedName() + "::" +
-                other.getSourceMethodDeclaration().toString() + "::" +
-                Objects.requireNonNull(other.getLocalVariableCriterion().getNameIdentifier()).getText();
+        String group2 = other.getSourceTypeDeclaration().getQualifiedName() + nameSeparator +
+                other.getSourceMethodDeclaration().getName() + nameSeparator +
+                other.getLocalVariableCriterion().getName();
         return group1.compareTo(group2);
     }
 }

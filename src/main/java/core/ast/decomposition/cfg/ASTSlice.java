@@ -263,13 +263,9 @@ public class ASTSlice {
     }
 
     public String toString() {
-        int numberOfSliceStatements = getNumberOfSliceStatements();
-        int numberOfDuplicatedStatements = getNumberOfDuplicatedStatements();
-        return getSourceTypeDeclaration().getQualifiedName() + "\t" +
-                getSourceMethodDeclaration().toString() + "\t" +
-                getLocalVariableCriterion().getNameIdentifier().getText() + "\t" +
-                "B" + getBoundaryBlock().getId() + "\t" +
-                numberOfDuplicatedStatements + "/" + numberOfSliceStatements;
+        return getSourceTypeDeclaration().getQualifiedName() + "::" +
+                getSourceMethodDeclaration().getName() + "." +
+                getLocalVariableCriterion().getName();
     }
 
     public int getNumberOfSliceStatements() {

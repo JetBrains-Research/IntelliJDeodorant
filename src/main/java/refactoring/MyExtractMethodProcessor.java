@@ -20,11 +20,12 @@ import java.util.*;
  * Extracts statements that responsible for calculating variable's value into new method.
  */
 public class MyExtractMethodProcessor extends ExtractMethodProcessor {
+    @NotNull
     private PsiVariable variableCriterion;
     private PsiElementFactory myElementFactory;
 
     /**
-     * Constructs a processor for extracting statements into new method.
+     * Constructs a processor for extracting statements into a new method.
      *
      * @param project           project that contains statements.
      * @param editor            editor that shows extracted statements.
@@ -33,23 +34,28 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
      * @param refactoringName   refactoring name.
      * @param initialMethodName initial name of new method.
      * @param helpId            id of help.
+     * @param psiClass          source class.
+     * @param psiVariable       variable, which calculation of value can be extracted into a separate method.
      */
-    public MyExtractMethodProcessor(Project project, Editor editor, PsiElement[] elements, PsiType forcedReturnType,
-                                    String refactoringName, String initialMethodName, String helpId, PsiClass psiClass,
-                                    PsiVariable psiVariable) {
+    public MyExtractMethodProcessor(@NotNull Project project, Editor editor, PsiElement[] elements, @NotNull PsiType forcedReturnType,
+                                    String refactoringName, String initialMethodName, String helpId, @NotNull PsiClass psiClass,
+                                    @NotNull PsiVariable psiVariable) {
         super(project, editor, elements, forcedReturnType, refactoringName, initialMethodName, helpId);
         this.myReturnType = forcedReturnType;
         this.myThrownExceptions = new PsiClassType[0];
         this.myTargetClass = psiClass;
         this.variableCriterion = psiVariable;
         this.myElementFactory = JavaPsiFacade.getElementFactory(PsiManager.getInstance(myProject).getProject());
+        this.myOutputVariable = psiVariable;
+        this.myOutputVariables = new PsiVariable[1];
+        this.myOutputVariables[0] = psiVariable;
     }
 
     /**
-     * Checks if variable is declared inside statements to extract.
+     * Checks if a variable is declared inside statements to extract.
      *
      * @param variable variable to check.
-     * @return true if variable is declared inside statements to extract and false otherwise.
+     * @return true if a variable is declared inside statements to extract and false otherwise.
      */
     @Override
     public boolean isDeclaredInside(PsiVariable variable) {
@@ -99,24 +105,31 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
         prepareMethodBody(newMethod);
         myExtractedMethod = addExtractedMethod(newMethod);
         setMethodCall(generateMethodCall(null, true));
-        PsiDeclarationStatement statement = myElementFactory.createVariableDeclarationStatement(variableCriterion.getName(),
-                variableCriterion.getType(), getMethodCall());
-        statement =
-                (PsiDeclarationStatement) JavaCodeStyleManager.getInstance(myProject).shortenClassReferences(addToMethodCallLocation(statement));
-        PsiVariable var = (PsiVariable) statement.getDeclaredElements()[0];
-        setMethodCall((PsiMethodCallExpression) var.getInitializer());
-        if (myOutputVariable != null && var.getModifierList() != null && myOutputVariable.getModifierList() != null) {
-            var.getModifierList().replace(myOutputVariable.getModifierList());
+
+        final String outputVariableName = myOutputVariable.getName();
+        if (isDeclaredInside(myOutputVariable) && outputVariableName != null) {
+            PsiDeclarationStatement statement = myElementFactory.createVariableDeclarationStatement(outputVariableName,
+                    variableCriterion.getType(), getMethodCall());
+            statement = (PsiDeclarationStatement) JavaCodeStyleManager.getInstance(myProject)
+                    .shortenClassReferences(addToMethodCallLocation(statement));
+            PsiVariable var = (PsiVariable) statement.getDeclaredElements()[0];
+            setMethodCall((PsiMethodCallExpression) var.getInitializer());
+        } else {
+            PsiExpressionStatement statement = (PsiExpressionStatement) myElementFactory.createStatementFromText(outputVariableName + "=x;", null);
+            statement = (PsiExpressionStatement) addToMethodCallLocation(statement);
+            PsiAssignmentExpression assignment = (PsiAssignmentExpression) statement.getExpression();
+            setMethodCall((PsiMethodCallExpression) Objects.requireNonNull(assignment.getRExpression()).replace(getMethodCall()));
         }
+
         for (PsiElement element : myElements) {
             element.delete();
         }
     }
 
     /**
-     * Prepares body for new method and removed extracted statements from source method.
+     * Prepares body for a new method.
      *
-     * @param newMethod method with empty body.
+     * @param newMethod new method with empty body.
      */
     private void prepareMethodBody(PsiMethod newMethod) {
         PsiCodeBlock body = newMethod.getBody();
@@ -124,31 +137,31 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
             for (PsiElement psiElement : myElements) {
                 body.add(psiElement);
             }
-        }
 
-        PsiReturnStatement returnStatement;
-        if (myNullConditionalCheck) {
-            returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return null;", null);
-        } else if (myOutputVariable != null) {
-            returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return " + myOutputVariable.getName() + ";", null);
-        } else if (myGenerateConditionalExit) {
-            returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return true;", null);
-        } else {
-            returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return;", null);
-        }
-        final PsiReturnStatement insertedReturnStatement = (PsiReturnStatement) body.add(returnStatement);
-        if (myOutputVariables.length == 1) {
-            final PsiExpression returnValue = insertedReturnStatement.getReturnValue();
-            if (returnValue instanceof PsiReferenceExpression) {
-                final PsiVariable variable = ObjectUtils.tryCast(((PsiReferenceExpression) returnValue).resolve(), PsiVariable.class);
-                if (variable != null && Comparing.strEqual(variable.getName(), myOutputVariable.getName())) {
-                    final PsiStatement statement = PsiTreeUtil.getPrevSiblingOfType(insertedReturnStatement, PsiStatement.class);
-                    if (statement instanceof PsiDeclarationStatement) {
-                        final PsiElement[] declaredElements = ((PsiDeclarationStatement) statement).getDeclaredElements();
-                        if (ArrayUtil.find(declaredElements, variable) != -1) {
-                            InlineUtil.inlineVariable(variable, PsiUtil.skipParenthesizedExprDown(variable.getInitializer()),
-                                    (PsiReferenceExpression) returnValue);
-                            variable.delete();
+            PsiReturnStatement returnStatement;
+            if (myNullConditionalCheck) {
+                returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return null;", null);
+            } else if (myOutputVariable != null) {
+                returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return " + myOutputVariable.getName() + ";", null);
+            } else if (myGenerateConditionalExit) {
+                returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return true;", null);
+            } else {
+                returnStatement = (PsiReturnStatement) myElementFactory.createStatementFromText("return;", null);
+            }
+            final PsiReturnStatement insertedReturnStatement = (PsiReturnStatement) body.add(returnStatement);
+            if (myOutputVariables.length == 1) {
+                final PsiExpression returnValue = insertedReturnStatement.getReturnValue();
+                if (returnValue instanceof PsiReferenceExpression) {
+                    final PsiVariable variable = ObjectUtils.tryCast(((PsiReferenceExpression) returnValue).resolve(), PsiVariable.class);
+                    if (variable != null && Comparing.strEqual(variable.getName(), myOutputVariable.getName())) {
+                        final PsiStatement statement = PsiTreeUtil.getPrevSiblingOfType(insertedReturnStatement, PsiStatement.class);
+                        if (statement instanceof PsiDeclarationStatement) {
+                            final PsiElement[] declaredElements = ((PsiDeclarationStatement) statement).getDeclaredElements();
+                            if (ArrayUtil.find(declaredElements, variable) != -1) {
+                                InlineUtil.inlineVariable(variable, PsiUtil.skipParenthesizedExprDown(variable.getInitializer()),
+                                        (PsiReferenceExpression) returnValue);
+                                variable.delete();
+                            }
                         }
                     }
                 }
@@ -158,8 +171,7 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
 
     public void setOutputVariable() {
         myOutputVariables = new PsiVariable[1];
-        PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) myElements[0];
-        myOutputVariables[0] = (PsiVariable) declarationStatement.getDeclaredElements()[0];
-        myOutputVariable = (PsiVariable) declarationStatement.getDeclaredElements()[0];
+        myOutputVariables[0] = variableCriterion;
+        myOutputVariable = variableCriterion;
     }
 }
