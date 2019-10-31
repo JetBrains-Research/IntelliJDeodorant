@@ -18,7 +18,7 @@ public abstract class CFGBranchNode extends CFGNode {
         super(statement);
     }
 
-    public Flow getTrueControlFlow() {
+    Flow getTrueControlFlow() {
         for (GraphEdge edge : outgoingEdges) {
             Flow flow = (Flow) edge;
             if (flow.isTrueControlFlow())
@@ -27,7 +27,7 @@ public abstract class CFGBranchNode extends CFGNode {
         return null;
     }
 
-    public Flow getFalseControlFlow() {
+    Flow getFalseControlFlow() {
         for (GraphEdge edge : outgoingEdges) {
             Flow flow = (Flow) edge;
             if (flow.isFalseControlFlow())
@@ -36,7 +36,7 @@ public abstract class CFGBranchNode extends CFGNode {
         return null;
     }
 
-    protected List<BasicBlock> getNestedBasicBlocksToEnd() {
+    List<BasicBlock> getNestedBasicBlocksToEnd() {
         List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock nextBlock = getBasicBlock();
         while (nextBlock.getNextBasicBlock() != null) {
@@ -67,7 +67,7 @@ public abstract class CFGBranchNode extends CFGNode {
                     processLabeledStatement(nestedStatements, labeledStatement);
                 } else if (statement instanceof TryStatementObject) {
                     CompositeStatementObject tryStatement = (CompositeStatementObject) statement;
-                    //TODO: processTryStatement(nestedStatements, tryStatement);
+                    processTryStatement(nestedStatements, tryStatement);
                 } else
                     nestedStatements.add(statement);
             }
@@ -88,11 +88,11 @@ public abstract class CFGBranchNode extends CFGNode {
         return nestedNodes;
     }
 
-    protected void processBlockStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject blockStatement) {
+    void processBlockStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject blockStatement) {
         for (AbstractStatement statementInsideBlock : blockStatement.getStatements()) {
             if (statementInsideBlock instanceof TryStatementObject) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) statementInsideBlock;
-                //TODO: processTryStatement(nestedStatements, tryStatement);
+                processTryStatement(nestedStatements, tryStatement);
             } else if (statementInsideBlock.getStatement() instanceof PsiLabeledStatement
                     || statementInsideBlock.getStatement() instanceof PsiSynchronizedStatement) {
                 CompositeStatementObject labeledStatement = (CompositeStatementObject) statementInsideBlock;
@@ -105,7 +105,7 @@ public abstract class CFGBranchNode extends CFGNode {
         }
     }
 
-    protected void processLabeledStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject labeledStatement) {
+    void processLabeledStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject labeledStatement) {
         List<AbstractStatement> nestedStatements2 = labeledStatement.getStatements();
         if (!nestedStatements2.isEmpty()) {
             AbstractStatement firstStatement = nestedStatements2.get(0);
@@ -120,15 +120,15 @@ public abstract class CFGBranchNode extends CFGNode {
                 }
             } else if (firstStatement instanceof TryStatementObject) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) firstStatement;
-                //TODO: processTryStatement(nestedStatements, tryStatement);
+                processTryStatement(nestedStatements, tryStatement);
             } else
                 nestedStatements.add(firstStatement);
         }
     }
 
     void processTryStatement(Set<AbstractStatement> nestedStatements, CompositeStatementObject tryStatement) {
-        CompositeStatementObject tryBlock = (CompositeStatementObject) tryStatement.getStatements().get(0);
-        for (AbstractStatement statementInsideBlock : tryBlock.getStatements()) {
+        List<AbstractStatement> tryBlockStatements = tryStatement.getStatements();
+        for (AbstractStatement statementInsideBlock : tryBlockStatements) {
             if (statementInsideBlock instanceof TryStatementObject) {
                 CompositeStatementObject nestedTryStatement = (CompositeStatementObject) statementInsideBlock;
                 processTryStatement(nestedStatements, nestedTryStatement);

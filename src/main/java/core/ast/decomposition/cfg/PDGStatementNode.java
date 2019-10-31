@@ -26,21 +26,6 @@ class PDGStatementNode extends PDGNode {
                 createdTypes.add(creation);
                 if (creation instanceof ClassInstanceCreationObject) {
                     ClassInstanceCreationObject classInstanceCreation = (ClassInstanceCreationObject) creation;
-                    Map<PlainVariable, LinkedHashSet<ClassInstanceCreationObject>> variablesAssignedWithClassInstanceCreations =
-                            statement.getVariablesAssignedWithClassInstanceCreations();
-                    PlainVariable variable = null;
-                    for (PlainVariable key : variablesAssignedWithClassInstanceCreations.keySet()) {
-                        if (variablesAssignedWithClassInstanceCreations.get(key).contains(classInstanceCreation) &&
-                                (statement.getDefinedFieldsThroughThisReference().contains(key)
-                                        || statement.getDefinedLocalVariables().contains(key)
-                                        || statement.getDeclaredLocalVariables().contains(key))) {
-                            variable = key;
-                            break;
-                        }
-                    }
-                    if (variable != null) {
-                        processArgumentsOfInternalClassInstanceCreation(classInstanceCreation, variable);
-                    }
                     thrownExceptionTypes.addAll(classInstanceCreation.getThrownExceptions());
                 }
             }
@@ -55,7 +40,6 @@ class PDGStatementNode extends PDGNode {
                 LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughLocalVariables.get(variable);
                 for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                     thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                    processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                 }
             }
             Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughParameters = statement.getInvokedMethodsThroughParameters();
@@ -63,7 +47,6 @@ class PDGStatementNode extends PDGNode {
                 LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughParameters.get(variable);
                 for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                     thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                    processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                 }
             }
 
@@ -81,16 +64,13 @@ class PDGStatementNode extends PDGNode {
                 LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughFields.get(variable);
                 for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                     thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                    processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                 }
             }
             for (MethodInvocationObject methodInvocationObject : statement.getInvokedMethodsThroughThisReference()) {
                 thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                processArgumentsOfInternalMethodInvocation(methodInvocationObject, null);
             }
             for (MethodInvocationObject methodInvocationObject : statement.getInvokedStaticMethods()) {
                 thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                processArgumentsOfInternalMethodInvocation(methodInvocationObject, null);
             }
             List<SuperMethodInvocationObject> superMethodInvocations = statement.getSuperMethodInvocations();
             for (SuperMethodInvocationObject superMethodInvocationObject : superMethodInvocations) {

@@ -83,7 +83,7 @@ public class CFG extends Graph {
                             } else if (compositeStatement2 instanceof SynchronizedStatementObject) {
                                 previousNodes = processSynchronizedStatement(previousNodes, compositeStatement2);
                             } else if (compositeStatement2 instanceof TryStatementObject) {
-                                //TODO: previousNodes = processTryStatement(previousNodes, compositeStatement2);
+                                previousNodes = processTryStatement(previousNodes, compositeStatement2);
                             } else if (isLoop(compositeStatement2)) {
                                 previousNodes = processLoopStatement(previousNodes, compositeStatement2);
                             } else if (compositeStatement2.getStatement() instanceof PsiDoWhileStatement) {
@@ -102,7 +102,7 @@ public class CFG extends Graph {
                 } else if (compositeStatement instanceof SynchronizedStatementObject) {
                     previousNodes = processSynchronizedStatement(previousNodes, compositeStatement);
                 } else if (compositeStatement instanceof TryStatementObject) {
-                    //TODO: previousNodes = processTryStatement(previousNodes, compositeStatement);
+                    previousNodes = processTryStatement(previousNodes, compositeStatement);
                 } else if (isLoop(compositeStatement)) {
                     previousNodes = processLoopStatement(previousNodes, compositeStatement);
                 } else if (compositeStatement.getStatement() instanceof PsiDoWhileStatement) {
@@ -145,7 +145,9 @@ public class CFG extends Graph {
             findBlockNodeControlParent(tryNode);
             directlyNestedNodesInBlocks.put(tryNode, new ArrayList<>());
             AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (firstStatement instanceof CompositeStatementObject) {
+                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            }
         } else {
             //if a try node has resources, it is treated as a non-composite node
             CFGTryNode tryNode = new CFGTryNode(compositeStatement);
@@ -158,7 +160,9 @@ public class CFG extends Graph {
             currentNodes.add(tryNode);
             previousNodes = currentNodes;
             AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (firstStatement instanceof CompositeStatementObject) {
+                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            }
         }
         return previousNodes;
     }
@@ -317,8 +321,6 @@ public class CFG extends Graph {
             if (parent != null) {
                 if (isLoop(parent) || parent.getStatement() instanceof PsiDoWhileStatement)
                     action = PUSH_NEW_LIST;
-				/*else if(parent.getStatement() instanceof DoStatement)
-					action = PLACE_NEW_LIST_SECOND_FROM_TOP;*/
             }
         } else if (statements.size() > 1) {
             AbstractStatement previousStatement = null;
@@ -370,9 +372,6 @@ public class CFG extends Graph {
                     action = PLACE_NEW_LIST_SECOND_FROM_TOP;
                 else {
                     action = PUSH_NEW_LIST;
-					/*if(parent != null && parent.getStatement() instanceof DoStatement &&
-							statements.get(0).getStatement() instanceof IfStatement)
-						action = PLACE_NEW_LIST_SECOND_FROM_TOP;*/
                 }
             }
         }
@@ -434,7 +433,7 @@ public class CFG extends Graph {
         PsiStatement astStatement = statement.getStatement();
         if (astStatement instanceof PsiReturnStatement)
             currentNode = new CFGExitNode(statement);
-        else if (astStatement instanceof PsiSwitchStatement)
+        else if (astStatement instanceof PsiSwitchLabelStatement)
             currentNode = new CFGSwitchCaseNode(statement);
         else if (astStatement instanceof PsiBreakStatement)
             currentNode = new CFGBreakNode(statement);

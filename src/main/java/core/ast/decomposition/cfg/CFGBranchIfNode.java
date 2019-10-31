@@ -34,7 +34,7 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
                 processLabeledStatement(nestedStatements, labeledStatement);
             } else if (trueControlFlowStatement instanceof PsiTryStatement) {
                 CompositeStatementObject tryStatement = (CompositeStatementObject) trueControlFlowStatement;
-                //TODO: processTryStatement(nestedStatements, tryStatement);
+                processTryStatement(nestedStatements, tryStatement);
             } else
                 nestedStatements.add(trueControlFlowStatement);
             List<BasicBlock> nestedBasicBlocks = getNestedBasicBlocks();
@@ -69,7 +69,7 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
                     processLabeledStatement(nestedStatements, labeledStatement);
                 } else if (falseControlFlowStatement instanceof PsiTryStatement) {
                     CompositeStatementObject tryStatement = (CompositeStatementObject) falseControlFlowStatement;
-                    //TODO: processTryStatement(nestedStatements, tryStatement);
+                    processTryStatement(nestedStatements, tryStatement);
                 } else
                     nestedStatements.add(falseControlFlowStatement);
                 List<BasicBlock> nestedBasicBlocks = getNestedBasicBlocks();

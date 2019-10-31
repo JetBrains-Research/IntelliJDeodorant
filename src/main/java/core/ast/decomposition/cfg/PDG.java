@@ -312,7 +312,6 @@ public class PDG extends Graph {
         return false;
     }
 
-    //TODO: debug it
     private void handleJumpNodes() {
         //key is the jump node and value is the innermost loop node
         Map<PDGNode, PDGNode> jumpNodeMap = getInnerMostLoopNodesForJumpNodes();
@@ -494,7 +493,6 @@ public class PDG extends Graph {
         return null;
     }
 
-    //TODO: cfgNode is PsiDeclarationStatement
     private void processCFGNode(PDGNode previousNode, CFGNode cfgNode, boolean controlType) {
         if (cfgNode instanceof CFGBranchNode) {
             PDGControlPredicateNode predicateNode = new PDGControlPredicateNode(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);

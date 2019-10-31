@@ -106,8 +106,8 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
         myExtractedMethod = addExtractedMethod(newMethod);
         setMethodCall(generateMethodCall(null, true));
 
-        final String outputVariableName = myOutputVariable.getName();
-        if (isDeclaredInside(myOutputVariable) && outputVariableName != null) {
+        final String outputVariableName = variableCriterion.getName();
+        if (isDeclaredInside(variableCriterion) && outputVariableName != null) {
             PsiDeclarationStatement statement = myElementFactory.createVariableDeclarationStatement(outputVariableName,
                     variableCriterion.getType(), getMethodCall());
             statement = (PsiDeclarationStatement) JavaCodeStyleManager.getInstance(myProject)

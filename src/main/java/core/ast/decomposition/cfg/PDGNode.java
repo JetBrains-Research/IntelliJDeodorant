@@ -516,16 +516,4 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         }
         return false;
     }
-
-    //TODO: process arguments
-    void processArgumentsOfInternalClassInstanceCreation(ClassInstanceCreationObject classInstanceCreationObject,
-                                                         AbstractVariable variable) {
-
-    }
-
-    //TODO: process arguments
-    void processArgumentsOfInternalMethodInvocation(MethodInvocationObject methodInvocationObject,
-                                                    AbstractVariable variable) {
-
-    }
 }

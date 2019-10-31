@@ -1,22 +1,18 @@
 package core.ast.decomposition.cfg;
 
-import com.intellij.psi.PsiSwitchStatement;
+import com.intellij.psi.PsiSwitchLabelStatement;
 import core.ast.decomposition.AbstractStatement;
 
-public class CFGSwitchCaseNode extends CFGNode {
+class CFGSwitchCaseNode extends CFGNode {
     private boolean isDefault;
 
-    public CFGSwitchCaseNode(AbstractStatement statement) {
+    CFGSwitchCaseNode(AbstractStatement statement) {
         super(statement);
-        PsiSwitchStatement switchCase = (PsiSwitchStatement) statement.getStatement();
-        // TODO: how can we identify this case?
-/*        if (switchCase)
-            isDefault = true;
-        else
-            isDefault = false;*/
+        PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement.getStatement();
+        isDefault = switchCase.isDefaultCase();
     }
 
-    public boolean isDefault() {
+    boolean isDefault() {
         return isDefault;
     }
 }

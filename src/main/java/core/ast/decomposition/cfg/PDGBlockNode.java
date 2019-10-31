@@ -36,21 +36,6 @@ public class PDGBlockNode extends PDGNode {
                     createdTypes.add(creation);
                     if (creation instanceof ClassInstanceCreationObject) {
                         ClassInstanceCreationObject classInstanceCreation = (ClassInstanceCreationObject) creation;
-                        Map<PlainVariable, LinkedHashSet<ClassInstanceCreationObject>> variablesAssignedWithClassInstanceCreations =
-                                expression.getVariablesAssignedWithClassInstanceCreations();
-                        PlainVariable variable = null;
-                        for (PlainVariable key : variablesAssignedWithClassInstanceCreations.keySet()) {
-                            if (variablesAssignedWithClassInstanceCreations.get(key).contains(classInstanceCreation)
-                                    && (expression.getDefinedFieldsThroughThisReference().contains(key)
-                                    || expression.getDefinedLocalVariables().contains(key)
-                                    || expression.getDeclaredLocalVariables().contains(key))) {
-                                variable = key;
-                                break;
-                            }
-                        }
-                        if (variable != null) {
-                            processArgumentsOfInternalClassInstanceCreation(classInstanceCreation, variable);
-                        }
                         thrownExceptionTypes.addAll(classInstanceCreation.getThrownExceptions());
                     }
                 }
@@ -67,7 +52,6 @@ public class PDGBlockNode extends PDGNode {
                     LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughLocalVariables.get(variable);
                     for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                         thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                        processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                     }
                 }
                 Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> invokedMethodsThroughParameters =
@@ -76,7 +60,6 @@ public class PDGBlockNode extends PDGNode {
                     LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughParameters.get(variable);
                     for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                         thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                        processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                     }
                 }
 
@@ -95,16 +78,13 @@ public class PDGBlockNode extends PDGNode {
                     LinkedHashSet<MethodInvocationObject> methodInvocations = invokedMethodsThroughFields.get(variable);
                     for (MethodInvocationObject methodInvocationObject : methodInvocations) {
                         thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                        processArgumentsOfInternalMethodInvocation(methodInvocationObject, variable);
                     }
                 }
                 for (MethodInvocationObject methodInvocationObject : expression.getInvokedMethodsThroughThisReference()) {
                     thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                    processArgumentsOfInternalMethodInvocation(methodInvocationObject, null);
                 }
                 for (MethodInvocationObject methodInvocationObject : expression.getInvokedStaticMethods()) {
                     thrownExceptionTypes.addAll(methodInvocationObject.getThrownExceptions());
-                    processArgumentsOfInternalMethodInvocation(methodInvocationObject, null);
                 }
                 List<SuperMethodInvocationObject> superMethodInvocations = expression.getSuperMethodInvocations();
                 for (SuperMethodInvocationObject superMethodInvocationObject : superMethodInvocations) {
