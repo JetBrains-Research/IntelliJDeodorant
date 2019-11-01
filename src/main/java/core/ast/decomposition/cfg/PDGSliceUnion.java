@@ -196,7 +196,7 @@ public class PDGSliceUnion {
         return throwNodes;
     }
 
-    public Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
+    Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
         return pdg.getVariableDeclarationsAndAccessedFieldsInMethod();
     }
 
@@ -204,43 +204,39 @@ public class PDGSliceUnion {
         return method;
     }
 
-    public PsiFile getIFile() {
+    PsiFile getIFile() {
         return iFile;
     }
 
-    public int getMethodSize() {
+    int getMethodSize() {
         return methodSize;
     }
 
-    public BasicBlock getBoundaryBlock() {
+    BasicBlock getBoundaryBlock() {
         return boundaryBlock;
     }
 
-    public Set<PDGNode> getNodeCriteria() {
-        return nodeCriteria;
-    }
-
-    public PDGNode getExtractedMethodInvocationInsertionNode() {
+    PDGNode getExtractedMethodInvocationInsertionNode() {
         return ((TreeSet<PDGNode>) sliceNodes).first();
     }
 
-    public AbstractVariable getLocalVariableCriterion() {
+    AbstractVariable getLocalVariableCriterion() {
         return localVariableCriterion;
     }
 
-    public Set<PDGNode> getSliceNodes() {
+    Set<PDGNode> getSliceNodes() {
         return this.sliceNodes;
     }
 
-    public Set<AbstractVariable> getPassedParameters() {
+    Set<AbstractVariable> getPassedParameters() {
         return passedParameters;
     }
 
-    public Set<PDGNode> getRemovableNodes() {
+    Set<PDGNode> getRemovableNodes() {
         return removableNodes;
     }
 
-    public PDGNode getDeclarationOfVariableCriterion() {
+    PDGNode getDeclarationOfVariableCriterion() {
         for (PDGNode pdgNode : sliceNodes) {
             if (pdgNode.declaresLocalVariable(localVariableCriterion))
                 return pdgNode;
@@ -248,7 +244,7 @@ public class PDGSliceUnion {
         return null;
     }
 
-    public boolean declarationOfVariableCriterionBelongsToSliceNodes() {
+    boolean declarationOfVariableCriterionBelongsToSliceNodes() {
         for (PDGNode node : sliceNodes) {
             if (node.declaresLocalVariable(localVariableCriterion))
                 return true;
@@ -452,7 +448,6 @@ public class PDGSliceUnion {
     }
 
     private boolean complyWithUserThresholds() {
-        int minimumSliceSize = 0;
         int maximumSliceSize = 0;
         int maximumDuplication = 100;
         double maximumRatioOfDuplicatedToExtracted = 1.0;

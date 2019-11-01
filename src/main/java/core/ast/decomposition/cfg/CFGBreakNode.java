@@ -3,11 +3,11 @@ package core.ast.decomposition.cfg;
 import com.intellij.psi.PsiBreakStatement;
 import core.ast.decomposition.AbstractStatement;
 
-public class CFGBreakNode extends CFGNode {
+class CFGBreakNode extends CFGNode {
     private String label;
     private CFGNode innerMostLoopNode;
 
-    public CFGBreakNode(AbstractStatement statement) {
+    CFGBreakNode(AbstractStatement statement) {
         super(statement);
         PsiBreakStatement breakStatement = (PsiBreakStatement) statement.getStatement();
         if (breakStatement.getLabelExpression() != null
@@ -15,19 +15,19 @@ public class CFGBreakNode extends CFGNode {
             label = breakStatement.getLabelExpression().getQualifiedName();
     }
 
-    public String getLabel() {
+    String getLabel() {
         return label;
     }
 
-    public boolean isLabeled() {
+    boolean isLabeled() {
         return label != null;
     }
 
-    public CFGNode getInnerMostLoopNode() {
+    CFGNode getInnerMostLoopNode() {
         return innerMostLoopNode;
     }
 
-    public void setInnerMostLoopNode(CFGNode innerMostLoopNode) {
+    void setInnerMostLoopNode(CFGNode innerMostLoopNode) {
         this.innerMostLoopNode = innerMostLoopNode;
     }
 }

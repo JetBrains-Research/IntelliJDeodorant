@@ -71,7 +71,7 @@ public class PDG extends Graph {
         return variableDeclarations;
     }
 
-    public Set<PsiVariable> getFieldsAccessedInMethod() {
+    private Set<PsiVariable> getFieldsAccessedInMethod() {
         Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         for (FieldObject field : fieldsAccessedInMethod) {
             variableDeclarations.add(field.getVariableDeclaration());
@@ -79,7 +79,7 @@ public class PDG extends Graph {
         return variableDeclarations;
     }
 
-    public PDGBlockNode isDirectlyNestedWithinBlockNode(PDGNode node) {
+    private PDGBlockNode isDirectlyNestedWithinBlockNode(PDGNode node) {
         Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks = cfg.getDirectlyNestedNodesInBlocks();
         for (CFGBlockNode blockNode : directlyNestedNodesInBlocks.keySet()) {
             List<CFGNode> nestedNodes = directlyNestedNodesInBlocks.get(blockNode);
@@ -90,7 +90,7 @@ public class PDG extends Graph {
         return null;
     }
 
-    public PDGBlockNode isNestedWithinBlockNode(PDGNode node) {
+    private PDGBlockNode isNestedWithinBlockNode(PDGNode node) {
         PDGBlockNode blockNode = isDirectlyNestedWithinBlockNode(node);
         if (blockNode != null) {
             return blockNode;
@@ -101,16 +101,6 @@ public class PDG extends Graph {
             }
             return null;
         }
-    }
-
-    public Set<PDGNode> getNestedNodesWithinBlockNode(PDGBlockNode blockNode) {
-        Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks = cfg.getDirectlyNestedNodesInBlocks();
-        List<CFGNode> directlyNestedCFGNodes = directlyNestedNodesInBlocks.get(blockNode.getCFGNode());
-        Set<PDGNode> directlyNestedPDGNodes = new LinkedHashSet<>();
-        for (CFGNode cfgNode : directlyNestedCFGNodes) {
-            directlyNestedPDGNodes.add(cfgNode.getPDGNode());
-        }
-        return directlyNestedPDGNodes;
     }
 
     public Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
@@ -148,7 +138,7 @@ public class PDG extends Graph {
         return variables;
     }
 
-    public int getTotalNumberOfStatements() {
+    int getTotalNumberOfStatements() {
         return nodes.size();
     }
 
@@ -156,7 +146,7 @@ public class PDG extends Graph {
         return nodes.iterator();
     }
 
-    public Map<CompositeVariable, LinkedHashSet<PDGNode>> getDefinedAttributesOfReference(PlainVariable reference) {
+    Map<CompositeVariable, LinkedHashSet<PDGNode>> getDefinedAttributesOfReference(PlainVariable reference) {
         Map<CompositeVariable, LinkedHashSet<PDGNode>> definedPropertiesMap = new LinkedHashMap<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
@@ -179,7 +169,7 @@ public class PDG extends Graph {
         return definedPropertiesMap;
     }
 
-    public Set<PDGNode> getAssignmentNodesOfVariableCriterion(AbstractVariable localVariableCriterion) {
+    Set<PDGNode> getAssignmentNodesOfVariableCriterion(AbstractVariable localVariableCriterion) {
         Set<PDGNode> nodeCriteria = new LinkedHashSet<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;
@@ -692,7 +682,7 @@ public class PDG extends Graph {
         }
     }
 
-    public List<BasicBlock> getBasicBlocks() {
+    private List<BasicBlock> getBasicBlocks() {
         return cfg.getBasicBlocks();
     }
 
@@ -718,7 +708,10 @@ public class PDG extends Graph {
         if (dominatedBlockMap.containsKey(pdgNode)) {
             return dominatedBlockMap.get(pdgNode);
         } else {
-            Set<BasicBlock> dominatedBlocks = dominatedBlocks(pdgNode);
+            Set<BasicBlock> dominatedBlocks = null;
+            if (pdgNode != null) {
+                dominatedBlocks = dominatedBlocks(pdgNode);
+            }
             dominatedBlockMap.put(pdgNode, dominatedBlocks);
             return dominatedBlocks;
         }
@@ -740,7 +733,7 @@ public class PDG extends Graph {
         return dominatedBlocks;
     }
 
-    public Set<BasicBlock> boundaryBlocks(PDGNode node) {
+    Set<BasicBlock> boundaryBlocks(PDGNode node) {
         Set<BasicBlock> boundaryBlocks = new LinkedHashSet<>();
         BasicBlock srcBlock = node.getBasicBlock();
         for (BasicBlock block : getBasicBlocks()) {
@@ -754,7 +747,7 @@ public class PDG extends Graph {
         return boundaryBlocks;
     }
 
-    public Set<PDGNode> blockBasedRegion(BasicBlock block) {
+    Set<PDGNode> blockBasedRegion(BasicBlock block) {
         Set<PDGNode> regionNodes = new LinkedHashSet<>();
         Set<BasicBlock> reachableBlocks = forwardReachableBlocks(block);
         for (BasicBlock reachableBlock : reachableBlocks) {
@@ -766,7 +759,7 @@ public class PDG extends Graph {
         return regionNodes;
     }
 
-    public Set<AbstractVariable> getReturnedVariables() {
+    Set<AbstractVariable> getReturnedVariables() {
         Set<AbstractVariable> returnedVariables = new LinkedHashSet<>();
         for (GraphNode node : nodes) {
             PDGNode pdgNode = (PDGNode) node;

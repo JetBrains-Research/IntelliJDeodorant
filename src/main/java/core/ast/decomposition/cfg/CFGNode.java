@@ -18,15 +18,19 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
         return statement;
     }
 
-    public PsiStatement getASTStatement() {
-        return statement.getStatement();
+    PsiStatement getASTStatement() {
+        if (statement.getStatement() instanceof PsiStatement) {
+            return (PsiStatement) statement.getStatement();
+        } else {
+            return null;
+        }
     }
 
-    public boolean isLeader() {
+    boolean isLeader() {
         return isFirst() || isJoin() || immediatelyFollowsBranchNode();
     }
 
-    public boolean immediatelyFollowsBranchNode() {
+    private boolean immediatelyFollowsBranchNode() {
         for (GraphEdge edge : incomingEdges) {
             CFGNode srcNode = (CFGNode) edge.src;
             if (srcNode.isBranch())
@@ -35,7 +39,7 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
         return false;
     }
 
-    public boolean isFirst() {
+    private boolean isFirst() {
         int numberOfNonLoopbackFlows = 0;
         for (GraphEdge edge : incomingEdges) {
             Flow flow = (Flow) edge;
@@ -45,15 +49,15 @@ public class CFGNode extends GraphNode implements Comparable<CFGNode> {
         return numberOfNonLoopbackFlows == 0;
     }
 
-    public boolean isBranch() {
+    private boolean isBranch() {
         return outgoingEdges.size() > 1 || this instanceof CFGBranchNode;
     }
 
-    public boolean isJoin() {
+    private boolean isJoin() {
         return incomingEdges.size() > 1;
     }
 
-    public void setBasicBlock(BasicBlock basicBlock) {
+    void setBasicBlock(BasicBlock basicBlock) {
         this.basicBlock = basicBlock;
     }
 

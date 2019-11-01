@@ -23,8 +23,8 @@ import java.util.*;
  */
 public class MyExtractMethodProcessor extends ExtractMethodProcessor {
     @NotNull
-    private PsiVariable variableCriterion;
-    private PsiElementFactory myElementFactory;
+    private final PsiVariable variableCriterion;
+    private final PsiElementFactory myElementFactory;
 
     /**
      * Constructs a processor for extracting statements into a new method.

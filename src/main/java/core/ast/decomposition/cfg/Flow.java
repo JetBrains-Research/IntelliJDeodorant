@@ -1,33 +1,33 @@
 package core.ast.decomposition.cfg;
 
-public class Flow extends GraphEdge {
+class Flow extends GraphEdge {
     private boolean loopbackFlow = false;
     private boolean trueControlFlow = false;
     private boolean falseControlFlow = false;
 
-    public Flow(CFGNode src, CFGNode dst) {
+    Flow(CFGNode src, CFGNode dst) {
         super(src, dst);
         src.addOutgoingEdge(this);
         dst.addIncomingEdge(this);
     }
 
-    public boolean isLoopbackFlow() {
+    boolean isLoopbackFlow() {
         return loopbackFlow;
     }
 
-    public void setLoopbackFlow(boolean loopbackFlow) {
+    void setLoopbackFlow(boolean loopbackFlow) {
         this.loopbackFlow = loopbackFlow;
     }
 
-    public boolean isTrueControlFlow() {
+    boolean isTrueControlFlow() {
         return trueControlFlow;
     }
 
-    public void setTrueControlFlow(boolean trueControlFlow) {
+    void setTrueControlFlow(boolean trueControlFlow) {
         this.trueControlFlow = trueControlFlow;
     }
 
-    public boolean isFalseControlFlow() {
+    boolean isFalseControlFlow() {
         return falseControlFlow;
     }
 
@@ -37,11 +37,11 @@ public class Flow extends GraphEdge {
 
     public String toString() {
         StringBuilder type = new StringBuilder();
-        if(trueControlFlow)
+        if (trueControlFlow)
             type.append("T");
-        if(falseControlFlow)
+        if (falseControlFlow)
             type.append("F");
-        if(loopbackFlow)
+        if (loopbackFlow)
             type.append("LB");
         return src.toString() + "-->" + type.toString() + "\n" + dst.toString();
     }

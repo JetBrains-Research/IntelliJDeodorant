@@ -121,7 +121,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         for (PlainVariable variable : usedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
             if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
-                //the used field in inherited from a superclass which is the target
+                //the used field in inherited from a superclass, which is the target
                 if (targetFieldReadMap.containsKey(fieldInstruction)) {
                     targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
                 } else {
@@ -139,7 +139,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         for (PlainVariable variable : definedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
             if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
-                //the defined field in inherited from a superclass which is the target
+                //the defined field in inherited from a superclass, which is the target
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
                 } else {

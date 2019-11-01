@@ -4,7 +4,7 @@ public class GraphEdge {
     protected GraphNode src;
     protected GraphNode dst;
 
-    public GraphEdge(GraphNode src, GraphNode dst) {
+    GraphEdge(GraphNode src, GraphNode dst) {
         this.src = src;
         this.dst = dst;
     }

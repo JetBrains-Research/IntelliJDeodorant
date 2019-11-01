@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 /**
- * Representation of a refactoring which moves method to a target class.
+ * Representation of a refactoring, which moves method to a target class.
  */
 public class MoveMethodRefactoring {
     private final @NotNull

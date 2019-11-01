@@ -25,7 +25,7 @@ public class PDGBlockNode extends PDGNode {
         return super.getControlDependenceParent();
     }
 
-    protected void determineDefinedAndUsedVariables() {
+    void determineDefinedAndUsedVariables() {
         CFGNode cfgNode = getCFGNode();
         if (cfgNode.getStatement() instanceof CompositeStatementObject) {
             CompositeStatementObject compositeStatement = (CompositeStatementObject) cfgNode.getStatement();

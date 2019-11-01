@@ -34,7 +34,7 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
         return candidates;
     }
 
-    public PsiClass getSourceTypeDeclaration() {
+    private PsiClass getSourceTypeDeclaration() {
         return ((ASTSlice) candidates.toArray()[0]).getSourceTypeDeclaration();
     }
 
@@ -42,7 +42,7 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
         return ((ASTSlice) candidates.toArray()[0]).getSourceMethodDeclaration();
     }
 
-    public PsiVariable getLocalVariableCriterion() {
+    private PsiVariable getLocalVariableCriterion() {
         return ((ASTSlice) candidates.toArray()[0]).getLocalVariableCriterion();
     }
 

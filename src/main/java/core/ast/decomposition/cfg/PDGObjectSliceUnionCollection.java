@@ -3,7 +3,7 @@ package core.ast.decomposition.cfg;
 import java.util.*;
 
 public class PDGObjectSliceUnionCollection {
-    private Map<BasicBlock, PDGObjectSliceUnion> objectSliceUnionMap;
+    private final Map<BasicBlock, PDGObjectSliceUnion> objectSliceUnionMap;
 
     public PDGObjectSliceUnionCollection(PDG pdg, PlainVariable objectReference) {
         this.objectSliceUnionMap = new LinkedHashMap<>();

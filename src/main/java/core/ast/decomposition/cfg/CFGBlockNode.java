@@ -2,19 +2,19 @@ package core.ast.decomposition.cfg;
 
 import core.ast.decomposition.AbstractStatement;
 
-public class CFGBlockNode extends CFGNode {
+class CFGBlockNode extends CFGNode {
 
     private CFGNode controlParent;
 
-    public CFGBlockNode(AbstractStatement statement) {
+    CFGBlockNode(AbstractStatement statement) {
         super(statement);
     }
 
-    public CFGNode getControlParent() {
+    CFGNode getControlParent() {
         return controlParent;
     }
 
-    public void setControlParent(CFGNode controlParent) {
+    void setControlParent(CFGNode controlParent) {
         this.controlParent = controlParent;
     }
 

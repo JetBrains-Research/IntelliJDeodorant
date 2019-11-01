@@ -8,7 +8,7 @@ import java.util.ListIterator;
 public class PDGMethodEntryNode extends PDGNode {
     private AbstractMethodDeclaration method;
 
-    public PDGMethodEntryNode(AbstractMethodDeclaration method) {
+    PDGMethodEntryNode(AbstractMethodDeclaration method) {
         super();
         this.method = method;
         this.id = 0;

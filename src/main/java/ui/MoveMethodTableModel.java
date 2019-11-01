@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class MoveMethodTableModel extends AbstractTableModel {
+class MoveMethodTableModel extends AbstractTableModel {
     private static final String METHOD_COLUMN_TITLE_KEY = "method.column.title";
     private static final String MOVE_TO_COLUMN_TITLE_KEY = "move.to.column.title";
 
@@ -158,8 +158,9 @@ public class MoveMethodTableModel extends AbstractTableModel {
     /**
      * For all rows that conflict with the newly selected row (has the same method to refactor),
      * deselects and disables them if user has selected this row and activates otherwise.
-     * @param isRowSelected has user selected or deselected the new row
-     * @param rowIndex index of that row
+     *
+     * @param isRowSelected          has user selected or deselected the new row
+     * @param rowIndex               index of that row
      * @param forceSelectInConflicts if false isRowSelected is true, in case of conflicts given row
      *                               shouldn't be selected and other rows won't be updated.
      * @return is there any conflicts with the initial row.

@@ -3,7 +3,7 @@ package core.ast.decomposition.cfg;
 public abstract class PDGDependence extends GraphEdge {
     private PDGDependenceType type;
 
-    public PDGDependence(PDGNode src, PDGNode dst, PDGDependenceType type) {
+    PDGDependence(PDGNode src, PDGNode dst, PDGDependenceType type) {
         super(src, dst);
         this.type = type;
     }
@@ -16,7 +16,7 @@ public abstract class PDGDependence extends GraphEdge {
         return dst;
     }
 
-    public PDGDependenceType getType() {
+    PDGDependenceType getType() {
         return type;
     }
 }

@@ -35,15 +35,15 @@ public class CFG extends Graph {
         return method;
     }
 
-    public BasicBlockCFG getBasicBlockCFG() {
+    BasicBlockCFG getBasicBlockCFG() {
         return basicBlockCFG;
     }
 
-    public List<BasicBlock> getBasicBlocks() {
+    List<BasicBlock> getBasicBlocks() {
         return basicBlockCFG.getBasicBlocks();
     }
 
-    public Map<CFGBlockNode, List<CFGNode>> getDirectlyNestedNodesInBlocks() {
+    Map<CFGBlockNode, List<CFGNode>> getDirectlyNestedNodesInBlocks() {
         return directlyNestedNodesInBlocks;
     }
 
@@ -430,7 +430,7 @@ public class CFG extends Graph {
 
     private CFGNode createNonCompositeNode(StatementObject statement) {
         CFGNode currentNode;
-        PsiStatement astStatement = statement.getStatement();
+        PsiElement astStatement = statement.getStatement();
         if (astStatement instanceof PsiReturnStatement)
             currentNode = new CFGExitNode(statement);
         else if (astStatement instanceof PsiSwitchLabelStatement)
@@ -463,7 +463,7 @@ public class CFG extends Graph {
                 return true;
             if (statement instanceof CompositeStatementObject) {
                 CompositeStatementObject composite2 = (CompositeStatementObject) statement;
-                PsiStatement astComposite2 = composite2.getStatement();
+                PsiElement astComposite2 = composite2.getStatement();
                 if (astComposite2 instanceof PsiBlockStatement) {
                     if (directlyNestedNode(node, composite2))
                         return true;

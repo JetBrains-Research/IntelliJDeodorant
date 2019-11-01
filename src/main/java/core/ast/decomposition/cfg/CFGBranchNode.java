@@ -14,7 +14,7 @@ import java.util.Set;
 
 public abstract class CFGBranchNode extends CFGNode {
 
-    public CFGBranchNode(AbstractStatement statement) {
+    CFGBranchNode(AbstractStatement statement) {
         super(statement);
     }
 
@@ -48,9 +48,9 @@ public abstract class CFGBranchNode extends CFGNode {
 
     public abstract CFGNode getJoinNode();
 
-    public abstract List<BasicBlock> getNestedBasicBlocks();
+    protected abstract List<BasicBlock> getNestedBasicBlocks();
 
-    public Set<CFGNode> getImmediatelyNestedNodesFromAST() {
+    Set<CFGNode> getImmediatelyNestedNodesFromAST() {
         Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {

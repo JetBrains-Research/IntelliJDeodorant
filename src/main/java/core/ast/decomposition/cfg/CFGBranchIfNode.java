@@ -11,13 +11,13 @@ import com.intellij.psi.PsiTryStatement;
 import core.ast.decomposition.AbstractStatement;
 import core.ast.decomposition.CompositeStatementObject;
 
-public class CFGBranchIfNode extends CFGBranchConditionalNode {
+class CFGBranchIfNode extends CFGBranchConditionalNode {
 
-    public CFGBranchIfNode(AbstractStatement statement) {
+    CFGBranchIfNode(AbstractStatement statement) {
         super(statement);
     }
 
-    public Set<CFGNode> getImmediatelyNestedNodesInTrueControlFlow() {
+    Set<CFGNode> getImmediatelyNestedNodesInTrueControlFlow() {
         Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {
@@ -51,7 +51,7 @@ public class CFGBranchIfNode extends CFGBranchConditionalNode {
         return nestedNodes;
     }
 
-    public Set<CFGNode> getImmediatelyNestedNodesInFalseControlFlow() {
+    Set<CFGNode> getImmediatelyNestedNodesInFalseControlFlow() {
         Set<CFGNode> nestedNodes = new LinkedHashSet<>();
         AbstractStatement abstractStatement = getStatement();
         if (abstractStatement instanceof CompositeStatementObject) {

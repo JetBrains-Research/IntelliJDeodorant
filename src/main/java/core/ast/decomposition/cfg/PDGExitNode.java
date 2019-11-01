@@ -5,11 +5,11 @@ import core.ast.VariableDeclarationObject;
 
 import java.util.Set;
 
-public class PDGExitNode extends PDGStatementNode {
+class PDGExitNode extends PDGStatementNode {
     private AbstractVariable returnedVariable;
 
-    public PDGExitNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-                       Set<FieldObject> fieldsAccessedInMethod) {
+    PDGExitNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
+                Set<FieldObject> fieldsAccessedInMethod) {
         super(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
         if (cfgNode instanceof CFGExitNode) {
             CFGExitNode exitNode = (CFGExitNode) cfgNode;
@@ -17,7 +17,7 @@ public class PDGExitNode extends PDGStatementNode {
         }
     }
 
-    public AbstractVariable getReturnedVariable() {
+    AbstractVariable getReturnedVariable() {
         return returnedVariable;
     }
 }

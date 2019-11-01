@@ -7,9 +7,9 @@ import core.ast.decomposition.TryStatementObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CFGTryNode extends CFGBlockNode {
-    private List<String> handledExceptions;
-    private boolean hasResources;
+class CFGTryNode extends CFGBlockNode {
+    private final List<String> handledExceptions;
+    private final boolean hasResources;
 
     CFGTryNode(AbstractStatement statement) {
         super(statement);

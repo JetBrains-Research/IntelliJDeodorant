@@ -25,7 +25,7 @@ public class PDGSlice extends Graph {
     private PsiFile psiFile;
     private int methodSize;
 
-    public PDGSlice(PDG pdg, BasicBlock boundaryBlock) {
+    PDGSlice(PDG pdg, BasicBlock boundaryBlock) {
         super();
         this.pdg = pdg;
         this.method = pdg.getMethod();
@@ -69,72 +69,7 @@ public class PDGSlice extends Graph {
         }
     }
 
-    public PDGSlice(PDG pdg, BasicBlock boundaryBlock, PDGNode nodeCriterion, AbstractVariable localVariableCriterion) {
-        this(pdg, boundaryBlock);
-        this.nodeCriterion = nodeCriterion;
-        this.localVariableCriterion = localVariableCriterion;
-        this.sliceNodes = new TreeSet<>();
-        sliceNodes.addAll(computeSlice(nodeCriterion, localVariableCriterion));
-        this.remainingNodes = new TreeSet<>();
-        remainingNodes.add(pdg.getEntryNode());
-        for (GraphNode node : pdg.nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (!sliceNodes.contains(pdgNode))
-                remainingNodes.add(pdgNode);
-        }
-        this.passedParameters = new LinkedHashSet<>();
-        Set<PDGNode> nCD = new LinkedHashSet<>();
-        Set<PDGNode> nDD = new LinkedHashSet<>();
-        for (GraphEdge edge : pdg.edges) {
-            PDGDependence dependence = (PDGDependence) edge;
-            PDGNode srcPDGNode = (PDGNode) dependence.src;
-            PDGNode dstPDGNode = (PDGNode) dependence.dst;
-            if (dependence instanceof PDGDataDependence) {
-                PDGDataDependence dataDependence = (PDGDataDependence) dependence;
-                if (remainingNodes.contains(srcPDGNode) && sliceNodes.contains(dstPDGNode))
-                    passedParameters.add(dataDependence.getData());
-                if (sliceNodes.contains(srcPDGNode) && remainingNodes.contains(dstPDGNode) &&
-                        !dataDependence.getData().equals(localVariableCriterion) && !dataDependence.getData().isField())
-                    nDD.add(srcPDGNode);
-            } else if (dependence instanceof PDGControlDependence) {
-                if (sliceNodes.contains(srcPDGNode) && remainingNodes.contains(dstPDGNode))
-                    nCD.add(srcPDGNode);
-            }
-        }
-        Set<PDGNode> controlIndispensableNodes = new LinkedHashSet<>();
-        for (PDGNode p : nCD) {
-            for (AbstractVariable usedVariable : p.usedVariables) {
-                Set<PDGNode> pSliceNodes = computeSlice(p, usedVariable);
-                for (GraphNode node : pdg.nodes) {
-                    PDGNode q = (PDGNode) node;
-                    if (pSliceNodes.contains(q) || q.equals(p))
-                        controlIndispensableNodes.add(q);
-                }
-            }
-        }
-        Set<PDGNode> dataIndispensableNodes = new LinkedHashSet<>();
-        for (PDGNode p : nDD) {
-            for (AbstractVariable definedVariable : p.definedVariables) {
-                Set<PDGNode> pSliceNodes = computeSlice(p, definedVariable);
-                for (GraphNode node : pdg.nodes) {
-                    PDGNode q = (PDGNode) node;
-                    if (pSliceNodes.contains(q))
-                        dataIndispensableNodes.add(q);
-                }
-            }
-        }
-        this.indispensableNodes = new TreeSet<>();
-        indispensableNodes.addAll(controlIndispensableNodes);
-        indispensableNodes.addAll(dataIndispensableNodes);
-        this.removableNodes = new LinkedHashSet<>();
-        for (GraphNode node : pdg.nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (!remainingNodes.contains(pdgNode) && !indispensableNodes.contains(pdgNode))
-                removableNodes.add(pdgNode);
-        }
-    }
-
-    public Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
+    Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
         return pdg.getVariableDeclarationsAndAccessedFieldsInMethod();
     }
 
@@ -142,39 +77,35 @@ public class PDGSlice extends Graph {
         return method;
     }
 
-    public PsiFile getIFile() {
+    PsiFile getIFile() {
         return psiFile;
     }
 
-    public int getMethodSize() {
+    int getMethodSize() {
         return methodSize;
     }
 
-    public BasicBlock getBoundaryBlock() {
+    BasicBlock getBoundaryBlock() {
         return boundaryBlock;
     }
 
-    public PDGNode getExtractedMethodInvocationInsertionNode() {
+    PDGNode getExtractedMethodInvocationInsertionNode() {
         return ((TreeSet<PDGNode>) sliceNodes).first();
     }
 
-    public PDGNode getNodeCriterion() {
-        return nodeCriterion;
-    }
-
-    public AbstractVariable getLocalVariableCriterion() {
+    AbstractVariable getLocalVariableCriterion() {
         return localVariableCriterion;
     }
 
-    public Set<PDGNode> getSliceNodes() {
+    Set<PDGNode> getSliceNodes() {
         return sliceNodes;
     }
 
-    public Set<AbstractVariable> getPassedParameters() {
+    Set<AbstractVariable> getPassedParameters() {
         return passedParameters;
     }
 
-    public Set<PDGNode> getRemovableNodes() {
+    Set<PDGNode> getRemovableNodes() {
         return removableNodes;
     }
 
@@ -217,18 +148,6 @@ public class PDGSlice extends Graph {
         Set<PDGNode> duplicatedNodes = new LinkedHashSet<>(sliceNodes);
         duplicatedNodes.retainAll(indispensableNodes);
         return duplicatedNodes.contains(nodeCriterion);
-    }
-
-    public boolean satisfiesRules() {
-        return !nodeCritetionIsDeclarationOfVariableCriterion() && !nodeCriterionIsDuplicated() &&
-                !declarationOfVariableCriterionIsDuplicated() && !sliceContainsReturnStatement() &&
-                !variableCriterionIsReturnedVariableInOriginalMethod() &&
-                !returnStatementIsControlDependentOnSliceNode() &&
-                !containsDuplicateNodeWithStateChangingMethodInvocation() &&
-                !nonDuplicatedSliceNodeAntiDependsOnNonRemovableNode() &&
-                !nonDuplicatedSliceNodeOutputDependsOnNonRemovableNode() &&
-                !duplicatedSliceNodeWithClassInstantiationHasDependenceOnRemovableNode() &&
-                !sliceContainsBranchStatementWithoutInnermostLoop();
     }
 
     private boolean sliceContainsBranchStatementWithoutInnermostLoop() {

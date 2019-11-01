@@ -15,7 +15,7 @@ public class FieldObject extends VariableDeclarationObject {
     private boolean _static;
     private Access access;
     private String className;
-    private PsiField psiField;
+    private final PsiField psiField;
     private volatile int hashCode = 0;
 
     public FieldObject(TypeObject type, String fieldName, PsiField field) {

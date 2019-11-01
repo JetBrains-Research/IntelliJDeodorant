@@ -8,11 +8,11 @@ import java.util.List;
 public abstract class CFGBranchConditionalNode extends CFGBranchNode {
     private CFGNode joinNode;
 
-    public CFGBranchConditionalNode(AbstractStatement statement) {
+    CFGBranchConditionalNode(AbstractStatement statement) {
         super(statement);
     }
 
-    public void setJoinNode(CFGNode joinNode) {
+    void setJoinNode(CFGNode joinNode) {
         this.joinNode = joinNode;
     }
 
@@ -20,7 +20,7 @@ public abstract class CFGBranchConditionalNode extends CFGBranchNode {
         return joinNode;
     }
 
-    public List<BasicBlock> getNestedBasicBlocks() {
+    protected List<BasicBlock> getNestedBasicBlocks() {
         List<BasicBlock> blocksBetween = new ArrayList<>();
         BasicBlock srcBlock = getBasicBlock();
         if (joinNode != null) {

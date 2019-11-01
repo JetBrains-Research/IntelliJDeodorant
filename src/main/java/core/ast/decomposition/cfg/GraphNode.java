@@ -9,7 +9,7 @@ public class GraphNode {
     protected Set<GraphEdge> incomingEdges;
     protected Set<GraphEdge> outgoingEdges;
 
-    public GraphNode() {
+    GraphNode() {
         nodeNum++;
         this.id = nodeNum;
         this.incomingEdges = new LinkedHashSet<>();

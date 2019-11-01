@@ -4,7 +4,7 @@ import com.intellij.psi.PsiSwitchLabelStatement;
 import core.ast.decomposition.AbstractStatement;
 
 class CFGSwitchCaseNode extends CFGNode {
-    private boolean isDefault;
+    private final boolean isDefault;
 
     CFGSwitchCaseNode(AbstractStatement statement) {
         super(statement);

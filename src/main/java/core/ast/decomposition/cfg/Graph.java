@@ -7,7 +7,7 @@ public class Graph {
     protected Set<GraphNode> nodes;
     protected Set<GraphEdge> edges;
 
-    public Graph() {
+    Graph() {
         this.nodes = new LinkedHashSet<>();
         this.edges = new LinkedHashSet<>();
     }

@@ -21,7 +21,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     private Set<AbstractVariable> originalDefinedVariables;
     private Set<AbstractVariable> originalUsedVariables;
 
-    public PDGNode() {
+    PDGNode() {
         super();
         this.declaredVariables = new LinkedHashSet<>();
         this.definedVariables = new LinkedHashSet<>();
@@ -30,8 +30,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         this.thrownExceptionTypes = new LinkedHashSet<>();
     }
 
-    public PDGNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-                   Set<FieldObject> fieldsAccessedInMethod) {
+    PDGNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
+            Set<FieldObject> fieldsAccessedInMethod) {
         super();
         this.cfgNode = cfgNode;
         this.variableDeclarationsInMethod = variableDeclarationsInMethod;
@@ -118,7 +118,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return null;
     }
 
-    public boolean isControlDependentOnNode(PDGNode node) {
+    private boolean isControlDependentOnNode(PDGNode node) {
         PDGNode parent = this.getControlDependenceParent();
         while (parent != null) {
             if (parent.equals(node)) {
@@ -148,7 +148,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return null;
     }
 
-    public boolean hasIncomingControlDependenceFromMethodEntryNode() {
+    boolean hasIncomingControlDependenceFromMethodEntryNode() {
         for (GraphEdge edge : incomingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGControlDependence) {
@@ -181,19 +181,19 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return dataDependences;
     }
 
-    public boolean declaresLocalVariable(AbstractVariable variable) {
+    boolean declaresLocalVariable(AbstractVariable variable) {
         return declaredVariables.contains(variable);
     }
 
-    public boolean definesLocalVariable(AbstractVariable variable) {
+    boolean definesLocalVariable(AbstractVariable variable) {
         return definedVariables.contains(variable);
     }
 
-    public boolean usesLocalVariable(AbstractVariable variable) {
+    boolean usesLocalVariable(AbstractVariable variable) {
         return usedVariables.contains(variable);
     }
 
-    public boolean instantiatesLocalVariable(AbstractVariable variable) {
+    boolean instantiatesLocalVariable(AbstractVariable variable) {
         if (variable instanceof PlainVariable && this.definesLocalVariable(variable)) {
             PlainVariable plainVariable = (PlainVariable) variable;
             String variableType = plainVariable.getType();
@@ -222,11 +222,11 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return false;
     }
 
-    public boolean containsClassInstanceCreation() {
+    boolean containsClassInstanceCreation() {
         return !createdTypes.isEmpty();
     }
 
-    public boolean throwsException() {
+    boolean throwsException() {
         return !thrownExceptionTypes.isEmpty();
     }
 
@@ -269,11 +269,11 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return "Def = " + definedVariables + " , Use = " + usedVariables;
     }
 
-    public void updateReachingAliasSet(ReachingAliasSet reachingAliasSet) {
+    void updateReachingAliasSet(ReachingAliasSet reachingAliasSet) {
         Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
-        PsiStatement statement = getASTStatement();
+        PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
             PsiVariable vDStatement = (PsiVariable) ((PsiDeclarationStatement) statement).getDeclaredElements()[0];
             if (!isPrimitive(vDStatement.getType())) {
@@ -350,7 +350,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         }
     }
 
-    public void applyReachingAliasSet(ReachingAliasSet reachingAliasSet) {
+    void applyReachingAliasSet(ReachingAliasSet reachingAliasSet) {
         if (originalDefinedVariables == null)
             originalDefinedVariables = new LinkedHashSet<>(definedVariables);
         Set<AbstractVariable> defVariablesToBeAdded = new LinkedHashSet<>();
@@ -386,12 +386,12 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         usedVariables.addAll(useVariablesToBeAdded);
     }
 
-    public Map<PsiVariable, PsiNewExpression> getClassInstantiations() {
+    Map<PsiVariable, PsiNewExpression> getClassInstantiations() {
         Map<PsiVariable, PsiNewExpression> classInstantiationMap = new LinkedHashMap<>();
         Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
-        PsiStatement statement = getASTStatement();
+        PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement vDStatement = (PsiDeclarationStatement) statement;
             PsiElement[] declaredElements = vDStatement.getDeclaredElements();
@@ -451,7 +451,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return false;
     }
 
-    public boolean changesStateOfReference(PsiVariable variableDeclaration) {
+    boolean changesStateOfReference(PsiVariable variableDeclaration) {
         for (AbstractVariable abstractVariable : definedVariables) {
             if (abstractVariable instanceof CompositeVariable) {
                 CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
@@ -462,7 +462,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return false;
     }
 
-    public boolean accessesReference(PsiVariable variableDeclaration) {
+    boolean accessesReference(PsiVariable variableDeclaration) {
         for (AbstractVariable abstractVariable : usedVariables) {
             if (abstractVariable instanceof PlainVariable) {
                 PlainVariable plainVariable = (PlainVariable) abstractVariable;
@@ -473,8 +473,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return false;
     }
 
-    public boolean assignsReference(PsiVariable variableDeclaration) {
-        PsiStatement statement = getASTStatement();
+    boolean assignsReference(PsiVariable variableDeclaration) {
+        PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement vDStatement = (PsiDeclarationStatement) statement;
             PsiElement[] psiElements = vDStatement.getDeclaredElements();

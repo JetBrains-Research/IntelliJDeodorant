@@ -1,8 +1,6 @@
 package core.ast;
 
 import com.intellij.codeInsight.AnnotationUtil;
-import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -38,7 +36,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         this.psiMethod = psiMethod;
     }
 
-    public PsiMethod getPsiMethod() {
+    private PsiMethod getPsiMethod() {
         return this.psiMethod;
     }
 
@@ -86,7 +84,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getName();
     }
 
-    public boolean hasTestAnnotation() {
+    boolean hasTestAnnotation() {
         return testAnnotation;
     }
 
@@ -234,7 +232,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                         boolean isDelegationChain = false;
                         boolean foundInParentClass = false;
                         for (PsiMethod parentClassMethod : parentClassMethods) {
-                            if (PsiManager.getInstance(Objects.requireNonNull(DataManager.getInstance().getDataContext().getData(PlatformDataKeys.PROJECT)))
+                            if (PsiManager.getInstance(psiMethod.getProject())
                                     .areElementsEquivalent(parentClassMethod, previousChainedMethodInvocation)) {
                                 foundInParentClass = true;
                                 PsiElement getterField = MethodDeclarationUtility.isGetter(parentClassMethod);

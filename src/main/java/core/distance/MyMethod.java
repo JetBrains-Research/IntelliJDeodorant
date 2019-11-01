@@ -17,7 +17,7 @@ public class MyMethod extends Entity {
     private MethodObject methodObject;
     private volatile int hashCode = 0;
 
-    public MyMethod(String classOrigin, String methodName, String returnType, List<String> parameterList) {
+    MyMethod(String classOrigin, String methodName, String returnType, List<String> parameterList) {
         this.classOrigin = classOrigin;
         this.methodName = methodName;
         this.returnType = returnType;
@@ -25,11 +25,11 @@ public class MyMethod extends Entity {
         this.isAbstract = false;
     }
 
-    public void setMethodObject(MethodObject methodObject) {
+    void setMethodObject(MethodObject methodObject) {
         this.methodObject = methodObject;
     }
 
-    public MethodObject getMethodObject() {
+    MethodObject getMethodObject() {
         return this.methodObject;
     }
 
@@ -41,7 +41,7 @@ public class MyMethod extends Entity {
         this.access = access;
     }
 
-    public void setMethodBody(MyMethodBody methodBody) {
+    void setMethodBody(MyMethodBody methodBody) {
         this.methodBody = methodBody;
     }
 
@@ -82,7 +82,7 @@ public class MyMethod extends Entity {
         return classOrigin;
     }
 
-    public String getMethodName() {
+    String getMethodName() {
         return methodName;
     }
 
@@ -98,7 +98,7 @@ public class MyMethod extends Entity {
         return parameterList;
     }
 
-    public void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
+    void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
         if (this.methodBody != null)
             this.methodBody.setAttributeInstructionReference(myAttributeInstruction, reference);
     }
@@ -118,7 +118,7 @@ public class MyMethod extends Entity {
             return new ArrayList<MyMethodInvocation>().listIterator();
     }
 
-    public ListIterator<MyAttributeInstruction> getAttributeInstructionIterator() {
+    ListIterator<MyAttributeInstruction> getAttributeInstructionIterator() {
         if (this.methodBody != null)
             return this.methodBody.getAttributeInstructionIterator();
         else
@@ -142,7 +142,7 @@ public class MyMethod extends Entity {
         return this.parameterList.size();
     }
 
-    public boolean equals(MyMethodInvocation methodInvocation) {
+    private boolean equals(MyMethodInvocation methodInvocation) {
         return this.classOrigin.equals(methodInvocation.getClassOrigin()) &&
                 this.methodName.equals(methodInvocation.getMethodName()) &&
                 this.returnType.equals(methodInvocation.getReturnType()) &&

@@ -8,8 +8,8 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
 import java.util.*;
 
-public class ExtractMethodTableModel extends AbstractTreeModel {
-    private List<ASTSliceGroup> refactorings;
+class ExtractMethodTableModel extends AbstractTreeModel {
+    private final List<ASTSliceGroup> refactorings;
 
     ExtractMethodTableModel(List<ASTSliceGroup> refactorings) {
         this.refactorings = refactorings;
@@ -31,8 +31,8 @@ public class ExtractMethodTableModel extends AbstractTreeModel {
                 return o;
             }
         } else if (parent instanceof ASTSliceGroup) {
-            ASTSliceGroup question = (ASTSliceGroup) parent;
-            return new ArrayList<>(question.getCandidates());
+            ASTSliceGroup sliceGroup = (ASTSliceGroup) parent;
+            return new ArrayList<>(sliceGroup.getCandidates());
         } else return null;
     }
 

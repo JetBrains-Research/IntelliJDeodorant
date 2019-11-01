@@ -22,10 +22,6 @@ public class PDGTryNode extends PDGBlockNode {
         return ((CFGTryNode) getCFGNode()).hasFinallyClauseClosingVariable(variable);
     }
 
-    public boolean hasCatchClause() {
-        return ((CFGTryNode) getCFGNode()).hasCatchClause();
-    }
-
     protected void determineDefinedAndUsedVariables() {
         super.determineDefinedAndUsedVariables();
         CFGNode cfgNode = getCFGNode();

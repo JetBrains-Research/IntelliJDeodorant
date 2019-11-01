@@ -9,9 +9,9 @@ public class ASTSlice {
     @NotNull
     private final PsiClass sourceTypeDeclaration;
     @NotNull
-    private PsiMethod sourceMethodDeclaration;
+    private final PsiMethod sourceMethodDeclaration;
     @NotNull
-    private PsiFile psiFile;
+    private final PsiFile psiFile;
     @NotNull
     private PsiStatement variableCriterionDeclarationStatement;
     @NotNull
@@ -210,15 +210,15 @@ public class ASTSlice {
         return sliceStatements;
     }
 
-    public Set<PsiStatement> getRemovableStatements() {
+    private Set<PsiStatement> getRemovableStatements() {
         return removableStatements;
     }
 
-    public PsiStatement getVariableCriterionDeclarationStatement() {
+    private PsiStatement getVariableCriterionDeclarationStatement() {
         return variableCriterionDeclarationStatement;
     }
 
-    public PsiStatement getExtractedMethodInvocationInsertionStatement() {
+    private PsiStatement getExtractedMethodInvocationInsertionStatement() {
         return extractedMethodInvocationInsertionStatement;
     }
 

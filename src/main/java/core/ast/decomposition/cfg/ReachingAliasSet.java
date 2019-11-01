@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ReachingAliasSet {
+class ReachingAliasSet {
 
     private List<LinkedHashSet<PsiVariable>> aliasSets;
 
