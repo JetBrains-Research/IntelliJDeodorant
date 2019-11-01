@@ -6,10 +6,12 @@ import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.extractMethod.*;
 import com.intellij.refactoring.util.InlineUtil;
+import com.intellij.refactoring.util.VariableData;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -97,6 +99,25 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
     }
 
     /**
+     * Collects used local variables, fields and method parameters.
+     *
+     * @return set of used variables.
+     */
+    private Set<PsiVariable> getUsedVariables() {
+        HashSet<PsiVariable> variables = new HashSet<>();
+        for (PsiElement psiElement : myElements) {
+            Collection<PsiReferenceExpression> referenceExpressions =
+                    PsiTreeUtil.findChildrenOfType(psiElement, PsiReferenceExpression.class);
+            for (PsiReferenceExpression referenceExpression : referenceExpressions) {
+                if (referenceExpression.resolve() != null && referenceExpression.resolve() instanceof PsiVariable) {
+                    variables.add((PsiVariable) referenceExpression.resolve());
+                }
+            }
+        }
+        return variables;
+    }
+
+    /**
      * Creates new method in class and extracts statements into the method.
      */
     @Override
@@ -124,6 +145,32 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
         for (PsiElement element : myElements) {
             element.delete();
         }
+    }
+
+    /**
+     * Sets parameters for new method.
+     */
+    @Override
+    public void setDataFromInputVariables() {
+        final List<VariableData> variables = myInputVariables.getInputVariables();
+        final Set<PsiVariable> usedVariables = getUsedVariables();
+        ArrayList<PsiVariable> inputVariables = new ArrayList<>();
+        for (VariableData data : variables) {
+            if (usedVariables.contains(data.variable)) {
+                inputVariables.add(data.variable);
+            }
+        }
+        myInputVariables = new InputVariables(inputVariables, myProject, new LocalSearchScope(myElements), true);
+        myVariableDatum = myInputVariables.getInputVariables().toArray(new VariableData[0]);
+    }
+
+    /**
+     * Sets output variable for new method.
+     */
+    public void setOutputVariable() {
+        myOutputVariables = new PsiVariable[1];
+        myOutputVariables[0] = variableCriterion;
+        myOutputVariable = variableCriterion;
     }
 
     /**
@@ -167,11 +214,5 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
                 }
             }
         }
-    }
-
-    public void setOutputVariable() {
-        myOutputVariables = new PsiVariable[1];
-        myOutputVariables[0] = variableCriterion;
-        myOutputVariable = variableCriterion;
     }
 }

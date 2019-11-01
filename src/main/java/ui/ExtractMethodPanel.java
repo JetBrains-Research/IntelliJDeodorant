@@ -202,21 +202,19 @@ class ExtractMethodPanel extends JPanel {
             processor.testTargetClass(slice.getSourceTypeDeclaration());
 
             try {
-                processor.setShowErrorDialogs(true);
-                if (processor.prepare()) {
-                    ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
-                            slice.getSourceMethodDeclaration().getContainingFile(), true);
-                }
+                processor.setShowErrorDialogs(false);
+                processor.prepare();
             } catch (PrepareFailedException e) {
                 e.printStackTrace();
             }
-            processor.setOutputVariable();
 
+            ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
+                    slice.getSourceMethodDeclaration().getContainingFile(), true);
         };
     }
 
     /**
-     * Opens definition of method and highlights statements, which should be extracted or removed.
+     * Opens definition of method and highlights statements, which should be extracted.
      *
      * @param sourceMethod method from which code is proposed to be extracted into separate method.
      * @param scope        scope of the current project.
@@ -237,17 +235,10 @@ class ExtractMethodPanel extends JPanel {
                     if (editor != null) {
                         TextAttributes attributes = new TextAttributes(editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR),
                                 new JBColor(new Color(84, 168, 78), new Color(16, 105, 15)), null, null, 0);
-                        TextAttributes removable = new TextAttributes(editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR),
-                                new JBColor(new Color(223, 77, 74), new Color(100, 34, 27)), null, null, 0);
-
                         Set<PsiStatement> statements = slice.getSliceStatements();
-                        Set<PsiStatement> removableStatements = slice.getRemovableStatements();
                         editor.getMarkupModel().removeAllHighlighters();
-
                         statements.forEach(statement -> editor.getMarkupModel().addRangeHighlighter(statement.getTextRange().getStartOffset(),
                                 statement.getTextRange().getEndOffset(), HighlighterLayer.SELECTION, attributes, HighlighterTargetArea.EXACT_RANGE));
-                        removableStatements.forEach(statement -> editor.getMarkupModel().addRangeHighlighter(statement.getTextRange().getStartOffset(),
-                                statement.getTextRange().getEndOffset(), HighlighterLayer.SELECTION, removable, HighlighterTargetArea.EXACT_RANGE));
                     }
                 }
             }
