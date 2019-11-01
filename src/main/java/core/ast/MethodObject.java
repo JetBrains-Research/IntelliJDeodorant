@@ -125,7 +125,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
                 StatementObject statementObject = (StatementObject) abstractStatements.get(0);
-                PsiStatement statement = statementObject.getStatement();
+                PsiElement statement = statementObject.getStatement();
                 if (statement instanceof PsiReturnStatement) {
                     PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
                     if ((returnStatement.getReturnValue() instanceof PsiReferenceExpression)
@@ -147,7 +147,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
                 StatementObject statementObject = (StatementObject) abstractStatements.get(0);
-                PsiStatement statement = statementObject.getStatement();
+                PsiElement statement = statementObject.getStatement();
                 if (statement instanceof PsiExpressionStatement) {
                     PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
                     if (expressionStatement.getExpression() instanceof PsiAssignmentExpression
@@ -209,7 +209,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
                 StatementObject statementObject = (StatementObject) abstractStatements.get(0);
-                PsiStatement statement = statementObject.getStatement();
+                PsiElement statement = statementObject.getStatement();
                 PsiMethodCallExpression methodInvocation = null;
                 if (statement instanceof PsiReturnStatement) {
                     PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
@@ -294,7 +294,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
         if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
             StatementObject statementObject = (StatementObject) abstractStatements.get(0);
-            PsiStatement statement = statementObject.getStatement();
+            PsiElement statement = statementObject.getStatement();
             if (statement instanceof PsiReturnStatement) {
                 PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
                 if (returnStatement.getReturnValue() instanceof PsiMethodCallExpression)

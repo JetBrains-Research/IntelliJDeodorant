@@ -215,7 +215,15 @@ public class MethodBodyObject {
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock codeBlock = (PsiCodeBlock) statement;
+            PsiStatement[] statements = codeBlock.getStatements();
+            CompositeStatementObject child = new CompositeStatementObject(codeBlock, StatementType.BLOCK, parent);
+            parent.addStatement(child);
+            for (PsiStatement psiStatement : statements) {
+                processStatement(child, psiStatement);
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
             PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
             PsiStatement[] blockStatements = psiCodeBlock.getStatements();
@@ -314,6 +322,7 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
+
             PsiResourceList resources = tryStatement.getResourceList();
             if (resources != null)
                 for (PsiResourceListElement resource : resources) {
@@ -324,6 +333,7 @@ public class MethodBodyObject {
                     }
                 }
             parent.addStatement(child);
+
             if (tryStatement.getTryBlock() != null) {
                 PsiStatement[] tryStatements = tryStatement.getTryBlock().getStatements();
                 for (PsiStatement psiStatement : tryStatements) {
