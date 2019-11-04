@@ -21,6 +21,7 @@ import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.MoveMethodRefactoring;
+import utils.ExportResultsUtil;
 import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
@@ -29,6 +30,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +48,7 @@ class MoveMethodPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "feature.envy.detect.indicator.status";
     private static final String TOTAL_LABEL_TEXT_KEY = "total.label";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
 
     @NotNull
     private final AnalysisScope scope;
@@ -60,6 +63,7 @@ class MoveMethodPanel extends JPanel {
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JScrollPane();
+    private final JButton exportButton = new JButton();
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -117,6 +121,10 @@ class MoveMethodPanel extends JPanel {
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonsPanel.add(refreshButton);
+
+        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.addActionListener(e -> export());
+        buttonsPanel.add(exportButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
         panel.add(info, BorderLayout.WEST);
@@ -195,6 +203,23 @@ class MoveMethodPanel extends JPanel {
                 }
             }
         }.queue();
+    }
+
+    /**
+     * Method exports refactoring results to the file
+     */
+    private void export() {
+        final JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnVal = fileChooser.showOpenDialog(null);
+        if (returnVal == JFileChooser.CANCEL_OPTION) {
+            return;
+        }
+        try {
+            ExportResultsUtil.exportToFile(refactorings, fileChooser.getSelectedFile().getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FunctionalInterface
