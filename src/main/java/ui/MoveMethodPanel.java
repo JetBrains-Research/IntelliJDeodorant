@@ -4,7 +4,9 @@ import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.DataManager;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -21,6 +23,9 @@ import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.MoveMethodRefactoring;
+import refactoring.ReplaceConditionalWithPolymorphism;
+import refactoring.TypeCheckElimination;
+import refactoring.TypeCheckEliminationGroup;
 import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
@@ -40,6 +45,8 @@ import static ui.MoveMethodTableModel.SELECTION_COLUMN_INDEX;
  * Panel for Move Method refactoring.
  */
 class MoveMethodPanel extends JPanel {
+    private static ReplaceConditionalWithPolymorphism replaceConditionalWithPolymorphism;
+
     private static final String SELECT_ALL_BUTTON_TEXT_KEY = "select.all.button";
     private static final String DESELECT_ALL_BUTTON_TEXT_KEY = "deselect.all.button";
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";

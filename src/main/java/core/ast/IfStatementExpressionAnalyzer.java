@@ -141,7 +141,7 @@ public class IfStatementExpressionAnalyzer {
 		return typeMethodInvocationSubclassMap.get(typeMethodInvocation);
 	}
 
-	private void processExpression(DefaultMutableTreeNode parent, PsiExpression expression) {
+	private void processExpression(DefaultMutableTreeNode parent, PsiExpression expression) { // TODO: not sure if works
 		if(expression instanceof PsiBinaryExpression) {
 			PsiBinaryExpression infixExpression = (PsiBinaryExpression)expression;
 			IElementType operator = infixExpression.getOperationTokenType();

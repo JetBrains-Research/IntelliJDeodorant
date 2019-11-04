@@ -7,6 +7,7 @@ import com.intellij.psi.util.PsiUtil;
 import core.ast.decomposition.CompositeStatementObject;
 import core.ast.inheritance.InheritanceTree;
 import core.ast.util.ExpressionExtractor;
+import core.ast.util.MethodDeclarationUtility;
 import core.ast.util.StatementExtractor;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -317,7 +318,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
 	public void setTypeCheckMethod(PsiMethod typeCheckMethod) {
 		this.typeCheckMethod = typeCheckMethod;
-		this.abstractMethodName = PsiUtil.getMemberQualifiedName(typeCheckMethod);
+		this.abstractMethodName = typeCheckMethod.getName();
 	}
 
 	public PsiClass getTypeCheckClass() {
@@ -648,11 +649,10 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 		return false;
 	}
 
-	// TODO: add me
-//	public Type getTypeCheckMethodReturnType() {
-//		return typeCheckMethod.getReturnType2();
-//	}
-//
+	public PsiType getTypeCheckMethodReturnType() {
+		return typeCheckMethod.getReturnType();
+	}
+
 	public PsiParameter[] getTypeCheckMethodParameters() {
 		return typeCheckMethod.getParameterList().getParameters();
 	}
@@ -735,34 +735,33 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 //		return null;
 //	}
 
-	// TODO: add me
-//	public String getAbstractClassName() {
-//		if(typeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-//			String typeFieldName = typeField.getName().getIdentifier().replaceAll("_", "");
-//			return typeFieldName.substring(0, 1).toUpperCase() + typeFieldName.substring(1, typeFieldName.length());
-//		}
-//		else if(typeLocalVariable != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-//			String typeLocalVariableName = typeLocalVariable.getName().getIdentifier().replaceAll("_", "");
-//			return typeLocalVariableName.substring(0, 1).toUpperCase() + typeLocalVariableName.substring(1, typeLocalVariableName.length());
-//		}
-//		else if(foreignTypeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-//			String foreignTypeFieldName = foreignTypeField.getName().getIdentifier().replaceAll("_", "");
-//			return foreignTypeFieldName.substring(0, 1).toUpperCase() + foreignTypeFieldName.substring(1, foreignTypeFieldName.length());
-//		}
-//		else if(existingInheritanceTree != null) {
-//			DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
-//			return (String)root.getUserObject();
-//		}
-//		else if(inheritanceTreeMatchingWithStaticTypes != null) {
-//			DefaultMutableTreeNode root = inheritanceTreeMatchingWithStaticTypes.getRootNode();
-//			String rootClassName = (String)root.getUserObject();
-//			if(rootClassName.contains("."))
-//				return rootClassName.substring(rootClassName.lastIndexOf(".")+1,rootClassName.length());
-//			else
-//				return rootClassName;
-//		}
-//		return null;
-//	}
+	public String getAbstractClassName() {
+		if(typeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+			String typeFieldName = typeField.getName().replaceAll("_", "");
+			return typeFieldName.substring(0, 1).toUpperCase() + typeFieldName.substring(1, typeFieldName.length());
+		}
+		else if(typeLocalVariable != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+			String typeLocalVariableName = typeLocalVariable.getName().replaceAll("_", "");
+			return typeLocalVariableName.substring(0, 1).toUpperCase() + typeLocalVariableName.substring(1, typeLocalVariableName.length());
+		}
+		else if(foreignTypeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+			String foreignTypeFieldName = foreignTypeField.getName().replaceAll("_", "");
+			return foreignTypeFieldName.substring(0, 1).toUpperCase() + foreignTypeFieldName.substring(1, foreignTypeFieldName.length());
+		}
+		else if(existingInheritanceTree != null) {
+			DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
+			return (String)root.getUserObject();
+		}
+		else if(inheritanceTreeMatchingWithStaticTypes != null) {
+			DefaultMutableTreeNode root = inheritanceTreeMatchingWithStaticTypes.getRootNode();
+			String rootClassName = (String)root.getUserObject();
+			if(rootClassName.contains("."))
+				return rootClassName.substring(rootClassName.lastIndexOf(".")+1,rootClassName.length());
+			else
+				return rootClassName;
+		}
+		return null;
+	}
 	
 	public String getAbstractClassType() {
 		String abstractClassType = null;
@@ -853,169 +852,153 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 		}
 		return true;
 	}
-//
-//	public List<String> getSubclassNames() {
-//		List<String> subclassNames = new ArrayList<String>();
-//		for(Expression expression : typeCheckMap.keySet()) {
-//			List<SimpleName> simpleNameGroup = staticFieldMap.get(expression);
-//			if(simpleNameGroup != null) {
-//				for(SimpleName simpleName : simpleNameGroup) {
-//					String staticFieldName = simpleName.getIdentifier();
-//					Type castingType = getCastingType(typeCheckMap.get(expression));
-//					String subclassName = null;
-//					if(!staticFieldName.contains("_")) {
-//						subclassName = staticFieldName.substring(0, 1).toUpperCase() +
-//						staticFieldName.substring(1, staticFieldName.length()).toLowerCase();
-//					}
-//					else {
-//						subclassName = "";
-//						StringTokenizer tokenizer = new StringTokenizer(staticFieldName,"_");
-//						while(tokenizer.hasMoreTokens()) {
-//							String tempName = tokenizer.nextToken().toLowerCase().toString();
-//							subclassName += tempName.subSequence(0, 1).toString().toUpperCase() +
-//							tempName.subSequence(1, tempName.length()).toString();
-//						}
-//					}
-//					if(inheritanceTreeMatchingWithStaticTypes != null) {
-//						subclassNames.add(staticFieldSubclassTypeMap.get(simpleName));
-//					}
-//					else if(existingInheritanceTree != null) {
-//						DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
-//						DefaultMutableTreeNode leaf = root.getFirstLeaf();
-//						while(leaf != null) {
-//							String childClassName = (String)leaf.getUserObject();
-//							if(childClassName.endsWith(subclassName)) {
-//								subclassNames.add(childClassName);
-//								break;
-//							}
-//							else if(castingType != null && castingType.resolveBinding().getQualifiedName().equals(childClassName)) {
-//								subclassNames.add(childClassName);
-//								break;
-//							}
-//							leaf = leaf.getNextLeaf();
-//						}
-//					}
-//					else if(castingType != null) {
-//						subclassNames.add(castingType.resolveBinding().getQualifiedName());
-//					}
-//					else {
-//						subclassNames.add(subclassName);
-//					}
-//				}
-//			}
-//			List<Type> typeGroup = subclassTypeMap.get(expression);
-//			if(typeGroup != null) {
-//				for(Type type : typeGroup)
-//					subclassNames.add(type.resolveBinding().getQualifiedName());
-//			}
-//		}
-//		return subclassNames;
-//	}
 
-	// TODO: add me
-//	private Type getCastingType(ArrayList<Statement> typeCheckCodeFragment) {
-//		List<Expression> castExpressions = new ArrayList<Expression>();
-//		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-//		for(Statement statement : typeCheckCodeFragment) {
-//			castExpressions.addAll(expressionExtractor.getCastExpressions(statement));
-//		}
-//		for(Expression expression : castExpressions) {
-//			CastExpression castExpression = (CastExpression)expression;
-//			Expression expressionOfCastExpression = castExpression.getExpression();
-//			SimpleName superTypeSimpleName = null;
-//			if(expressionOfCastExpression instanceof SimpleName) {
-//				superTypeSimpleName = (SimpleName)expressionOfCastExpression;
-//			}
-//			else if(expressionOfCastExpression instanceof FieldAccess) {
-//				FieldAccess fieldAccess = (FieldAccess)expressionOfCastExpression;
-//				superTypeSimpleName = fieldAccess.getName();
-//			}
-//			else if(expressionOfCastExpression instanceof MethodInvocation) {
-//				MethodInvocation methodInvocation = (MethodInvocation)expressionOfCastExpression;
-//				if(typeFieldGetterMethod != null && typeFieldGetterMethod.resolveBinding().isEqualTo(methodInvocation.resolveMethodBinding())) {
-//					superTypeSimpleName = MethodDeclarationUtility.isGetter(typeFieldGetterMethod);
-//				}
-//			}
-//			if(superTypeSimpleName != null) {
-//				if(typeField != null) {
-//					if(typeField.resolveBinding().isEqualTo(superTypeSimpleName.resolveBinding()))
-//						return castExpression.getType();
-//				}
-//				else if(typeLocalVariable != null) {
-//					if(typeLocalVariable.resolveBinding().isEqualTo(superTypeSimpleName.resolveBinding()))
-//						return castExpression.getType();
-//				}
-//				else if(typeMethodInvocation != null) {
-//					Expression typeMethodInvocationExpression = typeMethodInvocation.getExpression();
-//					SimpleName invoker = null;
-//					if(typeMethodInvocationExpression instanceof SimpleName) {
-//						invoker = (SimpleName)typeMethodInvocationExpression;
-//					}
-//					else if(typeMethodInvocationExpression instanceof FieldAccess) {
-//						FieldAccess fieldAccess = (FieldAccess)typeMethodInvocationExpression;
-//						invoker = fieldAccess.getName();
-//					}
-//					if(invoker != null && invoker.resolveBinding().isEqualTo(superTypeSimpleName.resolveBinding()))
-//						return castExpression.getType();
-//				}
-//			}
-//		}
-//		return null;
-//	}
-//
-//	public Set<ITypeBinding> getThrownExceptions() {
-//		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-//		StatementExtractor statementExtractor = new StatementExtractor();
-//		Set<ITypeBinding> thrownExceptions = new LinkedHashSet<ITypeBinding>();
-//		for(Expression key : typeCheckMap.keySet()) {
-//			ArrayList<Statement> statements = typeCheckMap.get(key);
-//			for(Statement typeCheckStatement : statements) {
-//				List<Expression> methodInvocations = expressionExtractor.getMethodInvocations(typeCheckStatement);
-//				List<Expression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(typeCheckStatement);
-//				List<Statement> tryStatements = statementExtractor.getTryStatements(typeCheckStatement);
-//				Set<ITypeBinding> catchClauseExceptions = new LinkedHashSet<ITypeBinding>();
-//				for(Statement statement : tryStatements) {
-//					TryStatement tryStatement = (TryStatement)statement;
-//					List<CatchClause> catchClauses = tryStatement.catchClauses();
-//					for(CatchClause catchClause : catchClauses) {
-//						SingleVariableDeclaration exception = catchClause.getException();
-//						Type exceptionType = exception.getType();
-//						if(exceptionType instanceof UnionType) {
-//							UnionType unionType = (UnionType)exceptionType;
-//							List<Type> types = unionType.types();
-//							for(Type type : types) {
-//								catchClauseExceptions.add(type.resolveBinding());
-//							}
-//						}
-//						else {
-//							catchClauseExceptions.add(exceptionType.resolveBinding());
-//						}
-//					}
-//				}
-//				for(Expression expression : methodInvocations) {
-//					if(expression instanceof MethodInvocation) {
-//						MethodInvocation methodInvocation = (MethodInvocation)expression;
-//						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-//						ITypeBinding[] typeBindings = methodBinding.getExceptionTypes();
-//						for(ITypeBinding typeBinding : typeBindings) {
-//							if(!catchClauseExceptions.contains(typeBinding))
-//								thrownExceptions.add(typeBinding);
-//						}
-//					}
-//				}
-//				for(Expression expression : classInstanceCreations) {
-//					ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation)expression;
-//					IMethodBinding methodBinding = classInstanceCreation.resolveConstructorBinding();
-//					ITypeBinding[] typeBindings = methodBinding.getExceptionTypes();
-//					for(ITypeBinding typeBinding : typeBindings) {
-//						if(!catchClauseExceptions.contains(typeBinding))
-//							thrownExceptions.add(typeBinding);
-//					}
-//				}
-//			}
-//		}
-//		return thrownExceptions;
-//	}
+	public List<String> getSubclassNames() {
+		List<String> subclassNames = new ArrayList<>();
+		for(PsiExpression expression : typeCheckMap.keySet()) {
+			List<PsiField> simpleNameGroup = staticFieldMap.get(expression);
+			if(simpleNameGroup != null) {
+				for(PsiField simpleName : simpleNameGroup) {
+					String staticFieldName = simpleName.getName();
+					PsiType castingType = getCastingType(typeCheckMap.get(expression));
+					String subclassName = null;
+					if(!staticFieldName.contains("_")) {
+						subclassName = staticFieldName.substring(0, 1).toUpperCase() +
+						staticFieldName.substring(1, staticFieldName.length()).toLowerCase();
+					}
+					else {
+						subclassName = "";
+						StringTokenizer tokenizer = new StringTokenizer(staticFieldName,"_");
+						while(tokenizer.hasMoreTokens()) {
+							String tempName = tokenizer.nextToken().toLowerCase().toString();
+							subclassName += tempName.subSequence(0, 1).toString().toUpperCase() +
+							tempName.subSequence(1, tempName.length()).toString();
+						}
+					}
+					if(inheritanceTreeMatchingWithStaticTypes != null) {
+						subclassNames.add(staticFieldSubclassTypeMap.get(simpleName));
+					}
+					else if(existingInheritanceTree != null) {
+						DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
+						DefaultMutableTreeNode leaf = root.getFirstLeaf();
+						while(leaf != null) {
+							String childClassName = (String)leaf.getUserObject();
+							if(childClassName.endsWith(subclassName)) {
+								subclassNames.add(childClassName);
+								break;
+							}
+							else if(castingType != null && castingType.getCanonicalText().equals(childClassName)) {
+								subclassNames.add(childClassName);
+								break;
+							}
+							leaf = leaf.getNextLeaf();
+						}
+					}
+					else if(castingType != null) {
+						subclassNames.add(castingType.getCanonicalText());
+					}
+					else {
+						subclassNames.add(subclassName);
+					}
+				}
+			}
+			List<PsiType> typeGroup = subclassTypeMap.get(expression);
+			if(typeGroup != null) {
+				for(PsiType type : typeGroup)
+					subclassNames.add(type.getCanonicalText());
+			}
+		}
+		return subclassNames;
+	}
+
+	private PsiType getCastingType(ArrayList<PsiStatement> typeCheckCodeFragment) {
+		List<PsiExpression> castExpressions = new ArrayList<>();
+		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+		for(PsiStatement statement : typeCheckCodeFragment) {
+			castExpressions.addAll(expressionExtractor.getCastExpressions(statement));
+		}
+		for(PsiExpression expression : castExpressions) {
+			PsiTypeCastExpression castExpression = (PsiTypeCastExpression)expression;
+			PsiExpression expressionOfCastExpression = castExpression.getOperand();
+			PsiReferenceExpression superTypeSimpleName = null;
+			if(expressionOfCastExpression instanceof PsiReferenceExpression) {
+				superTypeSimpleName = (PsiReferenceExpression) expressionOfCastExpression;
+			} else if(expressionOfCastExpression instanceof PsiMethodCallExpression) {
+				PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression)expressionOfCastExpression;
+				if(typeFieldGetterMethod != null && typeFieldGetterMethod.equals(methodInvocation.resolveMethod())) {
+					superTypeSimpleName = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(typeFieldGetterMethod);
+				}
+			}
+			if(superTypeSimpleName != null) {
+				if(typeField != null) {
+					if(typeField.equals(superTypeSimpleName.resolve()))
+						return castExpression.getType();
+				}
+				else if(typeLocalVariable != null) {
+					if(typeLocalVariable.equals(superTypeSimpleName.resolve()))
+						return castExpression.getType();
+				}
+				else if(typeMethodInvocation != null) {
+					PsiExpression typeMethodInvocationExpression = typeMethodInvocation.getMethodExpression().getQualifierExpression();
+					PsiReferenceExpression invoker = null;
+					if(typeMethodInvocationExpression instanceof PsiReferenceExpression) {
+						invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
+					}
+					if(invoker != null && invoker.resolve().equals(superTypeSimpleName.resolve()))
+						return castExpression.getType();
+				}
+			}
+		}
+		return null;
+	}
+
+	public Set<PsiClassType> getThrownExceptions() {
+		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+		StatementExtractor statementExtractor = new StatementExtractor();
+		Set<PsiClassType> thrownExceptions = new LinkedHashSet<>();
+		for(PsiExpression key : typeCheckMap.keySet()) {
+			ArrayList<PsiStatement> statements = typeCheckMap.get(key);
+			for(PsiStatement typeCheckStatement : statements) {
+				List<PsiExpression> methodInvocations = expressionExtractor.getMethodInvocations(typeCheckStatement);
+				List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(typeCheckStatement);
+				List<PsiStatement> tryStatements = statementExtractor.getTryStatements(typeCheckStatement);
+				Set<PsiType> catchClauseExceptions = new LinkedHashSet<>();
+				for(PsiStatement statement : tryStatements) {
+					PsiTryStatement tryStatement = (PsiTryStatement)statement;
+					PsiCatchSection[] catchClauses = tryStatement.getCatchSections();
+					for(PsiCatchSection catchClause : catchClauses) {
+						PsiType exceptionType = catchClause.getCatchType();
+						if(exceptionType instanceof PsiDisjunctionType) {
+							catchClauseExceptions.addAll(((PsiDisjunctionType) exceptionType).getDisjunctions());
+						} else {
+							catchClauseExceptions.add(exceptionType);
+						}
+					}
+				}
+				for(PsiExpression expression : methodInvocations) {
+					if(expression instanceof PsiMethodCallExpression) {
+						PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression)expression;
+						PsiMethod methodBinding = methodInvocation.resolveMethod();
+						PsiClassType[] typeBindings = methodBinding.getThrowsList().getReferencedTypes();
+						for(PsiClassType typeBinding : typeBindings) {
+							if(!catchClauseExceptions.contains(typeBinding))
+								thrownExceptions.add(typeBinding);
+						}
+					}
+				}
+				for(PsiExpression expression : classInstanceCreations) {
+					PsiNewExpression classInstanceCreation = (PsiNewExpression)expression;
+					PsiMethod methodBinding = classInstanceCreation.resolveMethod();
+					PsiClassType[] typeBindings = methodBinding.getThrowsList().getReferencedTypes();
+					for(PsiClassType typeBinding : typeBindings) {
+						if(!catchClauseExceptions.contains(typeBinding))
+							thrownExceptions.add(typeBinding);
+					}
+				}
+			}
+		}
+		return thrownExceptions;
+	}
 	
 	public boolean allTypeCheckBranchesAreEmpty() {
 		for(PsiExpression key : typeCheckMap.keySet()) {
@@ -1066,15 +1049,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 		return false;
 	}
 
-	// TODO: add me
-//	public boolean typeCheckCodeFragmentContainsReturnStatement() {
-//		StatementExtractor statementExtractor = new StatementExtractor();
-//		List<Statement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
-//		if(typeCheckCodeFragmentReturnStatements.isEmpty())
-//			return false;
-//		else
-//			return true;
-//	}
+	public boolean typeCheckCodeFragmentContainsReturnStatement() {
+		StatementExtractor statementExtractor = new StatementExtractor();
+		List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
+		return !typeCheckCodeFragmentReturnStatements.isEmpty();
+	}
 	
 	public String getAbstractMethodName() {
 		return abstractMethodName;

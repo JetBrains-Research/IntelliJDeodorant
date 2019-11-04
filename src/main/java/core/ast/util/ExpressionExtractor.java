@@ -408,9 +408,6 @@ public class ExpressionExtractor {
             PsiBinaryExpression infixExpression = (PsiBinaryExpression) expression;
             expressionList.addAll(getExpressions(infixExpression.getLOperand()));
             expressionList.addAll(getExpressions(infixExpression.getROperand()));
-            PsiExpression[] extendedOperands = infixExpression.getOperands();
-            for (PsiExpression operand : extendedOperands)
-                expressionList.addAll(getExpressions(operand));
             if (instanceChecker.instanceOf(infixExpression))
                 expressionList.add(infixExpression);
         } else if (expression instanceof PsiInstanceOfExpression) {

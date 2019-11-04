@@ -88,7 +88,9 @@ public class MethodDeclarationUtility {
                 PsiStatement statement = statements.get(0);
                 if (statement instanceof PsiReturnStatement) {
                     PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
-                    return returnStatement.getReturnValue();
+                    if (returnStatement.getReturnValue() instanceof PsiReferenceExpression) {
+                        return returnStatement.getReturnValue();
+                    }
                 }
             }
         }
