@@ -33,7 +33,6 @@ import refactoring.MyExtractMethodProcessor;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -81,7 +80,7 @@ class ExtractMethodPanel extends JPanel {
      */
     private JScrollPane createTablePanel() {
         jTree.setModel(model);
-        jTree.setCellRenderer(new DefaultTreeCellRenderer());
+        jTree.setCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
         jTree.addMouseListener((DoubleClickListener) this::onDoubleClick);
         jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         scrollPane = ScrollPaneFactory.createScrollPane(jTree);
