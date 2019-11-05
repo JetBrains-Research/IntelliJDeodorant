@@ -21,11 +21,14 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
         if (value instanceof ASTSlice) {
             label.setText(value.toString());
         } else if (value instanceof ArrayList) {
-            Object element = ((ArrayList) value).get(0);
-            if (element instanceof ASTSlice) {
-                label.setText(element.toString());
-            } else if (element instanceof ASTSliceGroup) {
-                label.setText(IntelliJDeodorantBundle.message("extract.method.found.candidates.label"));
+            ArrayList list = (ArrayList) value;
+            if (!list.isEmpty()) {
+                Object element = list.get(0);
+                if (element instanceof ASTSlice) {
+                    label.setText(element.toString());
+                } else if (element instanceof ASTSliceGroup) {
+                    label.setText(IntelliJDeodorantBundle.message("extract.method.found.candidates.label"));
+                }
             }
         }
         return label;
