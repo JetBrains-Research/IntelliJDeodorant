@@ -8,10 +8,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+import static utils.PsiUtils.getHumanReadableName;
+
 /**
  * Representation of a refactoring, which moves method to a target class.
  */
-public class MoveMethodRefactoring {
+public class MoveMethodRefactoring implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
@@ -117,5 +119,11 @@ public class MoveMethodRefactoring {
                 "method=" + method +
                 ", targetClass=" + targetClass +
                 '}';
+    }
+
+    @NotNull
+    @Override
+    public String getDescription() {
+        return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
     }
 }

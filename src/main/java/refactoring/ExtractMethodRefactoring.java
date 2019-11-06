@@ -12,10 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.Set;
 
+import static utils.PsiUtils.getHumanReadableName;
+
 /**
  * Representation of a refactoring, which suggests to extract code into separate method.
  */
-public class ExtractMethodRefactoring {
+public class ExtractMethodRefactoring implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
@@ -44,8 +46,24 @@ public class ExtractMethodRefactoring {
                 new IllegalStateException("Cannot get method. Reference is invalid."));
     }
 
+    /**
+     * Returns method that is moved in this refactoring.
+     */
+    public @NotNull
+    Optional<PsiMethod> getOptionalMethod() {
+        return Optional.ofNullable(method.getElement());
+    }
+
     @NotNull
     public Set<ASTSlice> getCandidates() {
         return candidates;
+    }
+
+    @NotNull
+    @Override
+    public String getDescription() {
+        Optional<PsiMethod> method = getOptionalMethod();
+        return method.map(psiMethod -> String.join(DELIMITER, getHumanReadableName(psiMethod.getContainingClass()),
+                getHumanReadableName(psiMethod), candidates.iterator().next().getLocalVariableCriterion().getName())).orElse("");
     }
 }
