@@ -470,6 +470,15 @@ public class ExpressionExtractor {
             }
             if (instanceChecker.instanceOf(polyadicExpression))
                 expressionList.add(polyadicExpression);
+        } else if (expression instanceof PsiLambdaExpression) {
+            PsiLambdaExpression lambdaExpression = (PsiLambdaExpression) expression;
+            if (lambdaExpression.getBody() instanceof PsiExpression) {
+                expressionList.addAll(getExpressions(lambdaExpression.getBody()));
+            } else if (lambdaExpression.getBody() instanceof PsiCodeBlock) {
+                expressionList.addAll(getExpressions(lambdaExpression.getBody()));
+            }
+            if (instanceChecker.instanceOf(lambdaExpression))
+                expressionList.add(lambdaExpression);
         }
         return expressionList;
     }
