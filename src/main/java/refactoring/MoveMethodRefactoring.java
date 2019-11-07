@@ -18,6 +18,8 @@ public class MoveMethodRefactoring implements Refactoring {
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
     SmartPsiElementPointer<PsiClass> targetClass;
+    //Save name of the method after performing refactoring
+    private final @NotNull String methodName;
 
     /**
      * Creates refactoring.
@@ -37,6 +39,7 @@ public class MoveMethodRefactoring implements Refactoring {
                 (Computable<SmartPsiElementPointer<PsiClass>>) () ->
                         SmartPointerManager.getInstance(targetClass.getProject()).createSmartPsiElementPointer(targetClass)
         );
+        this.methodName = getHumanReadableName(this.method.getElement());
     }
 
     /**
@@ -125,5 +128,9 @@ public class MoveMethodRefactoring implements Refactoring {
     @Override
     public String getDescription() {
         return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
+    }
+
+    public String getMethodName() {
+        return methodName;
     }
 }
