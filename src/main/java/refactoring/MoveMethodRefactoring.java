@@ -132,7 +132,8 @@ public class MoveMethodRefactoring implements Refactoring {
         return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
     }
 
-    public String qualifiedMethodName() {
+    @NotNull
+    public String getQualifiedMethodName() {
         return qualifiedMethodName;
     }
 }
