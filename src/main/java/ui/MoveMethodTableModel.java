@@ -212,7 +212,7 @@ class MoveMethodTableModel extends AbstractTableModel {
             case ENTITY_COLUMN_INDEX:
                 Optional<PsiMethod> method = refactorings.get(rowIndex).getOptionalMethod();
                 String qualifiedMethodName = refactorings.get(rowIndex).getQualifiedMethodName();
-                return method.map(PsiUtils::getHumanReadableName).orElseGet(() ->  qualifiedMethodName + " " + IntelliJDeodorantBundle.message("java.member.is.not.valid"));
+                return method.map(psiMethod -> qualifiedMethodName).orElseGet(() ->  qualifiedMethodName + " " + IntelliJDeodorantBundle.message("java.member.is.not.valid"));
             case MOVE_TO_COLUMN_INDEX:
                 Optional<PsiClass> targetClass = refactorings.get(rowIndex).getOptionalTargetClass();
                 return targetClass.map(PsiUtils::getHumanReadableName).orElseGet(() -> IntelliJDeodorantBundle.message("target.class.is.not.valid"));
