@@ -12,15 +12,13 @@ import static utils.PsiUtils.getHumanReadableName;
 
 /**
  * Representation of a refactoring, which moves method to a target class.
+ * Once the method moved, the corresponding pointer becomes invalid.
  */
 public class MoveMethodRefactoring implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
     SmartPsiElementPointer<PsiClass> targetClass;
-    /**
-     * After making refactoring link to the method became invalid so we need to save it
-     */
     private final @NotNull String qualifiedMethodName;
 
     /**
