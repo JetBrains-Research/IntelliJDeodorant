@@ -22,6 +22,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="ui.RefactoringsToolWindowFactory"/>
+        <errorHandler implementation="reporting.GitHubErrorReporter"/>
     </extensions>
 
     <actions>

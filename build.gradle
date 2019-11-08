@@ -20,6 +20,7 @@ intellij {
 }
 
 dependencies {
+    compile group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '2.1.5'
 }
 
 
