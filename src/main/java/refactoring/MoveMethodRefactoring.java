@@ -12,12 +12,14 @@ import static utils.PsiUtils.getHumanReadableName;
 
 /**
  * Representation of a refactoring, which moves method to a target class.
+ * Once the method moved, the corresponding pointer becomes invalid.
  */
 public class MoveMethodRefactoring implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
     SmartPsiElementPointer<PsiClass> targetClass;
+    private final @NotNull String qualifiedMethodName;
 
     /**
      * Creates refactoring.
@@ -37,6 +39,7 @@ public class MoveMethodRefactoring implements Refactoring {
                 (Computable<SmartPsiElementPointer<PsiClass>>) () ->
                         SmartPointerManager.getInstance(targetClass.getProject()).createSmartPsiElementPointer(targetClass)
         );
+        this.qualifiedMethodName = getHumanReadableName(this.method.getElement());
     }
 
     /**
@@ -125,5 +128,10 @@ public class MoveMethodRefactoring implements Refactoring {
     @Override
     public String getDescription() {
         return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
+    }
+
+    @NotNull
+    public String getQualifiedMethodName() {
+        return qualifiedMethodName;
     }
 }
