@@ -33,6 +33,8 @@ import refactoring.MyExtractMethodProcessor;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -85,6 +87,7 @@ class ExtractMethodPanel extends JPanel {
         jTree.setCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
         jTree.addMouseListener((DoubleClickListener) this::openMethodDefinition);
         jTree.addKeyListener((EnterKeyListener) this::openMethodDefinition);
+        jTree.addTreeSelectionListener((ElementSelectionListener) this::enableRefactorButtonIfAnySelected);
         jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         scrollPane = ScrollPaneFactory.createScrollPane(jTree);
         scrollPane.setVisible(false);
@@ -102,6 +105,7 @@ class ExtractMethodPanel extends JPanel {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
+        doRefactorButton.setEnabled(false);
         doRefactorButton.addActionListener(e -> refactorSelected());
         buttonPanel.add(doRefactorButton);
 
@@ -116,8 +120,25 @@ class ExtractMethodPanel extends JPanel {
      * Preforms selected refactoring.
      */
     private void refactorSelected() {
-        ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
-        TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
+        Object[] selectedPath = jTree.getAnchorSelectionPath().getPath();
+        if (selectedPath.length == 3) {
+            ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
+            TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
+        }
+    }
+
+    /**
+     * Enable Refactor button only if any suggestion is selected.
+     */
+    private void enableRefactorButtonIfAnySelected() {
+        boolean isAnySuggestionSelected = false;
+        if (jTree.getSelectionPath() != null && jTree.getSelectionPath().getPath().length == 3) {
+            Object o = jTree.getSelectionPath().getPath()[2];
+            if (o instanceof ASTSlice) {
+                isAnySuggestionSelected = true;
+            }
+        }
+        doRefactorButton.setEnabled(isAnySuggestionSelected);
     }
 
     /**
@@ -129,6 +150,7 @@ class ExtractMethodPanel extends JPanel {
             editor.getMarkupModel().removeAllHighlighters();
         }
         refactorings.clear();
+        doRefactorButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -284,6 +306,15 @@ class ExtractMethodPanel extends JPanel {
         }
 
         default void keyReleased(KeyEvent e) {
+        }
+    }
+
+    @FunctionalInterface
+    private interface ElementSelectionListener extends TreeSelectionListener {
+        void onSelect();
+
+        default void valueChanged(TreeSelectionEvent var1) {
+            onSelect();
         }
     }
 }
