@@ -35,6 +35,8 @@ import utils.IntelliJDeodorantBundle;
 import javax.swing.*;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
@@ -81,7 +83,8 @@ class ExtractMethodPanel extends JPanel {
     private JScrollPane createTablePanel() {
         jTree.setModel(model);
         jTree.setCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
-        jTree.addMouseListener((DoubleClickListener) this::onDoubleClick);
+        jTree.addMouseListener((DoubleClickListener) this::openMethodDefinition);
+        jTree.addKeyListener((EnterKeyListener) this::openMethodDefinition);
         jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         scrollPane = ScrollPaneFactory.createScrollPane(jTree);
         scrollPane.setVisible(false);
@@ -156,9 +159,9 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Opens the definition of appropriate method for the selected suggestion by double-clicking.
+     * Opens the definition of appropriate method for the selected suggestion by double-clicking or Enter key pressing.
      */
-    private void onDoubleClick() {
+    private void openMethodDefinition() {
         if (jTree.getAnchorSelectionPath().getPath().length == 3) {
             Object o = jTree.getAnchorSelectionPath().getPath()[2];
             if (o instanceof ASTSlice) {
@@ -264,6 +267,23 @@ class ExtractMethodPanel extends JPanel {
         }
 
         default void mouseExited(MouseEvent e) {
+        }
+    }
+
+    @FunctionalInterface
+    private interface EnterKeyListener extends KeyListener {
+        void onEnterKey();
+
+        default void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                onEnterKey();
+            }
+        }
+
+        default void keyTyped(KeyEvent e) {
+        }
+
+        default void keyReleased(KeyEvent e) {
         }
     }
 }
