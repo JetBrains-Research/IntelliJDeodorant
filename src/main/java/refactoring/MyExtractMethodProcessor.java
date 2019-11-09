@@ -125,7 +125,7 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
         PsiMethod newMethod = generateEmptyMethod(myMethodName, null);
         prepareMethodBody(newMethod);
         myExtractedMethod = addExtractedMethod(newMethod);
-        setMethodCall(generateMethodCall(null, true));
+        setMethodCall(generateMethodCall(null, true, null));
 
         final String outputVariableName = variableCriterion.getName();
         if (isDeclaredInside(variableCriterion) && outputVariableName != null) {
