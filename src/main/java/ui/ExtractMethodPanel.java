@@ -254,12 +254,12 @@ class ExtractMethodPanel extends JPanel {
             @Override
             public void onSuccess() {
                 if (sourceMethod != null) {
-                    EditorHelper.openInEditor(sourceMethod);
+                    Set<PsiStatement> statements = slice.getSliceStatements();
+                    EditorHelper.openInEditor(statements.iterator().next());
                     Editor editor = FileEditorManager.getInstance(sourceMethod.getProject()).getSelectedTextEditor();
                     if (editor != null) {
                         TextAttributes attributes = new TextAttributes(editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR),
                                 new JBColor(new Color(84, 168, 78), new Color(16, 105, 15)), null, null, 0);
-                        Set<PsiStatement> statements = slice.getSliceStatements();
                         editor.getMarkupModel().removeAllHighlighters();
                         statements.forEach(statement -> editor.getMarkupModel().addRangeHighlighter(statement.getTextRange().getStartOffset(),
                                 statement.getTextRange().getEndOffset(), HighlighterLayer.SELECTION, attributes, HighlighterTargetArea.EXACT_RANGE));
