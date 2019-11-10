@@ -3,6 +3,7 @@ package refactoring;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.PsiPackageReference;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.psi.util.PsiUtil;
 import core.ast.decomposition.CompositeStatementObject;
 import core.ast.inheritance.InheritanceTree;
@@ -388,12 +389,23 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 	
 	public boolean isApplicable() {
 		if(!containsLocalVariableAssignment() && !containsBranchingStatement() && !containsSuperMethodInvocation() && !containsSuperFieldAccess() &&
-				!isSubclassTypeAnInterface() && !returnStatementAfterTypeCheckCodeFragment())
+				!isSubclassTypeAnInterface() && !returnStatementAfterTypeCheckCodeFragment() && !typeCheckClassPartOfExistingInheritanceTree())
 			return true;
 		else
 			return false;
 	}
-	
+	private boolean typeCheckClassPartOfExistingInheritanceTree() {
+		Collection<List<PsiType>> subTypeCollection = subclassTypeMap.values();
+		for(List<PsiType> subTypes : subTypeCollection) {
+			for(PsiType subType : subTypes) {
+				if(subType.equals(PsiTypesUtil.getClassType(typeCheckClass))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean isSubclassTypeAnInterface() {
 		for(List<PsiType> subTypes : subclassTypeMap.values()) {
 			for(PsiType subType : subTypes) {
@@ -656,7 +668,94 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 	public PsiParameter[] getTypeCheckMethodParameters() {
 		return typeCheckMethod.getParameterList().getParameters();
 	}
-	
+
+	private Map<PsiReturnStatement, PsiVariable> getTypeCheckMethodReturnedVariableMap() {
+		Map<PsiReturnStatement, PsiVariable> map = new LinkedHashMap<PsiReturnStatement, PsiVariable>();
+		StatementExtractor statementExtractor = new StatementExtractor();
+		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+		List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
+		List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
+		for(PsiStatement statement : typeCheckCodeFragmentReturnStatements) {
+			PsiReturnStatement returnStatement = (PsiReturnStatement)statement;
+			if(returnStatement.getReturnValue() instanceof PsiReferenceExpression) {
+				PsiReferenceExpression returnExpression = (PsiReferenceExpression)returnStatement.getReturnValue();
+				PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+				for(PsiVariable parameter : parameters) {
+					if(parameter.equals(returnExpression.resolve())) {
+						map.put(returnStatement, parameter);
+					}
+				}
+				for(PsiStatement vdStatement : variableDeclarationStatements) {
+					PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement)vdStatement;
+					PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+					for(PsiElement fragment : fragments) {
+						if(fragment.equals(returnExpression.resolve())) {
+							map.put(returnStatement, (PsiVariable) fragment);
+						}
+					}
+				}
+			}
+		}
+		return map;
+	}
+
+	public boolean returnedVariableReturnedInBranches() {
+		Map<PsiReturnStatement, PsiVariable> map = getTypeCheckMethodReturnedVariableMap();
+		int returnedInBranchCounter = 0;
+		for(PsiReturnStatement key : map.keySet()) {
+			for(PsiExpression expression : typeCheckMap.keySet()) {
+				ArrayList<PsiStatement> branchStatements = typeCheckMap.get(expression);
+				if(branchStatements.contains(key)) {
+					returnedInBranchCounter++;
+				}
+			}
+			if(defaultCaseStatements.contains(key)) {
+				returnedInBranchCounter++;
+			}
+		}
+		return map.size() == returnedInBranchCounter;
+	}
+
+	public boolean returnedVariableDeclaredAndReturnedInBranches() {
+		Map<PsiReturnStatement, PsiVariable> map = getTypeCheckMethodReturnedVariableMap();
+		int returnedInBranchCounter = 0;
+		int declaredInBranchCounter = 0;
+		for(PsiReturnStatement key : map.keySet()) {
+			for(PsiExpression expression : typeCheckMap.keySet()) {
+				ArrayList<PsiStatement> branchStatements = typeCheckMap.get(expression);
+				if(branchStatements.contains(key)) {
+					returnedInBranchCounter++;
+				}
+				for(PsiStatement statement : branchStatements) {
+					if(statement instanceof PsiDeclarationStatement) {
+						PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement)statement;
+						PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+						for(PsiElement fragment : fragments) {
+							if(fragment.equals(map.get(key))) {
+								declaredInBranchCounter++;
+							}
+						}
+					}
+				}
+			}
+			if(defaultCaseStatements.contains(key)) {
+				returnedInBranchCounter++;
+			}
+			for(PsiStatement statement : defaultCaseStatements) {
+				if(statement instanceof PsiDeclarationStatement) {
+					PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement)statement;
+					PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+					for(PsiElement fragment : fragments) {
+						if(fragment.equals(map.get(key))) {
+							declaredInBranchCounter++;
+						}
+					}
+				}
+			}
+		}
+		return map.size() == returnedInBranchCounter && map.size() == declaredInBranchCounter;
+	}
+
 	public PsiVariable getTypeCheckMethodReturnedVariable() {
 		StatementExtractor statementExtractor = new StatementExtractor();
 		List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);

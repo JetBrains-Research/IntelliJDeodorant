@@ -449,6 +449,7 @@ public class ExpressionExtractor {
                 expressionList.add(arrayInitializer);
         } else if (expression instanceof PsiReferenceExpression) {
             PsiReferenceExpression simpleName = (PsiReferenceExpression) expression;
+            expressionList.addAll(getExpressions(simpleName.getQualifierExpression()));
             if (instanceChecker.instanceOf(simpleName))
                 expressionList.add(simpleName);
         } else if (expression instanceof PsiQualifiedExpression) {
