@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 public abstract class PolymorphismRefactoring {
     protected PsiFile sourceFile;
     protected PsiClass sourceTypeDeclaration;
+    protected Project project;
     protected TypeCheckElimination typeCheckElimination;
     protected PsiElementFactory elementFactory;
     protected CodeStyleManager codeStyleManager;
@@ -34,6 +35,7 @@ public abstract class PolymorphismRefactoring {
         elementFactory = PsiElementFactory.SERVICE.getInstance(project);
         codeStyleManager = CodeStyleManager.getInstance(project);
         this.fieldDeclarationsChangedWithPublicModifier = new LinkedHashSet<>();
+        this.project = project;
     }
 
     protected void modifySourceMethodInvocationsInSubclass(List<PsiExpression> oldMethodInvocations,
@@ -529,6 +531,26 @@ public abstract class PolymorphismRefactoring {
         ).flatMap(Collection::stream).anyMatch(element ->
                 element.getModifierList() == null || !element.getModifierList().hasModifierProperty(PsiModifier.STATIC)
         );
+    }
+
+    protected void addImports(PsiImportList importList, Set<PsiType> requiredImportDeclarations) {
+        for (PsiType typeBinding : requiredImportDeclarations) {
+            PsiClass resolvedClass = PsiUtil.resolveClassInType(typeBinding);
+            if (resolvedClass != null && resolvedClass.getContainingClass() == null && !PsiUtil.getPackageName(resolvedClass).isEmpty()) {
+                importList.add(elementFactory.createImportStatement(resolvedClass));
+            }
+        }
+    }
+
+    protected static PsiImportList getPsiImportList(PsiFile classFile) {
+        PsiImportList subClassImportList;
+        PsiElement[] children = classFile.getChildren();
+        if (children[0] instanceof PsiImportList) {
+            subClassImportList = (PsiImportList) children[0];
+        } else {
+            subClassImportList = (PsiImportList) children[1];
+        }
+        return subClassImportList;
     }
 
 //	protected Expression generateDefaultValue(ASTRewrite sourceRewriter, AST ast, ITypeBinding returnTypeBinding) {

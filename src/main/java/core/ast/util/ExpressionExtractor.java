@@ -69,7 +69,7 @@ public class ExpressionExtractor {
     }
 
     // returns a List of ClassInstanceCreation objects
-    public List<PsiExpression> getClassInstanceCreations(PsiStatement statement) {
+    public List<PsiExpression> getClassInstanceCreations(PsiElement statement) {
         instanceChecker = new InstanceOfClassInstanceCreation();
         return getExpressions(statement);
     }

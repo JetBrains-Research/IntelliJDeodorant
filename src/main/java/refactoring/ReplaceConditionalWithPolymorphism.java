@@ -15,7 +15,6 @@ import java.util.*;
 
 public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring {
     private PsiVariable returnedVariable;
-    private Project project;
     private Set<PsiClassType> thrownExceptions;
     private PsiVariable typeVariable;
     private PsiMethodCallExpression typeMethodInvocation;
@@ -33,8 +32,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
             this.typeVariable = typeCheckElimination.getTypeLocalVariable();
         }
         this.typeMethodInvocation = typeCheckElimination.getTypeMethodInvocation();
-
-        this.project = project;
     }
 
     public void apply() {
@@ -356,26 +353,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
 		PsiImportList abstractClassImportList = getPsiImportList(abstractClassFile);
 		addImports(abstractClassImportList, requiredImportDeclarationsBasedOnSignature);
-	}
-
-	private void addImports(PsiImportList importList, Set<PsiType> requiredImportDeclarations) {
-		for (PsiType typeBinding : requiredImportDeclarations) {
-			PsiClass resolvedClass = PsiUtil.resolveClassInType(typeBinding);
-			if (resolvedClass != null && resolvedClass.getContainingClass() == null && !PsiUtil.getPackageName(resolvedClass).isEmpty()) {
-				importList.add(elementFactory.createImportStatement(resolvedClass));
-			}
-		}
-	}
-
-	private static PsiImportList getPsiImportList(PsiFile classFile) {
-		PsiImportList subClassImportList;
-		PsiElement[] children = classFile.getChildren();
-		if (children[0] instanceof PsiImportList) {
-			subClassImportList = (PsiImportList) children[0];
-		} else {
-			subClassImportList = (PsiImportList) children[1];
-		}
-		return subClassImportList;
 	}
 
 	private PsiMethod createPolymorphicMethodHeader() {
