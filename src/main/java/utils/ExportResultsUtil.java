@@ -1,11 +1,6 @@
 package utils;
 
-import refactoring.MoveMethodRefactoring;
-
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiClass;
 import refactoring.Refactoring;
-
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.function.Function;
-import java.util.Optional;
-
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.write;
-import static utils.PsiUtils.getHumanReadableName;
 
 /**
  * Class exports (MoveMethod) refactoring results to the file
