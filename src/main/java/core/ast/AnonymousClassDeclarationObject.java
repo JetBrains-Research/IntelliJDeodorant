@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.intellij.psi.PsiAnonymousClass;
-import com.intellij.psi.PsiType;
 
 public class AnonymousClassDeclarationObject extends ClassDeclarationObject {
 	private ASTInformation anonymousClassDeclaration;
@@ -25,10 +24,6 @@ public class AnonymousClassDeclarationObject extends ClassDeclarationObject {
 
 	public void setClassObject(ClassObject classObject) {
 		this.classObject = classObject;
-	}
-
-	public PsiType getITypeRoot() {
-		return anonymousClassDeclaration.getITypeRoot();
 	}
 	
 	public TypeObject getSuperclass() {

@@ -5,16 +5,17 @@ import com.intellij.psi.PsiVariable;
 public class PlainVariable extends AbstractVariable {
     private volatile int hashCode = 0;
 
-    public PlainVariable(PsiVariable variableName) {
-        super(variableName);
+    public PlainVariable(PsiVariable variable) {
+        super(variable);
     }
 
-    public PlainVariable(String variableQualifiedName, String variableName, String variableType, boolean isField, boolean isParameter, boolean isStatic) {
-        super(variableQualifiedName, variableName, variableType, isField, isParameter, isStatic);
+    public PlainVariable(PsiVariable origin, String variableName, String variableType, boolean isField,
+                         boolean isParameter, boolean isStatic) {
+        super(origin, variableName, variableType, isField, isParameter, isStatic);
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        return this.qualifiedName.equals(variable.qualifiedName);
+        return this.getOrigin().equals(variable.getOrigin());
     }
 
     public boolean startsWithVariable(AbstractVariable variable) {
@@ -34,7 +35,7 @@ public class PlainVariable extends AbstractVariable {
         }
         if (o instanceof PlainVariable) {
             PlainVariable plain = (PlainVariable) o;
-            return this.qualifiedName.equals(plain.qualifiedName);
+            return this.getOrigin().equals(plain.getOrigin());
         }
         return false;
     }
@@ -42,13 +43,13 @@ public class PlainVariable extends AbstractVariable {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 31 * result + qualifiedName.hashCode();
+            result = 31 * result + this.getOrigin().hashCode();
             hashCode = result;
         }
         return hashCode;
     }
 
     public String toString() {
-        return name;
+        return this.getName();
     }
 }

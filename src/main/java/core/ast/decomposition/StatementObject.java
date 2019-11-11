@@ -22,31 +22,32 @@ import java.util.List;
  */
 
 public class StatementObject extends AbstractStatement {
-	
-	public StatementObject(PsiStatement statement, StatementType type, AbstractMethodFragment parent) {
-		super(statement, type, parent);
-		
-		ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+
+    public StatementObject(PsiStatement statement, StatementType type, AbstractMethodFragment parent) {
+        super(statement, type, parent);
+
+        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         List<PsiExpression> assignments = expressionExtractor.getAssignments(statement);
         List<PsiExpression> postfixExpressions = expressionExtractor.getPostfixExpressions(statement);
         List<PsiExpression> prefixExpressions = expressionExtractor.getPrefixExpressions(statement);
         processVariables(expressionExtractor.getVariableInstructions(statement), assignments, postfixExpressions, prefixExpressions);
-		processMethodInvocations(expressionExtractor.getMethodInvocations(statement));
-		processClassInstanceCreations(expressionExtractor.getClassInstanceCreations(statement));
-		processArrayCreations(expressionExtractor.getArrayCreations(statement));
-		processLiterals(expressionExtractor.getLiterals(statement));
-		if(statement instanceof PsiThrowStatement) {
-			processThrowStatement((PsiThrowStatement)statement);
-		}
-	}
+        processLocalVariableDeclaration(statement);
+        processMethodInvocations(expressionExtractor.getMethodInvocations(statement));
+        processClassInstanceCreations(expressionExtractor.getClassInstanceCreations(statement));
+        processArrayCreations(expressionExtractor.getArrayCreations(statement));
+        processLiterals(expressionExtractor.getLiterals(statement));
+        if (statement instanceof PsiThrowStatement) {
+            processThrowStatement((PsiThrowStatement) statement);
+        }
+    }
 
-	public String toString() {
-		return getStatement().toString();
-	}
+    public String toString() {
+        return getStatement().toString();
+    }
 
-	public List<String> stringRepresentation() {
-		List<String> stringRepresentation = new ArrayList<>();
-		stringRepresentation.add(this.toString());
-		return stringRepresentation;
-	}
+    public List<String> stringRepresentation() {
+        List<String> stringRepresentation = new ArrayList<>();
+        stringRepresentation.add(this.toString());
+        return stringRepresentation;
+    }
 }

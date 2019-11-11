@@ -3,7 +3,7 @@ package core.ast.decomposition;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiSynchronizedStatement;
 
-class SynchronizedStatementObject extends CompositeStatementObject {
+public class SynchronizedStatementObject extends CompositeStatementObject {
 
     SynchronizedStatementObject(PsiStatement statement, AbstractMethodFragment parent) {
         super(statement, StatementType.SYNCHRONIZED, parent);

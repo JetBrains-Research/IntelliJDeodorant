@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class MoveMethodTableModel extends AbstractTableModel {
+class MoveMethodTableModel extends AbstractTableModel {
     private static final String METHOD_COLUMN_TITLE_KEY = "method.column.title";
     private static final String MOVE_TO_COLUMN_TITLE_KEY = "move.to.column.title";
 
@@ -52,16 +52,24 @@ public class MoveMethodTableModel extends AbstractTableModel {
     void clearTable() {
         this.refactorings.clear();
         this.virtualRows.clear();
+        isSelected = new boolean[0];
+        isActive = new boolean[0];
         fireTableDataChanged();
     }
 
     void selectAll() {
-        virtualRows.forEach(i -> isSelected[i] = true);
+        for (int i = 0; i < virtualRows.size(); i++) {
+            setValueAtRowIndex(true, i, false);
+        }
+
         fireTableDataChanged();
     }
 
     void deselectAll() {
-        Arrays.fill(isSelected, false);
+        for (int i = 0; i < virtualRows.size(); i++) {
+            setValueAtRowIndex(false, i, false);
+        }
+
         fireTableDataChanged();
     }
 
@@ -126,8 +134,63 @@ public class MoveMethodTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int virtualRow, int columnIndex) {
-        isSelected[virtualRows.get(virtualRow)] = (Boolean) value;
-        fireTableCellUpdated(virtualRow, columnIndex);
+        final int rowIndex = virtualRows.get(virtualRow);
+        final boolean isRowSelected = (Boolean) value;
+        setValueAtRowIndex(isRowSelected, rowIndex, true);
+
+        fireTableDataChanged();
+    }
+
+    private void setValueAtRowIndex(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
+        if (!isActive[rowIndex]) {
+            return;
+        }
+
+        boolean hasConflicts = updateConflictingRows(isRowSelected, rowIndex, forceSelectInConflicts);
+
+        if (isRowSelected && hasConflicts && !forceSelectInConflicts) {
+            return;
+        }
+
+        isSelected[rowIndex] = isRowSelected;
+    }
+
+    /**
+     * For all rows that conflict with the newly selected row (has the same method to refactor),
+     * deselects and disables them if user has selected this row and activates otherwise.
+     *
+     * @param isRowSelected          has user selected or deselected the new row
+     * @param rowIndex               index of that row
+     * @param forceSelectInConflicts if false isRowSelected is true, in case of conflicts given row
+     *                               shouldn't be selected and other rows won't be updated.
+     * @return is there any conflicts with the initial row.
+     */
+    private boolean updateConflictingRows(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
+        boolean hasConflicts = false;
+
+        for (int i = 0; i < refactorings.size(); i++) {
+            if (i == rowIndex) {
+                continue;
+            }
+
+            if (refactorings.get(rowIndex).methodEquals(refactorings.get(i))) {
+                hasConflicts = true;
+
+                if (isRowSelected) {
+                    if (!forceSelectInConflicts) {
+                        return true;
+                    }
+
+                    isSelected[i] = false;
+                    isActive[i] = false;
+                } else {
+                    isSelected[i] = false;
+                    isActive[i] = true;
+                }
+            }
+        }
+
+        return hasConflicts;
     }
 
     boolean isAnySelected() {
@@ -148,7 +211,8 @@ public class MoveMethodTableModel extends AbstractTableModel {
                 return isSelected[rowIndex];
             case ENTITY_COLUMN_INDEX:
                 Optional<PsiMethod> method = refactorings.get(rowIndex).getOptionalMethod();
-                return method.map(PsiUtils::getHumanReadableName).orElseGet(() -> IntelliJDeodorantBundle.message("java.member.is.not.valid"));
+                String qualifiedMethodName = refactorings.get(rowIndex).getQualifiedMethodName();
+                return method.map(psiMethod -> qualifiedMethodName).orElseGet(() ->  qualifiedMethodName + " " + IntelliJDeodorantBundle.message("java.member.is.not.valid"));
             case MOVE_TO_COLUMN_INDEX:
                 Optional<PsiClass> targetClass = refactorings.get(rowIndex).getOptionalTargetClass();
                 return targetClass.map(PsiUtils::getHumanReadableName).orElseGet(() -> IntelliJDeodorantBundle.message("target.class.is.not.valid"));

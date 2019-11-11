@@ -1,11 +1,11 @@
 package core.ast;
 
-import com.intellij.psi.PsiDeclarationStatement;
+import com.intellij.psi.PsiVariable;
 
 public class LocalVariableDeclarationObject extends VariableDeclarationObject {
     private final TypeObject type;
     private final String name;
-    private PsiDeclarationStatement variableDeclaration;
+    private PsiVariable variableDeclaration;
     private volatile int hashCode = 0;
 
     public LocalVariableDeclarationObject(TypeObject type, String name) {
@@ -21,11 +21,11 @@ public class LocalVariableDeclarationObject extends VariableDeclarationObject {
         return name;
     }
 
-    public PsiDeclarationStatement getVariableDeclaration() {
+    public PsiVariable getVariableDeclaration() {
         return variableDeclaration;
     }
 
-    public void setVariableDeclaration(PsiDeclarationStatement variableDeclaration) {
+    public void setVariableDeclaration(PsiVariable variableDeclaration) {
         this.variableDeclaration = variableDeclaration;
     }
 
@@ -36,17 +36,15 @@ public class LocalVariableDeclarationObject extends VariableDeclarationObject {
 
         if (o instanceof LocalVariableDeclarationObject) {
             LocalVariableDeclarationObject lvdo = (LocalVariableDeclarationObject) o;
-            return this.name.equals(lvdo.name) 
-                    && this.type.equals(lvdo.type) 
-                    && this.variableBindingKey.equals(lvdo.variableBindingKey);
+            return this.name.equals(lvdo.name)
+                    && this.type.equals(lvdo.type);
         }
         return false;
     }
 
     public boolean equals(LocalVariableInstructionObject lvio) {
-        return this.name.equals(lvio.getName()) 
-                && this.type.equals(lvio.getType()) 
-                && this.variableBindingKey.equals(lvio.getVariableBindingKey());
+        return this.name.equals(lvio.getName())
+                && this.type.equals(lvio.getType());
     }
 
     public int hashCode() {
@@ -54,7 +52,6 @@ public class LocalVariableDeclarationObject extends VariableDeclarationObject {
             int result = 17;
             result = 37 * result + type.hashCode();
             result = 37 * result + name.hashCode();
-            result = 37 * result + variableBindingKey.hashCode();
             hashCode = result;
         }
         return hashCode;
