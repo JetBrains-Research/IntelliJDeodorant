@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.ExtractMethodRefactoring;
 import refactoring.MyExtractMethodProcessor;
+import utils.ExportResultsUtil;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
@@ -56,6 +57,7 @@ class ExtractMethodPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "long.method.detect.indicator.status";
     private static final String EXTRACT_METHOD_REFACTORING_NAME = "extract.method.refactoring.name";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
 
     @NotNull
     private final AnalysisScope scope;
@@ -65,6 +67,7 @@ class ExtractMethodPanel extends JPanel {
     private final JButton refreshButton = new JButton();
     private final List<ExtractMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JScrollPane();
+    private final JButton exportButton = new JButton();
 
     ExtractMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -112,6 +115,11 @@ class ExtractMethodPanel extends JPanel {
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonPanel.add(refreshButton);
+
+        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings));
+        exportButton.setEnabled(false);
+        buttonPanel.add(exportButton);
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
     }
@@ -151,6 +159,7 @@ class ExtractMethodPanel extends JPanel {
         }
         refactorings.clear();
         doRefactorButton.setEnabled(false);
+        exportButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -174,6 +183,7 @@ class ExtractMethodPanel extends JPanel {
                     model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
+                    exportButton.setEnabled(!refactorings.isEmpty());
                 });
             }
         };

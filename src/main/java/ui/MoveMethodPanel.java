@@ -28,7 +28,6 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,7 +122,8 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
-        exportButton.addActionListener(e -> export());
+        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings));
+        exportButton.setEnabled(false);
         buttonsPanel.add(exportButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
@@ -138,6 +138,7 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
+        exportButton.setEnabled(model.getRowCount() != 0);
     }
 
     private void disableAllButtons() {
@@ -145,6 +146,7 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(false);
         deselectAllButton.setEnabled(false);
         refreshButton.setEnabled(false);
+        exportButton.setEnabled(false);
     }
 
     private void refactorSelected() {
@@ -221,23 +223,6 @@ class MoveMethodPanel extends JPanel {
                 }
             }
         }.queue();
-    }
-
-    /**
-     * Method exports refactoring results to the file
-     */
-    private void export() {
-        final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int returnVal = fileChooser.showOpenDialog(null);
-        if (returnVal == JFileChooser.CANCEL_OPTION) {
-            return;
-        }
-        try {
-            ExportResultsUtil.exportToFile(refactorings, fileChooser.getSelectedFile().getCanonicalPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FunctionalInterface
