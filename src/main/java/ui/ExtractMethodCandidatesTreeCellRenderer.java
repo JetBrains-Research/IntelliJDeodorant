@@ -1,5 +1,6 @@
 package ui;
 
+import com.intellij.ui.JBColor;
 import core.ast.decomposition.cfg.ASTSlice;
 import core.ast.decomposition.cfg.ASTSliceGroup;
 import utils.IntelliJDeodorantBundle;
@@ -19,18 +20,36 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
         JLabel label = new JLabel();
         label.setIcon(null);
         if (value instanceof ASTSlice) {
-            label.setText(value.toString());
+            ASTSlice slice = (ASTSlice) value;
+            label.setText(slice.toString());
+            disableNotValidSuggestion(slice, label);
         } else if (value instanceof ArrayList) {
             ArrayList list = (ArrayList) value;
             if (!list.isEmpty()) {
                 Object element = list.get(0);
                 if (element instanceof ASTSlice) {
-                    label.setText(element.toString());
+                    ASTSlice slice = (ASTSlice) element;
+                    label.setText(slice.toString());
+                    disableNotValidSuggestion(slice, label);
                 } else if (element instanceof ASTSliceGroup) {
                     label.setText(IntelliJDeodorantBundle.message("extract.method.found.candidates.label"));
                 }
             }
         }
         return label;
+    }
+
+    /**
+     * Disables not valid suggestions (i.e. already extracted statements).
+     *
+     * @param slice computation slice.
+     * @param label the label to be displayed on tree.
+     */
+    private void disableNotValidSuggestion(ASTSlice slice, JLabel label) {
+        if (!(slice.getSliceStatements().iterator().next().isValid())) {
+            label.setEnabled(false);
+            label.setBackground(JBColor.LIGHT_GRAY);
+            label.setOpaque(true);
+        }
     }
 }
