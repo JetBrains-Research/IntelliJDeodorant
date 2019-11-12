@@ -16,11 +16,11 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 
 ## Installation
 
-* Clone this repository
-* Build .jar ```./gradlew jar``` 
-* Go to ```Settings-> Plugins-> Install plugin from disk```
-* Locate and select result .jar from the first step
-* Restart IntelliJ IDEA
+1. Clone this repository
+2. Build IntelliJDeodorant.jar using ```./gradlew jar``` 
+3. Go to ```Settings-> Plugins-> Install plugin from disk```
+4. Locate and select IntelliJDeodorant.jar
+5. Restart IntelliJ IDEA
 
 ## Usage
 
