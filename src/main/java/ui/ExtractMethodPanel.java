@@ -117,9 +117,10 @@ class ExtractMethodPanel extends JPanel {
         buttonPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
-        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings, panel));
         exportButton.setEnabled(false);
         buttonPanel.add(exportButton);
+
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
     }

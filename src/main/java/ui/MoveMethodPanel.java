@@ -122,7 +122,7 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
-        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings, this));
         exportButton.setEnabled(false);
         buttonsPanel.add(exportButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
