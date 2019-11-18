@@ -167,7 +167,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testIfStatementBlockTest() {
@@ -347,7 +347,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 2);
+        testMethod(methodCode, 2);
     }
 
     public void testSwitchCaseBodyTest() {
@@ -397,7 +397,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENDED MECHANIC: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testReturnComplexStatementTest() {
@@ -409,7 +409,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
         TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN.
         IF NOT: the problem is that program finds reference expression `SIZE.toString` which is not a field.
          */
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testSynzhronizedSyncTest() {
@@ -468,7 +468,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testTryMultipleCatchBlockTest() {
@@ -487,7 +487,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testTryFinallyBlockTest() {
@@ -503,7 +503,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testLocalVariableDeclarationTest() {
@@ -534,6 +534,6 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "    }";
 
         //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 }
