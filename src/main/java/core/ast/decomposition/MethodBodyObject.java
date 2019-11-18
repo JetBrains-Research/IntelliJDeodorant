@@ -282,6 +282,13 @@ public class MethodBodyObject {
 
             parent.addStatement(child);
         } else if (statement instanceof PsiSwitchStatement) {
+            /*
+            TODO does not process EXPRESSION
+            switch(...) {
+                case EXPRESSION:
+                    ...
+            }
+             */
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(switchStatement, StatementType.SWITCH, parent);
             AbstractExpression abstractExpression = new AbstractExpression(switchStatement.getExpression(), child);
@@ -320,6 +327,9 @@ public class MethodBodyObject {
             StatementObject child = new StatementObject(throwStatement, StatementType.THROW, parent);
             parent.addStatement(child);
         } else if (statement instanceof PsiTryStatement) {
+            /*
+            TODO does not process expression in catch and finally sections (see tests)
+             */
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
 
@@ -421,6 +431,8 @@ public class MethodBodyObject {
                 parent.addExpression(abstractExpression);
             }
         }
+
+        //TODO does not process expressions inside inner classes
     }
 
     public List<TryStatementObject> getTryStatements() {

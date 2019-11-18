@@ -440,8 +440,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "        throw new RuntimeException(SIZE.toString());\n" +
                 "    }\n";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testTryBodyStatementTest() {
