@@ -1,9 +1,7 @@
 package ui;
 
 import com.intellij.analysis.AnalysisScope;
-import com.intellij.ide.DataManager;
 import com.intellij.ide.util.EditorHelper;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -164,7 +162,7 @@ class MoveMethodPanel extends JPanel {
     }
 
     private void calculateRefactorings() {
-        Project project = DataManager.getInstance().getDataContext().getData(PlatformDataKeys.PROJECT);
+        Project project = scope.getProject();
         ProjectInfo projectInfo = new ProjectInfo(project);
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project,

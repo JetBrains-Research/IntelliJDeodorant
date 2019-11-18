@@ -215,7 +215,15 @@ public class MethodBodyObject {
     }
 
     private void processStatement(CompositeStatementObject parent, PsiStatement statement) {
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock codeBlock = (PsiCodeBlock) statement;
+            PsiStatement[] statements = codeBlock.getStatements();
+            CompositeStatementObject child = new CompositeStatementObject(codeBlock, StatementType.BLOCK, parent);
+            parent.addStatement(child);
+            for (PsiStatement psiStatement : statements) {
+                processStatement(child, psiStatement);
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement blockStatement = (PsiBlockStatement) statement;
             PsiCodeBlock psiCodeBlock = blockStatement.getCodeBlock();
             PsiStatement[] blockStatements = psiCodeBlock.getStatements();
@@ -399,10 +407,10 @@ public class MethodBodyObject {
             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
             StatementObject child = new StatementObject(variableDeclarationStatement, StatementType.VARIABLE_DECLARATION, parent);
             parent.addStatement(child);
-            Collection<PsiExpression> expressions =
-                    PsiTreeUtil.findChildrenOfType(variableDeclarationStatement, PsiExpression.class);
-            for (PsiExpression elem : expressions) {
-                AbstractExpression abstractExpression = new AbstractExpression(elem, child);
+            Collection<PsiMethodCallExpression> methodCallExpressions =
+                    PsiTreeUtil.findChildrenOfType(variableDeclarationStatement, PsiMethodCallExpression.class);
+            for (PsiMethodCallExpression elem : methodCallExpressions) {
+                AbstractExpression abstractExpression = new AbstractExpression(elem);
                 parent.addExpression(abstractExpression);
             }
         } else if (statement instanceof PsiBreakStatement) {
@@ -431,8 +439,6 @@ public class MethodBodyObject {
                 parent.addExpression(abstractExpression);
             }
         }
-
-        //TODO does not process expressions inside inner classes
     }
 
     public List<TryStatementObject> getTryStatements() {

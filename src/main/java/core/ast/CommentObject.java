@@ -1,7 +1,6 @@
 package core.ast;
 
 import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiType;
 
 class CommentObject {
     private ASTInformation comment;
@@ -43,9 +42,6 @@ class CommentObject {
         return endLine;
     }
 
-    private PsiType getITypeRoot() {
-        return comment.getITypeRoot();
-    }
 
     public int getStartPosition() {
         return comment.getStartPosition();
@@ -63,7 +59,7 @@ class CommentObject {
         if (o instanceof CommentObject) {
             CommentObject comment = (CommentObject) o;
 
-            return this.getITypeRoot().equals(comment.getITypeRoot()) && this.getStartPosition() == comment.getStartPosition() &&
+            return this.getStartPosition() == comment.getStartPosition() &&
                     this.getLength() == comment.getLength();
         }
         return false;
@@ -72,7 +68,6 @@ class CommentObject {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 37 * result + this.getITypeRoot().hashCode();
             result = 37 * result + this.getStartPosition();
             result = 37 * result + this.getLength();
             hashCode = result;

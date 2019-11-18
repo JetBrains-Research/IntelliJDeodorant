@@ -24,9 +24,8 @@ public class MySystem {
     }
 
     private void generateSystem() {
-        ListIterator<ClassObject> classIterator1 = systemObject.getClassListIterator();
-        while (classIterator1.hasNext()) {
-            ClassObject co = classIterator1.next();
+        Set<ClassObject> classObjects = systemObject.getClassObjects();
+        for (ClassObject co : classObjects) {
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);
             TypeObject superclassType = co.getSuperclass();
@@ -52,15 +51,15 @@ public class MySystem {
             classMap.put(co.getName(), myClass);
         }
 
-        ListIterator<ClassObject> classIterator2 = systemObject.getClassListIterator();
-        while (classIterator2.hasNext()) {
-            ClassObject co = classIterator2.next();
+        for (ClassObject co : classObjects) {
             MyClass myClass = classMap.get(co.getName());
             ListIterator<MethodObject> methodIt = co.getMethodIterator();
             while (methodIt.hasNext()) {
                 MethodObject mo = methodIt.next();
-                if (!mo.isStatic() && systemObject.containsGetter(mo.generateMethodInvocation()) == null &&
-                        systemObject.containsSetter(mo.generateMethodInvocation()) == null && systemObject.containsCollectionAdder(mo.generateMethodInvocation()) == null) {
+                if (!mo.isStatic()
+                        && systemObject.containsGetter(mo.generateMethodInvocation()) == null
+                        && systemObject.containsSetter(mo.generateMethodInvocation()) == null
+                        && systemObject.containsCollectionAdder(mo.generateMethodInvocation()) == null) {
                     MethodInvocationObject delegation = systemObject.containsDelegate(mo.generateMethodInvocation());
                     if (delegation == null || systemObject.getClassObject(delegation.getOriginClassName()) == null) {
                         MyMethod myMethod = new MyMethod(mo.getClassName(), mo.getName(),

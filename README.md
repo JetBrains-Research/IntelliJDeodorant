@@ -10,17 +10,17 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 - [x] Feature Envy problems can be resolved by appropriate Move Method refactorings.
 - [ ] Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.
 - [ ] State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.
-- [ ] Long Method problems can be resolved by appropriate Extract Method refactorings.
+- [x] Long Method problems can be resolved by appropriate Extract Method refactorings.
 - [ ] God Class problems can be resolved by appropriate Extract Class refactorings.
 - [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
 
 ## Installation
 
-* Clone this repository
-* Build .jar ```./gradlew jar``` 
-* Go to ```Settings-> Plugins-> Install plugin from disk```
-* Locate and select result .jar from the first step
-* Restart IntelliJ IDEA
+1. Clone this repository
+2. Build IntelliJDeodorant.jar using ```./gradlew jar``` 
+3. Go to ```Settings-> Plugins-> Install plugin from disk```
+4. Locate and select IntelliJDeodorant.jar
+5. Restart IntelliJ IDEA
 
 ## Usage
 

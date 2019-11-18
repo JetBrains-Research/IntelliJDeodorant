@@ -63,6 +63,11 @@ public class AbstractExpression extends AbstractMethodFragment {
     }
 
     public String toString() {
-        return getExpression().getType().getCanonicalText();
+        PsiExpression expression = getExpression();
+        if (expression == null || expression.getType() == null) {
+            return "";
+        } else {
+            return expression.getType().getCanonicalText();
+        }
     }
 }
