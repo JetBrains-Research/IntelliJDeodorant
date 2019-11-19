@@ -4,12 +4,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class PsiUtils {
 
@@ -97,5 +99,63 @@ public class PsiUtils {
         if (parent.equals(child)) return false;
         return child.getTextRange().getStartOffset() >= parent.getTextRange().getStartOffset()
                 && child.getTextRange().getEndOffset() <= parent.getTextRange().getEndOffset();
+    }
+
+    public static boolean isTestClass(final @NotNull PsiClass psiClass) {
+        PsiJavaFile file = (PsiJavaFile) psiClass.getContainingFile();
+        return file != null && isInsideTestDirectory(file);
+    }
+
+    private static boolean isInsideTestDirectory(final @NotNull PsiJavaFile file) {
+        Optional<PsiDirectory> optionalDirectory = getDirectoryWithRootPackageFor(file);
+
+        if (!optionalDirectory.isPresent()) {
+            return false;
+        }
+
+        PsiDirectory directory = optionalDirectory.get();
+
+        while (directory != null) {
+            String dirName = directory.getName().toLowerCase();
+            if (dirName.equals("test") || dirName.equals("tests")) {
+                return true;
+            }
+
+            directory = directory.getParentDirectory();
+        }
+
+        return false;
+    }
+
+    private static @NotNull
+    Optional<PsiDirectory> getDirectoryWithRootPackageFor(final @NotNull PsiJavaFile file) {
+        String packageName = file.getPackageName();
+        String[] packageSequence;
+
+        if ("".equals(packageName)) {
+            packageSequence = new String[0];
+        } else {
+            packageSequence = packageName.split("\\.");
+        }
+
+        ArrayUtils.reverse(packageSequence);
+
+        PsiDirectory directory = file.getParent();
+        if (directory == null) {
+            throw new IllegalStateException("File has no parent directory");
+        }
+
+        for (String packagePart : packageSequence) {
+            if (!packagePart.equals(directory.getName())) {
+                return Optional.empty();
+            }
+
+            directory = directory.getParentDirectory();
+            if (directory == null) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(directory);
     }
 }

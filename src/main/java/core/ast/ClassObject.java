@@ -21,6 +21,7 @@ public class ClassObject extends ClassDeclarationObject {
     private ASTInformation typeDeclaration;
     private final String psiType;
     private final PsiFile psiFile;
+    private final PsiClass psiClass;
 
     public ClassObject(PsiClass psiClass) {
         this.psiType = psiClass.getQualifiedName();
@@ -35,6 +36,7 @@ public class ClassObject extends ClassDeclarationObject {
         this.access = Access.NONE;
         this.typeDeclaration = ASTInformationGenerator.generateASTInformation(psiClass);
         this.psiFile = psiClass.getContainingFile();
+        this.psiClass = psiClass;
     }
 
     public void setAbstractTypeDeclaration(PsiDeclarationStatement typeDeclaration) {
@@ -247,5 +249,9 @@ public class ClassObject extends ClassDeclarationObject {
             sb.append("\n").append(method.toString());
 
         return sb.toString();
+    }
+
+    public PsiClass getPsiClass() {
+        return psiClass;
     }
 }
