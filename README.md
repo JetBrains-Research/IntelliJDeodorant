@@ -16,7 +16,7 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 - [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
 
 ## Installation
-*Currently, the plugin incompatible with pre-release builds of IntelliJ IDEA version 2019.3*
+*Currently, the plugin is incompatible with pre-release builds of IntelliJ IDEA version 2019.3*
 
 1. Clone this repository
 2. Build IntelliJDeodorant.jar using ```./gradlew jar``` 
