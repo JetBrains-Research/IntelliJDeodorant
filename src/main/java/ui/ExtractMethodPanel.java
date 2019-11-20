@@ -130,7 +130,7 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Sets the export button enabled if refactorings list is not empty, false otherwise
+     * Enables the Export button if there are refactoring suggestions.
      */
     private void enableExportButtonOnCondition() {
         exportButton.setEnabled(!refactorings.isEmpty());
