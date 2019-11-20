@@ -24,7 +24,7 @@ public class ExportResultsUtil {
      */
     public static void export(List<? extends Refactoring> refactorings, JPanel panel) {
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(panel);
-        FileDialog fileDialog = new FileDialog(frame, "Results export", FileDialog.SAVE);
+        FileDialog fileDialog = new FileDialog(frame, IntelliJDeodorantBundle.message("export.title"), FileDialog.SAVE);
         fileDialog.setFile(refactorings.get(0).getClass().getSimpleName() + ".txt");
         fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
         fileDialog.setVisible(true);

@@ -34,6 +34,8 @@ import utils.ExportResultsUtil;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
@@ -61,7 +63,7 @@ class ExtractMethodPanel extends JPanel {
 
     @NotNull
     private final AnalysisScope scope;
-    private ExtractMethodTableModel model;
+    private ExtractMethodTableModel model = new ExtractMethodTableModel();
     private final JTree jTree = new JTree();
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
@@ -121,8 +123,17 @@ class ExtractMethodPanel extends JPanel {
         exportButton.setEnabled(false);
         buttonPanel.add(exportButton);
 
+        model.addTreeModelListener((TreeNodesChangedListener) this::enableExportButtonOnCondition);
+
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
+    }
+
+    /**
+     * Sets the export button enabled if refactorings list is not empty, false otherwise
+     */
+    private void enableExportButtonOnCondition() {
+        exportButton.setEnabled(!refactorings.isEmpty());
     }
 
     /**
@@ -181,7 +192,8 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    model = new ExtractMethodTableModel(new ArrayList<>(candidates));
+                    model = new ExtractMethodTableModel();
+                    model.setRefactorings(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
                     exportButton.setEnabled(!refactorings.isEmpty());
@@ -329,6 +341,24 @@ class ExtractMethodPanel extends JPanel {
 
         default void valueChanged(TreeSelectionEvent var1) {
             onSelect();
+        }
+    }
+
+    @FunctionalInterface
+    private interface TreeNodesChangedListener extends TreeModelListener {
+        void enableExportButtonOnCondition();
+
+        default void treeNodesChanged(TreeModelEvent e) {
+            enableExportButtonOnCondition();
+        }
+
+        default void treeNodesInserted(TreeModelEvent e) {
+        }
+
+        default void treeNodesRemoved(TreeModelEvent e) {
+        }
+
+        default void treeStructureChanged(TreeModelEvent e) {
         }
     }
 }

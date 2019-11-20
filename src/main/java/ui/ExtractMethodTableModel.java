@@ -2,16 +2,14 @@ package ui;
 
 import com.intellij.util.ui.tree.AbstractTreeModel;
 import core.ast.decomposition.cfg.ASTSliceGroup;
-import org.jetbrains.annotations.NotNull;
 
-import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
 import java.util.*;
 
 class ExtractMethodTableModel extends AbstractTreeModel {
-    private final List<ASTSliceGroup> refactorings;
+    private List<ASTSliceGroup> refactorings;
 
-    ExtractMethodTableModel(List<ASTSliceGroup> refactorings) {
+    protected void setRefactorings(List<ASTSliceGroup> refactorings) {
         this.refactorings = refactorings;
     }
 
@@ -62,15 +60,5 @@ class ExtractMethodTableModel extends AbstractTreeModel {
     @Override
     public int getIndexOfChild(Object parent, Object child) {
         return 0;
-    }
-
-    @Override
-    public void addTreeModelListener(@NotNull TreeModelListener l) {
-
-    }
-
-    @Override
-    public void removeTreeModelListener(@NotNull TreeModelListener l) {
-
     }
 }
