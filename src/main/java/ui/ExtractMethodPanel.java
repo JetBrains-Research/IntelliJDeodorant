@@ -125,20 +125,6 @@ class ExtractMethodPanel extends JPanel {
         return panel;
     }
 
-    private ExtractMethodTableModel createTableModel(Set<ASTSliceGroup> candidates) {
-        ExtractMethodTableModel model = new ExtractMethodTableModel();
-        model.addTreeModelListener((TreeNodesChangedListener) this::enableExportButtonOnCondition);
-        model.setRefactorings(new ArrayList<>(candidates));
-        return model;
-    }
-
-    /**
-     * Enables the Export button if there are refactoring suggestions.
-     */
-    private void enableExportButtonOnCondition() {
-        exportButton.setEnabled(!refactorings.isEmpty());
-    }
-
     /**
      * Preforms selected refactoring.
      */
@@ -148,6 +134,7 @@ class ExtractMethodPanel extends JPanel {
             ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
+        exportButton.setEnabled(!refactorings.isEmpty());
     }
 
     /**
@@ -194,7 +181,8 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    ExtractMethodTableModel model = createTableModel(candidates);
+                    exportButton.setEnabled(!refactorings.isEmpty());
+                    ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
                 });
@@ -341,24 +329,6 @@ class ExtractMethodPanel extends JPanel {
 
         default void valueChanged(TreeSelectionEvent var1) {
             onSelect();
-        }
-    }
-
-    @FunctionalInterface
-    private interface TreeNodesChangedListener extends TreeModelListener {
-        void enableExportButtonOnCondition();
-
-        default void treeNodesChanged(TreeModelEvent e) {
-            enableExportButtonOnCondition();
-        }
-
-        default void treeNodesInserted(TreeModelEvent e) {
-        }
-
-        default void treeNodesRemoved(TreeModelEvent e) {
-        }
-
-        default void treeStructureChanged(TreeModelEvent e) {
         }
     }
 }

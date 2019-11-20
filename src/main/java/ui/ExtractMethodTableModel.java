@@ -9,7 +9,7 @@ import java.util.*;
 class ExtractMethodTableModel extends AbstractTreeModel {
     private List<ASTSliceGroup> refactorings;
 
-    protected void setRefactorings(List<ASTSliceGroup> refactorings) {
+    public ExtractMethodTableModel(List<ASTSliceGroup> refactorings) {
         this.refactorings = refactorings;
     }
 
