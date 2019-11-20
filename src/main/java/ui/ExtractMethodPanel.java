@@ -63,7 +63,6 @@ class ExtractMethodPanel extends JPanel {
 
     @NotNull
     private final AnalysisScope scope;
-    private ExtractMethodTableModel model = new ExtractMethodTableModel();
     private final JTree jTree = new JTree();
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
@@ -88,7 +87,6 @@ class ExtractMethodPanel extends JPanel {
      * @return result panel.
      */
     private JScrollPane createTablePanel() {
-        jTree.setModel(model);
         jTree.setCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
         jTree.addMouseListener((DoubleClickListener) this::openMethodDefinition);
         jTree.addKeyListener((EnterKeyListener) this::openMethodDefinition);
@@ -123,10 +121,15 @@ class ExtractMethodPanel extends JPanel {
         exportButton.setEnabled(false);
         buttonPanel.add(exportButton);
 
-        model.addTreeModelListener((TreeNodesChangedListener) this::enableExportButtonOnCondition);
-
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
+    }
+
+    private ExtractMethodTableModel createTableModel(Set<ASTSliceGroup> candidates) {
+        ExtractMethodTableModel model = new ExtractMethodTableModel();
+        model.addTreeModelListener((TreeNodesChangedListener) this::enableExportButtonOnCondition);
+        model.setRefactorings(new ArrayList<>(candidates));
+        return model;
     }
 
     /**
@@ -171,7 +174,6 @@ class ExtractMethodPanel extends JPanel {
         }
         refactorings.clear();
         doRefactorButton.setEnabled(false);
-        exportButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -192,10 +194,9 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    model.setRefactorings(new ArrayList<>(candidates));
+                    ExtractMethodTableModel model = createTableModel(candidates);
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
-                    exportButton.setEnabled(!refactorings.isEmpty());
                 });
             }
         };
