@@ -192,7 +192,6 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    model = new ExtractMethodTableModel();
                     model.setRefactorings(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
