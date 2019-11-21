@@ -6,7 +6,7 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew build -x test
+      - run: ./gradlew build
 
   release:
     docker:
