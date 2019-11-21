@@ -7,7 +7,6 @@ jobs:
     steps:
       - checkout
       - run: ./gradlew build -x test
-      - run: gradle test
 
   release:
     docker:
