@@ -3,28 +3,11 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:8-jdk
-
-    working_directory: ~/repo
-
+    working_directory: ~
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-
     steps:
       - checkout
-
-    run: ./gradlew build
-
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            - v1-dependencies-
-
-      - run: gradle dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-
+      - run: ./gradlew build
       - run: gradle test
