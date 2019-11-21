@@ -1,5 +1,7 @@
 # IntelliJDeodorant
 
+[![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
+
 An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. 
 
 Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
