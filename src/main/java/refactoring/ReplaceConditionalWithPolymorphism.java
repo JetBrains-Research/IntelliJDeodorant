@@ -139,9 +139,9 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 PsiUtil.setModifierProperty(abstractClass, PsiModifier.ABSTRACT, true);
             }
 
-			PsiMethod abstractMethod = createPolymorphicMethodHeader();
-			PsiUtil.setModifierProperty(abstractMethod, PsiModifier.ABSTRACT, true);
-			abstractMethod.getBody().replace(elementFactory.createStatementFromText(";", null).getFirstChild());
+            PsiMethod abstractMethod = createPolymorphicMethodHeader();
+            PsiUtil.setModifierProperty(abstractMethod, PsiModifier.ABSTRACT, true);
+            abstractMethod.getBody().replace(semicolon);
             abstractClass.add(abstractMethod);
         }
 
@@ -170,8 +170,8 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
             PsiClass subClass = ClassUtil.findPsiClass(PsiManager.getInstance(project), subclassNames.get(i));
             PsiFile subClassFile = subClass.getContainingFile();
 
-			PsiMethod concreteMethod = createPolymorphicMethodHeader();
-			PsiCodeBlock concreteMethodBody = concreteMethod.getBody();
+            PsiMethod concreteMethod = createPolymorphicMethodHeader();
+            PsiCodeBlock concreteMethodBody = concreteMethod.getBody();
             ExpressionExtractor expressionExtractor = new ExpressionExtractor();
             PsiCodeBlock ifStatementBody = null;
 
@@ -203,32 +203,32 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 );
                 enclosingIfStatement.getCondition().replace(newEnclosingIfStatementExpression);
                 enclosingIfStatement = (PsiIfStatement) concreteMethodBody.add(enclosingIfStatement);
-                if(!typeCheckElimination.getDefaultCaseStatements().isEmpty()) { // TODO: base class method is not created if base class is abstract
+                if (!typeCheckElimination.getDefaultCaseStatements().isEmpty()) { // TODO: base class method is not created if base class is abstract
                     PsiCodeBlock elseStatementBody = ((PsiBlockStatement) enclosingIfStatement.getElseBranch()).getCodeBlock();
                     PsiMethodCallExpression superMethodInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
                             "super." + typeCheckElimination.getAbstractMethodName() + "()",
                             null
                     );
                     PsiExpressionList superMethodInvocationArgumentRewrite = superMethodInvocation.getArgumentList();
-                    if(returnedVariable != null && !typeCheckElimination.returnedVariableDeclaredAndReturnedInBranches()) {
+                    if (returnedVariable != null && !typeCheckElimination.returnedVariableDeclaredAndReturnedInBranches()) {
                         superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(returnedVariable.getName(), null));
                     }
-                    for(PsiParameter abstractMethodParameter : typeCheckElimination.getAccessedParameters()) {
-                        if(!abstractMethodParameter.equals(returnedVariable) && !abstractMethodParameter.equals(typeVariable)) {
+                    for (PsiParameter abstractMethodParameter : typeCheckElimination.getAccessedParameters()) {
+                        if (!abstractMethodParameter.equals(returnedVariable) && !abstractMethodParameter.equals(typeVariable)) {
                             superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(abstractMethodParameter.getName(), null));
                         }
                     }
-                    for(PsiVariable fragment : typeCheckElimination.getAccessedLocalVariables()) {
-                        if(!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
+                    for (PsiVariable fragment : typeCheckElimination.getAccessedLocalVariables()) {
+                        if (!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
                             superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(fragment.getName(), null));
                         }
                     }
-                    if(sourceTypeRequiredForExtraction()) {
+                    if (sourceTypeRequiredForExtraction()) {
                         String parameterName = sourceTypeDeclaration.getName();
-                        parameterName = parameterName.substring(0,1).toLowerCase() + parameterName.substring(1,parameterName.length());
+                        parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
                         superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(parameterName, null));
                     }
-                    if(returnedVariable != null) {
+                    if (returnedVariable != null) {
                         PsiStatement superMethodInvocationReturnStatement = elementFactory.createStatementFromText(
                                 "return " + superMethodInvocation.getText() + ";",
                                 null
@@ -249,7 +249,10 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
             PsiVariable subclassCastInvoker = null;
             for (PsiStatement statement : statements) {
-                PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), null);
+                PsiStatement newStatement = elementFactory.createStatementFromText(
+                        statement.getText(),
+                        typeCheckElimination.getTypeCheckCodeFragment()
+                );
                 boolean insert = true;
                 if (statement instanceof PsiDeclarationStatement) {
                     PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
@@ -341,63 +344,63 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
             PsiImportList subClassImportList = getPsiImportList(subClassFile);
 
-			if (!subClassFile.equals(abstractClassFile)) {
+            if (!subClassFile.equals(abstractClassFile)) {
                 Set<PsiType> requiredImportDeclarations = new LinkedHashSet<>(requiredImportDeclarationsBasedOnSignature);
                 requiredImportDeclarations.addAll(getRequiredImportDeclarationsBasedOnBranch(statements));
-				addImports(subClassImportList, requiredImportDeclarations);
-			} else {
+                addImports(subClassImportList, requiredImportDeclarations);
+            } else {
                 Set<PsiType> requiredImportDeclarationsBasedOnBranch = getRequiredImportDeclarationsBasedOnBranch(statements);
                 requiredImportDeclarationsBasedOnSignature.addAll(requiredImportDeclarationsBasedOnBranch);
             }
         }
 
-		PsiImportList abstractClassImportList = getPsiImportList(abstractClassFile);
-		addImports(abstractClassImportList, requiredImportDeclarationsBasedOnSignature);
-	}
+        PsiImportList abstractClassImportList = getPsiImportList(abstractClassFile);
+        addImports(abstractClassImportList, requiredImportDeclarationsBasedOnSignature);
+    }
 
-	private PsiMethod createPolymorphicMethodHeader() {
-		String methodName = typeCheckElimination.getAbstractMethodName();
-		PsiType returnType = PsiType.VOID;
+    private PsiMethod createPolymorphicMethodHeader() {
+        String methodName = typeCheckElimination.getAbstractMethodName();
+        PsiType returnType = PsiType.VOID;
 
-		if (returnedVariable != null) {
-			returnType = returnedVariable.getType();
-		} else if (typeCheckElimination.typeCheckCodeFragmentContainsReturnStatement()) { // TODO: looks really suspicious
-			returnType = typeCheckElimination.getTypeCheckMethodReturnType();
-		}
+        if (returnedVariable != null) {
+            returnType = returnedVariable.getType();
+        } else if (typeCheckElimination.typeCheckCodeFragmentContainsReturnStatement()) { // TODO: looks really suspicious
+            returnType = typeCheckElimination.getTypeCheckMethodReturnType();
+        }
 
-		PsiMethod createdMethod = elementFactory.createMethod(methodName, returnType);
-		PsiUtil.setModifierProperty(createdMethod, PsiModifier.PUBLIC, true);
+        PsiMethod createdMethod = elementFactory.createMethod(methodName, returnType);
+        PsiUtil.setModifierProperty(createdMethod, PsiModifier.PUBLIC, true);
 
-		PsiParameterList abstractMethodParameters = createdMethod.getParameterList();
-		if (returnedVariable != null && !typeCheckElimination.returnedVariableDeclaredAndReturnedInBranches()) {
-			abstractMethodParameters.add(elementFactory.createParameter(returnedVariable.getName(), returnedVariable.getType()));
-		}
-		for (PsiParameter accessedParameter : typeCheckElimination.getAccessedParameters()) {
-			if (!accessedParameter.equals(returnedVariable) && !accessedParameter.equals(typeVariable)) {
-				abstractMethodParameters.add(elementFactory.createParameter(accessedParameter.getName(), accessedParameter.getType()));
-			}
-		}
-		for (PsiVariable fragment : typeCheckElimination.getAccessedLocalVariables()) {
-			if (!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
-				abstractMethodParameters.add(elementFactory.createParameter(fragment.getName(), fragment.getType()));
-			}
-		}
+        PsiParameterList abstractMethodParameters = createdMethod.getParameterList();
+        if (returnedVariable != null && !typeCheckElimination.returnedVariableDeclaredAndReturnedInBranches()) {
+            abstractMethodParameters.add(elementFactory.createParameter(returnedVariable.getName(), returnedVariable.getType()));
+        }
+        for (PsiParameter accessedParameter : typeCheckElimination.getAccessedParameters()) {
+            if (!accessedParameter.equals(returnedVariable) && !accessedParameter.equals(typeVariable)) {
+                abstractMethodParameters.add(elementFactory.createParameter(accessedParameter.getName(), accessedParameter.getType()));
+            }
+        }
+        for (PsiVariable fragment : typeCheckElimination.getAccessedLocalVariables()) {
+            if (!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
+                abstractMethodParameters.add(elementFactory.createParameter(fragment.getName(), fragment.getType()));
+            }
+        }
 
-		if (sourceTypeRequiredForExtraction()) {
-			String parameterName = sourceTypeDeclaration.getName();
-			parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
-			PsiType parameterType = PsiTypesUtil.getClassType(sourceTypeDeclaration);
-			abstractMethodParameters.add(elementFactory.createParameter(parameterName, parameterType));
-		}
+        if (sourceTypeRequiredForExtraction()) {
+            String parameterName = sourceTypeDeclaration.getName();
+            parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
+            PsiType parameterType = PsiTypesUtil.getClassType(sourceTypeDeclaration);
+            abstractMethodParameters.add(elementFactory.createParameter(parameterName, parameterType));
+        }
 
-		PsiReferenceList abstractMethodThrownExceptionsRewrite = createdMethod.getThrowsList();
-		for (PsiClassType typeBinding : thrownExceptions) {
-			abstractMethodThrownExceptionsRewrite.add(elementFactory.createReferenceElementByType(typeBinding));
-		}
-		return createdMethod;
-	}
+        PsiReferenceList abstractMethodThrownExceptionsRewrite = createdMethod.getThrowsList();
+        for (PsiClassType typeBinding : thrownExceptions) {
+            abstractMethodThrownExceptionsRewrite.add(elementFactory.createReferenceElementByType(typeBinding));
+        }
+        return createdMethod;
+    }
 
-	private void replaceCastExpressionWithThisExpression(List<PsiExpression> oldCastExpressions,
+    private void replaceCastExpressionWithThisExpression(List<PsiExpression> oldCastExpressions,
                                                          List<PsiExpression> newCastExpressions,
                                                          PsiClass subclassTypeDeclaration) {
         int j = 0;

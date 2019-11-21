@@ -54,12 +54,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                                 if (field.equals(switchStatementExpressionNameVariableBinding)) {
                                     typeCheckElimination.setTypeField(field);
                                     for (PsiMethod method : methods) {
-                                        PsiElement resolvedFieldInstruction = MethodDeclarationUtility.isSetter(method);
-                                        if (field.equals(resolvedFieldInstruction)) {
+                                        PsiElement resolvedField = MethodDeclarationUtility.isSetter(method);
+                                        if (field.equals(resolvedField)) {
                                             typeCheckElimination.setTypeFieldSetterMethod(method);
                                         }
-                                        resolvedFieldInstruction = MethodDeclarationUtility.isGetter(method);
-                                        if (field.equals(resolvedFieldInstruction)) {
+                                        PsiReferenceExpression resolvedFieldInstruction = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(method);
+                                        if (resolvedFieldInstruction != null && field.equals(resolvedFieldInstruction.resolve())) {
                                             typeCheckElimination.setTypeFieldGetterMethod(method);
                                         }
                                     }
@@ -82,8 +82,11 @@ public class TypeCheckCodeFragmentAnalyzer {
                             List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
                             for (PsiStatement statement : variableDeclarationStatements) {
                                 PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
-                                PsiVariable[] fragments = (PsiVariable[]) variableDeclarationStatement.getDeclaredElements();
-                                declaredVariables.addAll(Arrays.asList(fragments));
+                                PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+                                List<PsiVariable> fragmentsAsVariables = Arrays.stream(fragments)
+                                        .map(element -> (PsiVariable) element)
+                                        .collect(Collectors.toList());
+                                declaredVariables.addAll(fragmentsAsVariables);
                             }
                             for (PsiVariable declaredVariable : declaredVariables) {
                                 if (declaredVariable.equals(switchStatementExpressionNameVariableBinding)) {
@@ -324,12 +327,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                             if (field.equals(typeVariable)) {
                                 typeCheckElimination.setTypeField(field);
                                 for (PsiMethod method : methods) {
-                                    PsiElement fieldInstruction = MethodDeclarationUtility.isSetter(method);
-                                    if (fieldInstruction != null && field.getText().equals(fieldInstruction.getText())) { // TODO: probably a bad idea
+                                    PsiElement resolvedField = MethodDeclarationUtility.isSetter(method);
+                                    if (field.equals(resolvedField)) {
                                         typeCheckElimination.setTypeFieldSetterMethod(method);
                                     }
-                                    fieldInstruction = MethodDeclarationUtility.isGetter(method);
-                                    if (fieldInstruction != null && field.getText().equals(fieldInstruction.getText())) {
+                                    PsiReferenceExpression fieldInstruction = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(method);
+                                    if (fieldInstruction != null && field.equals(fieldInstruction.resolve())) {
                                         typeCheckElimination.setTypeFieldGetterMethod(method);
                                     }
                                 }
@@ -419,16 +422,22 @@ public class TypeCheckCodeFragmentAnalyzer {
         List<PsiStatement> variableDeclarationStatementsInsideTypeCheckMethod = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
         for (PsiStatement statement : variableDeclarationStatementsInsideTypeCheckMethod) {
             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
-            PsiVariable[] fragments = (PsiVariable[]) variableDeclarationStatement.getDeclaredElements();
-            variableDeclarationFragmentsInsideTypeCheckMethodApartFromTypeCheckCodeFragment.addAll(Arrays.asList(fragments));
+            PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+            List<PsiVariable> declaredVariables = Arrays.stream(fragments)
+                    .map(element -> (PsiVariable) element)
+                    .collect(Collectors.toList());
+            variableDeclarationFragmentsInsideTypeCheckMethodApartFromTypeCheckCodeFragment.addAll(declaredVariables);
         }
         for (ArrayList<PsiStatement> typeCheckStatementList : allTypeCheckStatements) {
             for (PsiStatement statement : typeCheckStatementList) {
                 List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(statement);
                 for (PsiStatement statement2 : variableDeclarationStatements) {
                     PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement2;
-                    PsiVariable[] fragments = (PsiVariable[]) variableDeclarationStatement.getDeclaredElements();
-                    variableDeclarationFragmentsInsideTypeCheckMethodApartFromTypeCheckCodeFragment.removeAll(Arrays.asList(fragments));
+                    PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+                    List<PsiVariable> declaredVariables = Arrays.stream(fragments)
+                            .map(element -> (PsiVariable) element)
+                            .collect(Collectors.toList());
+                    variableDeclarationFragmentsInsideTypeCheckMethodApartFromTypeCheckCodeFragment.removeAll(declaredVariables);
                 }
             }
         }

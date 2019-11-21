@@ -13,6 +13,7 @@ import core.ast.util.StatementExtractor;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 	private Map<PsiExpression, ArrayList<PsiStatement>> typeCheckMap;
@@ -464,8 +465,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 				List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(statement);
 				for(PsiStatement statement2 : variableDeclarationStatements) {
 					PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement)statement2;
-					PsiVariable[] fragments = (PsiVariable[]) variableDeclarationStatement.getDeclaredElements();
-					variableDeclarationFragmentsInsideBranch.addAll(Arrays.asList(fragments));
+					PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+					List<PsiVariable> declaredVariables = Arrays.stream(fragments)
+							.map(element -> (PsiVariable) element)
+							.collect(Collectors.toList());
+					variableDeclarationFragmentsInsideBranch.addAll(declaredVariables);
 				}
 			}
 			for(PsiStatement statement : typeCheckStatementList) {

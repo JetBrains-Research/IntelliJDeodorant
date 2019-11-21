@@ -70,10 +70,10 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 	private void modifyContext() {
 		PsiField fragment = typeCheckElimination.getTypeField();
 		fragment.normalizeDeclaration();
-		replacePrimitiveStateField();
 		generateSetterMethodForStateField();
 		generateGetterMethodForStateField();
 		replaceConditionalStructureWithPolymorphicMethodInvocation();
+		replacePrimitiveStateField();
 
 		generateGettersForAccessedFields();
 		generateSettersForAssignedFields();
@@ -146,13 +146,8 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 	}
 
 	private void replacePrimitiveStateField() {
-		PsiField[] fieldDeclarations = sourceTypeDeclaration.getFields();
-		for(PsiField fieldDeclaration : fieldDeclarations) {
-			if(fieldDeclaration.equals(typeCheckElimination.getTypeField())) {
-				PsiField typeFragment = createStateFieldVariableDeclarationFragment(abstractClassName);
-				fieldDeclaration.replace(typeFragment);
-			}
-		}
+		PsiField typeFragment = createStateFieldVariableDeclarationFragment(abstractClassName);
+		typeCheckElimination.getTypeField().replace(typeFragment);
 	}
 
 	private void generateSetterMethodForStateField() { // TODO: fix enum constants
@@ -171,14 +166,14 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 					null
 			);
 			String staticFieldNameDeclaringClass = null;
-//			boolean isEnumConstant = false;
-//			isEnumConstant = staticFieldName.isEnumConstant();
+
+			boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
 			if(!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
 				staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
 			}
 
 			PsiExpression caseExpression = switchCase.getCaseValues().getExpressions()[0];
-			if(staticFieldNameDeclaringClass == null) {
+			if(staticFieldNameDeclaringClass == null || isEnumConstant) {
 				caseExpression.replace(elementFactory.createExpressionFromText(
 						staticFieldName.getName(),
 						null
@@ -192,7 +187,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 
 			switchStatementStatementsRewrite.add(switchCase);
 			PsiStatement assignmentStatement = elementFactory.createStatementFromText(
-					"this." + typeCheckElimination.getTypeField().getName() + " = " + "new " + subclassNames.get(i) + ";",
+					"this." + typeCheckElimination.getTypeField().getName() + " = " + "new " + subclassNames.get(i) + "();",
 					null
 			);
 			switchStatementStatementsRewrite.add(assignmentStatement);
@@ -206,14 +201,14 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 					null
 			);
 			String staticFieldNameDeclaringClass = null;
-//			boolean isEnumConstant = false;
-//			isEnumConstant = staticFieldName.isEnumConstant();
+
+			boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
 			if(!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
 				staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
 			}
 
 			PsiExpression caseExpression = switchCase.getCaseValues().getExpressions()[0];
-			if(staticFieldNameDeclaringClass == null) {
+			if(staticFieldNameDeclaringClass == null || isEnumConstant) {
 				caseExpression.replace(elementFactory.createExpressionFromText(
 						staticFieldName.getName(),
 						null
@@ -227,7 +222,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 
 			switchStatementStatementsRewrite.add(switchCase);
 			PsiStatement assignmentStatement = elementFactory.createStatementFromText(
-					"this." + typeCheckElimination.getTypeField().getName() + " = " + "new " + additionalStaticFieldMap.get(staticFieldName) + ";",
+					"this." + typeCheckElimination.getTypeField().getName() + " = " + "new " + additionalStaticFieldMap.get(staticFieldName) + "();",
 					null
 			);
 			switchStatementStatementsRewrite.add(assignmentStatement);
@@ -273,7 +268,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 			));
 			PsiCodeBlock setterMethodBody = setterMethodDeclaration.getBody();
 			setterMethodBody.add(switchStatement);
-			sourceTypeDeclaration.add(setterMethod);
+			sourceTypeDeclaration.add(setterMethodDeclaration);
 		}
 	}
 
@@ -316,7 +311,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 	private void replaceConditionalStructureWithPolymorphicMethodInvocation() {
 		if(returnedVariable == null && !typeCheckElimination.typeCheckCodeFragmentContainsReturnStatement()) {
 			PsiMethodCallExpression abstractMethodInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
-					typeCheckElimination.getTypeField().getName() + "." + typeCheckElimination.getAbstractMethodName() + "();",
+					typeCheckElimination.getTypeField().getName() + "." + typeCheckElimination.getAbstractMethodName() + "()",
 					null
 			);
 			PsiExpressionList methodInvocationArgumentsRewrite = abstractMethodInvocation.getArgumentList();
@@ -421,7 +416,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 		addRequiredImportDeclarationsToContext();
 	}
 
-	private void createGetterMethodForStateObject() { // TODO: fix enums(((
+	private void createGetterMethodForStateObject() {
 		if(!typeObjectGetterMethodAlreadyExists()) {
 			PsiSwitchStatement switchStatement = (PsiSwitchStatement) elementFactory.createStatementFromText(
 					"switch(a) {}",
@@ -437,14 +432,13 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 						null
 				);
 				String staticFieldNameDeclaringClass = null;
-//				boolean isEnumConstant = false;
-//				isEnumConstant = staticFieldNameVariableBinding.isEnumConstant();
+				boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
 				if(!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
 					staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
 				}
 
 				PsiExpression caseExpression = switchCase.getCaseValues().getExpressions()[0];
-				if(staticFieldNameDeclaringClass == null) {
+				if(staticFieldNameDeclaringClass == null || isEnumConstant) {
 					caseExpression.replace(elementFactory.createExpressionFromText(
 							staticFieldName.getName(),
 							null
@@ -471,8 +465,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 						null
 				);
 				String staticFieldNameDeclaringClass = null;
-//				boolean isEnumConstant = false;
-//				isEnumConstant = staticFieldNameVariableBinding.isEnumConstant();
+				boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
 				if(!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
 					staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
 				}
@@ -724,7 +717,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 			}
 		} else {
 		    String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
-			if(packageName != null) {
+			if(packageName != null && !packageName.isEmpty()) {
 			    PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
 				stateStrategyFile.add(packageStatement);
 			}
@@ -737,18 +730,16 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 		if(typeCheckElimination.getTypeField() != null) {
             PsiMethod abstractGetterMethodDeclaration;
 			if(getterMethod != null) {
-			    abstractGetterMethodDeclaration = (PsiMethod) stateStrategyTypeDeclaration.add(getterMethod);
-				PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.PUBLIC, true);
-				PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.ABSTRACT, true);
-				stateStrategyTypeDeclaration.add(abstractGetterMethodDeclaration);
+			    abstractGetterMethodDeclaration = getterMethod;
 			} else {
 				PsiField typeField = typeCheckElimination.getTypeField();
 				PsiType returnType = typeField.getType();
 				abstractGetterMethodDeclaration = elementFactory.createMethod("get" + abstractClassName, returnType);
-				PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.PUBLIC, true);
-                PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.ABSTRACT, true);
 			}
-            stateStrategyTypeDeclaration.add(abstractGetterMethodDeclaration);
+            abstractGetterMethodDeclaration = (PsiMethod) stateStrategyTypeDeclaration.add(abstractGetterMethodDeclaration);
+			PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.PUBLIC, true);
+			PsiUtil.setModifierProperty(abstractGetterMethodDeclaration, PsiModifier.ABSTRACT, true);
+			abstractGetterMethodDeclaration.getBody().replace(semicolon);
 		}
 
 		PsiType abstractMethodReturnType;
@@ -765,6 +756,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 		PsiMethod abstractMethodDeclaration = elementFactory.createMethod(typeCheckElimination.getAbstractMethodName(), abstractMethodReturnType);
         PsiUtil.setModifierProperty(abstractMethodDeclaration, PsiModifier.PUBLIC, true);
         PsiUtil.setModifierProperty(abstractMethodDeclaration, PsiModifier.ABSTRACT, true);
+        abstractMethodDeclaration.getBody().replace(semicolon);
 
 		PsiParameterList abstractMethodParametersRewrite = abstractMethodDeclaration.getParameterList();
 		if(returnedVariable != null) {
@@ -889,11 +881,11 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 				}
 			} else {
                 String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
-                if(packageName != null) {
+                if(packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
                     subclassFile.add(packageStatement);
                 }
-                PsiDocComment subclassJavaDoc = elementFactory.createDocCommentFromText("", null);
+                PsiDocComment subclassJavaDoc = elementFactory.createDocCommentFromText("/** **/", null);
 
                 PsiField staticFieldNameBinding = staticFields.get(i);
                 PsiClass staticFieldNameDeclaringClass = staticFieldNameBinding.getContainingClass();
@@ -921,7 +913,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     String staticFieldNameDeclaringClass;
 
 					String packageName = PsiUtil.getPackageName(staticFieldDeclaringClass);
-					if(packageName != null && !packageName.equals("")) {
+					if(packageName != null && !packageName.isEmpty()) {
 					    staticFieldNameDeclaringClass = staticFieldDeclaringClassQualifiedName.substring(packageName.length() + 1);
 					} else {
 					    staticFieldNameDeclaringClass = staticFieldDeclaringClassQualifiedName;
@@ -1025,7 +1017,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             }
 
 			for(PsiStatement statement : statements) {
-                PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), null);
+                PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), typeCheckElimination.getTypeCheckCodeFragment());
                 List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(statement);
                 List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newStatement);
                 List<PsiExpression> oldMethodInvocations = expressionExtractor.getMethodInvocations(statement);
@@ -1105,7 +1097,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 			}
 		} else {
             String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
-            if(packageName != null) {
+            if(packageName != null && !packageName.isEmpty()) {
                 PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
                 intermediateClassFile.add(packageStatement);
             }
@@ -1189,7 +1181,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 		}
 
 		for(PsiStatement statement : typeCheckStatements) {
-			PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), null);
+			PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), typeCheckElimination.getTypeCheckCodeFragment());
 			List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(statement);
 			List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newStatement);
             List<PsiExpression> oldMethodInvocations = expressionExtractor.getMethodInvocations(statement);
@@ -1262,7 +1254,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 				}
 			} else {
 			    String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
-				if(packageName != null) {
+				if(packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
                     subclassFile.add(packageStatement);
 				}
@@ -1365,8 +1357,9 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 													qualifierExpressionText + setterMethodInvocationName + "()",
 													null
 											);
-											setterMethodInvocation.getArgumentList().add(assignment.getRExpression());
+											PsiExpression argument = (PsiExpression) setterMethodInvocation.getArgumentList().add(rightHandSide);
 											assignment.replace(setterMethodInvocation);
+											accessedVariables = expressionExtractor.getVariableInstructions(argument);
 										}
 										for(PsiExpression expression2 : accessedVariables) {
 											PsiReferenceExpression accessedVariable = (PsiReferenceExpression) expression2;
@@ -1376,7 +1369,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 												if(accessedVariableBinding instanceof PsiField && accessedVariableBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC) &&
 														!containsVariable(staticFields, accessedVariable) && accessedVariableBinding.getType().equals(assignedVariableBinding.getType())) {
 													if(!containsStaticFieldKey(accessedVariable) && !modify)
-														additionalStaticFieldMap.put((PsiField)accessedVariable, generateSubclassName(accessedVariableBinding));
+														additionalStaticFieldMap.put((PsiField)accessedVariableBinding, generateSubclassName(accessedVariableBinding));
 												}
 											}
 										}

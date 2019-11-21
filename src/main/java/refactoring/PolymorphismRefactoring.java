@@ -25,6 +25,8 @@ public abstract class PolymorphismRefactoring {
     protected CodeStyleManager codeStyleManager;
     private Set<PsiField> fieldDeclarationsChangedWithPublicModifier;
 
+    final protected PsiJavaToken semicolon;
+
     public PolymorphismRefactoring(PsiFile sourceFile,
                                    Project project,
                                    PsiClass sourceTypeDeclaration,
@@ -36,6 +38,7 @@ public abstract class PolymorphismRefactoring {
         codeStyleManager = CodeStyleManager.getInstance(project);
         this.fieldDeclarationsChangedWithPublicModifier = new LinkedHashSet<>();
         this.project = project;
+        semicolon = (PsiJavaToken) elementFactory.createStatementFromText(";", null).getFirstChild();
     }
 
     protected void modifySourceMethodInvocationsInSubclass(List<PsiExpression> oldMethodInvocations,

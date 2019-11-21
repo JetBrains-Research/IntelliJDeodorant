@@ -16,6 +16,7 @@ import utils.IntelliJDeodorantBundle;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SystemObject {
     private static final String TYPE_STATE_CHECKING_INDICATOR_KEY = "type.state.checking.identification.indicator";
@@ -434,8 +435,11 @@ public class SystemObject {
                     List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethodBody);
                     for (PsiStatement statement : variableDeclarationStatements) {
                         PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
-                        PsiVariable[] fragments = (PsiVariable[]) variableDeclarationStatement.getDeclaredElements();
-                        variableDeclarationFragments.addAll(Arrays.asList(fragments));
+                        PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
+                        List<PsiVariable> declaredVariables = Arrays.stream(fragments)
+                                .map(element -> (PsiVariable) element)
+                                .collect(Collectors.toList());
+                        variableDeclarationFragments.addAll(declaredVariables);
                     }
                     for (PsiVariable fragment : variableDeclarationFragments) {
                         if (fragment.equals(variableBinding)) {

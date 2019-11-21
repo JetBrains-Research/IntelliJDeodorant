@@ -79,6 +79,7 @@ public class MethodDeclarationUtility {
         return null;
     }
 
+    // returns reference expression (see the difference between isSetter)
     public static PsiExpression isGetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());
@@ -97,6 +98,7 @@ public class MethodDeclarationUtility {
         return null;
     }
 
+    // returns resolved reference (see the difference between isGetter)
     public static PsiElement isSetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());
