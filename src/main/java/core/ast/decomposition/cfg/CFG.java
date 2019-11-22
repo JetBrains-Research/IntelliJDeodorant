@@ -131,7 +131,9 @@ public class CFG extends Graph {
         currentNodes.add(synchronizedNode);
         previousNodes = currentNodes;
         AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-        previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+        if (firstStatement instanceof CompositeStatementObject) {
+            previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+        }
         return previousNodes;
     }
 

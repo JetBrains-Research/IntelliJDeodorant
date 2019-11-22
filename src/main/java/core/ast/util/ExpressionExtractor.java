@@ -365,6 +365,7 @@ public class ExpressionExtractor {
         if (expression instanceof PsiMethodCallExpression) {
             PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
             expressionList.addAll(getExpressions(methodInvocation.getMethodExpression()));
+            expressionList.addAll(getExpressions(methodInvocation.getMethodExpression().getQualifierExpression()));
             PsiExpressionList arguments = methodInvocation.getArgumentList();
             for (PsiExpression argument : arguments.getExpressions())
                 expressionList.addAll(getExpressions(argument));
