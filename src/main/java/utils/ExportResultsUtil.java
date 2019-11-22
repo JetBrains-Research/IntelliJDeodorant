@@ -13,9 +13,7 @@ import java.util.List;
 import static java.nio.file.Files.createFile;
 import static java.nio.file.Files.write;
 
-/**
- * Exports refactoring results to the file
- */
+/** Exports refactoring suggestions to the file. */
 public class ExportResultsUtil {
 
     /**
