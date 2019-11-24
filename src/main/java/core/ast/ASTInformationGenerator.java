@@ -7,5 +7,5 @@ public class ASTInformationGenerator {
     public static ASTInformation generateASTInformation(PsiElement astNode) {
         return new ASTInformation(astNode);
     }
-    
+
 }

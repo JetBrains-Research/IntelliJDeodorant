@@ -8,6 +8,10 @@ import com.intellij.psi.*;
 
 public class StatementExtractor {
 
+    public StatementExtractor() {
+
+    }
+
     private StatementInstanceChecker instanceChecker;
 
     public List<PsiStatement> getConstructorInvocations(PsiStatement statement) {

@@ -219,7 +219,7 @@ public class SystemObject {
                                     ListIterator<FieldObject> fieldIterator = declaringClassObject.getFieldIterator();
                                     while (fieldIterator.hasNext()) {
                                         FieldObject fieldObject = fieldIterator.next();
-                                        PsiField declaredField = fieldObject.getVariableDeclarationFragment();
+                                        PsiField declaredField = fieldObject.getVariableDeclaration();
                                         if (!(fieldInstruction instanceof PsiReferenceExpression)) {
                                             continue;
                                         }
@@ -413,7 +413,7 @@ public class SystemObject {
                     ListIterator<FieldObject> fieldIterator = typeCheckClassObject.getFieldIterator();
                     while (fieldIterator.hasNext()) {
                         FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclarationFragment();
+                        PsiField fragment = fieldObject.getVariableDeclaration();
                         if (variableBinding.equals(fragment)) {
                             elimination.setTypeField(fragment);
                             break;
@@ -570,7 +570,7 @@ public class SystemObject {
                     PsiField fieldFragment = null;
                     while (fieldIterator.hasNext()) {
                         FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclarationFragment();
+                        PsiField fragment = fieldObject.getVariableDeclaration();
                         if (fragment.equals(superAccessedField)) {
                             fieldFragment = fragment;
                             elimination.addSuperAccessedField(fragment, null);
@@ -600,7 +600,7 @@ public class SystemObject {
                     PsiField fieldFragment = null;
                     while (fieldIterator.hasNext()) {
                         FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclarationFragment();
+                        PsiField fragment = fieldObject.getVariableDeclaration();
                         if (fragment.equals(superAssignedField)) {
                             fieldFragment = fragment;
                             elimination.addSuperAssignedField(fragment, null);

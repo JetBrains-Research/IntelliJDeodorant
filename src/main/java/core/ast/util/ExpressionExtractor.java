@@ -365,6 +365,7 @@ public class ExpressionExtractor {
         if (expression instanceof PsiMethodCallExpression) {
             PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
             expressionList.addAll(getExpressions(methodInvocation.getMethodExpression()));
+            expressionList.addAll(getExpressions(methodInvocation.getMethodExpression().getQualifierExpression()));
             PsiExpressionList arguments = methodInvocation.getArgumentList();
             for (PsiExpression argument : arguments.getExpressions())
                 expressionList.addAll(getExpressions(argument));
@@ -468,6 +469,15 @@ public class ExpressionExtractor {
             }
             if (instanceChecker.instanceOf(polyadicExpression))
                 expressionList.add(polyadicExpression);
+        } else if (expression instanceof PsiLambdaExpression) {
+            PsiLambdaExpression lambdaExpression = (PsiLambdaExpression) expression;
+            if (lambdaExpression.getBody() instanceof PsiExpression) {
+                expressionList.addAll(getExpressions(lambdaExpression.getBody()));
+            } else if (lambdaExpression.getBody() instanceof PsiCodeBlock) {
+                expressionList.addAll(getExpressions(lambdaExpression.getBody()));
+            }
+            if (instanceChecker.instanceOf(lambdaExpression))
+                expressionList.add(lambdaExpression);
         }
         return expressionList;
     }

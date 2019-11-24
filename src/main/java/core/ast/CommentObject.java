@@ -42,6 +42,7 @@ class CommentObject {
         return endLine;
     }
 
+
     public int getStartPosition() {
         return comment.getStartPosition();
     }
@@ -58,16 +59,15 @@ class CommentObject {
         if (o instanceof CommentObject) {
             CommentObject comment = (CommentObject) o;
 
-            return this.getStartPosition() == comment.getStartPosition()
-                    && this.getLength() == comment.getLength()
-                    && this.text.equals(comment.text);
+            return this.getStartPosition() == comment.getStartPosition() &&
+                    this.getLength() == comment.getLength();
         }
         return false;
     }
 
     public int hashCode() {
         if (hashCode == 0) {
-            int result = 17 + text.hashCode();
+            int result = 17;
             result = 37 * result + this.getStartPosition();
             result = 37 * result + this.getLength();
             hashCode = result;

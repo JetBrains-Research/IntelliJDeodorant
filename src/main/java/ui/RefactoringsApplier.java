@@ -18,11 +18,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 
-public class RefactoringsApplier {
+class RefactoringsApplier {
     private RefactoringsApplier() {
     }
 
-    public static @NotNull
+    static @NotNull
     Set<MoveMethodRefactoring> moveRefactoring(
             final @NotNull List<MoveMethodRefactoring> refactorings,
             final @NotNull AnalysisScope scope) {
@@ -38,18 +38,14 @@ public class RefactoringsApplier {
                 final PsiClass target = refactoring.getKey();
                 final List<MoveMethodRefactoring> filteredRefactorings = refactoring.getValue().stream()
                         .sequential()
-                        .filter(r -> r.accept(new RefactoringVisitor<Boolean>() {
-                            @Override
-                            public @NotNull
-                            Boolean visit(final @NotNull MoveMethodRefactoring refactoring) {
-                                if (canMoveInstanceMethod(refactoring.getMethod(), target)) {
-                                    if (moveInstanceMethod(refactoring.getMethod(), target)) {
-                                        accepted.add(refactoring);
-                                    }
-                                    return false;
-                                } else {
-                                    return true;
+                        .filter(r -> r.accept(refactoring1 -> {
+                            if (canMoveInstanceMethod(refactoring1.getMethod(), target)) {
+                                if (moveInstanceMethod(refactoring1.getMethod(), target)) {
+                                    accepted.add(refactoring1);
                                 }
+                                return false;
+                            } else {
+                                return true;
                             }
                         }))
                         .collect(Collectors.toList());

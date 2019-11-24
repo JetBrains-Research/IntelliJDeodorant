@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static utils.PsiUtils.isTestClass;
+
 public class MoveMethodCandidateRefactoring extends CandidateRefactoring implements Comparable<MoveMethodCandidateRefactoring> {
     private final MySystem system;
     private final MyClass sourceClass;
@@ -66,10 +68,11 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     }
 
     boolean isApplicable() {
-        return !isSynchronized() && !containsSuperMethodInvocation() && !overridesMethod() && !containsFieldAssignment() && !isTargetClassAnInterface() &&
-                validTargetObject() && !oneToManyRelationshipWithTargetClass() && !containsAssignmentToTargetClassVariable() &&
-                !containsMethodCallWithThisExpressionAsArgument() && !isTargetClassAnEnum() && !isSourceClassATestClass() && !targetClassContainsMethodWithSourceMethodSignature() &&
-                !containsNullCheckForTargetObject();
+        return !isSynchronized() && !containsSuperMethodInvocation() && !overridesMethod() && !containsFieldAssignment()
+                && !isTargetClassAnInterface() && validTargetObject() && !oneToManyRelationshipWithTargetClass()
+                && !containsAssignmentToTargetClassVariable() && !containsMethodCallWithThisExpressionAsArgument()
+                && !isTargetClassAnEnum() && !isSourceClassATestClass()
+                && !targetClassContainsMethodWithSourceMethodSignature() && !containsNullCheckForTargetObject();
     }
 
     public boolean leaveDelegate() {
@@ -101,7 +104,8 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     }
 
     private boolean isSourceClassATestClass() {
-        return sourceClass.getClassObject().containsMethodWithTestAnnotation() || sourceClass.getClassObject().extendsTestCase();
+        return isTestClass(sourceClass.getClassObject().getPsiClass())
+                || sourceClass.getClassObject().containsMethodWithTestAnnotation();
     }
 
     private boolean isTargetClassAnInterface() {

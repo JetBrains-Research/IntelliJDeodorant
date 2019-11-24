@@ -42,8 +42,7 @@ public class ASTInformation {
 
         if (o instanceof ASTInformation) {
             ASTInformation astInformation = (ASTInformation) o;
-            return this.psiElement.equals(astInformation.psiElement)
-                    && this.startPosition == astInformation.startPosition
+            return this.startPosition == astInformation.startPosition
                     && this.length == astInformation.length;
         }
         return false;
@@ -51,7 +50,7 @@ public class ASTInformation {
 
     public int hashCode() {
         if (hashCode == 0) {
-            int result = 17 + psiElement.hashCode();
+            int result = 17;
             result = 37 * result + startPosition;
             result = 37 * result + length;
             hashCode = result;

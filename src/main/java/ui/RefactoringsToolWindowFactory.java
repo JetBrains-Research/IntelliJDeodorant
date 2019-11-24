@@ -7,7 +7,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
 import org.jetbrains.annotations.NotNull;
 
-public class RefactoringsToolWindowFactory implements ToolWindowFactory {
+class RefactoringsToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -15,5 +15,5 @@ public class RefactoringsToolWindowFactory implements ToolWindowFactory {
         Content content = contentManager.getFactory().createContent(new RefactoringsPanel(project), null, false);
         contentManager.addContent(content);
     }
-    
+
 }
