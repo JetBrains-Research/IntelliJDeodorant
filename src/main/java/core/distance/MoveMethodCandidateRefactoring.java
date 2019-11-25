@@ -273,4 +273,8 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     public int getDistinctTargetDependencies() {
         return getFeatureEnvyVisualizationData().getDistinctTargetDependencies();
     }
+    
+    public FeatureEnvyVisualizationData getVisualizationData() {
+        return visualizationData;
+    }
 }

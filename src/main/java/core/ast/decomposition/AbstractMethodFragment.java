@@ -109,11 +109,16 @@ public abstract class AbstractMethodFragment {
                           List<PsiExpression> postfixExpressions, List<PsiExpression> prefixExpressions) {
         for (PsiExpression variableInstruction : variableInstructions) {
             if (variableInstruction instanceof PsiReferenceExpression) {
-                PsiReferenceExpression psiReference = (PsiReferenceExpression) variableInstruction;
-                PsiElement resolvedElement = psiReference.resolve();
-                if (resolvedElement instanceof PsiField) {
-                    PsiField psiField = (PsiField) resolvedElement;
-                    if (psiField.getContainingClass() != null) {
+                PsiReferenceExpression psiReferenceExpression = (PsiReferenceExpression) variableInstruction;
+                PsiExpression qualifierExpression = psiReferenceExpression.getQualifierExpression();
+                PsiElement resolvedElement = null;
+                if (qualifierExpression instanceof PsiReferenceExpression) {
+                    resolvedElement = ((PsiReferenceExpression) qualifierExpression).resolve();
+                }
+
+                if (psiReferenceExpression.resolve() instanceof PsiField) {
+                    PsiField psiField = (PsiField) psiReferenceExpression.resolve();
+                    if (psiField != null && psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
                         String fieldType = psiField.getType().getCanonicalText();
                         TypeObject typeObject = TypeObject.extractTypeObject(fieldType);
@@ -126,15 +131,21 @@ public abstract class AbstractMethodFragment {
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
-                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName);
-                                fieldInstruction.setElement(resolvedElement);
+                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName, psiField);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
                                 Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(psiField, postfixExpressions);
                                 Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(psiField, prefixExpressions);
-                                AbstractVariable variable = MethodDeclarationUtility.createVariable(psiField, null);
+                                AbstractVariable variable;
+
+                                if (resolvedElement instanceof PsiVariable) {
+                                    variable = MethodDeclarationUtility.createVariable((PsiVariable) resolvedElement, new PlainVariable(psiField));
+                                } else {
+                                    variable = MethodDeclarationUtility.createVariable(psiField, null);
+                                }
+
                                 if (!fieldAssignments.isEmpty()) {
                                     handleDefinedField(variable);
                                     for (PsiAssignmentExpression assignment : fieldAssignments) {
@@ -157,14 +168,14 @@ public abstract class AbstractMethodFragment {
                             }
                         }
                     }
-                } else if (resolvedElement instanceof PsiLocalVariable) {
-                    PsiLocalVariable resolvedVariable = (PsiLocalVariable) resolvedElement;
+                } else if (resolvedElement instanceof PsiVariable) {
+                    PsiVariable resolvedVariable = (PsiVariable) resolvedElement;
                     String variableName = resolvedVariable.getName();
                     String variableType = resolvedVariable.getType().getCanonicalText();
                     TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
                     PlainVariable variable = new PlainVariable(resolvedVariable);
                     LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
-                    localVariable.setSimpleName(psiReference);
+                    localVariable.setReference(psiReferenceExpression);
                     addLocalVariableInstruction(localVariable);
                     Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(resolvedVariable, assignments);
                     Set<PsiPostfixExpression> localVariablePostfixAssignments =
@@ -772,10 +783,14 @@ public abstract class AbstractMethodFragment {
         if (variable != null) {
             PlainVariable initialVariable = variable.getInitialVariable();
             if (variable instanceof PlainVariable) {
-                nonDistinctUsedFieldsThroughThisReference.add((PlainVariable) variable);
+                if (!nonDistinctUsedFieldsThroughThisReference.contains(variable)) {
+                    nonDistinctUsedFieldsThroughThisReference.add((PlainVariable) variable);
+                }
             } else {
                 if (initialVariable.isField()) {
-                    nonDistinctUsedFieldsThroughFields.add(variable);
+                    if (!nonDistinctUsedFieldsThroughFields.contains(variable)) {
+                        nonDistinctUsedFieldsThroughFields.add(variable);
+                    }
                 } else if (initialVariable.isParameter()) {
                     nonDistinctUsedFieldsThroughParameters.add(variable);
                 } else {

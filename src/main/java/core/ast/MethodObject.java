@@ -155,8 +155,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                             && statementObject.getLocalVariableInstructions().size() == 1
                             && this.constructorObject.parameterList.size() == 1) {
                         PsiAssignmentExpression assignment = (PsiAssignmentExpression) expressionStatement.getExpression();
-                        if (assignment.getLExpression() instanceof PsiReferenceExpression
-                                && assignment.getRExpression() instanceof PsiReferenceExpression)
+                        if (assignment.getLExpression() instanceof PsiReferenceExpression)
                             return statementObject.getFieldInstructions().get(0);
                     }
                 }
@@ -283,7 +282,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
                 for (LocalVariableDeclarationObject variableDeclaration : getLocalVariableDeclarations()) {
-                    if (variableDeclaration.getVariableDeclaration().equals(localVariableInstruction.getSimpleName().resolve()))
+                    if (variableDeclaration.getVariableDeclaration().equals(localVariableInstruction.getReference().resolve()))
                         return false;
                 }
             }

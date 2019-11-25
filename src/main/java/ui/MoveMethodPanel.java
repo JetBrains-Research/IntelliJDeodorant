@@ -173,7 +173,7 @@ class MoveMethodPanel extends JPanel {
                     List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo, indicator);
                     final List<MoveMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
                             .map(x -> new MoveMethodRefactoring(x.getSourceMethodDeclaration(),
-                                    PsiUtils.findClass(x.getTargetClass().getName(), project))).collect(Collectors.toList());
+                                    x.getTargetClass().getClassObject().getPsiClass())).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);

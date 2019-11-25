@@ -6,9 +6,8 @@ import com.intellij.psi.PsiReferenceExpression;
 public class LocalVariableInstructionObject {
     private final TypeObject type;
     private final String name;
-    private ASTInformation simpleName;
+    private ASTInformation reference;
     private volatile int hashCode = 0;
-    private String variableBindingKey;
 
     public LocalVariableInstructionObject(TypeObject type, String name) {
         this.type = type;
@@ -23,17 +22,12 @@ public class LocalVariableInstructionObject {
         return name;
     }
 
-    public String getVariableBindingKey() {
-        return variableBindingKey;
+    public void setReference(PsiReferenceExpression reference) {
+        this.reference = ASTInformationGenerator.generateASTInformation(reference);
     }
 
-    public void setSimpleName(PsiReferenceExpression simpleName) {
-        this.variableBindingKey = simpleName.getReferenceName();
-        this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
-    }
-
-    public PsiReferenceExpression getSimpleName() {
-        PsiElement node = this.simpleName.recoverASTNode();
+    public PsiReferenceExpression getReference() {
+        PsiElement node = this.reference.recoverASTNode();
         return (PsiReferenceExpression) node;
     }
 
@@ -45,7 +39,7 @@ public class LocalVariableInstructionObject {
         if (o instanceof LocalVariableInstructionObject) {
             LocalVariableInstructionObject lvio = (LocalVariableInstructionObject) o;
             return this.name.equals(lvio.name) && this.type.equals(lvio.type) &&
-                    this.variableBindingKey.equals(lvio.variableBindingKey);
+                    this.reference.equals(lvio.reference);
         }
         return false;
     }
@@ -64,7 +58,7 @@ public class LocalVariableInstructionObject {
             int result = 17;
             result = 37 * result + type.hashCode();
             result = 37 * result + name.hashCode();
-            result = 37 * result + variableBindingKey.hashCode();
+            result = 37 * result + reference.hashCode();
             hashCode = result;
         }
         return hashCode;
