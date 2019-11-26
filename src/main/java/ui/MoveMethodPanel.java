@@ -122,7 +122,7 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
-        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings, this));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(getValidRefactoringsSuggestions(), this));
         exportButton.setEnabled(false);
         buttonsPanel.add(exportButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
@@ -133,12 +133,16 @@ class MoveMethodPanel extends JPanel {
         return panel;
     }
 
+    private List<MoveMethodRefactoring> getValidRefactoringsSuggestions() {
+        return refactorings.stream().filter(refactoring -> refactoring.getOptionalMethod().isPresent()).collect(Collectors.toList());
+    }
+
     private void enableButtonsOnConditions() {
         doRefactorButton.setEnabled(model.isAnySelected());
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
-        exportButton.setEnabled(model.getRowCount() != 0);
+        exportButton.setEnabled(refactorings.stream().anyMatch(refactoring -> refactoring.getOptionalMethod().isPresent()));
     }
 
     private void disableAllButtons() {
