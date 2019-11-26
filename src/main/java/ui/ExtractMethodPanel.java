@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import static core.ast.Standalone.getExtractMethodRefactoringOpportunities;
 import static utils.PsiUtils.isChild;
 
+
 /**
  * Panel for Extract Method refactoring.
  */
@@ -134,7 +135,7 @@ class ExtractMethodPanel extends JPanel {
             ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
-        exportButton.setEnabled(!refactorings.isEmpty());
+        exportButton.setEnabled(!refactorings.stream().map(ExtractMethodRefactoring::getCandidates).anyMatch(slices -> slices.stream().anyMatch(this::isAllStatementsAvailable)));
     }
 
     /**
@@ -181,7 +182,7 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    exportButton.setEnabled(!refactorings.isEmpty());
+                    //exportButton.setEnabled(!refactorings.stream().map(ExtractMethodRefactoring::getCandidates).anyMatch(slices -> slices.stream().anyMatch(this::isAllStatementsAvailable)));
                     ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
@@ -189,6 +190,22 @@ class ExtractMethodPanel extends JPanel {
             }
         };
         ProgressManager.getInstance().run(backgroundable);
+    }
+
+    /**
+     * Checks all SliceStatements from slice for availability
+     *
+     * @param slice to check SliceStatements for availability
+     * @return if all PsiStatements from set is valid
+     */
+    public boolean isAllStatementsAvailable(ASTSlice slice) {
+        Iterator<PsiStatement> iterator = slice.getSliceStatements().iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().isValid()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
