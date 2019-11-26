@@ -56,7 +56,7 @@ public class TypeCheckEliminationGroup implements Comparable<TypeCheckEliminatio
                 constantVariables.add(field.getName());
             }
             for (PsiField field : elimination.getAdditionalStaticFields()) {
-                constantVariables.add(field.getText());
+                constantVariables.add(field.getName());
             }
             return constantVariables;
         }

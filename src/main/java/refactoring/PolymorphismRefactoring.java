@@ -41,6 +41,8 @@ public abstract class PolymorphismRefactoring {
         semicolon = (PsiJavaToken) elementFactory.createStatementFromText(";", null).getFirstChild();
     }
 
+    public abstract void apply();
+
     protected void modifySourceMethodInvocationsInSubclass(List<PsiExpression> oldMethodInvocations,
                                                            List<PsiExpression> newMethodInvocations,
                                                            Set<PsiMethod> accessedMethods,

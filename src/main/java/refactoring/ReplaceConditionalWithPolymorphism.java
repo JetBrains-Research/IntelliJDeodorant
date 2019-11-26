@@ -34,6 +34,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
         this.typeMethodInvocation = typeCheckElimination.getTypeMethodInvocation();
     }
 
+    @Override
     public void apply() {
         modifyInheritanceHierarchy();
         modifyClient();

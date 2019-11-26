@@ -19,6 +19,7 @@ import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.MoveMethodRefactoring;
+import ui.functionalinterfaces.DoubleClickListener;
 import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
@@ -213,28 +214,5 @@ class MoveMethodPanel extends JPanel {
                 }
             }
         }.queue();
-    }
-
-    @FunctionalInterface
-    private interface DoubleClickListener extends MouseListener {
-        void onDoubleClick();
-
-        default void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() >= 2) {
-                onDoubleClick();
-            }
-        }
-
-        default void mousePressed(MouseEvent e) {
-        }
-
-        default void mouseReleased(MouseEvent e) {
-        }
-
-        default void mouseEntered(MouseEvent e) {
-        }
-
-        default void mouseExited(MouseEvent e) {
-        }
     }
 }

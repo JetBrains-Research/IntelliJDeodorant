@@ -30,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.ExtractMethodRefactoring;
 import refactoring.MyExtractMethodProcessor;
+import ui.functionalinterfaces.DoubleClickListener;
+import ui.functionalinterfaces.ElementSelectionListener;
+import ui.functionalinterfaces.EnterKeyListener;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
@@ -270,54 +273,5 @@ class ExtractMethodPanel extends JPanel {
                 }
             }
         }.queue();
-    }
-
-    @FunctionalInterface
-    private interface DoubleClickListener extends MouseListener {
-        void onDoubleClick();
-
-        default void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() >= 2) {
-                onDoubleClick();
-            }
-        }
-
-        default void mousePressed(MouseEvent e) {
-        }
-
-        default void mouseReleased(MouseEvent e) {
-        }
-
-        default void mouseEntered(MouseEvent e) {
-        }
-
-        default void mouseExited(MouseEvent e) {
-        }
-    }
-
-    @FunctionalInterface
-    private interface EnterKeyListener extends KeyListener {
-        void onEnterKey();
-
-        default void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                onEnterKey();
-            }
-        }
-
-        default void keyTyped(KeyEvent e) {
-        }
-
-        default void keyReleased(KeyEvent e) {
-        }
-    }
-
-    @FunctionalInterface
-    private interface ElementSelectionListener extends TreeSelectionListener {
-        void onSelect();
-
-        default void valueChanged(TreeSelectionEvent var1) {
-            onSelect();
-        }
     }
 }

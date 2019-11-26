@@ -44,6 +44,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         this.abstractClassName = typeCheckElimination.getAbstractClassName();
     }
 
+    @Override
     public void apply() {
         checkInitialConditions(); // do we really need it???
         if (typeCheckElimination.getTypeField() != null) {
