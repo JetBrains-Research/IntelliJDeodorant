@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 import static core.ast.Standalone.getExtractMethodRefactoringOpportunities;
 import static utils.PsiUtils.isChild;
 
-
 /**
  * Panel for Extract Method refactoring.
  */
