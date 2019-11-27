@@ -108,46 +108,48 @@ public class DistanceMatrix {
                                 }
                                 if (parameterIsPassedAsArgument) {
                                     MethodObject invokedMethod = targetClassObject.getMethod(methodInvocation);
-                                    List<FieldInstructionObject> fieldInstructions = invokedMethod.getFieldInstructions();
-                                    boolean containerFieldIsAccessed = false;
-                                    for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-                                        if (association.getFieldObject().equals(fieldInstruction)) {
-                                            containerFieldIsAccessed = true;
-                                            break;
+                                    if (invokedMethod != null) {
+                                        List<FieldInstructionObject> fieldInstructions = invokedMethod.getFieldInstructions();
+                                        boolean containerFieldIsAccessed = false;
+                                        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
+                                            if (association.getFieldObject().equals(fieldInstruction)) {
+                                                containerFieldIsAccessed = true;
+                                                break;
+                                            }
                                         }
-                                    }
-                                    if (containerFieldIsAccessed) {
-                                        MyClass mySourceClass = classList.get(classIndexMap.get(sourceClass));
-                                        MyClass myTargetClass = classList.get(classIndexMap.get(targetClass));
-                                        MoveMethodCandidateRefactoring candidate = new MoveMethodCandidateRefactoring(system, mySourceClass, myTargetClass, method);
-                                        Map<PsiMethodCallExpression, PsiMethod> additionalMethodsToBeMoved = candidate.getAdditionalMethodsToBeMoved();
-                                        Collection<PsiMethod> values = additionalMethodsToBeMoved.values();
-                                        Set<String> methodEntitySet = entityMap.get(method.toString());
-                                        Set<String> sourceClassEntitySet = classMap.get(sourceClass);
-                                        Set<String> targetClassEntitySet = classMap.get(targetClass);
-                                        Set<String> intersectionWithSourceClass = DistanceCalculator.intersection(methodEntitySet, sourceClassEntitySet);
-                                        Set<String> intersectionWithTargetClass = DistanceCalculator.intersection(methodEntitySet, targetClassEntitySet);
-                                        Set<String> entitiesToRemoveFromIntersectionWithSourceClass = new LinkedHashSet<>();
-                                        if (!values.isEmpty()) {
-                                            for (String s : intersectionWithSourceClass) {
-                                                int entityPosition = entityIndexMap.get(s);
-                                                Entity e = entityList.get(entityPosition);
-                                                if (e instanceof MyMethod) {
-                                                    MyMethod myInvokedMethod = (MyMethod) e;
-                                                    if (values.contains(myInvokedMethod.getMethodObject().getMethodDeclaration())) {
-                                                        entitiesToRemoveFromIntersectionWithSourceClass.add(s);
+                                        if (containerFieldIsAccessed) {
+                                            MyClass mySourceClass = classList.get(classIndexMap.get(sourceClass));
+                                            MyClass myTargetClass = classList.get(classIndexMap.get(targetClass));
+                                            MoveMethodCandidateRefactoring candidate = new MoveMethodCandidateRefactoring(system, mySourceClass, myTargetClass, method);
+                                            Map<PsiMethodCallExpression, PsiMethod> additionalMethodsToBeMoved = candidate.getAdditionalMethodsToBeMoved();
+                                            Collection<PsiMethod> values = additionalMethodsToBeMoved.values();
+                                            Set<String> methodEntitySet = entityMap.get(method.toString());
+                                            Set<String> sourceClassEntitySet = classMap.get(sourceClass);
+                                            Set<String> targetClassEntitySet = classMap.get(targetClass);
+                                            Set<String> intersectionWithSourceClass = DistanceCalculator.intersection(methodEntitySet, sourceClassEntitySet);
+                                            Set<String> intersectionWithTargetClass = DistanceCalculator.intersection(methodEntitySet, targetClassEntitySet);
+                                            Set<String> entitiesToRemoveFromIntersectionWithSourceClass = new LinkedHashSet<>();
+                                            if (!values.isEmpty()) {
+                                                for (String s : intersectionWithSourceClass) {
+                                                    int entityPosition = entityIndexMap.get(s);
+                                                    Entity e = entityList.get(entityPosition);
+                                                    if (e instanceof MyMethod) {
+                                                        MyMethod myInvokedMethod = (MyMethod) e;
+                                                        if (values.contains(myInvokedMethod.getMethodObject().getMethodDeclaration())) {
+                                                            entitiesToRemoveFromIntersectionWithSourceClass.add(s);
+                                                        }
                                                     }
                                                 }
+                                                intersectionWithSourceClass.removeAll(entitiesToRemoveFromIntersectionWithSourceClass);
                                             }
-                                            intersectionWithSourceClass.removeAll(entitiesToRemoveFromIntersectionWithSourceClass);
-                                        }
-                                        if (intersectionWithTargetClass.size() >= intersectionWithSourceClass.size()) {
-                                            if (candidate.isApplicable()) {
-                                                int sourceClassDependencies = candidate.getDistinctSourceDependencies();
-                                                int targetClassDependencies = candidate.getDistinctTargetDependencies();
-                                                if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate 
-                                                        && sourceClassDependencies < targetClassDependencies) {
-                                                    candidateRefactoringList.add(candidate);
+                                            if (intersectionWithTargetClass.size() >= intersectionWithSourceClass.size()) {
+                                                if (candidate.isApplicable()) {
+                                                    int sourceClassDependencies = candidate.getDistinctSourceDependencies();
+                                                    int targetClassDependencies = candidate.getDistinctTargetDependencies();
+                                                    if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate
+                                                            && sourceClassDependencies < targetClassDependencies) {
+                                                        candidateRefactoringList.add(candidate);
+                                                    }
                                                 }
                                             }
                                         }

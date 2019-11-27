@@ -8,19 +8,22 @@ import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
 
-/**
- * A tool window panel that consist of panels for each code smell type.
- */
-public class RefactoringsPanel extends SimpleToolWindowPanel {
+class RefactoringsPanel extends SimpleToolWindowPanel {
 
     RefactoringsPanel(Project project) {
         super(false, true);
         addRefactoringPanels(project);
     }
 
+    /**
+     * Creates a tabbed panel that consist of panels for each code smell type.
+     *
+     * @param project current project.
+     */
     private void addRefactoringPanels(Project project) {
         JTabbedPane jTabbedPane = new JTabbedPane();
         jTabbedPane.add(IntelliJDeodorantBundle.message("feature.envy.smell.name"), new MoveMethodPanel(new AnalysisScope(project)));
+        jTabbedPane.add(IntelliJDeodorantBundle.message("long.method.smell.name"), new ExtractMethodPanel(new AnalysisScope(project)));
         setContent(jTabbedPane);
     }
 

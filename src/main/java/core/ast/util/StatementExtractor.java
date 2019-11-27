@@ -7,6 +7,8 @@ import java.util.List;
 import com.intellij.psi.*;
 
 public class StatementExtractor {
+    public StatementExtractor() {
+    }
 
     private StatementInstanceChecker instanceChecker;
 
@@ -82,7 +84,13 @@ public class StatementExtractor {
 
     private List<PsiStatement> getStatements(PsiStatement statement) {
         List<PsiStatement> statementList = new ArrayList<>();
-        if (statement instanceof PsiBlockStatement) {
+        if (statement instanceof PsiCodeBlock) {
+            PsiCodeBlock block = (PsiCodeBlock) statement;
+            PsiStatement[] statements = block.getStatements();
+            for (PsiStatement psiStatement : statements) {
+                statementList.addAll(getStatements(psiStatement));
+            }
+        } else if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement block = (PsiBlockStatement) statement;
             PsiStatement[] statements = block.getCodeBlock().getStatements();
             for (PsiStatement psiStatement : statements) {
@@ -175,7 +183,7 @@ public class StatementExtractor {
         return statementList;
     }
 
-    private int getTotalNumberOfStatements(PsiStatement statement) {
+    public int getTotalNumberOfStatements(PsiStatement statement) {
         int statementCounter = 0;
         if (statement instanceof PsiBlockStatement) {
             PsiBlockStatement block = (PsiBlockStatement) statement;

@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.intellij.psi.*;
 import core.ast.ASTReader;
 import core.ast.ClassObject;
 import core.ast.SystemObject;
@@ -11,13 +12,14 @@ import core.ast.decomposition.cfg.AbstractVariable;
 import core.ast.util.MethodDeclarationUtility;
 
 public class RefactoringUtility {
-/*
-	public static Type generateQualifiedTypeFromTypeBinding(ITypeBinding typeBinding, AST ast, ASTRewrite rewriter) {
-		Type type = null;
+	public static PsiTypeElement generateQualifiedTypeFromTypeBinding(PsiType typeBinding) {
+		PsiTypeElement type = null;
 		if(typeBinding.isParameterizedType()) {
-			type = createQualifiedParameterizedType(ast, typeBinding, rewriter);
+			type = createQualifiedParameterizedType(typeBinding);
 		}
-		else if(typeBinding.isClass() || typeBinding.isInterface() || typeBinding.isEnum()) {
+		else if(typeBinding instanceof PsiClassType) {
+			PsiClass psiClass;
+			PsiClassType psiClassType = (PsiClassType) typeBinding;
 			if(typeBinding.isMember()) {
 				ITypeBinding declaringClassTypeBinding = typeBinding.getDeclaringClass();
 				Type declaringClassType = generateQualifiedTypeFromTypeBinding(declaringClassTypeBinding, ast, rewriter);
@@ -179,10 +181,11 @@ public class RefactoringUtility {
 		return type;
 	}
 
-	public static void getSimpleTypeBindings(Set<ITypeBinding> typeBindings, Set<ITypeBinding> finalTypeBindings) {
-		for(ITypeBinding typeBinding : typeBindings) {
+	public static void getSimpleTypeBindings(Set<PsiType> typeBindings, Set<PsiType> finalTypeBindings) {
+		for(PsiType typeBinding : typeBindings) {
 			if(typeBinding.isPrimitive()) {
-
+				PsiType psiType2 = (PsiArrayType) typeBinding;
+				psiType2.get
 			}
 			else if(typeBinding.isArray()) {
 				ITypeBinding elementTypeBinding = typeBinding.getElementType();
@@ -424,5 +427,4 @@ public class RefactoringUtility {
 		return implementsSerializableInterface(typeDeclaration.resolveBinding()) &&
 				(localField.resolveBinding().getModifiers() & Modifier.TRANSIENT) == 0;
 	}
-*/
 }

@@ -1,9 +1,7 @@
 package core.ast;
 
-import com.intellij.psi.PsiDeclarationStatement;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiVariable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,22 +15,20 @@ public class FieldObject extends VariableDeclarationObject {
     private boolean _static;
     private Access access;
     private String className;
-    private PsiField psiField;
+    private final PsiField psiField;
     private volatile int hashCode = 0;
 
-    public FieldObject(PsiField psiField, TypeObject type, String fieldName) {
-        this.psiField = psiField;
+    public FieldObject(TypeObject type, String fieldName, PsiField field) {
         this.type = type;
         this.name = fieldName;
         this._static = false;
         this.access = Access.NONE;
         this.commentList = new ArrayList<>();
+        this.psiField = field;
     }
 
-    public FieldInstructionObject generateFieldInstruction() {
-        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name);
-        fieldInstruction.setStatic(this._static);
-        return fieldInstruction;
+    private PsiVariable getVariableDeclarationFragment() {
+        return psiField;
     }
 
     public void setAccess(Access access) {
@@ -78,9 +74,7 @@ public class FieldObject extends VariableDeclarationObject {
 
         if (o instanceof FieldObject) {
             FieldObject fieldObject = (FieldObject) o;
-            return this.className.equals(fieldObject.className) &&
-                    this.name.equals(fieldObject.name) && this.type.equals(fieldObject.type) &&
-                    this.variableBindingKey.equals(fieldObject.variableBindingKey);
+            return this.psiField.equals(fieldObject.psiField);
         }
         return false;
     }
@@ -105,7 +99,7 @@ public class FieldObject extends VariableDeclarationObject {
             result = 37 * result + className.hashCode();
             result = 37 * result + name.hashCode();
             result = 37 * result + type.hashCode();
-            //result = 37 * result + variableBindingKey.hashCode();
+            result = 37 * result + psiField.hashCode();
             hashCode = result;
         }
         return hashCode;
@@ -122,7 +116,7 @@ public class FieldObject extends VariableDeclarationObject {
         return sb.toString();
     }
 
-    public PsiField getVariableDeclaration() {
-        return psiField;
+    public PsiVariable getVariableDeclaration() {
+        return getVariableDeclarationFragment();
     }
 }

@@ -23,7 +23,7 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     //if composite variable is "one.two.three" then right part is "two.three"
-    private AbstractVariable getRightPart() {
+    AbstractVariable getRightPart() {
         return rightPart;
     }
 

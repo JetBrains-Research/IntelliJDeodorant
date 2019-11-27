@@ -3,29 +3,20 @@
     <version>1.0</version>
     <vendor email="zarina.kurbatova@gmail.com">Zarina Kurbatova</vendor>
 
-    <description>An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve
-        them. Based on tsantalis/JDeodorant
+    <description><![CDATA[An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
+        <p>Currently, the plugin supports two code smells, namely Feature Envy and Long Method.
+            <ul>
+               <li>Feature Envy problems can be resolved by appropriate Move Method refactorings.</li>
+               <li>Long Method problems can be resolved by appropriate Extract Method refactorings.</li>
+            </ul>
+        </p>
+         ]]>
     </description>
-
-    <change-notes><![CDATA[
-    ]]>
-    </change-notes>
-
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="191.4212.41"/>
-
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="ui.RefactoringsToolWindowFactory"/>
-    </extensions>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
+        <errorHandler implementation="reporting.GitHubErrorReporter"/>
+    </extensions>
 
 </idea-plugin>

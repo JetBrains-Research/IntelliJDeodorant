@@ -101,7 +101,7 @@ public abstract class AbstractMethodFragment {
         this.variablesAssignedWithClassInstanceCreations = new LinkedHashMap<>();
     }
 
-    AbstractMethodFragment getParent() {
+    public AbstractMethodFragment getParent() {
         return this.parent;
     }
 
@@ -207,7 +207,7 @@ public abstract class AbstractMethodFragment {
                     TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
                     LocalVariableDeclarationObject localVariable =
                             new LocalVariableDeclarationObject(localVariableType, declaredVariable.getName());
-                    localVariable.setVariableDeclaration(declarationStatement);
+                    localVariable.setVariableDeclaration(declaredVariable);
                     addLocalVariableDeclaration(localVariable);
                     addDeclaredLocalVariable(new PlainVariable(declaredVariable));
                 }
@@ -415,7 +415,7 @@ public abstract class AbstractMethodFragment {
                     for (PsiField psiField : fields) {
                         TypeObject fieldType = TypeObject.extractTypeObject(psiField.getType().getCanonicalText());
                         fieldType.setArrayDimension(fieldType.getArrayDimension());
-                        FieldObject fieldObject = new FieldObject(psiField, fieldType, psiField.getName());
+                        FieldObject fieldObject = new FieldObject(fieldType, psiField.getName(), psiField);
                         fieldObject.setClassName(anonymousClassObject.getName());
                         if ((psiField.hasModifier(JvmModifier.PUBLIC)))
                             fieldObject.setAccess(Access.PUBLIC);
