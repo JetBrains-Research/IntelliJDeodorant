@@ -34,8 +34,6 @@ import utils.ExportResultsUtil;
 import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
@@ -118,12 +116,20 @@ class ExtractMethodPanel extends JPanel {
         buttonPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
-        exportButton.addActionListener(e -> ExportResultsUtil.export(refactorings, panel));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(getAvailableRefactoringSuggestions(), panel));
         exportButton.setEnabled(false);
         buttonPanel.add(exportButton);
 
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
+    }
+
+    /**
+     * Filters available refactorings suggestions from refactoring list
+     * @return list of available refactorings suggestions
+     */
+    private List<ExtractMethodRefactoring> getAvailableRefactoringSuggestions() {
+        return refactorings.stream().filter(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().allMatch(ASTSlice::isAllStatementsAvailable)).collect(Collectors.toList());
     }
 
     /**
@@ -135,7 +141,11 @@ class ExtractMethodPanel extends JPanel {
             ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
-        exportButton.setEnabled(!refactorings.stream().map(ExtractMethodRefactoring::getCandidates).anyMatch(slices -> slices.stream().anyMatch(this::isAllStatementsAvailable)));
+        exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
+    }
+
+    private boolean isAnyRefactoringSuggestionAvailable() {
+        return refactorings.stream().anyMatch(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().anyMatch(ASTSlice::isAllStatementsAvailable));
     }
 
     /**
@@ -182,7 +192,7 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    //exportButton.setEnabled(!refactorings.stream().map(ExtractMethodRefactoring::getCandidates).anyMatch(slices -> slices.stream().anyMatch(this::isAllStatementsAvailable)));
+                    exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
                     ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
@@ -190,22 +200,6 @@ class ExtractMethodPanel extends JPanel {
             }
         };
         ProgressManager.getInstance().run(backgroundable);
-    }
-
-    /**
-     * Checks all SliceStatements from slice for availability
-     *
-     * @param slice to check SliceStatements for availability
-     * @return if all PsiStatements from set is valid
-     */
-    public boolean isAllStatementsAvailable(ASTSlice slice) {
-        Iterator<PsiStatement> iterator = slice.getSliceStatements().iterator();
-        while (iterator.hasNext()) {
-            if (!iterator.next().isValid()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

@@ -49,26 +49,10 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
      * @param label the label to be displayed on tree.
      */
     private void disableNotValidSuggestion(ASTSlice slice, JLabel label) {
-        if (!isAllStatementsAvailable(slice)) {
+        if (!slice.isAllStatementsAvailable()) {
             label.setEnabled(false);
             label.setBackground(JBColor.LIGHT_GRAY);
             label.setOpaque(true);
         }
-    }
-
-    /**
-     * Checks all SliceStatements from slice for availability
-     *
-     * @param slice to check SliceStatements for availability
-     * @return if all PsiStatements from set is valid
-     */
-     public boolean isAllStatementsAvailable(ASTSlice slice) {
-         Iterator<PsiStatement> iterator = slice.getSliceStatements().iterator();
-        while (iterator.hasNext()) {
-            if (!iterator.next().isValid()) {
-                return false;
-            }
-        }
-        return true;
     }
 }
