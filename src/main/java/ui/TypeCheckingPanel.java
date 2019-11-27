@@ -183,7 +183,8 @@ class TypeCheckingPanel extends JPanel {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    Set<TypeCheckEliminationGroup> candidates = getTypeCheckEliminationRefactoringOpportunities(projectInfo, indicator);
+                    Set<TypeCheckEliminationGroup> candidates =
+                            getTypeCheckEliminationRefactoringOpportunities(projectInfo, indicator);
                     model.setEliminationGroups(new ArrayList<>(candidates));
                     ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
                 });
@@ -218,7 +219,7 @@ class TypeCheckingPanel extends JPanel {
             PsiClass sourceTypeDeclaration = typeCheckElimination.getTypeCheckClass();
             PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
             QuadriFunction<PsiFile, Project, PsiClass, TypeCheckElimination, PolymorphismRefactoring> constructor;
-            if(typeCheckElimination.getExistingInheritanceTree() == null) {
+            if (typeCheckElimination.getExistingInheritanceTree() == null) {
                 constructor = ReplaceTypeCodeWithStateStrategy::new;
             } else {
                 constructor = ReplaceConditionalWithPolymorphism::new;
