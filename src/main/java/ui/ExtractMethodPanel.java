@@ -25,6 +25,7 @@ import com.intellij.ui.components.JBPanel;
 import core.ast.decomposition.cfg.ASTSlice;
 import core.ast.decomposition.cfg.ASTSliceGroup;
 import core.ast.decomposition.cfg.PDGNode;
+import core.distance.ExtractClassCandidateGroup;
 import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

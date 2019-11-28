@@ -1,9 +1,6 @@
 package core.distance;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDeclarationStatement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import core.GodClassVisualizationData;
 import core.ast.FieldObject;
 import core.ast.MethodObject;
@@ -373,4 +370,8 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 	public int getDistinctTargetDependencies() {
 		return visualizationData.getDistinctTargetDependencies();
 	}
+
+    public PsiFile getSourceFile() {
+		return sourceClass.getClassObject().getPsiFile();
+    }
 }

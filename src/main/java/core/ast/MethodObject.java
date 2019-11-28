@@ -121,7 +121,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
-    FieldInstructionObject isGetter() {
+    public FieldInstructionObject isGetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -143,7 +143,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    FieldInstructionObject isSetter() {
+    public FieldInstructionObject isSetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
