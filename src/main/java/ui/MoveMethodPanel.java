@@ -19,6 +19,7 @@ import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.MoveMethodRefactoring;
+import utils.ExportResultsUtil;
 import utils.IntelliJDeodorantBundle;
 import utils.PsiUtils;
 
@@ -44,6 +45,7 @@ class MoveMethodPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "feature.envy.detect.indicator.status";
     private static final String TOTAL_LABEL_TEXT_KEY = "total.label";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
 
     @NotNull
     private final AnalysisScope scope;
@@ -58,6 +60,7 @@ class MoveMethodPanel extends JPanel {
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JScrollPane();
+    private final JButton exportButton = new JButton();
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -117,6 +120,11 @@ class MoveMethodPanel extends JPanel {
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonsPanel.add(refreshButton);
+
+        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(getValidRefactoringsSuggestions(), this));
+        exportButton.setEnabled(false);
+        buttonsPanel.add(exportButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
 
         model.addTableModelListener(l -> enableButtonsOnConditions());
@@ -125,11 +133,16 @@ class MoveMethodPanel extends JPanel {
         return panel;
     }
 
+    private List<MoveMethodRefactoring> getValidRefactoringsSuggestions() {
+        return refactorings.stream().filter(refactoring -> refactoring.getOptionalMethod().isPresent()).collect(Collectors.toList());
+    }
+
     private void enableButtonsOnConditions() {
         doRefactorButton.setEnabled(model.isAnySelected());
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
+        exportButton.setEnabled(refactorings.stream().anyMatch(refactoring -> refactoring.getOptionalMethod().isPresent()));
     }
 
     private void disableAllButtons() {
@@ -137,6 +150,7 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(false);
         deselectAllButton.setEnabled(false);
         refreshButton.setEnabled(false);
+        exportButton.setEnabled(false);
     }
 
     private void refactorSelected() {

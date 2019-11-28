@@ -1,5 +1,6 @@
 package ui;
 
+import com.intellij.psi.PsiStatement;
 import com.intellij.ui.JBColor;
 import core.ast.decomposition.cfg.ASTSlice;
 import core.ast.decomposition.cfg.ASTSliceGroup;
@@ -9,6 +10,8 @@ import javax.swing.*;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Renders {@link ASTSlice} elements inside JTree.
@@ -46,7 +49,7 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
      * @param label the label to be displayed on tree.
      */
     private void disableNotValidSuggestion(ASTSlice slice, JLabel label) {
-        if (!(slice.getSliceStatements().iterator().next().isValid())) {
+        if (!slice.areSliceStatementsValid()) {
             label.setEnabled(false);
             label.setBackground(JBColor.LIGHT_GRAY);
             label.setOpaque(true);
