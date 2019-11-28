@@ -49,7 +49,7 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
      * @param label the label to be displayed on tree.
      */
     private void disableNotValidSuggestion(ASTSlice slice, JLabel label) {
-        if (!slice.isAllStatementsAvailable()) {
+        if (!slice.areSliceStatementsValid()) {
             label.setEnabled(false);
             label.setBackground(JBColor.LIGHT_GRAY);
             label.setOpaque(true);
