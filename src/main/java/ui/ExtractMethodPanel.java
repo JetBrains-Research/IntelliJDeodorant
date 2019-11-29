@@ -140,7 +140,7 @@ class ExtractMethodPanel extends JPanel {
             ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
-        exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
+        enableButtonsOnConditions();
     }
 
     private boolean isAnyRefactoringSuggestionAvailable() {
@@ -165,6 +165,7 @@ class ExtractMethodPanel extends JPanel {
      * Refreshes the panel with suggestions.
      */
     private void refreshPanel() {
+        refreshButton.setEnabled(false);
         Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
@@ -173,6 +174,11 @@ class ExtractMethodPanel extends JPanel {
         doRefactorButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
+    }
+
+    private void enableButtonsOnConditions() {
+        exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
+        refreshButton.setEnabled(true);
     }
 
     /**
@@ -191,10 +197,11 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
                     ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
+
+                    enableButtonsOnConditions();
                 });
             }
         };
