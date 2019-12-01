@@ -22,6 +22,7 @@ import com.intellij.refactoring.extractMethod.PrepareFailedException;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
+import core.ast.ClassObject;
 import core.ast.decomposition.cfg.ASTSlice;
 import core.ast.decomposition.cfg.ASTSliceGroup;
 import core.ast.decomposition.cfg.PDGNode;
@@ -179,6 +180,7 @@ class ExtractMethodPanel extends JPanel {
      * Calculates suggestions for whole project.
      */
     private void calculateRefactorings() {
+        Set<ClassObject> classToFindRefactorings = SettingsPanel.getClassesToFindRefactorings();
         ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
