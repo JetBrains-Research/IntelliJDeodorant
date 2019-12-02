@@ -23,9 +23,9 @@ public class InheritanceTree {
     }
 
     public boolean contains(String nodeName) {
-        Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+        Enumeration e = rootNode.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
-            DefaultMutableTreeNode node = e.nextElement();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
             if (node.getUserObject().equals(nodeName)) {
                 return true;
             }
@@ -35,9 +35,9 @@ public class InheritanceTree {
 
     public DefaultMutableTreeNode getNode(String nodeName) {
         if (rootNode != null) {
-            Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+            Enumeration e = rootNode.breadthFirstEnumeration();
             while (e.hasMoreElements()) {
-                DefaultMutableTreeNode node = e.nextElement();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
                 if (node.getUserObject().equals(nodeName)) {
                     return node;
                 }
@@ -70,9 +70,9 @@ public class InheritanceTree {
 
     public TreeMap<Integer, Set<String>> getLeavesByLevel() {
         TreeMap<Integer, Set<String>> levelMap = new TreeMap<Integer, Set<String>>();
-        Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+        Enumeration e = rootNode.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
-            DefaultMutableTreeNode node = e.nextElement();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
             if (node.isLeaf()) {
                 int level = node.getLevel();
                 if (levelMap.containsKey(level)) {
@@ -93,7 +93,7 @@ public class InheritanceTree {
         }
         if (o instanceof InheritanceTree) {
             InheritanceTree inheritanceTree = (InheritanceTree) o;
-            rootNode.getUserObject().equals(inheritanceTree.rootNode.getUserObject());
+            return rootNode.getUserObject().equals(inheritanceTree.rootNode.getUserObject());
         }
         return false;
     }

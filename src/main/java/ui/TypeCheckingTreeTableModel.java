@@ -1,57 +1,29 @@
 package ui;
 
-import com.intellij.ui.treeStructure.treetable.TreeTableModel;
+import com.intellij.openapi.project.Project;
 import refactoring.TypeCheckElimination;
 import refactoring.TypeCheckEliminationGroup;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
+import ui.abstractrefactorings.TypeCheckRefactoringType;
+import ui.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoring;
+import ui.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoringGroup;
 
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-class TypeCheckingTreeTableModel extends DefaultTreeModel implements TreeTableModel {
-    private final static String[] COLUMN_NAMES = {
-            "Type Checking Method",
-            "Refactoring Type",
-            "System-Level Occurrences",
-            "Class-Level Occurrences",
-            "Average #statements per case"
-    };
-
-    private List<TypeCheckEliminationGroup> eliminationGroups;
-
-    public TypeCheckingTreeTableModel(List<TypeCheckEliminationGroup> eliminationGroups) {
-        super(new DefaultMutableTreeNode("root"));
-        this.eliminationGroups = eliminationGroups;
-    }
-
-    public void setEliminationGroups(List<TypeCheckEliminationGroup> eliminationGroups) {
-        this.eliminationGroups = eliminationGroups;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return COLUMN_NAMES.length;
-    }
-
-
-    @Override
-    public String getColumnName(int column) {
-        return COLUMN_NAMES[column];
-    }
-
-    @Override
-    public Class getColumnClass(int column) {
-        if (column == 0) {
-            return TreeTableModel.class;
-        }
-        return String.class;
+public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
+    public TypeCheckingTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, Project project) {
+        super(candidateRefactoringGroups, columnNames, new TypeCheckRefactoringType(project));
     }
 
     @Override
     public Object getValueAt(Object o, int index) {
-        if (o instanceof TypeCheckEliminationGroup) {
-            TypeCheckEliminationGroup group = (TypeCheckEliminationGroup)o;
+        if (o instanceof AbstractTypeCheckCandidateRefactoringGroup) {
+            AbstractTypeCheckCandidateRefactoringGroup abstractGroup = (AbstractTypeCheckCandidateRefactoringGroup)o;
+            TypeCheckEliminationGroup group = (TypeCheckEliminationGroup) abstractGroup.getCandidateRefactoringGroup();
+
             switch(index){
                 case 0:
                     return group.toString();
@@ -63,8 +35,9 @@ class TypeCheckingTreeTableModel extends DefaultTreeModel implements TreeTableMo
                     return Double.toString(group.getAverageNumberOfStatementsInGroup());
             }
         }
-        if (o instanceof TypeCheckElimination) {
-            TypeCheckElimination typeCheckElimination = (TypeCheckElimination)o;
+        if (o instanceof AbstractTypeCheckCandidateRefactoring) {
+            AbstractTypeCheckCandidateRefactoring abstractTypeCheckElimination = (AbstractTypeCheckCandidateRefactoring)o;
+            TypeCheckElimination typeCheckElimination = (TypeCheckElimination) abstractTypeCheckElimination.getCandidateRefactoring();
             switch(index) {
                 case 0:
                     return typeCheckElimination.toString();
@@ -80,52 +53,5 @@ class TypeCheckingTreeTableModel extends DefaultTreeModel implements TreeTableMo
             }
         }
         return "";
-    }
-
-    @Override
-    public boolean isCellEditable(Object node, int column) {
-        return false;
-    }
-
-    @Override
-    public void setValueAt(Object aValue, Object node, int column) {
-    }
-
-    @Override
-    public void setTree(JTree tree) {
-        "".hashCode();
-    }
-
-    @Override
-    public boolean isLeaf(Object node) {
-        return node instanceof TypeCheckElimination;
-    }
-
-    @Override
-    public Object getChild(Object parent, int index) {
-        if (parent instanceof TypeCheckEliminationGroup) {
-            TypeCheckEliminationGroup group = (TypeCheckEliminationGroup) parent;
-            return group.getCandidates().get(index);
-        }
-        return eliminationGroups.get(index);
-    }
-
-    @Override
-    public int getChildCount(Object parent) {
-        if (parent instanceof TypeCheckEliminationGroup) {
-            TypeCheckEliminationGroup group = (TypeCheckEliminationGroup) parent;
-            return group.getCandidates().size();
-        }
-        return eliminationGroups.size();
-    }
-
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        if (parent instanceof TypeCheckEliminationGroup) {
-            TypeCheckEliminationGroup group = (TypeCheckEliminationGroup) parent;
-            TypeCheckElimination elimination = (TypeCheckElimination) child;
-            return group.getCandidates().indexOf(elimination);
-        }
-        return eliminationGroups.indexOf(child);
     }
 }
