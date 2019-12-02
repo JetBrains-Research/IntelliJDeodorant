@@ -1,9 +1,12 @@
 package ui;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBPanel;
 import core.ast.ClassObject;
+import core.ast.SystemObject;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,13 +15,16 @@ import java.util.Objects;
 import java.util.Set;
 
 public class SettingsPanel extends JPanel {
-    private static ComboBox<String> refactoringPlaceChooseBox = new ComboBox<>(new String[]{"whole project",
+    @NotNull
+    private final AnalysisScope scope;
+    private final static ComboBox<String> refactoringPlaceChooseBox = new ComboBox<>(new String[]{"whole project",
             "selected package",
             "opened class",
             "opened classes",
     });
 
     SettingsPanel(Project project) {
+        scope = new AnalysisScope(project);
         setLayout(new BorderLayout());
         add(createComponentPanel(), BorderLayout.NORTH);
     }
@@ -33,13 +39,13 @@ public class SettingsPanel extends JPanel {
         return panel;
     }
 
-    public static Set<ClassObject> getClassesToFindRefactorings() {
+    public static Set<ClassObject> getClassesToFindRefactorings(SystemObject systemObject) {
         String currentComboBoxValue = Objects.requireNonNull(refactoringPlaceChooseBox.getSelectedItem()).toString();
         switch (currentComboBoxValue) {
-            case "whole project":
+            case "selected package":
                 return new LinkedHashSet<>();
             default:
-                return null;
+                return new LinkedHashSet<>(systemObject.getClassObjects());
         }
     }
 }

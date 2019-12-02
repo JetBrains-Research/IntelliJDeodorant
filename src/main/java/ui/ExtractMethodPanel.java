@@ -180,7 +180,6 @@ class ExtractMethodPanel extends JPanel {
      * Calculates suggestions for whole project.
      */
     private void calculateRefactorings() {
-        Set<ClassObject> classToFindRefactorings = SettingsPanel.getClassesToFindRefactorings();
         ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),

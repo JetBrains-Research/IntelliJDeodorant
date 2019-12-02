@@ -7,6 +7,7 @@ import core.distance.DistanceMatrix;
 import core.distance.MoveMethodCandidateRefactoring;
 import core.distance.MySystem;
 import core.distance.ProjectInfo;
+import ui.SettingsPanel;
 
 import java.util.*;
 
@@ -14,7 +15,7 @@ public class Standalone {
 
     public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
-        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(ASTReader.getSystemObject().getClassObjects());
+        Set<ClassObject> classObjectsToBeExamined = SettingsPanel.getClassesToFindRefactorings(ASTReader.getSystemObject());
 
         Set<String> classNamesToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : classObjectsToBeExamined) {
@@ -37,8 +38,7 @@ public class Standalone {
         SystemObject systemObject = ASTReader.getSystemObject();
         Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<>();
         if (systemObject != null) {
-            Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
-
+            Set<ClassObject> classObjectsToBeExamined = SettingsPanel.getClassesToFindRefactorings(systemObject);
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
