@@ -1,42 +1,105 @@
 package ui;
 
 import core.distance.ExtractClassCandidateGroup;
-import refactoring.MyExtractClassRefactoring;
-import ui.abstractrefactorings.AbstractCandidateRefactoringGroup;
+import core.distance.ExtractClassCandidateRefactoring;
+import core.distance.ExtractedConcept;
+import ui.abstractrefactorings.ExtractClassRefactoringType;
+import ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
+import ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class GodClassTableModel extends AbstractTreeTableModel {
     public GodClassTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames) {
-        super(candidateRefactoringGroups, columnNames);
+        super(candidateRefactoringGroups, columnNames, new ExtractClassRefactoringType());
     }
 
     @Override
     public Object getValueAt(Object o, int index) {
-        if (getRefactoringType().instanceOfCandidateRefactoring(o)) {
-            ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) ((AbstractCandidateRefactoringGroup) o).getCandidateRefactoringGroup();
-            switch(index){
-                case 0:
-                    return group.toString();
-                case 2:
-                    return Integer.toString(group.getCandidates().size());
-                case 3:
-                    return group.getSource();
-            }
-        }
+        if (o instanceof AbstractExtractClassCandidateRefactoringGroup) {
+            AbstractExtractClassCandidateRefactoringGroup abstractExtractClassCandidateRefactoringGroup =
+                    (AbstractExtractClassCandidateRefactoringGroup) o;
+            ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) abstractExtractClassCandidateRefactoringGroup.getCandidateRefactoringGroup();
 
-        if (getRefactoringType().instanceOfRefactoring(o)) {
-            MyExtractClassRefactoring extractClassRefactoring = (MyExtractClassRefactoring) o;
-            switch(index) {
+            if (index == 0) {
+                return group.getSource();
+            } else {
+                return "";
+            }
+        } else
+        if (o instanceof AbstractExtractClassCandidateRefactoring) {
+            AbstractExtractClassCandidateRefactoring abstractCandidateRefactoring = (AbstractExtractClassCandidateRefactoring) o;
+            ExtractClassCandidateRefactoring candidateRefactoring = (ExtractClassCandidateRefactoring) abstractCandidateRefactoring.getCandidateRefactoring();
+            switch (index) {
                 case 0:
-                    return extractClassRefactoring.toString();
+                    return "";
                 case 1:
-                    return "Replace Conditional with Polymorphism";
-                case 3:
-                    return extractClassRefactoring.getExtractedTypeName();
+                    return candidateRefactoring.getSourceEntity();
+                case 2:
+                    return candidateRefactoring.getExtractedFieldFragments().size();
             }
         }
 
         return "";
+    }
+
+
+    @Override
+    public int getChildCount(Object parent) {
+        if (parent instanceof AbstractExtractClassCandidateRefactoringGroup) {
+            AbstractExtractClassCandidateRefactoringGroup abstractGroup = (AbstractExtractClassCandidateRefactoringGroup) parent;
+            ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) abstractGroup.getCandidateRefactoringGroup();
+
+            return group.getExtractedConcepts().size();
+        } else if (parent instanceof ExtractedConceptAndChildren) {
+            ExtractedConceptAndChildren concept = (ExtractedConceptAndChildren) parent;
+            return concept.children.size();
+        } else {
+            return super.getChildCount(parent);
+        }
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+        if (parent instanceof AbstractExtractClassCandidateRefactoringGroup) {
+            AbstractExtractClassCandidateRefactoringGroup abstractGroup = (AbstractExtractClassCandidateRefactoringGroup) parent;
+            ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) abstractGroup.getCandidateRefactoringGroup();
+
+            return new ExtractedConceptAndChildren(group.getExtractedConcepts().get(index));
+        } else if (parent instanceof ExtractedConceptAndChildren) {
+            ExtractedConceptAndChildren concept = (ExtractedConceptAndChildren) parent;
+            return concept.children.get(index);
+        } else {
+            return super.getChild(parent, index);
+        }
+    }
+
+    //todo comment
+    private static class ExtractedConceptAndChildren {
+        private ExtractedConcept extractedConcept;
+        private List<AbstractExtractClassCandidateRefactoring> children;
+
+        private ExtractedConceptAndChildren(ExtractedConcept extractedConcept) {
+            this.extractedConcept = extractedConcept;
+            ExtractClassCandidateRefactoring[] refactorings = extractedConcept.getConceptClusters().toArray(new ExtractClassCandidateRefactoring[0]);
+            children = new ArrayList<>();
+            for (ExtractClassCandidateRefactoring refactoring : refactorings) {
+                children.add(new AbstractExtractClassCandidateRefactoring(refactoring));
+            }
+        }
+
+        @Override
+        public String toString() {
+            return extractedConcept.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return extractedConcept.hashCode();
+        }
     }
 }

@@ -15,10 +15,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiStatement;
+import com.intellij.psi.*;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
@@ -29,10 +26,9 @@ import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.*;
-import ui.abstractrefactorings.AbstractCandidateRefactoring;
-import ui.abstractrefactorings.AbstractCandidateRefactoringGroup;
-import ui.abstractrefactorings.AbstractRefactoring;
-import ui.abstractrefactorings.AbstractRefactoringType;
+import ui.abstractrefactorings.RefactoringType;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
+import ui.abstractrefactorings.RefactoringType.AbstractRefactoring;
 import ui.functionalinterfaces.DoubleClickListener;
 import ui.functionalinterfaces.ElementSelectionListener;
 import ui.functionalinterfaces.EnterKeyListener;
@@ -49,7 +45,7 @@ import java.util.Set;
 /**
  * Panel for Type-State Checking refactorings.
  */
-class AbstractRefactoringPanel extends JPanel {
+public class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private String detect_indicator_status_text_key; //TODO "type.state.checking.identification.indicator";
@@ -67,14 +63,16 @@ class AbstractRefactoringPanel extends JPanel {
             SwingConstants.CENTER
     );
 
-    private AbstractRefactoringType refactoringType;
+    private RefactoringType refactoringType;
+    private int refactorDepth;
 
-    AbstractRefactoringPanel(@NotNull AnalysisScope scope, String detect_indicator_status_text_key, AbstractRefactoringType refactoringType, AbstractTreeTableModel model) {
+    AbstractRefactoringPanel(@NotNull AnalysisScope scope, String detect_indicator_status_text_key, RefactoringType refactoringType, AbstractTreeTableModel model, int refactorDepth) {
         this.scope = scope;
         this.detect_indicator_status_text_key = detect_indicator_status_text_key;
         this.refactoringType = refactoringType;
         this.model = model;
         this.treeTable =  new TreeTable(model);
+        this.refactorDepth = refactorDepth;
         setLayout(new BorderLayout());
         setupGUI();
     }
@@ -146,8 +144,8 @@ class AbstractRefactoringPanel extends JPanel {
      */
     private void refactorSelected() {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
-        if (selectedPath.getPathCount() == 3) {
-            AbstractCandidateRefactoring computationSlice = new AbstractCandidateRefactoring(refactoringType, selectedPath.getLastPathComponent());
+        if (selectedPath.getPathCount() == refactorDepth) {
+            AbstractCandidateRefactoring computationSlice = refactoringType.newCandidateRefactoring(selectedPath.getLastPathComponent());
             disableRefactoringsTable();
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
@@ -159,7 +157,7 @@ class AbstractRefactoringPanel extends JPanel {
     private void enableRefactorButtonIfAnySelected() {
         boolean isAnySuggestionSelected = false;
         TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
-        if (selectedPath != null && selectedPath.getPathCount() == 3) {
+        if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
             Object o = selectedPath.getLastPathComponent();
             if (refactoringType.instanceOfCandidateRefactoring(o)) {
                 isAnySuggestionSelected = true;
@@ -192,7 +190,7 @@ class AbstractRefactoringPanel extends JPanel {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    Set<AbstractCandidateRefactoringGroup> candidates =
+                    Set<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
                     model.setEliminationGroups(new ArrayList<>(candidates));
                     ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
@@ -207,20 +205,11 @@ class AbstractRefactoringPanel extends JPanel {
      */
     private void highlightCode() {
         TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
-        if (selectedPath != null && selectedPath.getPathCount() == 3) {
+        if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
             Object o = selectedPath.getLastPathComponent();
             if (refactoringType.instanceOfCandidateRefactoring(o)) {
                 AbstractCandidateRefactoring refactoring = (AbstractCandidateRefactoring) o;
                 refactoring.highlightCode();
-
-                /*
-                highlightStatement(
-                        typeCheckElimination.getTypeCheckMethod(),
-                        scope,
-                        typeCheckElimination.getTypeCheckCodeFragment()
-                );
-
-                 */
             }
         }
     }
@@ -232,17 +221,17 @@ class AbstractRefactoringPanel extends JPanel {
         return () -> {
             PsiClass sourceTypeDeclaration = candidateRefactoring.getSourceClass();
             PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
-            AbstractRefactoring refactoring = new AbstractRefactoring(refactoringType, candidateRefactoring);
+            AbstractRefactoring refactoring = refactoringType.newAbstractRefactoring(candidateRefactoring);
             WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
         };
     }
 
     /**
-     * Opens definition of method and highlights specified statement.
+     * Opens definition of method and highlights specified element in the method.
      */
-    private static void highlightStatement(@Nullable PsiMethod sourceMethod,
+    public static void highlightStatement(@Nullable PsiMethod sourceMethod,
                                            AnalysisScope scope,
-                                           PsiStatement statement) {
+                                           PsiElement statement, boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -254,28 +243,71 @@ class AbstractRefactoringPanel extends JPanel {
                 if (sourceMethod == null || !statement.isValid()) {
                     return;
                 }
-                EditorHelper.openInEditor(statement);
-                Editor editor = FileEditorManager.getInstance(sourceMethod.getProject()).getSelectedTextEditor();
-                if (editor == null) {
-                    return;
-                }
-                Color foregroundColor = editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR);
-                Color backgroundColor = new JBColor(new Color(84, 168, 78), new Color(16, 105, 15));
-                TextAttributes attributes = new TextAttributes(foregroundColor,
-                        backgroundColor,
-                        null,
-                        null,
-                        0
-                );
-                editor.getMarkupModel().removeAllHighlighters();
-                editor.getMarkupModel().addRangeHighlighter(
-                        statement.getTextRange().getStartOffset(),
-                        statement.getTextRange().getEndOffset(),
-                        HighlighterLayer.SELECTION,
-                        attributes,
-                        HighlighterTargetArea.EXACT_RANGE
-                );
+                highlightPsiElement(statement, openInEditor);
             }
         }.queue();
+    }
+
+    //TODO
+    public static void highlightMethod(@Nullable PsiMethod sourceMethod,
+                                          AnalysisScope scope, boolean openInEditor) {
+        highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
+    }
+
+    //TODO
+    public static void highlightField(@Nullable PsiField sourceField, AnalysisScope scope, boolean openInEditor) {
+        new Task.Backgroundable(scope.getProject(), "Search Definition") {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                indicator.setIndeterminate(true);
+            }
+
+            @Override
+            public void onSuccess() {
+                if (sourceField == null || !sourceField.isValid()) {
+                    return;
+                }
+
+                highlightPsiElement(sourceField, openInEditor);
+            }
+        }.queue();
+    }
+
+    //TODO
+    private static void highlightPsiElement(PsiElement psiElement, boolean openInEditor) {
+        if (openInEditor) {
+            EditorHelper.openInEditor(psiElement);
+        }
+
+        Editor editor = FileEditorManager.getInstance(psiElement.getProject()).getSelectedTextEditor();
+        if (editor == null) {
+            return;
+        }
+        Color foregroundColor = editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR);
+        Color backgroundColor = new JBColor(new Color(84, 168, 78), new Color(16, 105, 15));
+        TextAttributes attributes = new TextAttributes(foregroundColor,
+                backgroundColor,
+                null,
+                null,
+                0
+        );
+
+        // TODO remove? editor.getMarkupModel().removeAllHighlighters();
+        editor.getMarkupModel().addRangeHighlighter(
+                psiElement.getTextRange().getStartOffset(),
+                psiElement.getTextRange().getEndOffset(),
+                HighlighterLayer.SELECTION,
+                attributes,
+                HighlighterTargetArea.EXACT_RANGE
+        );
+    }
+
+    //TODO
+    public static void removeHighlighters(Project project) {
+        Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+        if (editor == null) {
+            return;
+        }
+        editor.getMarkupModel().removeAllHighlighters();
     }
 }

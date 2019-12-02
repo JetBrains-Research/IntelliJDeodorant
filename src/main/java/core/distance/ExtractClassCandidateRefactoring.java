@@ -272,7 +272,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 */
 
 	public PsiClass getSourceClassTypeDeclaration() {
-		return (PsiClass) sourceClass.getClassObject().getAbstractTypeDeclaration();
+		return (PsiClass) sourceClass.getClassObject().getAbstractTypeDeclaration().recoverASTNode();
 	}
 
 	@Override

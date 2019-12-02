@@ -1,9 +1,9 @@
 package ui;
 
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
-import ui.abstractrefactorings.AbstractCandidateRefactoringGroup;
-import ui.abstractrefactorings.AbstractRefactoring;
-import ui.abstractrefactorings.AbstractRefactoringType;
+import ui.abstractrefactorings.RefactoringType;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -13,14 +13,15 @@ import java.util.List;
 abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
     private int numberOfColumns;
     private String[] columnNames;
-    private List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
-    private AbstractRefactoringType refactoringType;
+    protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
+    private RefactoringType refactoringType;
 
-    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames) {
+    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
         super(new DefaultMutableTreeNode("root"));
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         this.columnNames = columnNames;
         this.numberOfColumns = columnNames.length;
+        this.refactoringType = refactoringType;
     }
 
     public void setEliminationGroups(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
@@ -64,7 +65,7 @@ abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTa
 
     @Override
     public boolean isLeaf(Object node) {
-        return node instanceof AbstractRefactoring;
+        return node instanceof AbstractCandidateRefactoring;
     }
 
     @Override
@@ -82,20 +83,27 @@ abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTa
             AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
             return group.getCandidates().size();
         }
+
+        if (parent instanceof AbstractCandidateRefactoring) {
+            return 0;
+        }
+
         return candidateRefactoringGroups.size();
     }
 
+    /*
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        if (parent instanceof AbstractCandidateRefactoringGroup) {
-            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
-            AbstractRefactoring refactoring = (AbstractRefactoring) child;
-            return group.getCandidates().indexOf(refactoring);
+        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
+            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
+            RefactoringType.AbstractCandidateRefactoring candidate = (RefactoringType.AbstractCandidateRefactoring) child;
+            return group.getCandidates().indexOf(candidate);
         }
         return candidateRefactoringGroups.indexOf(child);
     }
+     */
 
-    AbstractRefactoringType getRefactoringType() {
+    RefactoringType getRefactoringType() {
         return refactoringType;
     }
 }

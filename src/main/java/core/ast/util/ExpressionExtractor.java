@@ -356,8 +356,8 @@ public class ExpressionExtractor {
                     expressionList.addAll(getExpressions(((PsiVariable) psiElement).getInitializer()));
                 }
             }
-        } else if (statement instanceof PsiExpressionListStatement) {
-            PsiExpressionListStatement listStatement = (PsiExpressionListStatement) statement;
+        } else if (element instanceof PsiExpressionListStatement) {
+            PsiExpressionListStatement listStatement = (PsiExpressionListStatement) element;
             for (PsiExpression psiExpression : listStatement.getExpressionList().getExpressions()) {
                 expressionList.addAll(getExpressions(psiExpression));
             }

@@ -64,4 +64,9 @@ public class ExtractedConcept implements Comparable<ExtractedConcept> {
 		ExtractClassCandidateRefactoring otherFirst = otherSet.first();
 		return thisFirst.compareTo(otherFirst);
 	}
+
+	@Override
+	public String toString() {
+		return topics.toString();
+	}
 }
