@@ -27,6 +27,7 @@ public class ASTReader {
         for (PsiClass c : classes) {
             systemObject.addClass(processTypeDeclaration(c));
             processedClasses += 1;
+            indicator.setIndeterminate(false);
             indicator.setFraction((double) processedClasses * 100 / classesCount);
         }
         indicator.setFraction(1.0);
