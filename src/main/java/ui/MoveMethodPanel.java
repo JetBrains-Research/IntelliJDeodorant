@@ -88,6 +88,10 @@ class MoveMethodPanel extends JPanel {
         final TableColumn selectionColumn = table.getTableHeader().getColumnModel().getColumn(SELECTION_COLUMN_INDEX);
         selectionColumn.setMaxWidth(30);
         selectionColumn.setMinWidth(30);
+
+        final TableColumn dependencies = table.getTableHeader().getColumnModel().getColumn(SELECTION_COLUMN_INDEX);
+        dependencies.setMaxWidth(30);
+        dependencies.setMinWidth(30);
     }
 
     private JComponent createButtonsPanel() {
@@ -172,8 +176,12 @@ class MoveMethodPanel extends JPanel {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     List<MoveMethodCandidateRefactoring> candidates = Standalone.getMoveMethodRefactoringOpportunities(projectInfo, indicator);
                     final List<MoveMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
-                            .map(x -> new MoveMethodRefactoring(x.getSourceMethodDeclaration(),
-                                    x.getTargetClass().getClassObject().getPsiClass())).collect(Collectors.toList());
+                            .map(x ->
+                                    new MoveMethodRefactoring(x.getSourceMethodDeclaration(),
+                                            x.getTargetClass().getClassObject().getPsiClass(),
+                                            x.getDistinctSourceDependencies(),
+                                            x.getDistinctTargetDependencies()))
+                            .collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);

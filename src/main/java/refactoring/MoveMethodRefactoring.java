@@ -20,6 +20,8 @@ public class MoveMethodRefactoring implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiClass> targetClass;
     private final @NotNull String qualifiedMethodName;
+    private final int sourceAccessedMembers;
+    private final int targetAccessedMembers;
 
     /**
      * Creates refactoring.
@@ -29,7 +31,9 @@ public class MoveMethodRefactoring implements Refactoring {
      */
     public MoveMethodRefactoring(
             final @NotNull PsiMethod method,
-            final @NotNull PsiClass targetClass
+            final @NotNull PsiClass targetClass,
+            int sourceAccessedMembers,
+            int targetAccessedMembers
     ) {
         this.method = ApplicationManager.getApplication().runReadAction(
                 (Computable<SmartPsiElementPointer<PsiMethod>>) () ->
@@ -40,6 +44,8 @@ public class MoveMethodRefactoring implements Refactoring {
                         SmartPointerManager.getInstance(targetClass.getProject()).createSmartPsiElementPointer(targetClass)
         );
         this.qualifiedMethodName = getHumanReadableName(this.method.getElement());
+        this.sourceAccessedMembers = sourceAccessedMembers;
+        this.targetAccessedMembers = targetAccessedMembers;
     }
 
     /**
@@ -133,5 +139,13 @@ public class MoveMethodRefactoring implements Refactoring {
     @NotNull
     public String getQualifiedMethodName() {
         return qualifiedMethodName;
+    }
+
+    public int getSourceAccessedMembers() {
+        return sourceAccessedMembers;
+    }
+
+    public int getTargetAccessedMembers() {
+        return targetAccessedMembers;
     }
 }

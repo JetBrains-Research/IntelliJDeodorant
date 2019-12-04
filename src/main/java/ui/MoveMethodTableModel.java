@@ -23,11 +23,13 @@ import java.util.stream.IntStream;
 class MoveMethodTableModel extends AbstractTableModel {
     private static final String METHOD_COLUMN_TITLE_KEY = "method.column.title";
     private static final String MOVE_TO_COLUMN_TITLE_KEY = "move.to.column.title";
+    private static final String DEPENDENCIES_COLUMN_TITLE_KEY = "dependencies.column.title";
 
     static final int SELECTION_COLUMN_INDEX = 0;
     private static final int ENTITY_COLUMN_INDEX = 1;
     private static final int MOVE_TO_COLUMN_INDEX = 2;
-    private static final int COLUMNS_COUNT = 3;
+    private static final int ACCESSED_MEMBERS_COUNT_INDEX = 3;
+    private static final int COLUMNS_COUNT = 4;
 
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private final List<Integer> virtualRows = new ArrayList<>();
@@ -112,6 +114,8 @@ class MoveMethodTableModel extends AbstractTableModel {
                 return IntelliJDeodorantBundle.message(METHOD_COLUMN_TITLE_KEY);
             case MOVE_TO_COLUMN_INDEX:
                 return IntelliJDeodorantBundle.message(MOVE_TO_COLUMN_TITLE_KEY);
+            case ACCESSED_MEMBERS_COUNT_INDEX:
+                return DEPENDENCIES_COLUMN_TITLE_KEY;
         }
         throw new IndexOutOfBoundsException("Unexpected column index: " + column);
     }
@@ -217,6 +221,8 @@ class MoveMethodTableModel extends AbstractTableModel {
             case MOVE_TO_COLUMN_INDEX:
                 Optional<PsiClass> targetClass = refactorings.get(rowIndex).getOptionalTargetClass();
                 return targetClass.map(PsiUtils::getHumanReadableName).orElseGet(() -> IntelliJDeodorantBundle.message("target.class.is.not.valid"));
+            case ACCESSED_MEMBERS_COUNT_INDEX:
+                return refactorings.get(rowIndex).getSourceAccessedMembers() + "/" + refactorings.get(rowIndex).getTargetAccessedMembers();
         }
         throw new IndexOutOfBoundsException("Unexpected column index: " + columnIndex);
     }
