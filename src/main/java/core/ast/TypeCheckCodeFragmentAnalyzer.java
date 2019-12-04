@@ -112,8 +112,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                     PsiMethodCallExpression switchStatementExpressionMethodInvocation = (PsiMethodCallExpression) switchStatementExpressionName;
                     PsiExpression invoker = switchStatementExpressionMethodInvocation.getMethodExpression().getQualifierExpression();
                     PsiMethod switchStatementExpressionMethodBinding = (PsiMethod) switchStatementExpressionMethodInvocation.getMethodExpression().resolve();
-                    if (switchStatementExpressionMethodBinding != null && switchStatementExpressionMethodBinding.getContainingClass() != null && //TODO check not-null checks, that caused NPE
-                            !switchStatementExpressionMethodBinding.getContainingClass().equals(typeDeclaration) &&
+                    if (!switchStatementExpressionMethodBinding.getContainingClass().equals(typeDeclaration) && //TODO probably causes NPE
                             invoker != null && !(invoker instanceof PsiThisExpression)) {
                         typeCheckElimination.setTypeMethodInvocation(switchStatementExpressionMethodInvocation);
                     }
@@ -956,7 +955,7 @@ public class TypeCheckCodeFragmentAnalyzer {
         for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
             IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
             for (PsiMethodCallExpression analyzerTypeMethodInvocation : analyzer.getTargetMethodInvocations()) {
-                if (Objects.equals(analyzerTypeMethodInvocation.resolveMethod(), typeMethodInvocation.resolveMethod())) {
+                if (analyzerTypeMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
                     List<PsiReferenceExpression> staticFields = analyzer.getTypeMethodInvocationStaticField(analyzerTypeMethodInvocation);
                     if (staticFields != null && staticFields.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
@@ -986,7 +985,7 @@ public class TypeCheckCodeFragmentAnalyzer {
 
     private PsiMethodCallExpression containsTypeMethodInvocationKey(PsiMethodCallExpression methodInvocation) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationCounterMap.keySet()) {
-            if (Objects.equals(keyMethodInvocation.resolveMethod(), methodInvocation.resolveMethod()))
+            if (keyMethodInvocation.resolveMethod().equals(methodInvocation.resolveMethod()))
                 return keyMethodInvocation;
         }
         return null;
