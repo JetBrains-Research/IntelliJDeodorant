@@ -279,4 +279,19 @@ public class ASTSlice {
         return numberOfDuplicatedStatements;
     }
 
+    /**
+     * Checks all {@link PsiStatement} from slice for availability.
+     *
+     * @return true if all {@link PsiStatement} are valid, false otherwise.
+     */
+    public boolean areSliceStatementsValid() {
+        Iterator<PsiStatement> iterator = this.getSliceStatements().iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().isValid()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
