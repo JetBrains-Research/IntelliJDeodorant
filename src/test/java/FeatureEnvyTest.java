@@ -33,7 +33,7 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
         return "src/test/resources/testCases/featureEnvy/";
     }
 
-    public void testSearchOfDependencies() {
+    public void testFieldAccessesCount() {
         String fromClass = "package testCases.featureEnvy;\n" +
                 "import testCases.featureEnvy.B;\n" +
                 "\n" +
@@ -65,7 +65,7 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(1, featureEnvyVisualizationData.getDistinctSourceDependencies());
     }
 
-    public void testSearchOfDependencies2() {
+    public void testFieldAccessesCount2() {
         String fromClass = "package testCases.featureEnvy;\n" +
                 "import testCases.featureEnvy.B;\n" +
                 "\n" +
@@ -91,13 +91,85 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
                 "    public void emptyMethod() {\n" +
                 "    }\n" +
                 "}";
-        
+
         List<MoveMethodCandidateRefactoring> refactorings = getMoveMethodCandidates(fromClass, toClass);
         assertNotEmpty(refactorings);
         FeatureEnvyVisualizationData featureEnvyVisualizationData = refactorings.get(0).getVisualizationData();
         assertEquals("testMethod", featureEnvyVisualizationData.getMethodToBeMoved().getName());
         assertEquals(3, featureEnvyVisualizationData.getDistinctTargetDependencies());
         assertEquals(1, featureEnvyVisualizationData.getDistinctSourceDependencies());
+    }
+
+    public void testTargetMethodInvocationsCount() {
+        String fromClass = "package testCases.featureEnvy;\n" +
+                "import testCases.featureEnvy.B;\n" +
+                "\n" +
+                "public class A {\n" +
+                "\n" +
+                "  public void testMethod(B bClass) {\n" +
+                "        if (bClass.firstMethod()) {\n" +
+                "            bClass.secondMethod();\n" +
+                "            bClass.thirdMethod();\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+
+        String toClass = "package testCases.featureEnvy;\n" +
+                "\n" +
+                "public class B {\n" +
+                "\n" +
+                "    public String firstField;\n" +
+                "    public int secondField;\n" +
+                "    public int thirdField = 100;\n" +
+                "\n" +
+                "    public boolean firstMethod() {\n" +
+                "    return true;" +
+                "    }\n" +
+                "    public void secondMethod() {\n" +
+                "    }\n" +
+                "    public void thirdMethod() {\n" +
+                "    }\n" +
+                "}";
+
+        List<MoveMethodCandidateRefactoring> refactorings = getMoveMethodCandidates(fromClass, toClass);
+        assertNotEmpty(refactorings);
+        FeatureEnvyVisualizationData featureEnvyVisualizationData = refactorings.get(0).getVisualizationData();
+        assertEquals("testMethod", featureEnvyVisualizationData.getMethodToBeMoved().getName());
+        assertEquals(3, featureEnvyVisualizationData.getDistinctTargetDependencies());
+        assertEquals(0, featureEnvyVisualizationData.getDistinctSourceDependencies());
+    }
+
+    public void testTargetMethodInvocationsCount2() {
+        String fromClass = "package testCases.featureEnvy;\n" +
+                "import testCases.featureEnvy.B;\n" +
+                "\n" +
+                "public class A {\n" +
+                "\n" +
+                "  public boolean testMethod(B bClass) {\n" +
+                "        if (bClass.getFirstField().equals(\"abc\")) {\n" +
+                "            return true;\n" +
+                "        }\n" +
+                "        else return false;\n" +
+                "  }\n" +
+                "}";
+
+        String toClass = "package testCases.featureEnvy;\n" +
+                "\n" +
+                "public class B {\n" +
+                "\n" +
+                "    public String firstField;\n" +
+                "\n" +
+                "    public String getFirstField() {\n" +
+                "       return firstField;" +
+                "    }\n" +
+                "}";
+
+        List<MoveMethodCandidateRefactoring> refactorings = getMoveMethodCandidates(fromClass, toClass);
+        assertNotEmpty(refactorings);
+        FeatureEnvyVisualizationData featureEnvyVisualizationData = refactorings.get(0).getVisualizationData();
+        assertEquals("testMethod", featureEnvyVisualizationData.getMethodToBeMoved().getName());
+        assertEquals(1, featureEnvyVisualizationData.getDistinctTargetDependencies());
+        assertEquals(0, featureEnvyVisualizationData.getDistinctSourceDependencies());
     }
 
 }

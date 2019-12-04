@@ -261,7 +261,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                     variableType = localVariableInstruction.getReference();
             }
             PsiElement targetPsiClass = targetClassObject.getAbstractTypeDeclaration().recoverASTNode();
-            if (variable.getType().equals(targetClassObject.getPsiClass().getName())) {
+            if (variable.getType().equals(targetClassObject.getPsiClass().getQualifiedName())) {
                 List<MethodInvocationObject> externalMethodInvocations = externalMethodInvocationMap.get(abstractVariable);
                 handleExternalMethodInvocation(externalMethodInvocations);
             } else if (variableType instanceof PsiClass) {

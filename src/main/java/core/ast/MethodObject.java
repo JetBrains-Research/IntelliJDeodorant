@@ -321,7 +321,7 @@ public class MethodObject implements AbstractMethodDeclaration {
 
         PsiParameter[] parameters = getPsiMethod().getParameterList().getParameters();
         for (PsiParameter psiParameter : parameters) {
-            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
+            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiClass().getQualifiedName())) {
                 return true;
             }
         }
