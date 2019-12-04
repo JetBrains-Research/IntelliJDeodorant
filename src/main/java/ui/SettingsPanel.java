@@ -19,8 +19,9 @@ import java.util.*;
 import java.util.List;
 
 public class SettingsPanel extends JPanel {
+    private static final String REFACTORING_PLACE_CHOOSE_BOX = "refactorings.place.choose.box";
     private static final String SEARCH_REFACTORINGS_IN_WHOLE_PROJECT = "search.in.whole.project.status";
-    private static final String SEARCH_REFACTORINGS_IN_OPENED_FILES = "search.in.opened.files.status";
+    private static final String SEARCH_REFACTORINGS_IN_OPENED_FILES = "search.in.all.opened.files.status";
     private static final String SEARCH_REFACTORINGS_IN_CURRENT_FILE = "search.in.current.file.status";
 
     @NotNull
@@ -41,7 +42,7 @@ public class SettingsPanel extends JPanel {
         final JBPanel panel = new JBPanel();
         final JBPanel componentPanel = new JBPanel<JBPanel<JBPanel>>();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        componentPanel.add(new Label("Search refactorings in:"));
+        componentPanel.add(new Label(IntelliJDeodorantBundle.message(REFACTORING_PLACE_CHOOSE_BOX)));
         componentPanel.add(refactoringPlaceChooseBox);
         panel.add(componentPanel, BorderLayout.WEST);
         return panel;
