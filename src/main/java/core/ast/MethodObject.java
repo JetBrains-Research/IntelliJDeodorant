@@ -300,7 +300,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         }
 
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
+            if (localVariableInstruction.getType().getClassType().equals(targetClass.getPsiClass().getName())) {
                 ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
                 while (parameterIterator.hasNext()) {
                     ParameterObject parameter = parameterIterator.next();
@@ -314,14 +314,14 @@ public class MethodObject implements AbstractMethodDeclaration {
         for (PsiReferenceExpression referenceExpression : fieldAccessed) {
             if (!(referenceExpression.resolve() instanceof PsiField)) continue;
             PsiField psiField = (PsiField) referenceExpression.resolve();
-            if (psiField != null && psiField.getType().getCanonicalText().equals(targetClass.getName())) {
+            if (psiField != null && psiField.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
                 return true;
             }
         }
 
         PsiParameter[] parameters = getPsiMethod().getParameterList().getParameters();
         for (PsiParameter psiParameter : parameters) {
-            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiType())) {
+            if (psiParameter.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
                 return true;
             }
         }

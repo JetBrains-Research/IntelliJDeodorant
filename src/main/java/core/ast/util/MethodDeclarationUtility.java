@@ -82,18 +82,9 @@ public class MethodDeclarationUtility {
     public static AbstractVariable processMethodInvocationExpression(PsiExpression expression) {
         AbstractVariable resultVariable = null;
         if (expression instanceof PsiReferenceExpression) {
-            PsiReferenceExpression referenceExpression = (PsiReferenceExpression) expression;
-            PsiExpression qualifierExpression = referenceExpression.getQualifierExpression();
-            if (qualifierExpression instanceof PsiReferenceExpression) {
-                PsiElement resolvedElement = ((PsiReferenceExpression) qualifierExpression).resolve();
-                if (resolvedElement instanceof PsiVariable) {
-                    resultVariable = createVariable((PsiVariable) resolvedElement, null);
-                }
-            } else {
-                PsiElement resolvedReference = referenceExpression.resolve();
-                if (resolvedReference instanceof PsiVariable) {
-                    resultVariable = createVariable((PsiVariable) resolvedReference, null);
-                }
+            PsiElement variable = ((PsiReferenceExpression) expression).resolve();
+            if (variable instanceof PsiVariable) {
+                resultVariable = createVariable((PsiVariable) variable, null);
             }
         }
         return resultVariable;
