@@ -160,7 +160,7 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
                 inputVariables.add(data.variable);
             }
         }
-        myInputVariables = new InputVariables(inputVariables, myProject, new LocalSearchScope(myElements), true);
+        myInputVariables = new InputVariables(inputVariables, myProject, new LocalSearchScope(myElements), true, Collections.emptySet());
         myVariableDatum = myInputVariables.getInputVariables().toArray(new VariableData[0]);
     }
 

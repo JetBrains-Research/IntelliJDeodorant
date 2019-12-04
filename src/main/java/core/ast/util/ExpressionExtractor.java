@@ -343,8 +343,8 @@ public class ExpressionExtractor {
             expressionList.add(superInvocation);
         } else if (element instanceof PsiBreakStatement) {
             PsiBreakStatement breakStatement = (PsiBreakStatement) element;
-            if (breakStatement.getLabelExpression() != null)
-                expressionList.addAll(getExpressions(breakStatement.getLabelExpression()));
+            if (breakStatement.getLabelIdentifier() != null)
+                expressionList.addAll(getExpressions(breakStatement.findExitedStatement()));
         } else if (element instanceof PsiContinueStatement) {
             PsiContinueStatement continueStatement = (PsiContinueStatement) element;
             // expressionList.addAll(getExpressions(continueStatement));
