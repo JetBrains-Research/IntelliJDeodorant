@@ -144,7 +144,7 @@ public class AbstractRefactoringPanel extends JPanel {
     private void refactorSelected() {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
         if (selectedPath.getPathCount() == refactorDepth) {
-            AbstractCandidateRefactoring computationSlice = refactoringType.newCandidateRefactoring(selectedPath.getLastPathComponent());
+            AbstractCandidateRefactoring computationSlice = (AbstractCandidateRefactoring) selectedPath.getLastPathComponent();
             disableRefactoringsTable();
             TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
         }
