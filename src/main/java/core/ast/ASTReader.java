@@ -27,13 +27,12 @@ public class ASTReader {
         for (PsiClass c : classes) {
             systemObject.addClass(processTypeDeclaration(c));
             processedClasses += 1;
-            indicator.setIndeterminate(false);
             indicator.setFraction((double) processedClasses * 100 / classesCount);
         }
         indicator.setFraction(1.0);
     }
 
-    private ClassObject processTypeDeclaration(PsiClass psiClass) {
+    public static ClassObject processTypeDeclaration(PsiClass psiClass) {
         final ClassObject classObject = new ClassObject(psiClass);
         classObject.setName(psiClass.getQualifiedName());
         if (psiClass.isInterface()) {
@@ -77,7 +76,7 @@ public class ASTReader {
         return classObject;
     }
 
-    private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
+    private static void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
         List<CommentObject> fieldDeclarationComments = new ArrayList<>();
         int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
         int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
@@ -110,7 +109,7 @@ public class ASTReader {
 
     }
 
-    private void processMethodDeclaration(final ClassObject classObject, PsiMethod methodDeclaration) {
+    private static void processMethodDeclaration(final ClassObject classObject, PsiMethod methodDeclaration) {
         String methodName = methodDeclaration.getName();
         final ConstructorObject constructorObject = new ConstructorObject();
         constructorObject.setMethodDeclaration(methodDeclaration);
