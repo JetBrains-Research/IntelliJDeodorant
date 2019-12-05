@@ -93,7 +93,7 @@ public class TypeCheckRefactoringType extends RefactoringType {
 
         @Override
         public String toString() {
-            return ((TypeCheckEliminationGroup) getCandidateRefactoringGroup()).toString();
+            return getCandidateRefactoringGroup().toString();
         }
     }
 

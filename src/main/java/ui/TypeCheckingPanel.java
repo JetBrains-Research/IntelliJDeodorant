@@ -11,13 +11,25 @@ import java.util.Collections;
  */
 class TypeCheckingPanel extends AbstractRefactoringPanel {
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "type.state.checking.identification.indicator";
+    private static final String[] COLUMN_NAMES = new String[]{
+            "Type Checking Method",
+            "Refactoring Type",
+            "System-Level Occurrences",
+            "Class-Level Occurrences",
+            "Average #statements per case"
+    };
+    private static final int REFACTOR_DEPTH = 3;
 
     TypeCheckingPanel(@NotNull AnalysisScope scope) {
-        super(scope, DETECT_INDICATOR_STATUS_TEXT_KEY,
+        super(  scope,
+                DETECT_INDICATOR_STATUS_TEXT_KEY,
                 new TypeCheckRefactoringType(scope.getProject()),
-                new TypeCheckingTreeTableModel(Collections.emptyList(),
-                        new String[]{"Type Checking Method", "Refactoring Type", "System-Level Occurrences", "Class-Level Occurrences", "Average #statements per case"},
-                        scope.getProject()),
-                3); //TODO fix last column values
+                new TypeCheckingTreeTableModel(
+                        Collections.emptyList(),
+                        COLUMN_NAMES,
+                        scope.getProject()
+                ),
+                REFACTOR_DEPTH
+        );
     }
 }
