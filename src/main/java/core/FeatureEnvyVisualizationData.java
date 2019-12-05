@@ -121,14 +121,14 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         for (PlainVariable variable : usedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
             if (fieldInstruction != null && !fieldInstruction.isStatic()) {
-                if (fieldInstruction.getElement().getParent().equals(targetClass.getPsiClass())) {
+                if (fieldInstruction.getOwnerClass().equals(targetClass.getPsiClass().getQualifiedName())) {
                     //the used field in inherited from a superclass, which is the target
                     if (targetFieldReadMap.containsKey(fieldInstruction)) {
                         targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
                     } else {
                         targetFieldReadMap.put(fieldInstruction, 1);
                     }
-                } else if (sourceClass.getPsiClass().equals(fieldInstruction.getElement().getParent())) {
+                } else {
                     if (sourceFieldReadMap.containsKey(fieldInstruction)) {
                         sourceFieldReadMap.put(fieldInstruction, sourceFieldReadMap.get(fieldInstruction) + 1);
                     } else {
