@@ -18,6 +18,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.intellij.psi.impl.source.tree.JavaDocElementType.DOC_METHOD_OR_FIELD_REF;
+
 public class SystemObject {
     private static final String TYPE_STATE_CHECKING_INDICATOR_KEY = "type.state.checking.identification.indicator";
 
@@ -522,17 +524,19 @@ public class SystemObject {
                                 tagElement.getName();
                                 if ("see".equals(tagElement.getName())) {
                                     PsiElement[] fragments = tagElement.getDataElements();
-                                    for (PsiElement fragment : fragments) {
-                                        if (fragment instanceof PsiDocMethodOrFieldRef) {
-                                            PsiDocMethodOrFieldRef memberRef = (PsiDocMethodOrFieldRef) fragment;
-                                            PsiClass staticFieldNameDeclaringClass = staticField.getContainingClass();
-                                            //TODO: add me
-//                                            if(staticFieldNameBinding.getName().equals(memberRef.getName().getIdentifier()) &&
-//                                                    staticFieldNameDeclaringClass.getQualifiedName().equals(memberRef.getQualifier().getFullyQualifiedName())) {
-//                                                typeCheckElimination.putStaticFieldSubclassTypeMapping(staticField, subclassName);
-//                                                matchCounter++;
-//                                                break;
-//                                            }
+                                    for(PsiElement fragment : fragments) {
+                                        if (!(fragment instanceof PsiDocMethodOrFieldRef)) {
+                                            continue;
+                                        }
+                                        PsiReference memberRef = fragment.getReference();
+                                        if (memberRef == null) {
+                                            continue;
+                                        }
+                                        PsiElement resolvedRef = memberRef.resolve();
+                                        if(staticField.equals(resolvedRef)) {
+                                            typeCheckElimination.putStaticFieldSubclassTypeMapping(staticField, subclassName);
+                                            matchCounter++;
+                                            break;
                                         }
                                     }
                                 }
@@ -543,7 +547,6 @@ public class SystemObject {
             }
             if (matchCounter == staticFields.size()) {
                 typeCheckElimination.setInheritanceTreeMatchingWithStaticTypes(tree);
-                return;
             }
         }
     }

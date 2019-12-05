@@ -1148,8 +1148,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 						}
 					}
 				}
-				if(matchCounter == subclassNames.size())
-					return true;
+				return matchCounter == subclassNames.size();
 			}
 		}
 		return false;
