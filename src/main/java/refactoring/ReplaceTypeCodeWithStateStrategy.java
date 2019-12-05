@@ -379,7 +379,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     }
 
     //
-//	private void initializeReturnedVariableDeclaration() { // TODO: do we really need it
+//	private void initializeReturnedVariableDeclaration() { // TODO: do we really need it???
 //		ASTRewrite sourceRewriter = ASTRewrite.create(sourceTypeDeclaration.getAST());
 //		AST contextAST = sourceTypeDeclaration.getAST();
 //		if(returnedVariable != null) {

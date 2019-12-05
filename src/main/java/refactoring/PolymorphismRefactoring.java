@@ -10,10 +10,7 @@ import core.ast.util.ExpressionExtractor;
 import core.ast.util.MethodDeclarationUtility;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public abstract class PolymorphismRefactoring {
@@ -548,14 +545,14 @@ public abstract class PolymorphismRefactoring {
     }
 
     protected static PsiImportList getPsiImportList(PsiFile classFile) {
-        PsiImportList subClassImportList;
         PsiElement[] children = classFile.getChildren();
-        if (children[0] instanceof PsiImportList) {
-            subClassImportList = (PsiImportList) children[0];
-        } else {
-            subClassImportList = (PsiImportList) children[1];
+        for (PsiElement child : children) {
+            if (child instanceof PsiImportList) {
+                return (PsiImportList) child;
+            }
         }
-        return subClassImportList;
+        // will not happen
+        return null;
     }
 
 //	protected Expression generateDefaultValue(ASTRewrite sourceRewriter, AST ast, ITypeBinding returnTypeBinding) {
