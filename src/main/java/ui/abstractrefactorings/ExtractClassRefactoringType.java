@@ -9,7 +9,7 @@ import core.ast.Standalone;
 import core.distance.ExtractClassCandidateGroup;
 import core.distance.ExtractClassCandidateRefactoring;
 import core.distance.ProjectInfo;
-import refactoring.MyExtractClassRefactoring;
+import refactoring.ExtractClassRefactoring;
 import ui.AbstractRefactoringPanel;
 
 import java.util.List;
@@ -97,10 +97,10 @@ public class ExtractClassRefactoringType extends RefactoringType {
     }
 
     public static class AbstractExtractClassRefactoring extends AbstractRefactoring {
-        private MyExtractClassRefactoring refactoring;
+        private ExtractClassRefactoring refactoring;
 
         public AbstractExtractClassRefactoring(ExtractClassCandidateRefactoring extractClassCandidateRefactoring) {
-            this.refactoring = new MyExtractClassRefactoring(extractClassCandidateRefactoring.getSourceFile(),
+            this.refactoring = new ExtractClassRefactoring(extractClassCandidateRefactoring.getSourceFile(),
                 extractClassCandidateRefactoring.getSourceClassTypeDeclaration(),
                 extractClassCandidateRefactoring.getExtractedFieldFragments(),
                 extractClassCandidateRefactoring.getExtractedMethods(),
@@ -111,6 +111,10 @@ public class ExtractClassRefactoringType extends RefactoringType {
         @Override
         public void apply() {
             refactoring.apply();
+        }
+
+        public ExtractClassRefactoring getRefactoring() {
+            return refactoring;
         }
     }
 }

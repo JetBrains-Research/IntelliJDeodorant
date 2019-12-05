@@ -32,10 +32,10 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 		this.extractedEntities = extractedEntities;
 		this.leaveDelegate = new LinkedHashMap<MyMethod, Boolean>();
 		if (system.getClass(sourceClass.getName() + "Product") == null) {
-			this.targetClassName = sourceClass.getName() + "Product";
+			this.targetClassName = sourceClass.getClassObject().getPsiClass().getName() + "Product";
 		}
 		else {
-			this.targetClassName = sourceClass.getName() + "Product2";
+			this.targetClassName = sourceClass.getClassObject().getPsiClass().getName() + "Product2";
 		}
 		this.topics = new ArrayList<String>();
 		Set<MethodObject> extractedMethods = new LinkedHashSet<MethodObject>();

@@ -1,6 +1,7 @@
 package core.ast.util;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +11,7 @@ import core.ast.util.math.HumaniseCamelCase;
 import core.ast.util.math.Stemmer;
 
 public class TopicFinder {
-	private static ArrayList<String> stopWords = getStopWords();
+	private static final ArrayList<String> stopWords = getStopWords();
 	
 	public static List<String> findTopics(List<String> codeElements) {
 		HumaniseCamelCase humaniser = new HumaniseCamelCase();
@@ -65,15 +66,14 @@ public class TopicFinder {
 
 	private static ArrayList<String> getStopWords() {
 		ArrayList<String> stopWords = new ArrayList<String>();
-		try {
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(new FileInputStream("src/main/resources/glasgowstoplist.txt")));
+
+		try (BufferedReader in = new BufferedReader(
+				new InputStreamReader(new FileInputStream("src/main/resources/glasgowstoplist.txt")))) {
 			String next = in.readLine();
 			while (next != null) {
 				stopWords.add(next);
 				next = in.readLine();
 			}
-			in.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -81,6 +81,4 @@ public class TopicFinder {
 		}
 		return stopWords;
 	}
-
-
 }

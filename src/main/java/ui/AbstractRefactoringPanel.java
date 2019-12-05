@@ -80,7 +80,7 @@ public class AbstractRefactoringPanel extends JPanel {
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
-        disableRefactoringsTable();
+        disableRefactoringsTable(true);
     }
 
     /**
@@ -96,10 +96,12 @@ public class AbstractRefactoringPanel extends JPanel {
     /**
      * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
      */
-    private void disableRefactoringsTable() {
+    private void disableRefactoringsTable(boolean hideTree) {
         scrollPane.setVisible(true);
         treeTable.getTree().setSelectionPath(null);
-        scrollPane.setViewportView(refreshLabel);
+        if (hideTree) {
+            scrollPane.setViewportView(refreshLabel);
+        }
     }
 
     /**
@@ -145,10 +147,15 @@ public class AbstractRefactoringPanel extends JPanel {
     private void refactorSelected() {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
         if (selectedPath.getPathCount() == refactorDepth) {
-            AbstractCandidateRefactoring computationSlice = refactoringType.newCandidateRefactoring(selectedPath.getLastPathComponent());
-            disableRefactoringsTable();
-            TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
+            AbstractCandidateRefactoring computationSlice = (AbstractCandidateRefactoring) selectedPath.getLastPathComponent();
+            disableRefactoringsTable(false);
+            doRefactor(computationSlice);
         }
+    }
+
+    //TODO comment
+    void doRefactor(AbstractCandidateRefactoring computationSlice) {
+        TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
     }
 
     /**
@@ -214,14 +221,18 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
+    AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
+        PsiClass sourceTypeDeclaration = candidate.getSourceClass();
+        PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
+        return refactoringType.newAbstractRefactoring(candidate);
+    }
+
     /**
      * Returns Runnable which performs specified refactoring.
      */
     private Runnable doExtract(AbstractCandidateRefactoring candidateRefactoring) {
         return () -> {
-            PsiClass sourceTypeDeclaration = candidateRefactoring.getSourceClass();
-            PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
-            AbstractRefactoring refactoring = refactoringType.newAbstractRefactoring(candidateRefactoring);
+            AbstractRefactoring refactoring = getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
             WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
         };
     }
@@ -302,7 +313,6 @@ public class AbstractRefactoringPanel extends JPanel {
         );
     }
 
-    //TODO
     public static void removeHighlighters(Project project) {
         Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (editor == null) {
