@@ -341,13 +341,6 @@ public class ExpressionExtractor {
         } else if (element instanceof PsiSuperExpression) {
             PsiSuperExpression superInvocation = (PsiSuperExpression) element;
             expressionList.add(superInvocation);
-        } else if (element instanceof PsiBreakStatement) {
-            PsiBreakStatement breakStatement = (PsiBreakStatement) element;
-            if (breakStatement.findExitedStatement() != null)
-                expressionList.addAll(getExpressions(breakStatement.findExitedStatement()));
-        } else if (element instanceof PsiContinueStatement) {
-            PsiContinueStatement continueStatement = (PsiContinueStatement) element;
-            // expressionList.addAll(getExpressions(continueStatement));
         } else if (element instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) element;
             PsiElement[] declaredElements = variableDeclarationStatement.getDeclaredElements();
