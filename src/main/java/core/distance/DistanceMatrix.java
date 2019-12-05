@@ -256,7 +256,7 @@ public class DistanceMatrix {
                     }
                 }
             }
-            indicator.setFraction((double) processedEntities * 100 / entityCount);
+            indicator.setFraction((double) processedEntities / entityCount);
         }
         indicator.setFraction(1.0);
         return candidateRefactoringList;

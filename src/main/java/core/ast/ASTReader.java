@@ -25,13 +25,9 @@ public class ASTReader {
         int processedClasses = 0;
         int classesCount = classes.size();
         for (PsiClass psiClass : classes) {
-            PsiClass[] inners = psiClass.getInnerClasses();
-            for (PsiClass innerClass : inners) {
-                systemObject.addClass(processTypeDeclaration(innerClass));
-            }
             systemObject.addClass(processTypeDeclaration(psiClass));
             processedClasses += 1;
-            indicator.setFraction((double) processedClasses * 100 / classesCount);
+            indicator.setFraction((double) processedClasses / classesCount);
         }
         indicator.setFraction(1.0);
     }

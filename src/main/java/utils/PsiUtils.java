@@ -89,7 +89,13 @@ public class PsiUtils {
     }
 
     public static List<PsiClass> extractClasses(PsiJavaFile psiFile) {
-        return Arrays.asList(psiFile.getClasses());
+        ArrayList<PsiClass> allClasses = new ArrayList<>();
+        PsiClass[] psiClasses = psiFile.getClasses();
+        for (PsiClass psiClass : psiClasses) {
+            allClasses.add(psiClass);
+            allClasses.addAll(Arrays.asList(psiClass.getAllInnerClasses()));
+        }
+        return allClasses;
     }
 
     public static List<PsiMethod> extractMethods(PsiClass psiClass) {
