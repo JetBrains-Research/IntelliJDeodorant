@@ -176,10 +176,12 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             if (variable.getType().equals(targetClass.getName()) ||
                     superClassTarget != null && variable.getType().equals(superClassTarget.getQualifiedName())) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
-                if (fieldInstruction != null && targetFieldReadMap.containsKey(fieldInstruction)) {
-                    targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
-                } else if (fieldInstruction != null) {
-                    targetFieldReadMap.put(fieldInstruction, 1);
+                if (fieldInstruction != null && !fieldInstruction.isStatic()) {
+                    if (targetFieldReadMap.containsKey(fieldInstruction)) {
+                        targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
+                    } else {
+                        targetFieldReadMap.put(fieldInstruction, 1);
+                    }
                 }
             }
         }
