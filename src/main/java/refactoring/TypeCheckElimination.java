@@ -1092,6 +1092,9 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 				for(PsiExpression expression : classInstanceCreations) {
 					PsiNewExpression classInstanceCreation = (PsiNewExpression)expression;
 					PsiMethod methodBinding = classInstanceCreation.resolveMethod();
+					if (methodBinding == null) { // in case of implicit constructor
+						continue;
+					}
 					PsiClassType[] typeBindings = methodBinding.getThrowsList().getReferencedTypes();
 					for(PsiClassType typeBinding : typeBindings) {
 						if(!catchClauseExceptions.contains(typeBinding))

@@ -711,7 +711,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     if (typeDeclaration.getName().equals(abstractClassName)) {
                         stateStrategyTypeDeclaration = typeDeclaration;
                         requiredImportDeclarationsForContext.add(PsiTypesUtil.getClassType(stateStrategyTypeDeclaration));
-                        PsiUtil.setModifierProperty(stateStrategyTypeDeclaration, PsiModifier.STATIC, true);
+                        PsiUtil.setModifierProperty(stateStrategyTypeDeclaration, PsiModifier.ABSTRACT, true);
                         break;
                     }
                 }
@@ -866,7 +866,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 
             PsiClass subclassTypeDeclaration = null;
             if (subclassAlreadyExists) {
-                PsiElement[] abstractTypeDeclarations = stateStrategyFile.getChildren();
+                PsiElement[] abstractTypeDeclarations = subclassFile.getChildren();
                 for (PsiElement child : abstractTypeDeclarations) {
                     if (child instanceof PsiClass) {
                         PsiClass typeDeclaration = (PsiClass) child;
@@ -1438,7 +1438,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                     }
                                     PsiStatement[] statements2 = switchStatement.getBody().getStatements();
                                     for (PsiStatement statement2 : statements2) {
-                                        if (statement2 instanceof PsiSwitchLabelStatement) {
+                                        if (statement2 instanceof PsiSwitchLabelStatement && !((PsiSwitchLabelStatement) statement2).isDefaultCase()) {
                                             PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement2;
                                             PsiExpressionList switchCaseExpressions = switchCase.getCaseValues();
                                             for (PsiExpression switchCaseExpression : switchCaseExpressions.getExpressions()) {
@@ -1878,7 +1878,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                             if (typeCheckElimination.getTypeLocalVariable().equals(accessedVariableBinding)) {
                                 PsiStatement[] statements2 = switchStatement.getBody().getStatements();
                                 for (PsiStatement statement2 : statements2) {
-                                    if (statement2 instanceof PsiSwitchLabelStatement) {
+                                    if (statement2 instanceof PsiSwitchLabelStatement && !((PsiSwitchLabelStatement) statement2).isDefaultCase()) {
                                         PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement2;
                                         for (PsiExpression switchCaseExpression : switchCase.getCaseValues().getExpressions()) {
                                             PsiReferenceExpression comparedVariable = null;
