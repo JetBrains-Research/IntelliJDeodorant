@@ -120,18 +120,20 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
         for (PlainVariable variable : usedFieldsThroughThisReference) {
             FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction != null && fieldInstruction.getElement().getParent().equals(targetClass.getPsiClass())) {
-                //the used field in inherited from a superclass, which is the target
-                if (targetFieldReadMap.containsKey(fieldInstruction)) {
-                    targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
-                } else {
-                    targetFieldReadMap.put(fieldInstruction, 1);
-                }
-            } else if (sourceClass.getPsiClass().equals(fieldInstruction.getElement().getParent())) {
-                if (sourceFieldReadMap.containsKey(fieldInstruction)) {
-                    sourceFieldReadMap.put(fieldInstruction, sourceFieldReadMap.get(fieldInstruction) + 1);
-                } else {
-                    sourceFieldReadMap.put(fieldInstruction, 1);
+            if (fieldInstruction != null && !fieldInstruction.isStatic()) {
+                if (fieldInstruction.getElement().getParent().equals(targetClass.getPsiClass())) {
+                    //the used field in inherited from a superclass, which is the target
+                    if (targetFieldReadMap.containsKey(fieldInstruction)) {
+                        targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
+                    } else {
+                        targetFieldReadMap.put(fieldInstruction, 1);
+                    }
+                } else if (sourceClass.getPsiClass().equals(fieldInstruction.getElement().getParent())) {
+                    if (sourceFieldReadMap.containsKey(fieldInstruction)) {
+                        sourceFieldReadMap.put(fieldInstruction, sourceFieldReadMap.get(fieldInstruction) + 1);
+                    } else {
+                        sourceFieldReadMap.put(fieldInstruction, 1);
+                    }
                 }
             }
         }

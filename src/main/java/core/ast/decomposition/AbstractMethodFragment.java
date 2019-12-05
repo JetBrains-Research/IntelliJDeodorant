@@ -16,6 +16,7 @@ import java.util.*;
 
 import static core.ast.ASTReader.getExaminedProject;
 import static java.util.stream.Collectors.toList;
+import static utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
     private final AbstractMethodFragment parent;
@@ -276,23 +277,16 @@ public abstract class AbstractMethodFragment {
                     PsiExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
 
                     if (qualifierExpression == null) {
-                        JavaResolveResult[] result = methodInvocation.getMethodExpression().multiResolve(false);
-                        for (JavaResolveResult resolveResult : result) {
-                            if (resolveResult instanceof MethodCandidateInfo) {
-                                MethodCandidateInfo candidateInfo = (MethodCandidateInfo) resolveResult;
-                                PsiMethod method = candidateInfo.getElement();
-                                if (method.getContainingClass() != null) {
-                                    originClassName = method.getContainingClass().getQualifiedName();
-                                }
-                                if ("".equals(originClassName)) return;
-                                processMethodInvocation(methodInvocation, originClassName);
-                            }
+                        PsiMethod resolvedMethod = resolveMethod(methodInvocation);
+                        if (resolvedMethod != null && resolvedMethod.getContainingClass() != null) {
+                            boolean isStatic = resolvedMethod.hasModifier(JvmModifier.STATIC);
+                            originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+                            processMethodInvocation(methodInvocation, originClassName, isStatic);
                         }
                     } else {
                         PsiReferenceExpression firstQualifier = getFirstQualifierInAChain(methodExpression);
                         if (firstQualifier != null) {
                             PsiElement resolvedElement = firstQualifier.resolve();
-
                             if (resolvedElement instanceof PsiParameter
                                     && resolvedElement.getParent() instanceof PsiParameterList) {
                                 PsiType resolvedQualifierType = ((PsiParameter) resolvedElement).getType();
@@ -302,16 +296,17 @@ public abstract class AbstractMethodFragment {
                                 originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
                             }
                             if (!originClassName.equals("")) {
-                                processMethodInvocation(methodExpression, originClassName);
+                                processMethodInvocation(methodExpression, originClassName, false);
                             }
                         }
                     }
                 } else {
                     String originClassName = null;
+                    boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
                     if (resolveMethod.getContainingClass() != null) {
                         originClassName = resolveMethod.getContainingClass().getQualifiedName();
                     }
-                    processMethodInvocation(methodInvocation, originClassName);
+                    processMethodInvocation(methodInvocation, originClassName, isMethodStatic);
                 }
             }
         }
@@ -348,12 +343,13 @@ public abstract class AbstractMethodFragment {
         return classQualifiedName;
     }
 
-    private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName) {
+    private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
         TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
         TypeObject returnType = TypeObject.extractTypeObject("UNK");
         MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
         methodInvocationObject.setMethodInvocation(methodInvocation);
+        methodInvocationObject.setStatic(isMethodStatic);
         addMethodInvocation(methodInvocationObject);
 
         AbstractVariable invoker = MethodDeclarationUtility
@@ -371,7 +367,7 @@ public abstract class AbstractMethodFragment {
         } else {
             if (methodInvocationObject.isStatic())
                 addStaticallyInvokedMethod(methodInvocationObject);
-            else {
+            else if (methodInvocation.getMethodExpression().getQualifierExpression() instanceof PsiThisExpression) {
                 addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
             }
         }

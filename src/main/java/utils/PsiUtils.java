@@ -3,6 +3,7 @@ package utils;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.psi.*;
+import com.intellij.psi.infos.MethodCandidateInfo;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
@@ -157,5 +158,16 @@ public class PsiUtils {
         }
 
         return Optional.of(directory);
+    }
+
+    public static PsiMethod resolveMethod(PsiMethodCallExpression methodInvocation) {
+        JavaResolveResult[] result = methodInvocation.getMethodExpression().multiResolve(false);
+        for (JavaResolveResult resolveResult : result) {
+            if (resolveResult instanceof MethodCandidateInfo) {
+                MethodCandidateInfo candidateInfo = (MethodCandidateInfo) resolveResult;
+                return candidateInfo.getElement();
+            }
+        }
+        return null;
     }
 }

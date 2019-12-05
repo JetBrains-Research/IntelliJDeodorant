@@ -115,7 +115,7 @@ class MoveMethodTableModel extends AbstractTableModel {
             case MOVE_TO_COLUMN_INDEX:
                 return IntelliJDeodorantBundle.message(MOVE_TO_COLUMN_TITLE_KEY);
             case ACCESSED_MEMBERS_COUNT_INDEX:
-                return DEPENDENCIES_COLUMN_TITLE_KEY;
+                return IntelliJDeodorantBundle.message(DEPENDENCIES_COLUMN_TITLE_KEY);
         }
         throw new IndexOutOfBoundsException("Unexpected column index: " + column);
     }
