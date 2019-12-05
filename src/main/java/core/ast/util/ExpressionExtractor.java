@@ -384,9 +384,8 @@ public class ExpressionExtractor {
                 expressionList.add(castExpression);
         } else if (expression instanceof PsiNewExpression) {
             PsiNewExpression classInstanceCreation = (PsiNewExpression) expression;
-            if (classInstanceCreation.getClassReference() != null)
-                if (instanceChecker.instanceOf(classInstanceCreation))
-                    expressionList.add(classInstanceCreation);
+            if (classInstanceCreation.getQualifier() != null)
+                expressionList.addAll(getExpressions(classInstanceCreation.getQualifier()));
             if (classInstanceCreation.getArgumentList() != null) {
                 PsiExpression[] arguments = classInstanceCreation.getArgumentList().getExpressions();
                 for (PsiExpression argument : arguments)
