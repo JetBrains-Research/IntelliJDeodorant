@@ -4,8 +4,6 @@ import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 
-import com.intellij.psi.infos.MethodCandidateInfo;
-
 import com.intellij.psi.util.PsiUtil;
 import core.ast.*;
 import core.ast.decomposition.cfg.AbstractVariable;
@@ -100,15 +98,16 @@ public abstract class AbstractMethodFragment {
         for (PsiExpression variableInstruction : variableInstructions) {
             if (variableInstruction instanceof PsiReferenceExpression) {
                 PsiReferenceExpression psiReferenceExpression = (PsiReferenceExpression) variableInstruction;
+                PsiElement resolvedReference = psiReferenceExpression.resolve();
                 PsiExpression qualifierExpression = psiReferenceExpression.getQualifierExpression();
                 PsiElement resolvedElement = null;
                 if (qualifierExpression instanceof PsiReferenceExpression) {
                     resolvedElement = ((PsiReferenceExpression) qualifierExpression).resolve();
                 }
 
-                if (psiReferenceExpression.resolve() instanceof PsiField) {
-                    PsiField psiField = (PsiField) psiReferenceExpression.resolve();
-                    if (psiField != null && psiField.getContainingClass() != null) {
+                if (resolvedReference instanceof PsiField) {
+                    PsiField psiField = (PsiField) resolvedReference;
+                    if (psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
                         String fieldType = psiField.getType().getCanonicalText();
                         TypeObject typeObject = TypeObject.extractTypeObject(fieldType);
@@ -116,7 +115,7 @@ public abstract class AbstractMethodFragment {
                         if (originClassName != null && !originClassName.equals("")) {
                             if (variableInstruction instanceof PsiSuperExpression) {
                                 SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
-                                superFieldInstruction.setSimpleName(resolvedElement);
+                                superFieldInstruction.setSimpleName(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
@@ -158,8 +157,8 @@ public abstract class AbstractMethodFragment {
                             }
                         }
                     }
-                } else if (resolvedElement instanceof PsiVariable) {
-                    PsiVariable resolvedVariable = (PsiVariable) resolvedElement;
+                } else if (resolvedReference instanceof PsiVariable) {
+                    PsiVariable resolvedVariable = (PsiVariable) resolvedReference;
                     String variableName = resolvedVariable.getName();
                     String variableType = resolvedVariable.getType().getCanonicalText();
                     TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
