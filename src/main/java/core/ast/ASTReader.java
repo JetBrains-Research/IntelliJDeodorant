@@ -24,8 +24,8 @@ public class ASTReader {
         List<PsiClass> classes = project.getClasses();
         int processedClasses = 0;
         int classesCount = classes.size();
-        for (PsiClass c : classes) {
-            systemObject.addClass(processTypeDeclaration(c));
+        for (PsiClass psiClass : classes) {
+            systemObject.addClass(processTypeDeclaration(psiClass));
             processedClasses += 1;
             indicator.setFraction((double) processedClasses / classesCount);
         }

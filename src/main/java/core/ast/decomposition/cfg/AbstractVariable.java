@@ -3,6 +3,7 @@ package core.ast.decomposition.cfg;
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiVariable;
 
 public abstract class AbstractVariable {
@@ -18,7 +19,8 @@ public abstract class AbstractVariable {
         this.name = psiVariable.getName();
         this.type = psiVariable.getType().getCanonicalText();
         this.isField = (psiVariable instanceof PsiField);
-        this.isParameter = (psiVariable instanceof PsiParameter);
+        this.isParameter = (psiVariable instanceof PsiParameter)
+                && (psiVariable.getParent() instanceof PsiParameterList);
         this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
     }
 

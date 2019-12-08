@@ -1,32 +1,20 @@
 package core.ast.decomposition;
 
 import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.lang.jvm.types.JvmReferenceType;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.PsiClassReferenceType;
+
 import com.intellij.psi.util.PsiUtil;
-import core.ast.Access;
-import core.ast.AnonymousClassDeclarationObject;
-import core.ast.ArrayCreationObject;
-import core.ast.ClassInstanceCreationObject;
-import core.ast.ConstructorInvocationObject;
-import core.ast.ConstructorObject;
-import core.ast.CreationObject;
-import core.ast.FieldInstructionObject;
-import core.ast.FieldObject;
-import core.ast.LiteralObject;
-import core.ast.LocalVariableDeclarationObject;
-import core.ast.LocalVariableInstructionObject;
-import core.ast.MethodInvocationObject;
-import core.ast.MethodObject;
-import core.ast.ParameterObject;
-import core.ast.SuperFieldInstructionObject;
-import core.ast.SuperMethodInvocationObject;
-import core.ast.TypeObject;
+import core.ast.*;
 import core.ast.decomposition.cfg.AbstractVariable;
 import core.ast.decomposition.cfg.PlainVariable;
 import core.ast.util.MethodDeclarationUtility;
 
 import java.util.*;
+
+import static core.ast.ASTReader.getExaminedProject;
+import static java.util.stream.Collectors.toList;
+import static utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
     private final AbstractMethodFragment parent;
@@ -109,10 +97,16 @@ public abstract class AbstractMethodFragment {
                           List<PsiExpression> postfixExpressions, List<PsiExpression> prefixExpressions) {
         for (PsiExpression variableInstruction : variableInstructions) {
             if (variableInstruction instanceof PsiReferenceExpression) {
-                PsiReferenceExpression psiReference = (PsiReferenceExpression) variableInstruction;
-                PsiElement resolvedElement = psiReference.resolve();
-                if (resolvedElement instanceof PsiField) {
-                    PsiField psiField = (PsiField) resolvedElement;
+                PsiReferenceExpression psiReferenceExpression = (PsiReferenceExpression) variableInstruction;
+                PsiElement resolvedReference = psiReferenceExpression.resolve();
+                PsiExpression qualifierExpression = psiReferenceExpression.getQualifierExpression();
+                PsiElement resolvedElement = null;
+                if (qualifierExpression instanceof PsiReferenceExpression) {
+                    resolvedElement = ((PsiReferenceExpression) qualifierExpression).resolve();
+                }
+
+                if (resolvedReference instanceof PsiField) {
+                    PsiField psiField = (PsiField) resolvedReference;
                     if (psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
                         String fieldType = psiField.getType().getCanonicalText();
@@ -121,20 +115,26 @@ public abstract class AbstractMethodFragment {
                         if (originClassName != null && !originClassName.equals("")) {
                             if (variableInstruction instanceof PsiSuperExpression) {
                                 SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
-                                superFieldInstruction.setSimpleName(resolvedElement);
+                                superFieldInstruction.setSimpleName(resolvedReference);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
-                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName);
-                                fieldInstruction.setElement(resolvedElement);
+                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName, psiField);
                                 if ((psiField.hasModifier(JvmModifier.STATIC)))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
                                 Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(psiField, postfixExpressions);
                                 Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(psiField, prefixExpressions);
-                                AbstractVariable variable = MethodDeclarationUtility.createVariable(psiField, null);
+                                AbstractVariable variable;
+
+                                if (resolvedElement instanceof PsiVariable) {
+                                    variable = MethodDeclarationUtility.createVariable((PsiVariable) resolvedElement, new PlainVariable(psiField));
+                                } else {
+                                    variable = MethodDeclarationUtility.createVariable(psiField, null);
+                                }
+
                                 if (!fieldAssignments.isEmpty()) {
                                     handleDefinedField(variable);
                                     for (PsiAssignmentExpression assignment : fieldAssignments) {
@@ -157,14 +157,14 @@ public abstract class AbstractMethodFragment {
                             }
                         }
                     }
-                } else if (resolvedElement instanceof PsiLocalVariable) {
-                    PsiLocalVariable resolvedVariable = (PsiLocalVariable) resolvedElement;
+                } else if (resolvedReference instanceof PsiVariable) {
+                    PsiVariable resolvedVariable = (PsiVariable) resolvedReference;
                     String variableName = resolvedVariable.getName();
                     String variableType = resolvedVariable.getType().getCanonicalText();
                     TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
                     PlainVariable variable = new PlainVariable(resolvedVariable);
                     LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
-                    localVariable.setSimpleName(psiReference);
+                    localVariable.setReference(psiReferenceExpression);
                     addLocalVariableInstruction(localVariable);
                     Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(resolvedVariable, assignments);
                     Set<PsiPostfixExpression> localVariablePostfixAssignments =
@@ -269,94 +269,112 @@ public abstract class AbstractMethodFragment {
             if (expression instanceof PsiMethodCallExpression) {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiMethod resolveMethod = methodInvocation.resolveMethod();
-                if (resolveMethod == null) continue;
-                String originClassName = null;
-                if (resolveMethod.getContainingClass() != null) {
-                    originClassName = resolveMethod.getContainingClass().getQualifiedName();
-                }
-                TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
-                String methodInvocationName = resolveMethod.getName();
-                PsiType returnTypeBinding = resolveMethod.getReturnType();
-                TypeObject returnType = TypeObject.extractTypeObject(returnTypeBinding == null ?
-                        "java.lang.Object" : returnTypeBinding.getCanonicalText());
-                MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
-                methodInvocationObject.setMethodInvocation(methodInvocation);
-                PsiParameter[] parameters = resolveMethod.getParameterList().getParameters();
-                for (PsiParameter psiParameter : parameters) {
-                    TypeObject typeObject = TypeObject.extractTypeObject(psiParameter.getType().getCanonicalText());
-                    methodInvocationObject.addParameter(typeObject);
-                }
-                JvmReferenceType[] thrownExceptionTypes = resolveMethod.getThrowsTypes();
-                for (JvmReferenceType thrownExceptionType : thrownExceptionTypes) {
-                    methodInvocationObject.addThrownException(thrownExceptionType.getName());
-                }
-                if ((resolveMethod.hasModifier(JvmModifier.STATIC)))
-                    methodInvocationObject.setStatic(true);
-                addMethodInvocation(methodInvocationObject);
-                AbstractVariable invoker = MethodDeclarationUtility
-                        .processMethodInvocationExpression(methodInvocation.getMethodExpression());
-                if (invoker != null) {
-                    PlainVariable initialVariable = invoker.getInitialVariable();
-                    if (initialVariable.isField()) {
-                        addNonDistinctInvokedMethodThroughField(invoker, methodInvocationObject);
-                    } else if (initialVariable.isParameter()) {
-                        addNonDistinctInvokedMethodThroughParameter(invoker, methodInvocationObject);
+                if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
+                    PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
+                    String methodName = methodExpression.getMethodExpression().getReferenceName();
+                    String originClassName = "";
+                    PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
+
+                    if (qualifierExpression == null) {
+                        PsiMethod resolvedMethod = resolveMethod(methodInvocation);
+                        if (resolvedMethod != null && resolvedMethod.getContainingClass() != null) {
+                            boolean isStatic = resolvedMethod.hasModifier(JvmModifier.STATIC);
+                            originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+                            processMethodInvocation(methodInvocation, originClassName, isStatic);
+                        }
                     } else {
-                        addNonDistinctInvokedMethodThroughLocalVariable(invoker, methodInvocationObject);
+                        PsiElement resolvedElement = qualifierExpression.resolve();
+                        if (resolvedElement instanceof PsiParameter
+                                && resolvedElement.getParent() instanceof PsiParameterList) {
+                            PsiType resolvedQualifierType = ((PsiParameter) resolvedElement).getType();
+                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
+                        } else if (resolvedElement instanceof PsiField) {
+                            PsiType resolvedQualifierType = ((PsiField) resolvedElement).getType();
+                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
+                        }
+                        if (!originClassName.equals("")) {
+                            processMethodInvocation(methodExpression, originClassName, false);
+                        }
                     }
                 } else {
-                    if (methodInvocationObject.isStatic())
-                        addStaticallyInvokedMethod(methodInvocationObject);
-                    else {
-                        if (methodInvocation.getFirstChild() instanceof PsiThisExpression) {
-                            addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
-                        }
+                    String originClassName = null;
+                    boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
+                    if (resolveMethod.getContainingClass() != null) {
+                        originClassName = resolveMethod.getContainingClass().getQualifiedName();
                     }
+                    processMethodInvocation(methodInvocation, originClassName, isMethodStatic);
                 }
-                PsiExpression[] arguments = methodInvocation.getArgumentList().getExpressions();
-                for (PsiExpression argument : arguments) {
-                    if (argument instanceof PsiReferenceExpression) {
-                        PsiReferenceExpression argumentReference = (PsiReferenceExpression) argument;
-                        PsiElement resolvedArgument = argumentReference.resolve();
-                        if (resolvedArgument instanceof PsiParameter) {
-                            PsiVariable variableBinding = (PsiVariable) resolvedArgument;
-                            PlainVariable variable = new PlainVariable(variableBinding);
-                            addParameterPassedAsArgumentInMethodInvocation(variable, methodInvocationObject);
-
-                        }
-                    }
-                }
-            } else if (expression instanceof PsiSuperExpression) {
-                PsiSuperExpression psiSuperExpression = (PsiSuperExpression) expression;
-                PsiElement resolvedElement = null;
-                if (psiSuperExpression.getReference() != null) {
-                    resolvedElement = psiSuperExpression.getReference().resolve();
-                }
-                if (!(resolvedElement instanceof PsiMethod)) return;
-                PsiMethod resolvedMethod = (PsiMethod) resolvedElement;
-                String originClassName = Objects.requireNonNull(resolvedMethod.getContainingClass()).getQualifiedName();
-                TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
-                String methodInvocationName = resolvedMethod.getName();
-                String returnTypeName = Objects.requireNonNull(resolvedMethod.getReturnType()).getCanonicalText();
-                TypeObject returnType = TypeObject.extractTypeObject(returnTypeName);
-                SuperMethodInvocationObject superMethodInvocationObject =
-                        new SuperMethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
-                superMethodInvocationObject.setSuperMethodInvocation(psiSuperExpression);
-                PsiParameter[] psiParameters = resolvedMethod.getParameterList().getParameters();
-                for (PsiParameter parameter : psiParameters) {
-                    String qualifiedParameterName = parameter.getType().getCanonicalText();
-                    TypeObject typeObject = TypeObject.extractTypeObject(qualifiedParameterName);
-                    superMethodInvocationObject.addParameter(typeObject);
-                }
-                JvmReferenceType[] thrownExceptionTypes = resolvedMethod.getThrowsTypes();
-                for (JvmReferenceType thrownExceptionType : thrownExceptionTypes) {
-                    superMethodInvocationObject.addThrownException(thrownExceptionType.getName());
-                }
-                if ((resolvedMethod.hasModifier(JvmModifier.STATIC)))
-                    superMethodInvocationObject.setStatic(true);
-                addSuperMethodInvocation(superMethodInvocationObject);
-                //TODO: handle arguments of method call
             }
+        }
+    }
+
+    private PsiReferenceExpression getFirstQualifierInAChain(PsiExpression expression) {
+        if (expression instanceof PsiMethodCallExpression) {
+            PsiExpression qualifierExpression =
+                    ((PsiMethodCallExpression) expression).getMethodExpression().getQualifierExpression();
+            return getFirstQualifierInAChain(qualifierExpression);
+        } else if (expression instanceof PsiReferenceExpression) {
+            PsiExpression qualifierExpression = ((PsiReferenceExpression) expression).getQualifierExpression();
+            if (qualifierExpression instanceof PsiReferenceExpression) {
+                return getFirstQualifierInAChain(qualifierExpression);
+            } else {
+                return (PsiReferenceExpression) expression;
+            }
+        }
+        return null;
+    }
+
+    private String findClassBySimpleNameAndGetQualifiedName(PsiType classReferenceType, String methodName) {
+        String classQualifiedName = "";
+        if (classReferenceType instanceof PsiClassReferenceType) {
+            String classSimpleName = ((PsiClassReferenceType) classReferenceType).getName();
+            List<PsiClass> candidateClasses = getExaminedProject().getClasses().stream()
+                    .filter(psiClass -> classSimpleName.equals(psiClass.getName())).collect(toList());
+            for (PsiClass psiClass : candidateClasses) {
+                if (psiClass.findMethodsByName(methodName, true).length != 0) {
+                    classQualifiedName = psiClass.getQualifiedName();
+                }
+            }
+        }
+        return classQualifiedName;
+    }
+
+    private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
+        TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
+        String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
+        TypeObject returnType = TypeObject.extractTypeObject("UNK");
+        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
+        methodInvocationObject.setMethodInvocation(methodInvocation);
+        methodInvocationObject.setStatic(isMethodStatic);
+        addMethodInvocation(methodInvocationObject);
+
+        AbstractVariable invoker = MethodDeclarationUtility
+                .processMethodInvocationExpression(methodInvocation.getMethodExpression().getQualifierExpression());
+
+        if (invoker != null) {
+            PlainVariable initialVariable = invoker.getInitialVariable();
+            if (initialVariable.isField()) {
+                addNonDistinctInvokedMethodThroughField(invoker, methodInvocationObject);
+            } else if (initialVariable.isParameter()) {
+                addNonDistinctInvokedMethodThroughParameter(invoker, methodInvocationObject);
+            } else {
+                addNonDistinctInvokedMethodThroughLocalVariable(invoker, methodInvocationObject);
+            }
+        } else {
+            if (methodInvocationObject.isStatic())
+                addStaticallyInvokedMethod(methodInvocationObject);
+            else {
+                addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
+            }
+        }
+    }
+
+    private PsiMethodCallExpression getFirstMethodCallInAChain(PsiMethodCallExpression methodCallExpression) {
+        PsiExpression qualifierExpression = methodCallExpression.getMethodExpression().getQualifierExpression();
+        if (qualifierExpression instanceof PsiMethodCallExpression) {
+            return getFirstMethodCallInAChain((PsiMethodCallExpression) qualifierExpression);
+        } else {
+            return methodCallExpression;
         }
     }
 
@@ -772,10 +790,14 @@ public abstract class AbstractMethodFragment {
         if (variable != null) {
             PlainVariable initialVariable = variable.getInitialVariable();
             if (variable instanceof PlainVariable) {
-                nonDistinctUsedFieldsThroughThisReference.add((PlainVariable) variable);
+                if (!nonDistinctUsedFieldsThroughThisReference.contains(variable)) {
+                    nonDistinctUsedFieldsThroughThisReference.add((PlainVariable) variable);
+                }
             } else {
                 if (initialVariable.isField()) {
-                    nonDistinctUsedFieldsThroughFields.add(variable);
+                    if (!nonDistinctUsedFieldsThroughFields.contains(variable)) {
+                        nonDistinctUsedFieldsThroughFields.add(variable);
+                    }
                 } else if (initialVariable.isParameter()) {
                     nonDistinctUsedFieldsThroughParameters.add(variable);
                 } else {
