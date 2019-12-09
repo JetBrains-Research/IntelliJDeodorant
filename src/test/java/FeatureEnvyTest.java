@@ -172,4 +172,30 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(0, featureEnvyVisualizationData.getDistinctSourceDependencies());
     }
 
+    public void testFieldAccessThroughParameterCount() {
+        String fromClass = "package testCases.featureEnvy;\n" +
+                "import testCases.featureEnvy.B;\n" +
+                "\n" +
+                "public class A {\n" +
+                "\n" +
+                "  public void testMethod(B bClass) {\n" +
+                "        bClass.firstField += \"cd\";\n" +
+                "    }" +
+                "}";
+
+        String toClass = "package testCases.featureEnvy;\n" +
+                "\n" +
+                "public class B {\n" +
+                "\n" +
+                "    public String firstField = \"a\";\n" +
+                "}";
+
+        List<MoveMethodCandidateRefactoring> refactorings = getMoveMethodCandidates(fromClass, toClass);
+        assertNotEmpty(refactorings);
+        FeatureEnvyVisualizationData featureEnvyVisualizationData = refactorings.get(0).getVisualizationData();
+        assertEquals("testMethod", featureEnvyVisualizationData.getMethodToBeMoved().getName());
+        assertEquals(1, featureEnvyVisualizationData.getDistinctTargetDependencies());
+        assertEquals(0, featureEnvyVisualizationData.getDistinctSourceDependencies());
+    }
+
 }

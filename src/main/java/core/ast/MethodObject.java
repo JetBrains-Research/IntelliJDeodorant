@@ -155,7 +155,8 @@ public class MethodObject implements AbstractMethodDeclaration {
                             && statementObject.getLocalVariableInstructions().size() == 1
                             && this.constructorObject.parameterList.size() == 1) {
                         PsiAssignmentExpression assignment = (PsiAssignmentExpression) expressionStatement.getExpression();
-                        if (assignment.getLExpression() instanceof PsiReferenceExpression)
+                        if (assignment.getLExpression() instanceof PsiReferenceExpression
+                                && assignment.getOperationSign() == JavaTokenType.EQ)
                             return statementObject.getFieldInstructions().get(0);
                     }
                 }
