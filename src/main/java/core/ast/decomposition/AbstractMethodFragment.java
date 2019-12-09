@@ -12,6 +12,7 @@ import core.ast.util.MethodDeclarationUtility;
 
 import java.util.*;
 
+import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
 import static core.ast.ASTReader.getExaminedProject;
 import static java.util.stream.Collectors.toList;
 import static utils.PsiUtils.resolveMethod;
@@ -269,10 +270,10 @@ public abstract class AbstractMethodFragment {
             if (expression instanceof PsiMethodCallExpression) {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiMethod resolveMethod = methodInvocation.resolveMethod();
+                String originClassName = "";
                 if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
                     PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
                     String methodName = methodExpression.getMethodExpression().getReferenceName();
-                    String originClassName = "";
                     PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
 
                     if (qualifierExpression == null) {
@@ -292,12 +293,11 @@ public abstract class AbstractMethodFragment {
                             PsiType resolvedQualifierType = ((PsiField) resolvedElement).getType();
                             originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
                         }
-                        if (!originClassName.equals("")) {
+                        if (originClassName != null && !originClassName.equals("")) {
                             processMethodInvocation(methodExpression, originClassName, false);
                         }
                     }
                 } else {
-                    String originClassName = null;
                     boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
                     if (resolveMethod.getContainingClass() != null) {
                         originClassName = resolveMethod.getContainingClass().getQualifiedName();
@@ -364,7 +364,11 @@ public abstract class AbstractMethodFragment {
             if (methodInvocationObject.isStatic())
                 addStaticallyInvokedMethod(methodInvocationObject);
             else {
-                addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
+                PsiClass sourceClass = getParentOfType(methodInvocation, PsiClass.class);
+                if (sourceClass != null && originClassName != null
+                        && originClassName.equals(sourceClass.getQualifiedName())) {
+                    addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
+                }
             }
         }
     }
