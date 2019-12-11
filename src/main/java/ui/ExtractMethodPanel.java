@@ -162,7 +162,7 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Disable all buttons.
+     * Disables all buttons.
      */
     private void disableAllButtons() {
         refreshButton.setEnabled(false);
