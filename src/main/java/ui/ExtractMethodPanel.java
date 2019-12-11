@@ -128,7 +128,9 @@ class ExtractMethodPanel extends JPanel {
      * @return list of available refactorings suggestions
      */
     private List<ExtractMethodRefactoring> getAvailableRefactoringSuggestions() {
-        return refactorings.stream().filter(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().allMatch(ASTSlice::areSliceStatementsValid)).collect(Collectors.toList());
+        return refactorings.stream().filter(extractMethodRefactoring ->
+                extractMethodRefactoring.getCandidates()
+                        .stream().allMatch(ASTSlice::areSliceStatementsValid)).collect(Collectors.toList());
     }
 
     /**
@@ -144,7 +146,9 @@ class ExtractMethodPanel extends JPanel {
     }
 
     private boolean isAnyRefactoringSuggestionAvailable() {
-        return refactorings.stream().anyMatch(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().anyMatch(ASTSlice::areSliceStatementsValid));
+        return refactorings.stream().anyMatch(extractMethodRefactoring ->
+                extractMethodRefactoring.getCandidates()
+                        .stream().anyMatch(ASTSlice::areSliceStatementsValid));
     }
 
     /**

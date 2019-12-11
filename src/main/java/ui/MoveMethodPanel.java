@@ -134,7 +134,8 @@ class MoveMethodPanel extends JPanel {
     }
 
     private List<MoveMethodRefactoring> getValidRefactoringsSuggestions() {
-        return refactorings.stream().filter(refactoring -> refactoring.getOptionalMethod().isPresent()).collect(Collectors.toList());
+        return refactorings.stream().filter(refactoring ->
+                refactoring.getOptionalMethod().isPresent()).collect(Collectors.toList());
     }
 
     private void enableButtonsOnConditions() {
@@ -142,7 +143,8 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
-        exportButton.setEnabled(refactorings.stream().anyMatch(refactoring -> refactoring.getOptionalMethod().isPresent()));
+        exportButton.setEnabled(refactorings.stream().anyMatch(refactoring ->
+                refactoring.getOptionalMethod().isPresent()));
     }
 
     private void disableAllButtons() {
