@@ -1,7 +1,10 @@
 package ui;
 
 import com.intellij.analysis.AnalysisScope;
+import com.intellij.openapi.application.TransactionGuard;
+import com.intellij.openapi.command.WriteCommandAction;
 import org.jetbrains.annotations.NotNull;
+import ui.abstractrefactorings.RefactoringType;
 import ui.abstractrefactorings.TypeCheckRefactoringType;
 
 import java.util.Collections;
@@ -31,5 +34,16 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
                 ),
                 REFACTOR_DEPTH
         );
+    }
+
+    @Override
+    protected void doRefactor(RefactoringType.AbstractCandidateRefactoring candidateRefactoring) {
+        removeHighlighters(scope.getProject());
+        disableRefactoringsTable(true);
+        TransactionGuard.getInstance().submitTransactionAndWait(() -> {
+            RefactoringType.AbstractRefactoring refactoring =
+                    getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
+            WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
+        });
     }
 }

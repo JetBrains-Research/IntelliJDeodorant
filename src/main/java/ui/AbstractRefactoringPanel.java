@@ -41,14 +41,14 @@ import java.util.Set;
 /**
  * Panel for Type-State Checking refactorings.
  */
-public class AbstractRefactoringPanel extends JPanel {
+public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String REFRESH_NEEDED_TEXT = "type.state.checking.refresh.needed.text";
 
     private String detectIndicatorStatusTextKey;
     @NotNull
-    private final AnalysisScope scope;
+    protected final AnalysisScope scope;
     private AbstractTreeTableModel model;
     private final TreeTable treeTable;
     private final JButton doRefactorButton = new JButton();
@@ -92,7 +92,7 @@ public class AbstractRefactoringPanel extends JPanel {
     /**
      * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
      */
-    private void disableRefactoringsTable(boolean hideTree) {
+    protected void disableRefactoringsTable(boolean hideTree) {
         scrollPane.setVisible(true);
         treeTable.getTree().setSelectionPath(null);
         if (hideTree) {
@@ -150,9 +150,7 @@ public class AbstractRefactoringPanel extends JPanel {
     }
 
     //TODO comment
-    void doRefactor(AbstractCandidateRefactoring computationSlice) {
-        TransactionGuard.getInstance().submitTransactionAndWait(getRefactoringRunnable(computationSlice));
-    }
+    protected abstract void doRefactor(AbstractCandidateRefactoring candidateRefactoring);
 
     /**
      * Enables Refactor button only if a suggestion is selected.
@@ -217,15 +215,8 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
-    /**
-     * Returns Runnable which performs specified refactoring.
-     */
-    private Runnable getRefactoringRunnable(AbstractCandidateRefactoring candidateRefactoring) {
-        return () -> {
-            removeHighlighters(scope.getProject());
-            AbstractRefactoring refactoring = refactoringType.newAbstractRefactoring(candidateRefactoring);
-            WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
-        };
+    AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
+        return refactoringType.newAbstractRefactoring(candidate);
     }
 
     /**
