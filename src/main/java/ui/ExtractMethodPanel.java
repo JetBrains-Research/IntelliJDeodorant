@@ -162,10 +162,19 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
+     * Disable all buttons
+     */
+    private void disableAllButtons() {
+        refreshButton.setEnabled(false);
+        exportButton.setEnabled(false);
+        doRefactorButton.setEnabled(false);
+    }
+
+    /**
      * Refreshes the panel with suggestions.
      */
     private void refreshPanel() {
-        refreshButton.setEnabled(false);
+        disableAllButtons();
         Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
@@ -200,7 +209,6 @@ class ExtractMethodPanel extends JPanel {
                     ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
                     scrollPane.setVisible(true);
-
                     enableButtonsOnConditions();
                 });
             }
