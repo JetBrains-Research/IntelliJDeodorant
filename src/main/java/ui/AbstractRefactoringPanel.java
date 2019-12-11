@@ -76,7 +76,7 @@ public class AbstractRefactoringPanel extends JPanel {
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
-        disableRefactoringsTable();
+        disableRefactoringsTable(true);
     }
 
     /**
@@ -92,10 +92,12 @@ public class AbstractRefactoringPanel extends JPanel {
     /**
      * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
      */
-    private void disableRefactoringsTable() {
+    private void disableRefactoringsTable(boolean hideTree) {
         scrollPane.setVisible(true);
         treeTable.getTree().setSelectionPath(null);
-        scrollPane.setViewportView(refreshLabel);
+        if (hideTree) {
+            scrollPane.setViewportView(refreshLabel);
+        }
     }
 
     /**
@@ -142,9 +144,14 @@ public class AbstractRefactoringPanel extends JPanel {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
         if (selectedPath.getPathCount() == refactorDepth) {
             AbstractCandidateRefactoring computationSlice = (AbstractCandidateRefactoring) selectedPath.getLastPathComponent();
-            disableRefactoringsTable();
-            TransactionGuard.getInstance().submitTransactionAndWait((getRefactoringRunnable(computationSlice)));
+            disableRefactoringsTable(false);
+            doRefactor(computationSlice);
         }
+    }
+
+    //TODO comment
+    void doRefactor(AbstractCandidateRefactoring computationSlice) {
+        TransactionGuard.getInstance().submitTransactionAndWait(getRefactoringRunnable(computationSlice));
     }
 
     /**
@@ -298,7 +305,6 @@ public class AbstractRefactoringPanel extends JPanel {
         );
     }
 
-    //TODO
     public static void removeHighlighters(Project project) {
         Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (editor == null) {
