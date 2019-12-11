@@ -2072,33 +2072,33 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 //		return sourceCompilationUnit;
 //	}
 //
-//	public String getAbstractClassName() {
-//		return abstractClassName;
-//	}
-//
-//	public SimpleName getTypeVariableSimpleName() {
-//		return typeCheckElimination.getTypeVariableSimpleName();
-//	}
-//
-//	public Set<Map.Entry<SimpleName, String>> getStaticFieldMapEntrySet() {
-//		return staticFieldMap.entrySet();
-//	}
-//
-//	public Set<Map.Entry<SimpleName, String>> getAdditionalStaticFieldMapEntrySet() {
-//		return additionalStaticFieldMap.entrySet();
-//	}
-//
-//	public void setTypeNameForNamedConstant(SimpleName namedConstant, String typeName) {
-//		if(staticFieldMap.containsKey(namedConstant)) {
-//			staticFieldMap.put(namedConstant, typeName);
-//		}
-//		else if(additionalStaticFieldMap.containsKey(namedConstant)) {
-//			additionalStaticFieldMap.put(namedConstant, typeName);
-//		}
-//		else {
-//			abstractClassName = typeName;
-//		}
-//	}
+	public String getAbstractClassName() {
+		return abstractClassName;
+	}
+
+    public String getTypeVariableSimpleName() {
+		return typeCheckElimination.getTypeVariableSimpleName();
+	}
+
+	public Set<Map.Entry<PsiField, String>> getStaticFieldMapEntrySet() {
+		return staticFieldMap.entrySet();
+	}
+
+	public Set<Map.Entry<PsiField, String>> getAdditionalStaticFieldMapEntrySet() {
+		return additionalStaticFieldMap.entrySet();
+	}
+
+	public void setTypeNameForNamedConstant(PsiField namedConstant, String typeName) {
+		if(staticFieldMap.containsKey(namedConstant)) {
+			staticFieldMap.put(namedConstant, typeName);
+		}
+		else if(additionalStaticFieldMap.containsKey(namedConstant)) {
+			additionalStaticFieldMap.put(namedConstant, typeName);
+		}
+		else {
+			abstractClassName = typeName;
+		}
+	}
 
     public String getTypeNameForNamedConstant(PsiField namedConstant) {
         if (staticFieldMap.containsKey(namedConstant)) {

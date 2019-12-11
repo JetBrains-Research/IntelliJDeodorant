@@ -555,6 +555,18 @@ public abstract class PolymorphismRefactoring {
         return null;
     }
 
+    public Project getProject() {
+        return project;
+    }
+
+    public PsiClass getSourceTypeDeclaration() {
+        return sourceTypeDeclaration;
+    }
+
+    public PsiFile getSourceFile() {
+        return sourceFile;
+    }
+
 //	protected Expression generateDefaultValue(ASTRewrite sourceRewriter, AST ast, ITypeBinding returnTypeBinding) {
 //		Expression returnedExpression = null;
 //		if(returnTypeBinding.isPrimitive()) {

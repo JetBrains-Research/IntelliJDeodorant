@@ -3,9 +3,15 @@ package ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.psi.PsiReferenceBase;
 import org.jetbrains.annotations.NotNull;
+import refactoring.PolymorphismRefactoring;
+import refactoring.ReplaceConditionalWithPolymorphism;
+import refactoring.ReplaceTypeCodeWithStateStrategy;
 import ui.abstractrefactorings.RefactoringType;
+import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
 import ui.abstractrefactorings.TypeCheckRefactoringType;
+import ui.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
 
 import java.util.Collections;
 
@@ -37,13 +43,26 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
     }
 
     @Override
-    protected void doRefactor(RefactoringType.AbstractCandidateRefactoring candidateRefactoring) {
-        removeHighlighters(scope.getProject());
-        disableRefactoringsTable(true);
-        TransactionGuard.getInstance().submitTransactionAndWait(() -> {
-            RefactoringType.AbstractRefactoring refactoring =
-                    getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
+    protected void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
+        AbstractTypeCheckRefactoring abstractRefactoring =
+                (AbstractTypeCheckRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
+        PolymorphismRefactoring refactoring = abstractRefactoring.getRefactoring();
+
+        Runnable applyRefactoring = () -> {
+            removeHighlighters(scope.getProject());
+            disableRefactoringsTable(true);
             WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
-        });
+        };
+
+        if (refactoring instanceof ReplaceTypeCodeWithStateStrategy) {
+            TransactionGuard.getInstance().submitTransactionAndWait(() -> {
+                new ReplaceTypeCodeWithStateStrategyDialog(
+                        (ReplaceTypeCodeWithStateStrategy) refactoring,
+                        applyRefactoring
+                ).show();
+            });
+        } else {
+            applyRefactoring.run();
+        }
     }
 }

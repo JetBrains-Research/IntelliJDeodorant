@@ -98,7 +98,7 @@ public class TypeCheckRefactoringType extends RefactoringType {
     }
 
     public class AbstractTypeCheckRefactoring extends AbstractRefactoring {
-        private PolymorphismRefactoring  refactoring;
+        private PolymorphismRefactoring refactoring;
 
         public AbstractTypeCheckRefactoring(TypeCheckElimination typeCheckElimination) {
             PsiClass sourceTypeDeclaration = typeCheckElimination.getTypeCheckClass();
@@ -121,6 +121,10 @@ public class TypeCheckRefactoringType extends RefactoringType {
         @Override
         public void apply() {
             refactoring.apply();
+        }
+
+        public PolymorphismRefactoring getRefactoring() {
+            return refactoring;
         }
     }
 }

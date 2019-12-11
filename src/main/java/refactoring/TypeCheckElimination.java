@@ -809,34 +809,30 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 		return null;
 	}
 
-	//TODO: add me
-//	public SimpleName getTypeVariableSimpleName() {
-//		if(typeField != null) {
-//			return typeField.getName();
-//		}
-//		else if(typeLocalVariable != null) {
-//			return typeLocalVariable.getName();
-//		}
-//		else if(foreignTypeField != null) {
-//			return foreignTypeField.getName();
-//		}
-//		else if(typeMethodInvocation != null) {
-//			Expression typeMethodInvocationExpression = typeMethodInvocation.getExpression();
-//			SimpleName invoker = null;
-//			if(typeMethodInvocationExpression instanceof SimpleName) {
-//				invoker = (SimpleName)typeMethodInvocationExpression;
-//			}
-//			else if(typeMethodInvocationExpression instanceof FieldAccess) {
-//				FieldAccess fieldAccess = (FieldAccess)typeMethodInvocationExpression;
-//				invoker = fieldAccess.getName();
-//			}
-//			if(invoker != null)
-//				return invoker;
-//			else
-//				return typeMethodInvocation.getName();
-//		}
-//		return null;
-//	}
+	public String getTypeVariableSimpleName() {
+		if(typeField != null) {
+			return typeField.getName();
+		}
+		else if(typeLocalVariable != null) {
+			return typeLocalVariable.getName();
+		}
+		else if(foreignTypeField != null) {
+			return foreignTypeField.getName();
+		}
+		else if(typeMethodInvocation != null) {
+			PsiExpression typeMethodInvocationExpression = typeMethodInvocation.getMethodExpression().getQualifierExpression();
+			PsiReferenceExpression invoker = null;
+			if(typeMethodInvocationExpression instanceof PsiReferenceExpression) {
+				invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
+			}
+			if(invoker != null) {
+				return invoker.getReferenceName();
+			} else {
+				return typeMethodInvocation.resolveMethod().getName();
+			}
+		}
+		return getAbstractClassName();
+	}
 
 	public String getAbstractClassName() {
 		if(typeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
