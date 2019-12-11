@@ -285,7 +285,11 @@ public class ASTSlice {
      * @return true if all {@link PsiStatement} are valid, false otherwise.
      */
     public boolean areSliceStatementsValid() {
-        Iterator<PsiStatement> iterator = this.getSliceStatements().iterator();
+        Set<PsiStatement> setOfSliceStatements = this.getSliceStatements();
+        if (setOfSliceStatements.isEmpty()) {
+            return false;
+        }
+        Iterator<PsiStatement> iterator = setOfSliceStatements.iterator();
         while (iterator.hasNext()) {
             if (!iterator.next().isValid()) {
                 return false;
