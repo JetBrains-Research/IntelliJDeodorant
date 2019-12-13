@@ -1,4 +1,8 @@
 # IntelliJDeodorant
+
+[![JB Research](https://jb.gg/badges/research-flat-square.svg)](https://research.jetbrains.org/)
+[![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
+
 An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. 
 
 Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
@@ -15,6 +19,7 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 - [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
 
 ## Installation
+Supported IntelliJ IDEA version: 2019.3
 
 1. Clone this repository
 2. Build IntelliJDeodorant.jar using ```./gradlew jar``` 
