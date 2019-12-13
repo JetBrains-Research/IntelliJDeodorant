@@ -9,7 +9,8 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
-import com.intellij.refactoring.extractMethod.*;
+import com.intellij.refactoring.extractMethod.ExtractMethodProcessor;
+import com.intellij.refactoring.extractMethod.InputVariables;
 import com.intellij.refactoring.util.InlineUtil;
 import com.intellij.refactoring.util.VariableData;
 import com.intellij.util.ArrayUtil;
@@ -160,7 +161,7 @@ public class MyExtractMethodProcessor extends ExtractMethodProcessor {
                 inputVariables.add(data.variable);
             }
         }
-        myInputVariables = new InputVariables(inputVariables, myProject, new LocalSearchScope(myElements), true);
+        myInputVariables = new InputVariables(inputVariables, myProject, new LocalSearchScope(myElements), true, Collections.emptySet());
         myVariableDatum = myInputVariables.getInputVariables().toArray(new VariableData[0]);
     }
 
