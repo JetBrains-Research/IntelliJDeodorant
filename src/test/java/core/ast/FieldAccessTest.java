@@ -2,41 +2,22 @@ package core.ast;
 
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import core.ast.Standalone;
-import core.distance.*;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
-import org.jetbrains.annotations.NotNull;
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
+import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
+import org.jetbrains.research.intellijdeodorant.core.distance.MyAttribute;
+import org.jetbrains.research.intellijdeodorant.core.distance.MyClass;
+import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
+import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.WriteAbortedException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertThat;
+public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
+    private String getPrefix() {
+        String className = "TestFieldAccess";
 
-public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
-    private File createTempFile(@NotNull String filename) {
-        try {
-            return File.createTempFile(filename, ".java");
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private void writePrefix(@NotNull FileWriter writer, @NotNull File file) throws IOException {
-        final String className = file.getName().substring(0,file.getName().length() - 5); // delete ".java" suffix
-
-        writer.write("package field.accesses;\n" +
+        return "package field.accesses;\n" +
                 "\n" +
                 "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.jetbrains.annotations.Nullable;\n" +
@@ -51,28 +32,20 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "import java.util.function.Supplier;\n" +
                 "\n" +
                 "public class " + className + " {\n" +
-                "    private Integer SIZE = 100;\n" +
+                "    private Integer FIELD = 100;\n" +
                 "    private int extraField = 5;\n" +
-                "    private static final int SWITCH_CASE_TEST = 5;\n");
+                "    private static final int SWITCH_CASE_TEST = 5;\n";
     }
 
-    private void writeSuffix(@NotNull FileWriter writer) throws IOException {
-        writer.write("\n}");
+    private String getSuffix() {
+        return "\n}";
     }
 
     private void testMethod(String methodCode, int fieldNumber) {
-        File file = createTempFile("testFieldAccess");
-        assertNotNull(file);
+        String testContent = getPrefix() + methodCode + getSuffix();
 
-        try (FileWriter writer = new FileWriter(file)) {
-            writePrefix(writer, file);
-            writer.write(methodCode);
-            writeSuffix(writer);
-        } catch (IOException e) {
-            fail();
-        }
+        myFixture.configureByText("TestFieldAccess.java", testContent);
 
-        myFixture.configureByFile(file.getPath());
         Project project = myFixture.getProject();
         ProjectInfo projectInfo = new ProjectInfo(project);
 
@@ -82,29 +55,21 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
         MyClass myClass = mySystem.getClassIterator().next();
 
         MyAttribute testField = myClass.getAttributeList().get(fieldNumber);
-/*
-        final String prefix;
-        if (isInner) {
-            prefix = "field.accesses." + className + "::InnerClassTest::";
-        } else {
-            prefix = "field.accesses." + className + "::";
-        }
-
-        final String suffix;
-        if (isVoid) {
-            suffix = "():void";
-        } else {
-            suffix = "():int";
-        }
-*/
         List<String> entitySet = new ArrayList<>(testField.getFullEntitySet());
 
-        assertEquals(2, entitySet.size());
+        String fieldName = "FIELD";
+        if (fieldNumber == 1) {
+            fieldName = "extraField";
+        } else if (fieldNumber == 2) {
+            fieldName = "SWITCH_CASE_TEST";
+        }
+
+        assertTrue(fieldName + "'s entity set does not contain given method.", entitySet.size() == 2);
     }
 
     public void testSimpleTest() {
         String methodCode = " void simpleTest() {\n" +
-                "        SIZE += 7;\n" +
+                "        FIELD += 7;\n" +
                 "    }";
 
         testMethod(methodCode, 0);
@@ -112,15 +77,15 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testBinaryExpressionTest() {
         String methodCode = "int binaryExpressionTest() {\n" +
-                "        return SIZE + 6;\n" +
+                "        return FIELD + 6;\n" +
                 "    }";
 
-        testMethod(methodCode,  0);
+        testMethod(methodCode, 0);
     }
 
     public void testComplexExpressionTest() {
         String methodCode = "int complexExpressionTest() {\n" +
-                "        return ((SIZE * 2) + (SIZE + 6)) * 6;\n" +
+                "        return ((FIELD * 2) + (FIELD + 6)) * 6;\n" +
                 "    }\n";
 
         testMethod(methodCode, 0);
@@ -129,7 +94,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testBlockStatementTest() {
         String methodCode = "void blockStatementTest() {\n" +
                 "        {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -143,7 +108,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            }\n" +
                 "            if (2 > 5) {\n" +
                 "            }\n" +
-                "            SIZE++;\n" +
+                "            FIELD++;\n" +
                 "        }\n" +
                 "    }";
 
@@ -152,7 +117,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testIfStatementConditionTest() {
         String methodCode = "void ifStatementConditionTest() {\n" +
-                "        if (5 > SIZE) {\n" +
+                "        if (5 > FIELD) {\n" +
                 "            extraField += 5;\n" +
                 "        }\n" +
                 "    }";
@@ -162,18 +127,16 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testIfStatementCondition2Test() {
         String methodCode = "void ifStatementCondition2Test() {\n" +
-                "        if (SIZE.equals(100)) {\n" +
+                "        if (FIELD.equals(100)) {\n" +
                 "        }\n" +
                 "    }";
-
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
         testMethod(methodCode, 0);
     }
 
     public void testIfStatementBlockTest() {
         String methodCode = "void ifStatementBlockTest() {\n" +
                 "        if (true) {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -184,7 +147,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
         String methodCode = "void ifStatementElseBlockTest() {\n" +
                 "        if (true) {\n" +
                 "        } else {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -194,7 +157,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testIfStatementThenBlockTest() {
         String methodCode = "void ifStatementThenBlockTest() {\n" +
                 "        if (true) {\n" +
-                "            SIZE += 7;\n" +
+                "            FIELD += 7;\n" +
                 "        } else {\n" +
                 "        }\n" +
                 "    }";
@@ -204,7 +167,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForStatementInitiliazerTest() {
         String methodCode = "void forStatementInitiliazerTest() {\n" +
-                "        for (int i = SIZE; i < 100; i++) {\n" +
+                "        for (int i = FIELD; i < 100; i++) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -213,7 +176,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForStatementMultipleInitiliazerTest() {
         String methodCode = "void forStatementMultipleInitiliazerTest() {\n" +
-                "        for (int i = 0, j = SIZE + 5, k = 5; i < 100; i++) {\n" +
+                "        for (int i = 0, j = FIELD + 5, k = 5; i < 100; i++) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -222,7 +185,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForStatementConditionTest() {
         String methodCode = "void forStatementConditionTest() {\n" +
-                "        for (int i = 0; i < SIZE; i++) {\n" +
+                "        for (int i = 0; i < FIELD; i++) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -231,7 +194,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForStatementUpdatersTest() {
         String methodCode = "void forStatementUpdatersTest() {\n" +
-                "        for (int i = 0; i < 100; i += SIZE) {\n" +
+                "        for (int i = 0; i < 100; i += FIELD) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -240,7 +203,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForStatementMultipleUpdatersTest() {
         String methodCode = "void forStatementMultipleUpdatersTest() {\n" +
-                "        for (int i = 0, j = 5; i < 100; i += 1, j += SIZE) {\n" +
+                "        for (int i = 0, j = 5; i < 100; i += 1, j += FIELD) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -254,7 +217,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "                i += 7;\n" +
                 "            }\n" +
                 "\n" +
-                "            i += SIZE;\n" +
+                "            i += FIELD;\n" +
                 "        }\n" +
                 "    }";
 
@@ -263,7 +226,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testForeachEnhancedTest() {
         String methodCode = "void foreachEnhancedTest() {\n" +
-                "        for (Integer i : new ArrayList<Integer>(SIZE)) {\n" +
+                "        for (Integer i : new ArrayList<Integer>(FIELD)) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -273,7 +236,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testForeachBodyTest() {
         String methodCode = "void foreachBodyTest() {\n" +
                 "        for (Integer i : new ArrayList<Integer>()) {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -283,7 +246,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testWhileConditionTest() {
         String methodCode = "void whileConditionTest() {\n" +
                 "        int i = 0;\n" +
-                "        while (i < SIZE) {\n" +
+                "        while (i < FIELD) {\n" +
                 "        }\n" +
                 "    }";
 
@@ -293,7 +256,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testWhileBlockTest() {
         String methodCode = "void whileBlockTest() {\n" +
                 "        while (true) {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -304,7 +267,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
         String methodCode = "void doWhileConditionTest() {\n" +
                 "        int i = 0;\n" +
                 "        do {\n" +
-                "        } while (i < SIZE);\n" +
+                "        } while (i < FIELD);\n" +
                 "    }";
 
         testMethod(methodCode, 0);
@@ -317,7 +280,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            if (5 > 2) {\n" +
                 "                extraField += 5;\n" +
                 "            }\n" +
-                "            SIZE += 2;\n" +
+                "            FIELD += 2;\n" +
                 "        } while (true);\n" +
                 "    }";
 
@@ -326,7 +289,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testSwitchSwitchTest() {
         String methodCode = "void switchSwitchTest() {\n" +
-                "        switch (SIZE) {\n" +
+                "        switch (FIELD) {\n" +
                 "            default:\n" +
                 "                break;\n" +
                 "        }\n" +
@@ -346,7 +309,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 2);
     }
 
@@ -357,7 +320,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            case 10:\n" +
                 "                break;\n" +
                 "            case 100:\n" +
-                "                SIZE += 10;\n" +
+                "                FIELD += 10;\n" +
                 "                break;\n" +
                 "            case 13:\n" +
                 "                break;\n" +
@@ -369,7 +332,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testAssertTest() {
         String methodCode = "void assertTest() {\n" +
-                "        assert 1 < SIZE;\n" +
+                "        assert 1 < FIELD;\n" +
                 "    }";
 
         testMethod(methodCode, 0);
@@ -384,7 +347,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "                i += 1;\n" +
                 "            }\n" +
                 "\n" +
-                "            SIZE += 6;\n" +
+                "            FIELD += 6;\n" +
                 "        }\n" +
                 "    }";
 
@@ -393,29 +356,25 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testReturnStatementTest() {
         String methodCode = "int returnStatementTest() {\n" +
-                "        return SIZE;\n" +
+                "        return FIELD;\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENDED MECHANIC: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENDED MECHANIC: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 0);
     }
 
     public void testReturnComplexStatementTest() {
         String methodCode = "int returnComplexStatementTest() {\n" +
-                "        return this.SIZE.toString().hashCode();\n" +
+                "        return this.FIELD.toString().hashCode();\n" +
                 "    }";
 
-        /*
-        TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN.
-        IF NOT: the problem is that program finds reference expression `SIZE.toString` which is not a field.
-         */
         testMethod(methodCode, 0);
     }
 
     public void testSynzhronizedSyncTest() {
         String methodCode = "void synzhronizedSyncTest() {\n" +
-                "        synchronized (SIZE) {\n" +
-                "            SIZE += 5;\n" +
+                "        synchronized (FIELD) {\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
@@ -428,7 +387,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            if (2 > 5) {\n" +
                 "            }\n" +
                 "\n" +
-                "            SIZE += 6;\n" +
+                "            FIELD += 6;\n" +
                 "        }\n" +
                 "    }";
 
@@ -437,7 +396,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
 
     public void testThrowStatementTest() {
         String methodCode = "void throwStatementTest() {\n" +
-                "        throw new RuntimeException(SIZE.toString());\n" +
+                "        throw new RuntimeException(FIELD.toString());\n" +
                 "    }\n";
 
         testMethod(methodCode, 0);
@@ -449,7 +408,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            if (1 > 2) {\n" +
                 "            }\n" +
                 "\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        } finally {\n" +
                 "        }\n" +
                 "    }";
@@ -463,11 +422,11 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            extraField /= 0;\n" +
                 "        } catch (ArithmeticException e) {\n" +
                 "            extraField += 1;\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 0);
     }
 
@@ -478,7 +437,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "        } catch (ArithmeticException e) {\n" +
                 "            extraField += 1;\n" +
                 "        } catch (RuntimeException e) {\n" +
-                "            SIZE *= 2;\n" +
+                "            FIELD *= 2;\n" +
                 "        } catch (StackOverflowError e) {\n" +
                 "            extraField += 10;\n" +
                 "        } finally {\n" +
@@ -486,7 +445,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 0);
     }
 
@@ -498,28 +457,28 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "            extraField += 1;\n" +
                 "        } finally {\n" +
                 "            extraField += 5;\n" +
-                "            SIZE += 1;\n" +
+                "            FIELD += 1;\n" +
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 0);
     }
 
     public void testLocalVariableDeclarationTest() {
         String methodCode = "void localVariableDeclarationTest() {\n" +
                 "        int a = 5;\n" +
-                "        int b = SIZE;\n" +
+                "        int b = FIELD;\n" +
                 "    }";
 
         testMethod(methodCode, 0);
     }
 
     public void testLocalCLassDeclarationTest() {
-        String methodCode = "void localCLassDeclarationTest() {\n" +
+        String methodCode = "void localClassDeclarationTest() {\n" +
                 "        int a = 5;\n" +
                 "        class LocalClass {\n" +
-                "            int b = SIZE; //It will be in entity set too.\n" +
+                "            int b = FIELD; //It will be in entity set too.\n" +
                 "        }\n" +
                 "    }";
 
@@ -529,11 +488,11 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     public void testInnerClassFieldAccess() {
         String methodCode = "public static class InnerClass {\n" +
                 "        void static fun() {\n" +
-                "            SIZE += 5;\n" +
+                "            FIELD += 5;\n" +
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN
+        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         testMethod(methodCode, 0);
     }
 }
