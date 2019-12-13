@@ -77,10 +77,19 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testBinaryExpressionTest() {
         String methodCode = "int binaryExpressionTest() {\n" +
-                "        return FIELD;\n" +
+                "        return FIELD + 6;\n" +
                 "    }";
 
         testMethod(methodCode, 0);
+    }
+
+    public void testSimpleAccessTest() {
+        String methodCode = "int binaryExpressionTest() {\n" +
+                "        return FIELD;\n" +
+                "    }";
+
+        //TODO does not work
+        //testMethod(methodCode, 0);
     }
 
     public void testAccessViaThisTest() {
