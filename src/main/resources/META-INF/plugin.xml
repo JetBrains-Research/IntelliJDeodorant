@@ -14,9 +14,9 @@
     </description>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="ui.RefactoringsToolWindowFactory"/>
+        <toolWindow id="JDeodorant" secondary="true" anchor="bottom" factoryClass="org.jetbrains.research.intellijdeodorant.ide.ui.RefactoringsToolWindowFactory"/>
 
-        <errorHandler implementation="reporting.GitHubErrorReporter"/>
+        <errorHandler implementation="org.jetbrains.research.intellijdeodorant.reporting.GitHubErrorReporter"/>
     </extensions>
 
 </idea-plugin>
