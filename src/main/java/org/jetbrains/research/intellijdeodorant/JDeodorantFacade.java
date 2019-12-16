@@ -2,14 +2,7 @@ package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiVariable;
-<<<<<<< HEAD:src/main/java/core/ast/Standalone.java
-import core.ast.decomposition.cfg.*;
-import core.distance.DistanceMatrix;
-import core.distance.MoveMethodCandidateRefactoring;
-import core.distance.MySystem;
-import core.distance.ProjectInfo;
-import ui.SettingsPanel;
-=======
+import org.jetbrains.research.intellijdeodorant.ide.ui.SettingsPanel;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
@@ -19,7 +12,6 @@ import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
->>>>>>> master:src/main/java/org/jetbrains/research/intellijdeodorant/JDeodorantFacade.java
 
 import java.util.*;
 

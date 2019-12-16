@@ -1,4 +1,4 @@
-package ui;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -7,11 +7,11 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.ui.components.JBPanel;
-import core.ast.ASTReader;
-import core.ast.ClassObject;
-import core.ast.SystemObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
+import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.annotations.NotNull;
-import utils.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 
 import javax.swing.*;
 import java.awt.*;
