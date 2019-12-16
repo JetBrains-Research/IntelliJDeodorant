@@ -54,14 +54,18 @@ public class CFG extends Graph {
             findBlockNodeControlParent(tryNode);
             directlyNestedNodesInBlocks.put(tryNode, new ArrayList<>());
             AbstractStatement firstStatement = composite.getStatements().get(0);
-            composite = (CompositeStatementObject) firstStatement;
+            if (firstStatement instanceof CompositeStatementObject) {
+                composite = (CompositeStatementObject) firstStatement;
+            }
         } else if (composite instanceof SynchronizedStatementObject) {
             CFGSynchronizedNode synchronizedNode = new CFGSynchronizedNode(composite);
             directlyNestedNodeInBlock(synchronizedNode);
             findBlockNodeControlParent(synchronizedNode);
             directlyNestedNodesInBlocks.put(synchronizedNode, new ArrayList<>());
             AbstractStatement firstStatement = composite.getStatements().get(0);
-            composite = (CompositeStatementObject) firstStatement;
+            if (firstStatement instanceof CompositeStatementObject) {
+                composite = (CompositeStatementObject) firstStatement;
+            }
         }
         int i = 0;
         for (AbstractStatement abstractStatement : composite.getStatements()) {
@@ -477,7 +481,8 @@ public class CFG extends Graph {
 
     private void directlyNestedNodeInBlock(CFGNode node) {
         for (CFGBlockNode blockNode : directlyNestedNodesInBlocks.keySet()) {
-            if (directlyNestedNode(node, (CompositeStatementObject) blockNode.getStatement())) {
+            if (blockNode.getStatement() instanceof CompositeStatementObject
+                    && directlyNestedNode(node, (CompositeStatementObject) blockNode.getStatement())) {
                 List<CFGNode> directlyNestedNodes = directlyNestedNodesInBlocks.get(blockNode);
                 directlyNestedNodes.add(node);
                 break;
