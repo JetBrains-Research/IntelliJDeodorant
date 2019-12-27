@@ -5,10 +5,14 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.pom.java.LanguageLevel;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
+import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +24,7 @@ import java.util.Set;
 
 public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TEST_ROOT = "src/test/resources/testdata/core/ast/typestatechecking/";
+    private static final String MOCK_JDK_HOME = "src/test/resources/mockJDK-1.8";
     private ProgressIndicator fakeProgressIndicator = new FakeProgressIndicator();
 
     public void testAdditionalConstants() {
@@ -51,6 +56,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testOuterLocalVariables() {
+        performTwoRefactoringsTest();
+    }
+
+    public void testPackages() {
         performTwoRefactoringsTest();
     }
 
@@ -114,6 +123,17 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
                 () -> createRefactoring(eliminationGroup.getCandidates().get(0), project).apply()
         );
         checkTest();
+    }
+
+    @NotNull
+    @Override
+    protected LightProjectDescriptor getProjectDescriptor() {
+        return new ProjectDescriptor(LanguageLevel.JDK_1_8, false) {
+            @Override
+            public Sdk getSdk() {
+                return JavaSdk.getInstance().createJdk("java 1.8", MOCK_JDK_HOME, false);
+            }
+        };
     }
 
     @Override
