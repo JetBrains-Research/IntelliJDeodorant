@@ -105,7 +105,8 @@ public abstract class PolymorphismRefactoring {
         List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(newStatement);
         for (PsiExpression creation : classInstanceCreations) {
             PsiNewExpression classInstanceCreation = (PsiNewExpression) creation;
-            PsiExpression[] arguments = classInstanceCreation.getArgumentList().getExpressions();
+            PsiExpressionList argumentList = classInstanceCreation.getArgumentList();
+            PsiExpression[] arguments = argumentList != null ? argumentList.getExpressions() : PsiExpression.EMPTY_ARRAY;
             for (PsiExpression argument : arguments) {
                 if (argument instanceof PsiThisExpression) {
                     String parameterName = sourceTypeDeclaration.getName();

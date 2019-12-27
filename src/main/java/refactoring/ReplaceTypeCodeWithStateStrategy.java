@@ -1537,7 +1537,8 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(statement);
                     for (PsiExpression expression : classInstanceCreations) {
                         PsiNewExpression classInstanceCreation = (PsiNewExpression) expression;
-                        PsiExpression[] arguments = classInstanceCreation.getArgumentList().getExpressions();
+                        PsiExpressionList argumentList = classInstanceCreation.getArgumentList();
+                        PsiExpression[] arguments = argumentList != null ? argumentList.getExpressions() : PsiExpression.EMPTY_ARRAY;
                         for (PsiExpression argument : arguments) {
                             PsiReferenceExpression accessedVariable = null;
                             if (argument instanceof PsiReferenceExpression) {

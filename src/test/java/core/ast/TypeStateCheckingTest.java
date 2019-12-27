@@ -26,6 +26,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performSingleRefactoringTest();
     }
 
+    public void testExceptionInSignature() {
+        performTwoRefactoringsTest();
+    }
+
     public void testExistingGetterSetter() {
         performSingleRefactoringTest();
     }
@@ -34,12 +38,20 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performSingleRefactoringTest();
     }
 
+    public void testImports() {
+        performTwoRefactoringsTest();
+    }
+
     public void testInstanceof() {
         performSingleRefactoringTest();
     }
 
     public void testNestedEnum() {
         performSingleRefactoringTest();
+    }
+
+    public void testOuterLocalVariables() {
+        performTwoRefactoringsTest();
     }
 
     public void testSeparateFileEnum() {
@@ -67,6 +79,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testTwoTypeCheckingFragments() {
+        performTwoRefactoringsTest();
+    }
+
+    private void performTwoRefactoringsTest() {
         initTest();
         Project project = myFixture.getProject();
         for (int i = 0; i < 2; i++) {
