@@ -1465,6 +1465,39 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                 }
                             }
                         }
+                    } else if(statement instanceof PsiDeclarationStatement) {
+                        PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement)statement;
+                        PsiElement[] declaredElements = declarationStatement.getDeclaredElements();
+                        for(PsiElement fragment : declaredElements) {
+                            if (!(fragment instanceof PsiVariable)) {
+                                continue;
+                            }
+                            PsiVariable variable = (PsiVariable) fragment;
+                            PsiExpression initializerExpression = variable.getInitializer();
+                            PsiReferenceExpression accessedVariable = null;
+                            if(initializerExpression instanceof PsiReferenceExpression) {
+                                accessedVariable = (PsiReferenceExpression) initializerExpression;
+                            }
+
+                            if(accessedVariable != null) {
+                                PsiElement resolvedAccessdVariable = accessedVariable.resolve();
+                                if(resolvedAccessdVariable.equals(resolvedAccessdVariable)) {
+                                    if(modify && !nodeExistsInsideTypeCheckCodeFragment(initializerExpression)) {
+                                        String getterMethodName;
+                                        if (typeCheckElimination.getTypeFieldGetterMethod() != null) {
+                                            getterMethodName = typeCheckElimination.getTypeFieldGetterMethod().getName();
+                                        } else {
+                                            getterMethodName = "get" + abstractClassName;
+                                        }
+                                        PsiExpression getterMethodInvocation = elementFactory.createExpressionFromText(
+                                                getterMethodName + "()",
+                                                null
+                                        );
+                                        variable.setInitializer(getterMethodInvocation);
+                                    }
+                                }
+                            }
+                        }
                     }
                     List<PsiExpression> methodInvocations = expressionExtractor.getMethodInvocations(statement);
                     for (PsiExpression expression : methodInvocations) {

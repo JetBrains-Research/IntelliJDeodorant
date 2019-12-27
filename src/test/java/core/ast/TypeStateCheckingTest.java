@@ -30,6 +30,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performSingleRefactoringTest();
     }
 
+    public void testGetClass() {
+        performSingleRefactoringTest();
+    }
+
     public void testInstanceof() {
         performSingleRefactoringTest();
     }
@@ -43,6 +47,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testStateField() {
+        performSingleRefactoringTest();
+    }
+
+    public void testStateFieldAccesses() {
         performSingleRefactoringTest();
     }
 
