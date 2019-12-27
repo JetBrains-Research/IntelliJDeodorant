@@ -2,7 +2,6 @@ package core.ast;
 
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
@@ -10,7 +9,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
-import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +22,66 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TEST_ROOT = "src/test/resources/testdata/core/ast/typestatechecking/";
     private ProgressIndicator fakeProgressIndicator = new FakeProgressIndicator();
 
-    public void IGNORED_testBasicStateStrategy() {
+    public void testAdditionalConstants() {
+        performSingleRefactoringTest();
+    }
+
+    public void testExistingGetterSetter() {
+        performSingleRefactoringTest();
+    }
+
+    public void testInstanceof() {
+        performSingleRefactoringTest();
+    }
+
+    public void testNestedEnum() {
+        performSingleRefactoringTest();
+    }
+
+    public void testSeparateFileEnum() {
+        performSingleRefactoringTest();
+    }
+
+    public void testStateField() {
+        performSingleRefactoringTest();
+    }
+
+    public void testStateLocalVariable() {
+        performSingleRefactoringTest();
+    }
+
+    public void testStateParameter() {
+        performSingleRefactoringTest();
+    }
+
+    public void testSwitchOperator() {
+        performSingleRefactoringTest();
+    }
+
+    public void testTwoTypeCheckingFragments() {
         initTest();
         Project project = myFixture.getProject();
-        Set<TypeCheckEliminationGroup> set = Standalone.getTypeCheckEliminationRefactoringOpportunities(new ProjectInfo(project), fakeProgressIndicator);
+        for (int i = 0; i < 2; i++) {
+            Set<TypeCheckEliminationGroup> set = Standalone.getTypeCheckEliminationRefactoringOpportunities(
+                    new ProjectInfo(project), fakeProgressIndicator
+            );
+            assertEquals(set.size(), 2 - i);
+            TypeCheckEliminationGroup eliminationGroup = set.iterator().next();
+            assertEquals(eliminationGroup.getCandidates().size(), 1);
+            WriteCommandAction.runWriteCommandAction(
+                    project,
+                    () -> createRefactoring(eliminationGroup.getCandidates().get(0), project).apply()
+            );
+        }
+        checkTest();
+    }
+
+    private void performSingleRefactoringTest() {
+        initTest();
+        Project project = myFixture.getProject();
+        Set<TypeCheckEliminationGroup> set = Standalone.getTypeCheckEliminationRefactoringOpportunities(
+                new ProjectInfo(project), fakeProgressIndicator
+        );
         assertEquals(set.size(), 1);
         TypeCheckEliminationGroup eliminationGroup = set.iterator().next();
         assertEquals(eliminationGroup.getCandidates().size(), 1);

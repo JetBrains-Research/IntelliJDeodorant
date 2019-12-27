@@ -3,8 +3,6 @@ package ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.TransactionGuard;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
@@ -15,7 +13,9 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiMethod;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
@@ -35,8 +35,7 @@ import utils.IntelliJDeodorantBundle;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Panel for Type-State Checking refactorings.
@@ -191,9 +190,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    Set<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
+                    List<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
-                    model.setEliminationGroups(new ArrayList<>(candidates));
+                    model.setEliminationGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
                 });
             }

@@ -170,8 +170,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                     PsiExpression rightOperand = leafInfixExpression.getROperand();
                     PsiExpression leftOperandExpression = extractOperand(leftOperand);
                     PsiExpression rightOperandExpression = extractOperand(rightOperand);
-                    PsiReferenceExpression typeVariableName = null; // TODO: AA WTF
-                    PsiReferenceExpression staticFieldName = null; /// TODO: AAA WTF
+                    PsiReferenceExpression typeVariableName = null;
+                    PsiReferenceExpression staticFieldName = null;
                     PsiMethodCallExpression typeMethodInvocation = null;
                     PsiType subclassType = null;
                     if (leftOperandExpression != null && rightOperandExpression != null) {
@@ -209,7 +209,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                     } else if (leftOperandExpression != null && rightOperandExpression == null) {
                         if (rightOperand instanceof PsiClassObjectAccessExpression) {
                             PsiClassObjectAccessExpression typeLiteral = (PsiClassObjectAccessExpression) rightOperand;
-                            subclassType = typeLiteral.getType();
+                            subclassType = typeLiteral.getOperand().getType();
                             if (leftOperandExpression instanceof PsiReferenceExpression) {
                                 typeVariableName = (PsiReferenceExpression) leftOperandExpression;
                             } else if (leftOperandExpression instanceof PsiMethodCallExpression) {
@@ -219,7 +219,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                     } else if (leftOperandExpression == null && rightOperandExpression != null) {
                         if (leftOperand instanceof PsiClassObjectAccessExpression) {
                             PsiClassObjectAccessExpression typeLiteral = (PsiClassObjectAccessExpression) leftOperand;
-                            subclassType = typeLiteral.getType();
+                            subclassType = typeLiteral.getOperand().getType();
                             if (rightOperandExpression instanceof PsiReferenceExpression) {
                                 typeVariableName = (PsiReferenceExpression) rightOperandExpression;
                             } else if (rightOperandExpression instanceof PsiMethodCallExpression) {

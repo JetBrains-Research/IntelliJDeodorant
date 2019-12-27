@@ -42,11 +42,11 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             this.additionalStaticFieldMap.put(simpleName, generateSubclassName(simpleName));
         }
         this.abstractClassName = typeCheckElimination.getAbstractClassName();
+        checkInitialConditions();
     }
 
     @Override
     public void apply() {
-        checkInitialConditions(); // do we really need it???
         if (typeCheckElimination.getTypeField() != null) {
             modifyTypeFieldAssignmentsInContextClass(true);
             modifyTypeFieldAccessesInContextClass(true);
