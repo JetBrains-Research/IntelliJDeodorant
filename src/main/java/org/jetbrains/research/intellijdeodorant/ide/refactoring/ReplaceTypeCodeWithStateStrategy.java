@@ -339,7 +339,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             typeCheckElimination.getTypeCheckCodeFragment().replace(expressionStatement);
         } else {
             PsiMethodCallExpression abstractMethodInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
-                    typeCheckElimination.getTypeField().getName() + "." + typeCheckElimination.getAbstractMethodName() + "();",
+                    typeCheckElimination.getTypeField().getName() + "." + typeCheckElimination.getAbstractMethodName() + "()",
                     null
             );
             PsiExpressionList methodInvocationArgumentsRewrite = abstractMethodInvocation.getArgumentList();
