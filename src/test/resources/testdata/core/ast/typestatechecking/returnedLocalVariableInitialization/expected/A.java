@@ -1,5 +1,3 @@
-package ru.tests;
-
 /**
  * @see Main#A **/
 public class A extends State {

@@ -567,39 +567,4 @@ public abstract class PolymorphismRefactoring {
     public PsiFile getSourceFile() {
         return sourceFile;
     }
-
-//	protected Expression generateDefaultValue(ASTRewrite sourceRewriter, AST ast, ITypeBinding returnTypeBinding) {
-//		Expression returnedExpression = null;
-//		if(returnTypeBinding.isPrimitive()) {
-//			if(returnTypeBinding.getQualifiedName().equals("boolean")) {
-//				returnedExpression = ast.newBooleanLiteral(false);
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("char")) {
-//				CharacterLiteral characterLiteral = ast.newCharacterLiteral();
-//				sourceRewriter.set(characterLiteral, CharacterLiteral.ESCAPED_VALUE_PROPERTY, "\u0000", null);
-//				returnedExpression = characterLiteral;
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("int") ||
-//					returnTypeBinding.getQualifiedName().equals("short") ||
-//					returnTypeBinding.getQualifiedName().equals("byte")) {
-//				returnedExpression = ast.newNumberLiteral("0");
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("long")) {
-//				returnedExpression = ast.newNumberLiteral("0L");
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("float")) {
-//				returnedExpression = ast.newNumberLiteral("0.0f");
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("double")) {
-//				returnedExpression = ast.newNumberLiteral("0.0d");
-//			}
-//			else if(returnTypeBinding.getQualifiedName().equals("void")) {
-//				returnedExpression = null;
-//			}
-//		}
-//		else {
-//			returnedExpression = ast.newNullLiteral();
-//		}
-//		return returnedExpression;
-//	}
 }

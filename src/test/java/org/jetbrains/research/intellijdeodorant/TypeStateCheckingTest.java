@@ -16,7 +16,6 @@ import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.*;
 import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.QuadriFunction;
@@ -62,6 +61,14 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testPackages() {
         performTwoRefactoringsTest();
+    }
+
+    public void testReturnedLocalVariableInitialization() {
+        performSingleRefactoringTest();
+    }
+
+    public void testReturnedLocalVariableModification() {
+        performSingleRefactoringTest();
     }
 
     public void testSeparateFileEnum() {

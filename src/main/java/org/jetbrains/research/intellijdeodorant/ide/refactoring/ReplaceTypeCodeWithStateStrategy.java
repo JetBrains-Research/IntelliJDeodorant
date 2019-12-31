@@ -346,6 +346,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             if (returnedVariable != null) {
                 PsiExpression argument = elementFactory.createExpressionFromText(returnedVariable.getName(), null);
                 methodInvocationArgumentsRewrite.add(argument);
+                initializeReturnedVariableDeclaration();
             }
             for (PsiParameter abstractMethodParameter : typeCheckElimination.getAccessedParameters()) {
                 if (!abstractMethodParameter.equals(returnedVariable)) {
@@ -378,31 +379,15 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
     }
 
-    //
-//	private void initializeReturnedVariableDeclaration() { // TODO: do we really need it???
-//		ASTRewrite sourceRewriter = ASTRewrite.create(sourceTypeDeclaration.getAST());
-//		AST contextAST = sourceTypeDeclaration.getAST();
-//		if(returnedVariable != null) {
-//			IVariableBinding returnedVariableBinding = returnedVariable.resolveBinding();
-//			if(returnedVariable instanceof VariableDeclarationFragment && !returnedVariableBinding.isField()) {
-//				VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment)returnedVariable;
-//				if(variableDeclarationFragment.getInitializer() == null) {
-//					Expression defaultValue = generateDefaultValue(sourceRewriter, contextAST, returnedVariableBinding.getType());
-//					sourceRewriter.set(variableDeclarationFragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, defaultValue, null);
-//				}
-//			}
-//		}
-//		try {
-//			TextEdit sourceEdit = sourceRewriter.rewriteAST();
-//			ICompilationUnit sourceICompilationUnit = (ICompilationUnit)sourceCompilationUnit.getJavaElement();
-//			CompilationUnitChange change = compilationUnitChanges.get(sourceICompilationUnit);
-//			change.getEdit().addChild(sourceEdit);
-//			change.addTextEditGroup(new TextEditGroup("Initialize returned variable", new TextEdit[] {sourceEdit}));
-//		} catch (JavaModelException e) {
-//			e.printStackTrace();
-//		}
-//	}
-//
+
+	private void initializeReturnedVariableDeclaration() {
+        if(returnedVariable instanceof PsiLocalVariable && !returnedVariable.hasInitializer()) {
+            String defaultValue = PsiTypesUtil.getDefaultValueOfType(returnedVariable.getType());
+            PsiExpression initializerExpression = elementFactory.createExpressionFromText(defaultValue, null);
+            returnedVariable.setInitializer(initializerExpression);
+		}
+	}
+
     private void addRequiredImportDeclarationsToContext() {
         addImports(getPsiImportList(sourceFile), requiredImportDeclarationsForContext);
     }
@@ -602,6 +587,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             PsiExpressionList abstractMethodInvocationArgumentsRewrite = abstractMethodInvocation.getArgumentList();
             if (returnedVariable != null) {
                 abstractMethodInvocationArgumentsRewrite.add(elementFactory.createExpressionFromText(returnedVariable.getName(), null));
+                initializeReturnedVariableDeclaration();
             }
             for (PsiParameter abstractMethodParameter : typeCheckElimination.getAccessedParameters()) {
                 if (!abstractMethodParameter.equals(returnedVariable)) {
