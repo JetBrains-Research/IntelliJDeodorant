@@ -706,7 +706,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
             if (packageName != null && !packageName.isEmpty()) {
                 PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
-                stateStrategyFile.add(packageStatement);
+                stateStrategyFile.addBefore(packageStatement, getPsiImportList(stateStrategyFile));
             }
             stateStrategyTypeDeclaration = elementFactory.createClass(abstractClassName);
             PsiUtil.setModifierProperty(stateStrategyTypeDeclaration, PsiModifier.PUBLIC, true);
@@ -867,7 +867,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                 String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
                 if (packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
-                    subclassFile.add(packageStatement);
+                    subclassFile.addBefore(packageStatement, getPsiImportList(subclassFile));
                 }
                 PsiDocComment subclassJavaDoc = elementFactory.createDocCommentFromText("/** **/", null);
 
@@ -1081,7 +1081,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
             if (packageName != null && !packageName.isEmpty()) {
                 PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
-                intermediateClassFile.add(packageStatement);
+                intermediateClassFile.addBefore(packageStatement, getPsiImportList(intermediateClassFile));
             }
             intermediateClassTypeDeclaration = elementFactory.createClass(intermediateClassName);
             intermediateClassTypeDeclaration.getExtendsList().add(elementFactory.createReferenceFromText(abstractClassName, null));
@@ -1238,7 +1238,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                 String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
                 if (packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
-                    subclassFile.add(packageStatement);
+                    subclassFile.addBefore(packageStatement, getPsiImportList(subclassFile));
                 }
                 PsiDocComment subclassJavaDoc = elementFactory.createDocCommentFromText("", null);
 

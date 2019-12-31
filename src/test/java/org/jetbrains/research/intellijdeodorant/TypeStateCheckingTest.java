@@ -47,6 +47,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performTwoRefactoringsTest();
     }
 
+    public void testImportsAndPackageOrder() {
+        performTwoRefactoringsTest();
+    }
+
     public void testInstanceof() {
         performSingleRefactoringTest();
     }

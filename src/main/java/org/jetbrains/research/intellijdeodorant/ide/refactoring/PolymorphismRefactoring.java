@@ -545,7 +545,7 @@ public abstract class PolymorphismRefactoring {
         }
     }
 
-    protected static PsiImportList getPsiImportList(PsiFile classFile) {
+    protected static PsiImportList  getPsiImportList(PsiFile classFile) {
         PsiElement[] children = classFile.getChildren();
         for (PsiElement child : children) {
             if (child instanceof PsiImportList) {
