@@ -4,6 +4,7 @@ import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.command.WriteCommandAction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
@@ -19,11 +20,11 @@ import java.util.Collections;
 class TypeCheckingPanel extends AbstractRefactoringPanel {
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "type.state.checking.identification.indicator";
     private static final String[] COLUMN_NAMES = new String[]{
-            "Type Checking Method",
-            "Refactoring Type",
-            "System-Level Occurrences",
-            "Class-Level Occurrences",
-            "Average #statements per case"
+            IntelliJDeodorantBundle.message("type.state.checking.panel.column.method"),
+            IntelliJDeodorantBundle.message("type.state.checking.panel.column.refactoring.type"),
+            IntelliJDeodorantBundle.message("type.state.checking.panel.column.system.occurrences"),
+            IntelliJDeodorantBundle.message("type.state.checking.panel.column.class.occurrences"),
+            IntelliJDeodorantBundle.message("type.state.checking.panel.column.average.statements")
     };
     private static final int REFACTOR_DEPTH = 3;
 

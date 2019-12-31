@@ -5,6 +5,7 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.ui.RefactoringDialog;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.ReplaceTypeCodeWithStateStrategy;
 
 import javax.swing.*;
@@ -21,7 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
-
+	private static final String TYPE_NAME_NOT_VALID =
+			IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.invalid");
+	private static final String TYPE_NAME_EXISTS_IN_PACKAGE =
+			IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.package");
+	private static final String TYPE_NAME_EXISTS_IN_JAVA_LANG =
+			IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.javalang");
+	private static final String NAME_ALREADY_CHOSEN =
+			IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.chosen");
 	private ReplaceTypeCodeWithStateStrategy refactoring;
 	private Map<JTextField, PsiField> textMap = new HashMap<>();
 	private Map<JTextField, String> defaultNamingMap = new HashMap<>();
@@ -162,17 +170,13 @@ public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
 		for (JTextField textField : textMap.keySet()) {
 			String text = textField.getText();
 			if (!Pattern.matches(classNamePattern, textField.getText())) {
-				String message = "Type name is not valid";
-				validationInfoList.add(new ValidationInfo(message, textField));
+				validationInfoList.add(new ValidationInfo(TYPE_NAME_NOT_VALID, textField));
 			} else if (parentPackage != null && parentPackage.containsClassNamed(text)) {
-				String message = "Type with this name already exists in the package";
-				validationInfoList.add(new ValidationInfo(message, textField));
+				validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_PACKAGE, textField));
 			} else if (javaLangClassNames.contains(text)) {
-				String message = "Type with this name already exists in package java.lang";
-				validationInfoList.add(new ValidationInfo(message, textField));
+				validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_JAVA_LANG, textField));
 			} else if (encounteredNames.contains(text)) {
-				String message = "This name is already chosen";
-				validationInfoList.add(new ValidationInfo(message, textField));
+				validationInfoList.add(new ValidationInfo(NAME_ALREADY_CHOSEN, textField));
 			} else {
 				refactoring.setTypeNameForNamedConstant(textMap.get(textField), textField.getText());
 			}
