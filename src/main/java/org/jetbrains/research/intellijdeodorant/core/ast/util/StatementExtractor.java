@@ -19,7 +19,7 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) { // TODO: returns all declaration statements
+    public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) {
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
     }
