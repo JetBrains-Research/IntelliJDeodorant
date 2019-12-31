@@ -91,18 +91,6 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
         return candidateRefactoringGroups.size();
     }
 
-    /*
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
-            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
-            RefactoringType.AbstractCandidateRefactoring candidate = (RefactoringType.AbstractCandidateRefactoring) child;
-            return group.getCandidates().indexOf(candidate);
-        }
-        return candidateRefactoringGroups.indexOf(child);
-    }
-     */
-
     RefactoringType getRefactoringType() {
         return refactoringType;
     }

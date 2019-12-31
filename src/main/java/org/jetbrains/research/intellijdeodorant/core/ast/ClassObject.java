@@ -130,14 +130,17 @@ public class ClassObject extends ClassDeclarationObject {
                     List<TypeCheckElimination> list = methodBodyObject.generateTypeCheckEliminations();
                     for(TypeCheckElimination typeCheckElimination : list) {
                         if(!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
-                            //TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(typeCheckElimination, typeDeclaration, methodObject.getMethodDeclaration());
                             TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
                                     typeCheckElimination,
                                     (PsiClass)getAbstractTypeDeclaration().recoverASTNode(),
                                     methodObject.getMethodDeclaration()
                             );
-                            if((typeCheckElimination.getTypeField() != null || typeCheckElimination.getTypeLocalVariable() != null || typeCheckElimination.getTypeMethodInvocation() != null) &&
-                                    typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType() && typeCheckElimination.isApplicable()) {
+                            boolean hasTypeLocalVariableFieldOrMethod = typeCheckElimination.getTypeField() != null
+                                    || typeCheckElimination.getTypeLocalVariable() != null
+                                    || typeCheckElimination.getTypeMethodInvocation() != null;
+                            if(hasTypeLocalVariableFieldOrMethod
+                                    && typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType()
+                                    && typeCheckElimination.isApplicable()) {
                                 typeCheckEliminations.add(typeCheckElimination);
                             }
                         }

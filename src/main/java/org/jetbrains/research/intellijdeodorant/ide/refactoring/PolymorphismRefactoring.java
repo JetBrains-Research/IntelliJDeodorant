@@ -22,7 +22,6 @@ public abstract class PolymorphismRefactoring {
     protected TypeCheckElimination typeCheckElimination;
     protected PsiElementFactory elementFactory;
     protected CodeStyleManager codeStyleManager;
-    private Set<PsiField> fieldDeclarationsChangedWithPublicModifier;
 
     final protected PsiJavaToken semicolon;
 
@@ -35,7 +34,6 @@ public abstract class PolymorphismRefactoring {
         this.typeCheckElimination = typeCheckElimination;
         elementFactory = PsiElementFactory.SERVICE.getInstance(project);
         codeStyleManager = CodeStyleManager.getInstance(project);
-        this.fieldDeclarationsChangedWithPublicModifier = new LinkedHashSet<>();
         this.project = project;
         semicolon = (PsiJavaToken) elementFactory.createStatementFromText(";", null).getFirstChild();
     }

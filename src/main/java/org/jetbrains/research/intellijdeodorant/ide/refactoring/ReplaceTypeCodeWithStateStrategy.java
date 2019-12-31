@@ -152,7 +152,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         typeCheckElimination.getTypeField().replace(typeFragment);
     }
 
-    private void generateSetterMethodForStateField() { // TODO: fix enum constants
+    private void generateSetterMethodForStateField() {
         PsiMethod setterMethod = typeCheckElimination.getTypeFieldSetterMethod();
         List<PsiField> staticFieldNames = new ArrayList<>(staticFieldMap.keySet());
         List<String> subclassNames = new ArrayList<>(staticFieldMap.values());
@@ -1677,9 +1677,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
         List<PsiMethod> methodDeclarationList = Arrays.asList(sourceTypeDeclaration.getMethods());
         contextMethods.addAll(methodDeclarationList);
-		/*for(MethodDeclaration methodDeclaration : methodDeclarationList) {
-			contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
-		}*/
         //get methods of inner classes
         PsiClass[] types = sourceTypeDeclaration.getInnerClasses();
         for (PsiClass type : types) {
@@ -1688,9 +1685,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             }
             List<PsiMethod> innerMethodDeclarationList = Arrays.asList(type.getMethods());
             contextMethods.addAll(innerMethodDeclarationList);
-			/*for(MethodDeclaration methodDeclaration : innerMethodDeclarationList) {
-				contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
-			}*/
         }
         return contextMethods;
     }
@@ -1777,11 +1771,10 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
 
         typeBindings.addAll(thrownExceptions);
-//		RefactoringUtility.getSimpleTypeBindings(typeBindings, requiredImportDeclarationsBasedOnSignature); // TODO: make it work
-        requiredImportDeclarationsBasedOnSignature.addAll(typeBindings); // TODO: this is temporary
+        requiredImportDeclarationsBasedOnSignature.addAll(typeBindings);
     }
 
-    private Set<PsiType> getRequiredImportDeclarationsBasedOnBranch(ArrayList<PsiStatement> statements) { // TODO: move to base class and use RefactoringUtility
+    private Set<PsiType> getRequiredImportDeclarationsBasedOnBranch(ArrayList<PsiStatement> statements) { // TODO: move to base class
         Set<PsiType> typeBindings = new LinkedHashSet<>();
         for (PsiStatement statement : statements) {
             TypeVisitor typeVisitor = new TypeVisitor();
@@ -1791,44 +1784,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return typeBindings;
     }
 
-    //
-//	private void addImportDeclaration(ITypeBinding typeBinding, CompilationUnit targetCompilationUnit, ASTRewrite targetRewriter) {
-//		String qualifiedName = typeBinding.getQualifiedName();
-//		String qualifiedPackageName = "";
-//		if(qualifiedName.contains("."))
-//			qualifiedPackageName = qualifiedName.substring(0,qualifiedName.lastIndexOf("."));
-//		PackageDeclaration sourcePackageDeclaration = sourceCompilationUnit.getPackage();
-//		String sourcePackageDeclarationName = "";
-//		if(sourcePackageDeclaration != null)
-//			sourcePackageDeclarationName = sourcePackageDeclaration.getName().getFullyQualifiedName();
-//		if(!qualifiedPackageName.equals("") && !qualifiedPackageName.equals("java.lang") &&
-//				!qualifiedPackageName.equals(sourcePackageDeclarationName) && !typeBinding.isNested()) {
-//			List<ImportDeclaration> importDeclarationList = targetCompilationUnit.imports();
-//			boolean found = false;
-//			for(ImportDeclaration importDeclaration : importDeclarationList) {
-//				if(!importDeclaration.isOnDemand()) {
-//					if(qualifiedName.equals(importDeclaration.getName().getFullyQualifiedName())) {
-//						found = true;
-//						break;
-//					}
-//				}
-//				else {
-//					if(qualifiedPackageName.equals(importDeclaration.getName().getFullyQualifiedName())) {
-//						found = true;
-//						break;
-//					}
-//				}
-//			}
-//			if(!found) {
-//				AST ast = targetCompilationUnit.getAST();
-//				ImportDeclaration importDeclaration = ast.newImportDeclaration();
-//				targetRewriter.set(importDeclaration, ImportDeclaration.NAME_PROPERTY, ast.newName(qualifiedName), null);
-//				ListRewrite importRewrite = targetRewriter.getListRewrite(targetCompilationUnit, CompilationUnit.IMPORTS_PROPERTY);
-//				importRewrite.insertLast(importDeclaration, null);
-//			}
-//		}
-//	}
-//
     private void setPublicModifierToStaticFields() {
         PsiField[] fieldDeclarations = sourceTypeDeclaration.getFields();
         List<PsiField> staticFields = typeCheckElimination.getStaticFields();
@@ -2102,10 +2057,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return commonSubstrings;
     }
 
-//	public CompilationUnit getSourceCompilationUnit() {
-//		return sourceCompilationUnit;
-//	}
-//
 	public String getAbstractClassName() {
 		return abstractClassName;
 	}
@@ -2143,22 +2094,4 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return null;
     }
 
-//	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
-//			throws CoreException, OperationCanceledException {
-//		RefactoringStatus status= new RefactoringStatus();
-//		try {
-//			pm.beginTask("Checking preconditions...", 1);
-//			if(typeCheckElimination.getTypeField() != null) {
-//				modifyTypeFieldAssignmentsInContextClass(false);
-//				modifyTypeFieldAccessesInContextClass(false);
-//			}
-//			else if(typeCheckElimination.getTypeLocalVariable() != null) {
-//				identifyTypeLocalVariableAssignmentsInTypeCheckMethod();
-//				identifyTypeLocalVariableAccessesInTypeCheckMethod();
-//			}
-//		} finally {
-//			pm.done();
-//		}
-//		return status;
-//	}
 }
