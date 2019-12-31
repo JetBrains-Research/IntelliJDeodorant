@@ -19,10 +19,10 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
     @Override
     public Object getValueAt(Object o, int index) {
         if (o instanceof AbstractTypeCheckCandidateRefactoringGroup) {
-            AbstractTypeCheckCandidateRefactoringGroup abstractGroup = (AbstractTypeCheckCandidateRefactoringGroup)o;
+            AbstractTypeCheckCandidateRefactoringGroup abstractGroup = (AbstractTypeCheckCandidateRefactoringGroup) o;
             TypeCheckEliminationGroup group = (TypeCheckEliminationGroup) abstractGroup.getCandidateRefactoringGroup();
 
-            switch(index){
+            switch (index) {
                 case 0:
                     return group.toString();
                 case 2:
@@ -34,13 +34,13 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
             }
         }
         if (o instanceof AbstractTypeCheckCandidateRefactoring) {
-            AbstractTypeCheckCandidateRefactoring abstractTypeCheckElimination = (AbstractTypeCheckCandidateRefactoring)o;
+            AbstractTypeCheckCandidateRefactoring abstractTypeCheckElimination = (AbstractTypeCheckCandidateRefactoring) o;
             TypeCheckElimination typeCheckElimination = (TypeCheckElimination) abstractTypeCheckElimination.getCandidateRefactoring();
-            switch(index) {
+            switch (index) {
                 case 0:
                     return typeCheckElimination.toString();
                 case 1:
-                    if(typeCheckElimination.getExistingInheritanceTree() == null) {
+                    if (typeCheckElimination.getExistingInheritanceTree() == null) {
                         return "Replace Type Code with State/Strategy";
                     }
                     return "Replace Conditional with Polymorphism";

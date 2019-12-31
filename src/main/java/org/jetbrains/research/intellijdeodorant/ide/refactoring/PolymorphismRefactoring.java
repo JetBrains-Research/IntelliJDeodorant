@@ -51,17 +51,17 @@ public abstract class PolymorphismRefactoring {
                 PsiMethodCallExpression oldMethodInvocation = (PsiMethodCallExpression) oldMethodInvocations.get(j);
                 for (PsiMethod methodDeclaration : accessedMethods) {
                     if (methodDeclaration.equals(oldMethodInvocation.resolveMethod())) {
-						addQualifierToSourceTypeMethodCalls(newMethodInvocation, methodDeclaration);
-						break;
-					}
+                        addQualifierToSourceTypeMethodCalls(newMethodInvocation, methodDeclaration);
+                        break;
+                    }
                 }
                 for (PsiMethod superMethodBinding : superAccessedMethods) {
                     if (superMethodBinding.equals(oldMethodInvocation.resolveMethod())) {
                         PsiExpression qualifierExpression = oldMethodInvocation.getMethodExpression().getQualifierExpression();
                         if (qualifierExpression == null || qualifierExpression instanceof PsiThisExpression) {
-							addQualifierToSourceTypeMethodCalls(newMethodInvocation, superMethodBinding);
-							break;
-						}
+                            addQualifierToSourceTypeMethodCalls(newMethodInvocation, superMethodBinding);
+                            break;
+                        }
                     }
                 }
             }
@@ -69,15 +69,15 @@ public abstract class PolymorphismRefactoring {
         }
     }
 
-	private void addQualifierToSourceTypeMethodCalls(PsiMethodCallExpression newMethodInvocation, PsiMethod methodDeclaration) {
-		String invokerName = sourceTypeDeclaration.getName();
-		if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
-			invokerName = invokerName.substring(0, 1).toLowerCase() + invokerName.substring(1);
-		}
-		newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
-	}
+    private void addQualifierToSourceTypeMethodCalls(PsiMethodCallExpression newMethodInvocation, PsiMethod methodDeclaration) {
+        String invokerName = sourceTypeDeclaration.getName();
+        if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
+            invokerName = invokerName.substring(0, 1).toLowerCase() + invokerName.substring(1);
+        }
+        newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
+    }
 
-	protected void replaceThisExpressionWithContextParameterInMethodInvocationArguments(List<PsiExpression> oldMethodInvocations,
+    protected void replaceThisExpressionWithContextParameterInMethodInvocationArguments(List<PsiExpression> oldMethodInvocations,
                                                                                         List<PsiExpression> newMethodInvocations) {
         for (int expressionIndex = 0; expressionIndex < oldMethodInvocations.size(); expressionIndex++) {
             PsiExpression newExpression = newMethodInvocations.get(expressionIndex);
@@ -385,45 +385,45 @@ public abstract class PolymorphismRefactoring {
     }
 
     private String getGetterName(Set<PsiField> superAccessedFields, PsiField assignedFieldBinding) {
-		PsiMethod getterMethodBinding = null;
-		if (superAccessedFields.contains(assignedFieldBinding)) {
-			getterMethodBinding = typeCheckElimination.getGetterMethodBindingOfSuperAccessedField(assignedFieldBinding);
-		} else {
-			getterMethodBinding = findGetterMethodInContext(assignedFieldBinding);
-		}
-		String getterMethodName;
-		if (getterMethodBinding != null) {
-			getterMethodName = getterMethodBinding.getName();
-		} else {
-			getterMethodName = assignedFieldBinding.getName();
-			getterMethodName = "get" + getterMethodName.substring(0, 1).toUpperCase() + getterMethodName.substring(1);
-		}
-		return getterMethodName;
-	}
+        PsiMethod getterMethodBinding = null;
+        if (superAccessedFields.contains(assignedFieldBinding)) {
+            getterMethodBinding = typeCheckElimination.getGetterMethodBindingOfSuperAccessedField(assignedFieldBinding);
+        } else {
+            getterMethodBinding = findGetterMethodInContext(assignedFieldBinding);
+        }
+        String getterMethodName;
+        if (getterMethodBinding != null) {
+            getterMethodName = getterMethodBinding.getName();
+        } else {
+            getterMethodName = assignedFieldBinding.getName();
+            getterMethodName = "get" + getterMethodName.substring(0, 1).toUpperCase() + getterMethodName.substring(1);
+        }
+        return getterMethodName;
+    }
 
-	private PsiMethodCallExpression generateSetterInvocation(Set<PsiField> superAssignedFields, String invokerName, PsiField assignedFieldBinding) {
-		PsiMethod setterMethodBinding = null;
-		if (superAssignedFields.contains(assignedFieldBinding)) {
-			setterMethodBinding = typeCheckElimination.getSetterMethodBindingOfSuperAssignedField(assignedFieldBinding);
-		} else {
-			setterMethodBinding = findSetterMethodInContext(assignedFieldBinding);
-		}
-		String leftHandMethodName;
-		if (setterMethodBinding != null) {
-			leftHandMethodName = setterMethodBinding.getName();
-		} else {
-			leftHandMethodName = assignedFieldBinding.getName();
-			leftHandMethodName = "set" + leftHandMethodName.substring(0, 1).toUpperCase() + leftHandMethodName.substring(1);
-		}
+    private PsiMethodCallExpression generateSetterInvocation(Set<PsiField> superAssignedFields, String invokerName, PsiField assignedFieldBinding) {
+        PsiMethod setterMethodBinding = null;
+        if (superAssignedFields.contains(assignedFieldBinding)) {
+            setterMethodBinding = typeCheckElimination.getSetterMethodBindingOfSuperAssignedField(assignedFieldBinding);
+        } else {
+            setterMethodBinding = findSetterMethodInContext(assignedFieldBinding);
+        }
+        String leftHandMethodName;
+        if (setterMethodBinding != null) {
+            leftHandMethodName = setterMethodBinding.getName();
+        } else {
+            leftHandMethodName = assignedFieldBinding.getName();
+            leftHandMethodName = "set" + leftHandMethodName.substring(0, 1).toUpperCase() + leftHandMethodName.substring(1);
+        }
 
-		PsiMethodCallExpression setterInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
-				invokerName + "." + leftHandMethodName + "()",
-				null
-		);
-		return setterInvocation;
-	}
+        PsiMethodCallExpression setterInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
+                invokerName + "." + leftHandMethodName + "()",
+                null
+        );
+        return setterInvocation;
+    }
 
-	private void setPublicModifierToSourceField(PsiField variableBinding) {
+    private void setPublicModifierToSourceField(PsiField variableBinding) {
         PsiUtil.setModifierProperty(variableBinding, PsiModifier.PUBLIC, true);
     }
 
@@ -536,7 +536,7 @@ public abstract class PolymorphismRefactoring {
         );
     }
 
-    protected static PsiImportList  getPsiImportList(PsiFile classFile) {
+    protected static PsiImportList getPsiImportList(PsiFile classFile) {
         PsiElement[] children = classFile.getChildren();
         for (PsiElement child : children) {
             if (child instanceof PsiImportList) {

@@ -373,13 +373,13 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     }
 
 
-	private void initializeReturnedVariableDeclaration() {
-        if(returnedVariable instanceof PsiLocalVariable && !returnedVariable.hasInitializer()) {
+    private void initializeReturnedVariableDeclaration() {
+        if (returnedVariable instanceof PsiLocalVariable && !returnedVariable.hasInitializer()) {
             String defaultValue = PsiTypesUtil.getDefaultValueOfType(returnedVariable.getType());
             PsiExpression initializerExpression = elementFactory.createExpressionFromText(defaultValue, null);
             returnedVariable.setInitializer(initializerExpression);
-		}
-	}
+        }
+    }
 
     private void modifyTypeCheckMethod() {
         createGetterMethodForStateObject();
@@ -1385,24 +1385,24 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                 }
                             }
                         }
-                    } else if(statement instanceof PsiDeclarationStatement) {
-                        PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement)statement;
+                    } else if (statement instanceof PsiDeclarationStatement) {
+                        PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) statement;
                         PsiElement[] declaredElements = declarationStatement.getDeclaredElements();
-                        for(PsiElement fragment : declaredElements) {
+                        for (PsiElement fragment : declaredElements) {
                             if (!(fragment instanceof PsiVariable)) {
                                 continue;
                             }
                             PsiVariable variable = (PsiVariable) fragment;
                             PsiExpression initializerExpression = variable.getInitializer();
                             PsiReferenceExpression accessedVariable = null;
-                            if(initializerExpression instanceof PsiReferenceExpression) {
+                            if (initializerExpression instanceof PsiReferenceExpression) {
                                 accessedVariable = (PsiReferenceExpression) initializerExpression;
                             }
 
-                            if(accessedVariable != null) {
+                            if (accessedVariable != null) {
                                 PsiElement resolvedAccessdVariable = accessedVariable.resolve();
-                                if(resolvedAccessdVariable.equals(resolvedAccessdVariable)) {
-                                    if(modify && !nodeExistsInsideTypeCheckCodeFragment(initializerExpression)) {
+                                if (resolvedAccessdVariable.equals(resolvedAccessdVariable)) {
+                                    if (modify && !nodeExistsInsideTypeCheckCodeFragment(initializerExpression)) {
                                         String getterMethodName;
                                         if (typeCheckElimination.getTypeFieldGetterMethod() != null) {
                                             getterMethodName = typeCheckElimination.getTypeFieldGetterMethod().getName();
@@ -1931,33 +1931,31 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return commonSubstrings;
     }
 
-	public String getAbstractClassName() {
-		return abstractClassName;
-	}
+    public String getAbstractClassName() {
+        return abstractClassName;
+    }
 
     public String getTypeVariableSimpleName() {
-		return typeCheckElimination.getTypeVariableSimpleName();
-	}
+        return typeCheckElimination.getTypeVariableSimpleName();
+    }
 
-	public Set<Map.Entry<PsiField, String>> getStaticFieldMapEntrySet() {
-		return staticFieldMap.entrySet();
-	}
+    public Set<Map.Entry<PsiField, String>> getStaticFieldMapEntrySet() {
+        return staticFieldMap.entrySet();
+    }
 
-	public Set<Map.Entry<PsiField, String>> getAdditionalStaticFieldMapEntrySet() {
-		return additionalStaticFieldMap.entrySet();
-	}
+    public Set<Map.Entry<PsiField, String>> getAdditionalStaticFieldMapEntrySet() {
+        return additionalStaticFieldMap.entrySet();
+    }
 
-	public void setTypeNameForNamedConstant(PsiField namedConstant, String typeName) {
-		if(staticFieldMap.containsKey(namedConstant)) {
-			staticFieldMap.put(namedConstant, typeName);
-		}
-		else if(additionalStaticFieldMap.containsKey(namedConstant)) {
-			additionalStaticFieldMap.put(namedConstant, typeName);
-		}
-		else {
-			abstractClassName = typeName;
-		}
-	}
+    public void setTypeNameForNamedConstant(PsiField namedConstant, String typeName) {
+        if (staticFieldMap.containsKey(namedConstant)) {
+            staticFieldMap.put(namedConstant, typeName);
+        } else if (additionalStaticFieldMap.containsKey(namedConstant)) {
+            additionalStaticFieldMap.put(namedConstant, typeName);
+        } else {
+            abstractClassName = typeName;
+        }
+    }
 
     public String getTypeNameForNamedConstant(PsiField namedConstant) {
         if (staticFieldMap.containsKey(namedConstant)) {
