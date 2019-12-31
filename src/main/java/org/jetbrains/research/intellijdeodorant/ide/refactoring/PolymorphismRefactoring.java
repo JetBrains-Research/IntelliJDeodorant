@@ -536,15 +536,6 @@ public abstract class PolymorphismRefactoring {
         );
     }
 
-    protected void addImports(PsiImportList importList, Set<PsiType> requiredImportDeclarations) {
-        for (PsiType typeBinding : requiredImportDeclarations) {
-            PsiClass resolvedClass = PsiUtil.resolveClassInType(typeBinding);
-            if (resolvedClass != null && resolvedClass.getContainingClass() == null && !PsiUtil.getPackageName(resolvedClass).isEmpty()) {
-                importList.add(elementFactory.createImportStatement(resolvedClass));
-            }
-        }
-    }
-
     protected static PsiImportList  getPsiImportList(PsiFile classFile) {
         PsiElement[] children = classFile.getChildren();
         for (PsiElement child : children) {

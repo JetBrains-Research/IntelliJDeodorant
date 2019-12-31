@@ -5,20 +5,16 @@ import com.intellij.psi.*;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocTag;
 import com.intellij.psi.util.*;
-import core.ast.util.TypeVisitor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("restriction")
 public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     private PsiVariable returnedVariable;
     private Set<PsiType> requiredImportDeclarationsBasedOnSignature;
-    private Set<PsiType> requiredImportDeclarationsForContext;
     private Set<PsiClassType> thrownExceptions;
     private Map<PsiField, String> staticFieldMap;
     private Map<PsiField, String> additionalStaticFieldMap;
@@ -31,7 +27,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         super(sourceFile, project, sourceTypeDeclaration, typeCheckElimination);
         this.returnedVariable = typeCheckElimination.getTypeCheckMethodReturnedVariable();
         this.requiredImportDeclarationsBasedOnSignature = new LinkedHashSet<>();
-        this.requiredImportDeclarationsForContext = new LinkedHashSet<>();
         this.thrownExceptions = typeCheckElimination.getThrownExceptions();
         this.staticFieldMap = new LinkedHashMap<>();
         for (PsiField simpleName : typeCheckElimination.getStaticFields()) {
@@ -81,8 +76,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         generateSettersForAssignedFields();
         setPublicModifierToStaticFields();
         setPublicModifierToAccessedMethods();
-
-        addRequiredImportDeclarationsToContext();
     }
 
     private PsiField createStateFieldVariableDeclarationFragment(String type) {
@@ -388,10 +381,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 		}
 	}
 
-    private void addRequiredImportDeclarationsToContext() {
-        addImports(getPsiImportList(sourceFile), requiredImportDeclarationsForContext);
-    }
-
     private void modifyTypeCheckMethod() {
         createGetterMethodForStateObject();
         replaceConditionalStructureWithPolymorphicMethodInvocationThroughStateObject();
@@ -400,8 +389,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         generateSettersForAssignedFields();
         setPublicModifierToStaticFields();
         setPublicModifierToAccessedMethods();
-
-        addRequiredImportDeclarationsToContext();
     }
 
     private void createGetterMethodForStateObject() {
@@ -696,7 +683,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     PsiClass typeDeclaration = (PsiClass) child;
                     if (typeDeclaration.getName().equals(abstractClassName)) {
                         stateStrategyTypeDeclaration = typeDeclaration;
-                        requiredImportDeclarationsForContext.add(PsiTypesUtil.getClassType(stateStrategyTypeDeclaration));
                         PsiUtil.setModifierProperty(stateStrategyTypeDeclaration, PsiModifier.ABSTRACT, true);
                         break;
                     }
@@ -773,13 +759,9 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
         stateStrategyTypeDeclaration.add(abstractMethodDeclaration);
 
-        generateRequiredImportDeclarationsBasedOnSignature();
-
         if (!stateStrategyAlreadyExists) {
             stateStrategyFile.add(stateStrategyTypeDeclaration);
         }
-
-        addImports(getPsiImportList(stateStrategyFile), requiredImportDeclarationsBasedOnSignature);
 
         List<ArrayList<PsiStatement>> typeCheckStatements = typeCheckElimination.getTypeCheckStatements();
         List<String> subclassNames = new ArrayList<String>(staticFieldMap.values());
@@ -851,19 +833,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             }
 
             PsiClass subclassTypeDeclaration = null;
-            if (subclassAlreadyExists) {
-                PsiElement[] abstractTypeDeclarations = subclassFile.getChildren();
-                for (PsiElement child : abstractTypeDeclarations) {
-                    if (child instanceof PsiClass) {
-                        PsiClass typeDeclaration = (PsiClass) child;
-                        if (typeDeclaration.getName().equals(subclassNames.get(i))) {
-                            subclassTypeDeclaration = typeDeclaration;
-                            requiredImportDeclarationsForContext.add(PsiTypesUtil.getClassType(subclassTypeDeclaration));
-                            break;
-                        }
-                    }
-                }
-            } else {
+            if (!subclassAlreadyExists) {
                 String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
                 if (packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
@@ -1026,12 +996,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             if (!subclassAlreadyExists) {
                 subclassFile.add(subclassTypeDeclaration);
             }
-
-            Set<PsiType> requiredImportDeclarations = Stream.of(
-                    getRequiredImportDeclarationsBasedOnBranch(statements),
-                    requiredImportDeclarationsBasedOnSignature
-            ).flatMap(Collection::stream).collect(Collectors.toSet());
-            addImports(getPsiImportList(subclassFile), requiredImportDeclarations);
         }
     }
 
@@ -1065,19 +1029,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
 
         PsiClass intermediateClassTypeDeclaration = null;
-        if (intermediateClassAlreadyExists) {
-            PsiElement[] abstractTypeDeclarations = intermediateClassFile.getChildren();
-            for (PsiElement child : abstractTypeDeclarations) {
-                if (child instanceof PsiClass) {
-                    PsiClass typeDeclaration = (PsiClass) child;
-                    if (intermediateClassName.equals(typeDeclaration.getName())) {
-                        intermediateClassTypeDeclaration = typeDeclaration;
-                        requiredImportDeclarationsForContext.add(PsiTypesUtil.getClassType(intermediateClassTypeDeclaration));
-                        break;
-                    }
-                }
-            }
-        } else {
+        if (!intermediateClassAlreadyExists) {
             String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
             if (packageName != null && !packageName.isEmpty()) {
                 PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
@@ -1126,7 +1078,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             concreteMethodParametersRewrite.add(elementFactory.createParameter(parameterName, parameterType));
         }
 
-        for (PsiClassType typeBinding : thrownExceptions) { // TODO: Use refactoring utility
+        for (PsiClassType typeBinding : thrownExceptions) {
             concreteMethodDeclaration.getThrowsList().add(elementFactory.createReferenceElementByType(typeBinding));
         }
 
@@ -1192,12 +1144,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             intermediateClassFile.add(intermediateClassTypeDeclaration);
         }
 
-        Set<PsiType> requiredImportDeclarations = Stream.of(
-                getRequiredImportDeclarationsBasedOnBranch(typeCheckStatements),
-                requiredImportDeclarationsBasedOnSignature
-        ).flatMap(Collection::stream).collect(Collectors.toSet());
-        addImports(getPsiImportList(intermediateClassFile), requiredImportDeclarations);
-
         for (int i = 0; i < subclassNames.size(); i++) {
             PsiFile subclassFile = null;
             boolean subclassAlreadyExists = true;
@@ -1222,19 +1168,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 
 
             PsiClass subclassTypeDeclaration = null;
-            if (subclassAlreadyExists) {
-                PsiElement[] abstractTypeDeclarations = subclassFile.getChildren();
-                for (PsiElement child : abstractTypeDeclarations) {
-                    if (child instanceof PsiClass) {
-                        PsiClass typeDeclaration = (PsiClass) child;
-                        if (typeDeclaration.getName().equals(subclassNames.get(i))) {
-                            subclassTypeDeclaration = typeDeclaration;
-                            requiredImportDeclarationsForContext.add(PsiTypesUtil.getClassType(subclassTypeDeclaration));
-                            break;
-                        }
-                    }
-                }
-            } else {
+            if (!subclassAlreadyExists) {
                 String packageName = PsiUtil.getPackageName(sourceTypeDeclaration);
                 if (packageName != null && !packageName.isEmpty()) {
                     PsiPackageStatement packageStatement = elementFactory.createPackageStatement(packageName);
@@ -1722,52 +1656,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         } else {
             return false;
         }
-    }
-
-    private void generateRequiredImportDeclarationsBasedOnSignature() { //TODO: move to base class
-        Set<PsiType> typeBindings = new LinkedHashSet<>();
-        if (returnedVariable != null) {
-            PsiType returnType = returnedVariable.getType();
-            typeBindings.add(returnType);
-        } else {
-            PsiType returnType = typeCheckElimination.getTypeCheckMethodReturnType();
-            typeBindings.add(returnType);
-        }
-
-        Set<PsiParameter> parameters = typeCheckElimination.getAccessedParameters();
-        for (PsiParameter parameter : parameters) {
-            if (!parameter.equals(returnedVariable)) {
-                PsiType parameterType = parameter.getType();
-                typeBindings.add(parameterType);
-            }
-        }
-
-        Set<PsiVariable> accessedLocalVariables = typeCheckElimination.getAccessedLocalVariables();
-        for (PsiVariable fragment : accessedLocalVariables) {
-            if (!fragment.equals(returnedVariable)) {
-                PsiType variableType = fragment.getType();
-                typeBindings.add(variableType);
-            }
-        }
-
-        if (typeCheckElimination.getAccessedFields().size() > 0 || typeCheckElimination.getAssignedFields().size() > 0 ||
-                typeCheckElimination.getAccessedMethods().size() > 0 || typeCheckElimination.getSuperAccessedMethods().size() > 0 ||
-                typeCheckElimination.getSuperAccessedFieldBindings().size() > 0 || typeCheckElimination.getSuperAssignedFieldBindings().size() > 0) {
-            typeBindings.add(PsiTypesUtil.getClassType(sourceTypeDeclaration));
-        }
-
-        typeBindings.addAll(thrownExceptions);
-        requiredImportDeclarationsBasedOnSignature.addAll(typeBindings);
-    }
-
-    private Set<PsiType> getRequiredImportDeclarationsBasedOnBranch(ArrayList<PsiStatement> statements) { // TODO: move to base class
-        Set<PsiType> typeBindings = new LinkedHashSet<>();
-        for (PsiStatement statement : statements) {
-            TypeVisitor typeVisitor = new TypeVisitor();
-            statement.accept(typeVisitor);
-            typeBindings.addAll(typeVisitor.getTypes());
-        }
-        return typeBindings;
     }
 
     private void setPublicModifierToStaticFields() {

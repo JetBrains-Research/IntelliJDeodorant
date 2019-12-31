@@ -5,7 +5,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.ClassUtil;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.psi.util.PsiUtil;
-import core.ast.util.TypeVisitor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
@@ -342,21 +341,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 concreteMethodBody.add(elementFactory.createStatementFromText("return " + returnedVariable.getName() + ";", null));
             }
             subClass.add(concreteMethod);
-
-            PsiImportList subClassImportList = getPsiImportList(subClassFile);
-
-            if (!subClassFile.equals(abstractClassFile)) {
-                Set<PsiType> requiredImportDeclarations = new LinkedHashSet<>(requiredImportDeclarationsBasedOnSignature);
-                requiredImportDeclarations.addAll(getRequiredImportDeclarationsBasedOnBranch(statements));
-                addImports(subClassImportList, requiredImportDeclarations);
-            } else {
-                Set<PsiType> requiredImportDeclarationsBasedOnBranch = getRequiredImportDeclarationsBasedOnBranch(statements);
-                requiredImportDeclarationsBasedOnSignature.addAll(requiredImportDeclarationsBasedOnBranch);
-            }
         }
-
-        PsiImportList abstractClassImportList = getPsiImportList(abstractClassFile);
-        addImports(abstractClassImportList, requiredImportDeclarationsBasedOnSignature);
     }
 
     private PsiMethod createPolymorphicMethodHeader() {
@@ -518,16 +503,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
         typeBindings.addAll(thrownExceptions);
 
-        return typeBindings;
-    }
-
-    private Set<PsiType> getRequiredImportDeclarationsBasedOnBranch(ArrayList<PsiStatement> statements) {
-        Set<PsiType> typeBindings = new LinkedHashSet<>();
-        for (PsiStatement statement : statements) {
-            TypeVisitor typeVisitor = new TypeVisitor();
-            statement.accept(typeVisitor);
-            typeBindings.addAll(typeVisitor.getTypes());
-        }
         return typeBindings;
     }
 }
