@@ -18,9 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MethodObjectTest extends LightJavaCodeInsightFixtureTestCase {
-    private static final String PATH_TO_TEST_DATA = "src/test/resources/testdata/core/ast/";
+    private static final String PATH_TO_TEST_DATA = "/core/ast/";
 
     private void runCheckOnFunFunctionContainsEnclosingClassAccess(@NotNull String classFileName) {
+        myFixture.setTestDataPath("./src/test/resources/testdata/");
         myFixture.configureByFile(PATH_TO_TEST_DATA + classFileName);
 
         class Visitor extends PsiRecursiveElementVisitor {
