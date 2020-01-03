@@ -1,4 +1,4 @@
-package core.distance;
+package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import java.util.ArrayList;
 import java.util.Collections;

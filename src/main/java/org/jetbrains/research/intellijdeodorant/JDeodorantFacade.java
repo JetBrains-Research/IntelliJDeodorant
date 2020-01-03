@@ -2,7 +2,7 @@ package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 
-import core.distance.*;
+import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;

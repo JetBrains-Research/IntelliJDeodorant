@@ -1,4 +1,4 @@
-package ui;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
@@ -21,26 +21,22 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
-import core.distance.ExtractClassCandidateRefactoring;
-import core.distance.ProjectInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import refactoring.*;
-import ui.abstractrefactorings.RefactoringType;
-import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
-import ui.abstractrefactorings.RefactoringType.AbstractRefactoring;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
 import ui.functionalinterfaces.DoubleClickListener;
 import ui.functionalinterfaces.ElementSelectionListener;
 import ui.functionalinterfaces.EnterKeyListener;
-import ui.functionalinterfaces.QuadriFunction;
-import utils.IntelliJDeodorantBundle;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
+
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.*;
 
 /**
  * Panel for Type-State Checking refactorings.
@@ -66,7 +62,7 @@ public class AbstractRefactoringPanel extends JPanel {
     private RefactoringType refactoringType;
     private int refactorDepth;
 
-    AbstractRefactoringPanel(@NotNull AnalysisScope scope, String detect_indicator_status_text_key, RefactoringType refactoringType, AbstractTreeTableModel model, int refactorDepth) {
+    public AbstractRefactoringPanel(@NotNull AnalysisScope scope, String detect_indicator_status_text_key, RefactoringType refactoringType, AbstractTreeTableModel model, int refactorDepth) {
         this.scope = scope;
         this.detect_indicator_status_text_key = detect_indicator_status_text_key;
         this.refactoringType = refactoringType;
@@ -154,7 +150,7 @@ public class AbstractRefactoringPanel extends JPanel {
     }
 
     //TODO comment
-    void doRefactor(AbstractCandidateRefactoring computationSlice) {
+    public void doRefactor(AbstractCandidateRefactoring computationSlice) {
         TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
     }
 
@@ -197,7 +193,7 @@ public class AbstractRefactoringPanel extends JPanel {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    Set<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
+                    Set<AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
                     model.setEliminationGroups(new ArrayList<>(candidates));
                     ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
@@ -221,7 +217,7 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
-    AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
+    protected AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
         PsiClass sourceTypeDeclaration = candidate.getSourceClass();
         PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
         return refactoringType.newAbstractRefactoring(candidate);

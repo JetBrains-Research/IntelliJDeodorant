@@ -1,11 +1,11 @@
-package core.distance;
+package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import com.intellij.psi.*;
-import core.GodClassVisualizationData;
-import core.ast.FieldObject;
-import core.ast.MethodObject;
-import core.ast.TypeObject;
-import core.ast.util.TopicFinder;
+import org.jetbrains.research.intellijdeodorant.core.GodClassVisualizationData;
+import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
+import org.jetbrains.research.intellijdeodorant.util.TopicFinder;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -371,7 +371,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 		return visualizationData.getDistinctTargetDependencies();
 	}
 
-    public PsiFile getSourceFile() {
+    public PsiJavaFile getSourceFile() {
 		return sourceClass.getClassObject().getPsiFile();
     }
 }

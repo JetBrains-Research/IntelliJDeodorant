@@ -20,7 +20,7 @@ public class ClassObject extends ClassDeclarationObject {
     private Access access;
     private ASTInformation typeDeclaration;
     private final String psiType;
-    private final PsiFile psiFile;
+    private final PsiJavaFile psiFile;
     private final PsiClass psiClass;
 
     public ClassObject(PsiClass psiClass) {
@@ -35,7 +35,7 @@ public class ClassObject extends ClassDeclarationObject {
         this._enum = psiClass.isEnum();
         this.access = Access.NONE;
         this.typeDeclaration = ASTInformationGenerator.generateASTInformation(psiClass);
-        this.psiFile = psiClass.getContainingFile();
+        this.psiFile = (PsiJavaFile) psiClass.getContainingFile();
         this.psiClass = psiClass;
     }
 
@@ -55,7 +55,7 @@ public class ClassObject extends ClassDeclarationObject {
         return psiType;
     }
 
-    public PsiFile getPsiFile() {
+    public PsiJavaFile getPsiFile() {
         return psiFile;
     }
 

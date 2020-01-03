@@ -1,4 +1,4 @@
-package core.distance;
+package org.jetbrains.research.intellijdeodorant.distance;
 
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
@@ -7,19 +7,23 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import core.ast.Standalone;
-
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractClassRefactoringOpportunities;
 
-public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase {
+public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String PATH_TO_TEST_DATA = "src/test/resources/testdata/core/distance/godclass/";
 
     //TODO add some complicated actual project tests
@@ -31,7 +35,7 @@ public class GodClassDistanceMatrixTest extends LightCodeInsightFixtureTestCase 
         PsiFile psiFile = FilenameIndex.getFilesByName(project, classFileName, GlobalSearchScope.allScope(project))[0];
         ProjectInfo projectInfo = new ProjectInfo(project);
 
-        Set<ExtractClassCandidateGroup> set = Standalone.getExtractClassRefactoringOpportunities(projectInfo, new ProgressIndicatorBase());
+        Set<ExtractClassCandidateGroup> set = getExtractClassRefactoringOpportunities(projectInfo, new ProgressIndicatorBase());
 
         if (set.isEmpty()) {
             return null;

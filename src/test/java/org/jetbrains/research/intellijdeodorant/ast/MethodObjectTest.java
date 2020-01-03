@@ -1,25 +1,16 @@
-package core.ast;
+package org.jetbrains.research.intellijdeodorant.ast;
 
-import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import core.ast.Access;
-import core.ast.ConstructorObject;
-import core.ast.MethodObject;
-import core.ast.decomposition.MethodBodyObject;
-import core.distance.ExtractClassCandidateGroup;
-import core.distance.ExtractClassCandidateRefactoring;
-import core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.core.ast.Access;
+import org.jetbrains.research.intellijdeodorant.core.ast.ConstructorObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class MethodObjectTest extends LightCodeInsightFixtureTestCase {

@@ -1,4 +1,4 @@
-package refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.java.JavaLanguage;
@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.util.FileContentUtil;
-import core.ast.util.TypeVisitor;
+import org.jetbrains.research.intellijdeodorant.ast.util.TypeVisitor;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;

@@ -15,7 +15,7 @@ import com.intellij.ui.components.JBLabelDecorator;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
-import refactoring.ExtractClassRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractClassRefactoring;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

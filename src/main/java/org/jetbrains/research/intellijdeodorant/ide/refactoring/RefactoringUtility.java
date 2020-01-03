@@ -1,4 +1,4 @@
-package refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;

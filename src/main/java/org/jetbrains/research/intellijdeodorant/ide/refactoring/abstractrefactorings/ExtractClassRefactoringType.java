@@ -1,19 +1,20 @@
-package ui.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
-import core.ast.Standalone;
-import core.distance.ExtractClassCandidateGroup;
-import core.distance.ExtractClassCandidateRefactoring;
-import core.distance.ProjectInfo;
-import refactoring.ExtractClassRefactoring;
-import ui.AbstractRefactoringPanel;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.AbstractRefactoringPanel;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractClassRefactoring;
 
 import java.util.List;
 import java.util.Set;
+
+import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractClassRefactoringOpportunities;
 
 public class ExtractClassRefactoringType extends RefactoringType {
     @Override
@@ -28,7 +29,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
 
     @Override
     Set<?> getNotAbstractRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator) {
-        return Standalone.getExtractClassRefactoringOpportunities(projectInfo, indicator);
+        return getExtractClassRefactoringOpportunities(projectInfo, indicator);
     }
 
     @Override

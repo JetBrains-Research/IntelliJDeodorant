@@ -1,4 +1,7 @@
-package core.ast.util;
+package org.jetbrains.research.intellijdeodorant.util;
+
+import org.jetbrains.research.intellijdeodorant.util.math.HumaniseCamelCase;
+import org.jetbrains.research.intellijdeodorant.util.math.Stemmer;
 
 import java.io.*;
 import java.net.URL;
@@ -6,9 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import core.ast.util.math.HumaniseCamelCase;
-import core.ast.util.math.Stemmer;
 
 public class TopicFinder {
 	private static final ArrayList<String> stopWords = getStopWords();

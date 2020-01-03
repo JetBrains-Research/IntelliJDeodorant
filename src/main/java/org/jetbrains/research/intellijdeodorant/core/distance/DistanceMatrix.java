@@ -10,6 +10,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.ParameterObject;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.util.math.Cluster;
+import org.jetbrains.research.intellijdeodorant.util.math.Clustering;
 
 import java.util.*;
 

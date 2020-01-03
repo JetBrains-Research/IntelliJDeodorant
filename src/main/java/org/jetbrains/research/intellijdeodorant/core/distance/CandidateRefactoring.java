@@ -1,6 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import core.ast.ASTInformation;
+import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -1,22 +1,20 @@
-package ui;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
-import ui.abstractrefactorings.RefactoringType;
-import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
-import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
-abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
+public abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
     private int numberOfColumns;
     private String[] columnNames;
-    protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
+    protected List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
     private RefactoringType refactoringType;
 
-    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
+    public AbstractTreeTableModel(List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
         super(new DefaultMutableTreeNode("root"));
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         this.columnNames = columnNames;
@@ -24,7 +22,7 @@ abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTa
         this.refactoringType = refactoringType;
     }
 
-    public void setEliminationGroups(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
+    public void setEliminationGroups(List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
         this.candidateRefactoringGroups = candidateRefactoringGroups;
     }
 
@@ -65,13 +63,13 @@ abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTa
 
     @Override
     public boolean isLeaf(Object node) {
-        return node instanceof AbstractCandidateRefactoring;
+        return node instanceof RefactoringType.AbstractCandidateRefactoring;
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof AbstractCandidateRefactoringGroup) {
-            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
+        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
+            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
             return group.getCandidates().get(index);
         }
         return candidateRefactoringGroups.get(index);
@@ -79,12 +77,12 @@ abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTa
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof AbstractCandidateRefactoringGroup) {
-            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
+        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
+            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
             return group.getCandidates().size();
         }
 
-        if (parent instanceof AbstractCandidateRefactoring) {
+        if (parent instanceof RefactoringType.AbstractCandidateRefactoring) {
             return 0;
         }
 

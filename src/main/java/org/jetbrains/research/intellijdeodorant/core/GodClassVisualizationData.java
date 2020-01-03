@@ -1,13 +1,13 @@
-package core;
+package org.jetbrains.research.intellijdeodorant.core;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
-import core.ast.ClassObject;
-import core.ast.FieldInstructionObject;
-import core.ast.FieldObject;
-import core.ast.MethodInvocationObject;
-import core.ast.MethodObject;
-import core.ast.decomposition.cfg.PlainVariable;
+import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

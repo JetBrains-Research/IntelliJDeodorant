@@ -1,4 +1,4 @@
-package core.ast.util;
+package org.jetbrains.research.intellijdeodorant.ast.util;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;

@@ -1,8 +1,8 @@
-package ui.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiClass;
-import core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;

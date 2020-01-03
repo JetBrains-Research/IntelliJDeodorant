@@ -1,6 +1,7 @@
-package core.distance;
+package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import core.ast.util.TopicFinder;
+
+import org.jetbrains.research.intellijdeodorant.util.TopicFinder;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -1,12 +1,13 @@
-package ui;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
-import core.distance.ExtractClassCandidateGroup;
-import core.distance.ExtractClassCandidateRefactoring;
-import core.distance.ExtractedConcept;
-import ui.abstractrefactorings.ExtractClassRefactoringType;
-import ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
-import ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
-import ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.core.distance.ExtractedConcept;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;

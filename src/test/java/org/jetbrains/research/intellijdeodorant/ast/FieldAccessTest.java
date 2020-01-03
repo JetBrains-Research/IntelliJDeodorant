@@ -1,28 +1,15 @@
-package core.ast;
+package org.jetbrains.research.intellijdeodorant.ast;
 
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import core.ast.Standalone;
-import core.distance.*;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.WriteAbortedException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     private File createTempFile(@NotNull String filename) {
@@ -34,7 +21,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
     }
 
     private void writePrefix(@NotNull FileWriter writer, @NotNull File file) throws IOException {
-        final String className = file.getName().substring(0,file.getName().length() - 5); // delete ".java" suffix
+        final String className = file.getName().substring(0, file.getName().length() - 5); // delete ".java" suffix
 
         writer.write("package field.accesses;\n" +
                 "\n" +
@@ -115,7 +102,7 @@ public class FieldAccessTest extends LightCodeInsightFixtureTestCase {
                 "        return SIZE + 6;\n" +
                 "    }";
 
-        testMethod(methodCode,  0);
+        testMethod(methodCode, 0);
     }
 
     public void testComplexExpressionTest() {
