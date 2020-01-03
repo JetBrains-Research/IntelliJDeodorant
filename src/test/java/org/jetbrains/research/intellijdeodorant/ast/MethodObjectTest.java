@@ -1,19 +1,23 @@
 package org.jetbrains.research.intellijdeodorant.ast;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiRecursiveElementVisitor;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.Access;
 import org.jetbrains.research.intellijdeodorant.core.ast.ConstructorObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MethodObjectTest extends LightCodeInsightFixtureTestCase {
+public class MethodObjectTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String PATH_TO_TEST_DATA = "src/test/resources/testdata/core/ast/";
 
     private void runCheckOnFunFunctionContainsEnclosingClassAccess(@NotNull String classFileName) {

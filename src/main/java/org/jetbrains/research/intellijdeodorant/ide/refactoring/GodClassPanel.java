@@ -28,7 +28,7 @@ public class GodClassPanel extends AbstractRefactoringPanel {
     public void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
             AbstractExtractClassRefactoring refactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
-            ui.GodClassUserInputDialog dialog = new ui.GodClassUserInputDialog(refactoring.getRefactoring());
+            GodClassUserInputDialog dialog = new GodClassUserInputDialog(refactoring.getRefactoring());
             dialog.show();
         });
     }

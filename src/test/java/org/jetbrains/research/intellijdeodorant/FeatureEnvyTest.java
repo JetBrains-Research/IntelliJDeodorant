@@ -2,13 +2,12 @@ package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
-
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.FeatureEnvyVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
