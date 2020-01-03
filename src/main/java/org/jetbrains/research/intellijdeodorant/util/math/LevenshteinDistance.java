@@ -1,4 +1,4 @@
-package core.ast.util.math;
+package org.jetbrains.research.intellijdeodorant.util.math;
 
 public class LevenshteinDistance {
 	private static int minimum(int a, int b, int c) {

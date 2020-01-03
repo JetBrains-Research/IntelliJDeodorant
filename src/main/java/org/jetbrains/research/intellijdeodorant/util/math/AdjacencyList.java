@@ -1,4 +1,4 @@
-package core.ast.util.math;
+package org.jetbrains.research.intellijdeodorant.util.math;
 
 import java.util.LinkedHashSet;
 import java.util.Map;

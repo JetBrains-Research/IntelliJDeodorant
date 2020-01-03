@@ -1,6 +1,7 @@
-package core.ast.util.math;
+package org.jetbrains.research.intellijdeodorant.util.math;
 
-import core.distance.Entity;
+
+import org.jetbrains.research.intellijdeodorant.core.distance.Entity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +21,4 @@ public abstract class Clustering {
 	}
 	
 	public abstract HashSet<Cluster> clustering(ArrayList<Entity> entities);
-	
-	
 }

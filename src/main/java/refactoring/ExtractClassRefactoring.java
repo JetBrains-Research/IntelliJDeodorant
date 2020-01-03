@@ -7,16 +7,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.util.FileContentUtil;
-import core.ast.decomposition.cfg.PlainVariable;
-import core.ast.util.ExpressionExtractor;
-import core.ast.util.MethodDeclarationUtility;
-import core.ast.util.StatementExtractor;
 import core.ast.util.TypeVisitor;
-import core.ast.util.math.AdjacencyList;
-import core.ast.util.math.Edge;
-import core.ast.util.math.Node;
-import core.ast.util.math.TarjanAlgorithm;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
+import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
+import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
+import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
+import org.jetbrains.research.intellijdeodorant.util.math.AdjacencyList;
+import org.jetbrains.research.intellijdeodorant.util.math.Edge;
+import org.jetbrains.research.intellijdeodorant.util.math.Node;
+import org.jetbrains.research.intellijdeodorant.util.math.TarjanAlgorithm;
 
 import java.util.*;
 

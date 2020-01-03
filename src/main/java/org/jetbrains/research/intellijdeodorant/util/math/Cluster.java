@@ -1,6 +1,6 @@
-package core.ast.util.math;
+package org.jetbrains.research.intellijdeodorant.util.math;
 
-import core.distance.Entity;
+import org.jetbrains.research.intellijdeodorant.core.distance.Entity;
 
 import java.util.ArrayList;
 

@@ -1,15 +1,11 @@
-package core.ast.util.math;
+package org.jetbrains.research.intellijdeodorant.util.math;
 
-import static core.ast.util.math.DoubleArray.deleteColumns;
-import static core.ast.util.math.DoubleArray.deleteRows;
-import static core.ast.util.math.DoubleArray.insertColumns;
-import static core.ast.util.math.DoubleArray.insertRows;
-
-import core.ast.util.math.Clustering;
-import core.distance.Entity;
+import org.jetbrains.research.intellijdeodorant.core.distance.Entity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import static org.jetbrains.research.intellijdeodorant.util.math.DoubleArray.*;
 
 public class Hierarchical extends Clustering {
 
