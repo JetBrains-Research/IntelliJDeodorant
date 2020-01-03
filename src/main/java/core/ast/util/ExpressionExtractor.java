@@ -15,6 +15,12 @@ public class ExpressionExtractor {
     }
 
     // returns a List of Variable objects
+    public List<PsiExpression> getVariableInstructions(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfVariable();
+        return getExpressions(statement);
+    }
+
+    // returns a List of Variable objects
     public List<PsiExpression> getVariableInstructions(PsiExpression expression) {
         instanceChecker = new InstanceOfVariable();
         return getExpressions(expression);
@@ -73,6 +79,13 @@ public class ExpressionExtractor {
         instanceChecker = new InstanceOfClassInstanceCreation();
         return getExpressions(statement);
     }
+
+    // returns a List of ClassInstanceCreation objects
+    public List<PsiExpression> getClassInstanceCreations(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfClassInstanceCreation();
+        return getExpressions(statement);
+    }
+
 
     // returns a List of ClassInstanceCreation objects
     public List<PsiExpression> getClassInstanceCreations(PsiExpression expression) {
@@ -181,6 +194,12 @@ public class ExpressionExtractor {
     }
 
     // returns a List of PostfixExpression objects
+    public List<PsiExpression> getPostfixExpressions(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfPostfixExpression();
+        return getExpressions(statement);
+    }
+
+    // returns a List of PostfixExpression objects
     public List<PsiExpression> getPostfixExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfPostfixExpression();
         return getExpressions(expression);
@@ -188,6 +207,12 @@ public class ExpressionExtractor {
 
     // returns a List of PrefixExpression objects
     public List<PsiExpression> getPrefixExpressions(PsiStatement statement) {
+        instanceChecker = new InstanceOfPrefixExpression();
+        return getExpressions(statement);
+    }
+
+    // returns a List of PrefixExpression objects
+    public List<PsiExpression> getPrefixExpressions(PsiStatement[] statement) {
         instanceChecker = new InstanceOfPrefixExpression();
         return getExpressions(statement);
     }
@@ -220,6 +245,15 @@ public class ExpressionExtractor {
     public List<PsiExpression> getVariableModifiers(PsiExpression expression) {
         instanceChecker = new InstanceOfVariableModifier();
         return getExpressions(expression);
+    }
+
+    private List<PsiExpression> getExpressions(PsiElement[] elements) {
+        List<PsiExpression> result = new ArrayList<>();
+        for (PsiElement element : elements) {
+            result.addAll(getExpressions(element));
+        }
+
+        return result;
     }
 
     private List<PsiExpression> getExpressions(PsiElement element) {

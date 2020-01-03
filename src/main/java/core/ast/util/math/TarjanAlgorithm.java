@@ -1,5 +1,7 @@
 package core.ast.util.math;
 
+import com.intellij.psi.PsiElement;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
@@ -41,7 +43,7 @@ public class TarjanAlgorithm {
 		}
 	}
 
-	public boolean belongToTheSameStronglyConnectedComponent(String s1, String s2) {
+	public boolean belongToTheSameStronglyConnectedComponent(PsiElement s1, PsiElement s2) {
 		Node n1 = new Node(s1);
 		Node n2 = new Node(s2);
 		for(LinkedHashSet<Node> component : SCC) {

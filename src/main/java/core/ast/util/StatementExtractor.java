@@ -22,6 +22,11 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
+    public List<PsiStatement> getVariableDeclarationStatements(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfVariableDeclarationStatement();
+        return getStatements(statement);
+    }
+
     public List<PsiStatement> getBranchingStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfBranchingStatement();
         return getStatements(statement);
@@ -43,6 +48,11 @@ public class StatementExtractor {
     }
 
     public List<PsiStatement> getReturnStatements(PsiReturnStatement statement) {
+        instanceChecker = new InstanceOfReturnStatement();
+        return getStatements(statement);
+    }
+
+    public List<PsiStatement> getReturnStatements(PsiStatement[] statement) {
         instanceChecker = new InstanceOfReturnStatement();
         return getStatements(statement);
     }
@@ -80,6 +90,15 @@ public class StatementExtractor {
     public List<PsiStatement> getTypeDeclarationStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfTypeDeclarationStatement();
         return getStatements(statement);
+    }
+
+    private List<PsiStatement> getStatements(PsiStatement[] statements) {
+        List<PsiStatement> result = new ArrayList<>();
+        for (PsiStatement statement : statements) {
+            result.addAll(getStatements(statement));
+        }
+
+        return result;
     }
 
     private List<PsiStatement> getStatements(PsiStatement statement) {

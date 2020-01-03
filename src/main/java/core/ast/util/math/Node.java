@@ -1,18 +1,20 @@
 package core.ast.util.math;
 
+import com.intellij.psi.PsiElement;
+
 public class Node implements Comparable<Node> {
 
-	protected final String name;
+	protected final PsiElement name;
 	protected boolean visited = false;   // used for Kosaraju's algorithm and Edmonds's algorithm
 	protected int lowlink = -1;          // used for Tarjan's algorithm
 	protected int index = -1;            // used for Tarjan's algorithm
 	private volatile int hashCode = 0;
 
-	public Node(final String argName) {
+	public Node(final PsiElement argName) {
 		name = argName;
 	}
 
-	public String getName() {
+	public PsiElement getName() {
 		return name;
 	}
 
@@ -30,14 +32,14 @@ public class Node implements Comparable<Node> {
     public int hashCode() {
     	if(hashCode == 0) {
     		int result = 17;
-    		result = 37*result + name.hashCode();
+    		result = 37 * result + name.hashCode();
     		hashCode = result;
     	}
     	return hashCode;
     }
 
     public String toString() {
-    	return name;
+    	return name.toString();
     }
 
 	public int compareTo(final Node argNode) {

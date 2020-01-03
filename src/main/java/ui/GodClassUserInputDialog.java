@@ -1,36 +1,19 @@
 package ui;
 
 import com.intellij.diff.DiffDialogHints;
-import com.intellij.diff.DiffManager;
-import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.chains.DiffRequestChain;
-import com.intellij.diff.chains.DiffRequestProducer;
 import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.contents.FileDocumentContentImpl;
-import com.intellij.diff.requests.ContentDiffRequest;
 import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.roots.JavaProjectRootsUtil;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.presentation.java.SymbolPresentationUtil;
 import com.intellij.refactoring.RefactorJBundle;
-import com.intellij.refactoring.RefactoringBundle;
-import com.intellij.refactoring.classMembers.DelegatingMemberInfoModel;
-import com.intellij.refactoring.ui.MemberSelectionPanelBase;
-import com.intellij.refactoring.ui.MemberSelectionTable;
 import com.intellij.refactoring.ui.RefactoringDialog;
-import com.intellij.refactoring.util.classMembers.MemberInfo;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabelDecorator;
-import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import refactoring.ExtractClassRefactoring;
 
@@ -38,24 +21,16 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
+    private static final String TITLE = "Extracted Class Name";
     private ExtractClassRefactoring refactoring;
-
     @Nullable
     private PsiPackage parentPackage;
     private List<String> javaLangClassNames;
-    private static final String TITLE = "Extracted Class Name";
-
     private JPanel mainPanel;
     private Label extractedClassNameLabel = new Label();
     private JTextField extractedClassNameField = new JTextField(); //TODO default size
@@ -125,21 +100,21 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         //TODO extractedClassNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         extractedClassNameField.setText(refactoring.getExtractedTypeName());
         extractedClassNameField.getDocument().addDocumentListener(new DocumentListener() {
-                                                                      @Override
-                                                                      public void insertUpdate(DocumentEvent e) {
-                                                                          handleInputChanged(extractedClassNameField);
-                                                                      }
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                handleInputChanged(extractedClassNameField);
+            }
 
-                                                                      @Override
-                                                                      public void removeUpdate(DocumentEvent e) {
-                                                                          handleInputChanged(extractedClassNameField);
-                                                                      }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                handleInputChanged(extractedClassNameField);
+            }
 
-                                                                      @Override
-                                                                      public void changedUpdate(DocumentEvent e) {
-                                                                          handleInputChanged(extractedClassNameField);
-                                                                      }
-                                                                  });
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                handleInputChanged(extractedClassNameField);
+            }
+        });
 
         restoreButton.setText("Restore Defaults");
 

@@ -2,8 +2,6 @@ package core.ast;
 
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import core.ast.association.Association;
@@ -13,7 +11,6 @@ import core.ast.decomposition.cfg.PlainVariable;
 import core.ast.decomposition.MethodBodyObject;
 import core.ast.decomposition.cfg.AbstractVariable;
 import core.ast.util.MethodDeclarationUtility;
-import gherkin.lexer.Vi;
 
 import java.util.*;
 
