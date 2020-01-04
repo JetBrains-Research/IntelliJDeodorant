@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType;
 import ui.functionalinterfaces.DoubleClickListener;
 import ui.functionalinterfaces.ElementSelectionListener;
 import ui.functionalinterfaces.EnterKeyListener;
@@ -36,7 +36,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Set;
 
-import static org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.*;
+import static org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType.*;
 
 /**
  * Panel for Type-State Checking refactorings.

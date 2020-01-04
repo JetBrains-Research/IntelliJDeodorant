@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiClass;

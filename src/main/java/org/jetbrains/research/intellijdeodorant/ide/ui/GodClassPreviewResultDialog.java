@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.diff.DiffDialogHints;
 import com.intellij.diff.actions.CompareFilesAction;

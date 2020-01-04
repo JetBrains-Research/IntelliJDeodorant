@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.diff.DiffDialogHints;
 import com.intellij.diff.chains.DiffRequestChain;
@@ -16,6 +16,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractClassRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.ui.GodClassPreviewResultDialog;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

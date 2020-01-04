@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -8,7 +8,7 @@ import com.intellij.psi.PsiMethod;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.AbstractRefactoringPanel;
+import org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractClassRefactoring;
 
 import java.util.List;

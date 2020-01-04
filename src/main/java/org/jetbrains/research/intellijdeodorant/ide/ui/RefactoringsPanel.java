@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.components.JBTabbedPane;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.GodClassPanel;
 
 import javax.swing.*;
 
