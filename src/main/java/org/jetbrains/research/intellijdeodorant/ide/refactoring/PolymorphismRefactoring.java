@@ -335,11 +335,11 @@ public abstract class PolymorphismRefactoring {
                 for (PsiField accessedFieldBinding : accessedFieldBindings) {
                     if (accessedFieldBinding.equals(oldSimpleName.resolve())) {
                         if (accessedFieldBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
-                            String qualifier = accessedFieldBinding.getName();
-                            newSimpleName.replace(elementFactory.createExpressionFromText(
-                                    qualifier + "." + newSimpleName.getReferenceName(),
+                            PsiExpression qualifier = elementFactory.createExpressionFromText(
+                                    accessedFieldBinding.getContainingClass().getName(),
                                     null
-                            ));
+                            );
+                            newSimpleName.setQualifierExpression(qualifier);
                             if (accessedFieldBinding.getContainingClass().equals(sourceTypeDeclaration)) {
                                 setPublicModifierToSourceField(accessedFieldBinding);
                             }
