@@ -179,7 +179,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 PsiExpression enclosingIfStatementExpression = constructExpression(remainingIfStatementExpression);
                 PsiExpression newEnclosingIfStatementExpression = elementFactory.createExpressionFromText(
                         enclosingIfStatementExpression.getText(),
-                        typeCheckElimination.getTypeCheckCodeFragment()
+                        enclosingIfStatementExpression.getContext()
                 );
                 List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(enclosingIfStatementExpression);
                 List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newEnclosingIfStatementExpression);
@@ -251,7 +251,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
             for (PsiStatement statement : statements) {
                 PsiStatement newStatement = elementFactory.createStatementFromText(
                         statement.getText(),
-                        typeCheckElimination.getTypeCheckCodeFragment()
+                        statement.getContext()
                 );
                 boolean insert = true;
                 if (statement instanceof PsiDeclarationStatement) {

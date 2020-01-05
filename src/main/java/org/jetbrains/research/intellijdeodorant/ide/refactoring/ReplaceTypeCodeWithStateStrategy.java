@@ -950,7 +950,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                 PsiExpression enclosingIfStatementExpression = constructExpression(remainingIfStatementExpression);
                 PsiExpression newEnclosingIfStatementExpression = elementFactory.createExpressionFromText(
                         enclosingIfStatementExpression.getText(),
-                        typeCheckElimination.getTypeCheckCodeFragment()
+                        enclosingIfStatementExpression.getContext()
                 );
                 List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(enclosingIfStatementExpression);
                 List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newEnclosingIfStatementExpression);
@@ -969,7 +969,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             }
 
             for (PsiStatement statement : statements) {
-                PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), typeCheckElimination.getTypeCheckCodeFragment());
+                PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), statement.getContext());
                 List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(statement);
                 List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newStatement);
                 List<PsiExpression> oldMethodInvocations = expressionExtractor.getMethodInvocations(statement);
@@ -1096,7 +1096,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             PsiExpression enclosingIfStatementExpression = constructExpression(remainingIfStatementExpression);
             PsiExpression newEnclosingIfStatementExpression = elementFactory.createExpressionFromText(
                     enclosingIfStatementExpression.getText(),
-                    typeCheckElimination.getTypeCheckCodeFragment()
+                    enclosingIfStatementExpression.getContext()
             );
             List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(enclosingIfStatementExpression);
             List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newEnclosingIfStatementExpression);
@@ -1115,7 +1115,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
 
         for (PsiStatement statement : typeCheckStatements) {
-            PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), typeCheckElimination.getTypeCheckCodeFragment());
+            PsiStatement newStatement = elementFactory.createStatementFromText(statement.getText(), statement.getContext());
             List<PsiExpression> oldVariableInstructions = expressionExtractor.getVariableInstructions(statement);
             List<PsiExpression> newVariableInstructions = expressionExtractor.getVariableInstructions(newStatement);
             List<PsiExpression> oldMethodInvocations = expressionExtractor.getMethodInvocations(statement);
