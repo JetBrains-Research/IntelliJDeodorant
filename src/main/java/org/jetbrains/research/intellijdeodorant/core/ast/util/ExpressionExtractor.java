@@ -26,6 +26,13 @@ public class ExpressionExtractor {
         return getExpressions(expression);
     }
 
+    // returns a List of Variable objects
+    public List<PsiExpression> getVariableInstructions(PsiExpression[] expression) {
+        instanceChecker = new InstanceOfVariable();
+        return getExpressions(expression);
+    }
+
+
     // returns a List of MethodInvocation and SuperMethodInvocation objects
     public List<PsiExpression> getMethodInvocations(PsiStatement statement) {
         instanceChecker = new InstanceOfMethodInvocation();

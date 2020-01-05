@@ -5,6 +5,7 @@ import com.intellij.diff.chains.DiffRequestChain;
 import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.contents.FileDocumentContentImpl;
 import com.intellij.diff.requests.SimpleDiffRequest;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -136,10 +137,6 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         });
 
         handleInputChanged(extractedClassNameField);
-
-        getOKAction().addPropertyChangeListener(evt -> {
-            refactoring.apply();
-        });
     }
 
     private void placeControlsOnPanel() {
@@ -160,7 +157,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     }
 
     private void setPageComplete(boolean value) {
-        getOKAction().setEnabled(value);
+        getRefactorAction().setEnabled(value);
         getPreviewAction().setEnabled(value);
     }
 
@@ -213,6 +210,11 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             DiffRequestChain chain = new SimpleDiffRequestChain(simpleDiffRequest);
             GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT);
             previewResultDialog.show();
+
+            setPreviewResults(false);
+        } else {
+            WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
+            closeOKAction();
         }
     }
 
