@@ -20,7 +20,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.*;
 import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.QuadriFunction;
 
-import java.util.Set;
+import java.util.*;
 
 public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TEST_ROOT = "src/test/resources/testdata/core/ast/typestatechecking/";
@@ -79,6 +79,10 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performSingleRefactoringTest();
     }
 
+    public void testSourceFileFieldsAccesses() {
+        performMultipleRefactoringsTest(Collections.singletonList(1));
+    }
+
     public void testStateField() {
         performSingleRefactoringTest();
     }
@@ -104,36 +108,35 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     private void performTwoRefactoringsTest() {
+        performMultipleRefactoringsTest(Arrays.asList(1, 1));
+    }
+
+    private void performSingleRefactoringTest() {
+        performMultipleRefactoringsTest(Collections.singletonList(1));
+    }
+
+    private void performMultipleRefactoringsTest(List<Integer> eliminationGroupSizes) {
         initTest();
+        eliminationGroupSizes = new ArrayList<>(eliminationGroupSizes);
         Project project = myFixture.getProject();
-        for (int i = 0; i < 2; i++) {
+        while (eliminationGroupSizes.size() != 0) {
             Set<TypeCheckEliminationGroup> set = JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
                     new ProjectInfo(project), fakeProgressIndicator
             );
-            assertEquals(set.size(), 2 - i);
+            assertEquals(set.size(), eliminationGroupSizes.size());
             TypeCheckEliminationGroup eliminationGroup = set.iterator().next();
-            assertEquals(eliminationGroup.getCandidates().size(), 1);
+            assertEquals(eliminationGroup.getCandidates().size(), eliminationGroupSizes.get(0).intValue());
             WriteCommandAction.runWriteCommandAction(
                     project,
                     () -> createRefactoring(eliminationGroup.getCandidates().get(0), project).apply()
             );
-        }
-        checkTest();
-    }
 
-    private void performSingleRefactoringTest() {
-        initTest();
-        Project project = myFixture.getProject();
-        Set<TypeCheckEliminationGroup> set = JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
-                new ProjectInfo(project), fakeProgressIndicator
-        );
-        assertEquals(set.size(), 1);
-        TypeCheckEliminationGroup eliminationGroup = set.iterator().next();
-        assertEquals(eliminationGroup.getCandidates().size(), 1);
-        WriteCommandAction.runWriteCommandAction(
-                project,
-                () -> createRefactoring(eliminationGroup.getCandidates().get(0), project).apply()
-        );
+            if (eliminationGroupSizes.get(0) == 1) {
+                eliminationGroupSizes.remove(0);
+            } else {
+                eliminationGroupSizes.set(0, eliminationGroupSizes.get(0) - 1);
+            }
+        }
         checkTest();
     }
 
