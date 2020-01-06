@@ -1,15 +1,13 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.psi.*;
-import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.ParameterObject;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.core.ast.*;
+import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
 import org.jetbrains.research.intellijdeodorant.util.math.Cluster;
 import org.jetbrains.research.intellijdeodorant.util.math.Clustering;
 
@@ -316,16 +314,16 @@ public class DistanceMatrix {
         Iterator<MyClass> classIt = system.getClassIterator();
         ArrayList<MyClass> oldClasses = new ArrayList<>();
 
-        while(classIt.hasNext()) {
+        while (classIt.hasNext()) {
             MyClass myClass = classIt.next();
-            if(classNamesToBeExamined.contains(myClass.getName())) {
+            if (classNamesToBeExamined.contains(myClass.getName())) {
                 oldClasses.add(myClass);
             }
         }
 
         indicator.setText("Identification of Extract Class refactoring opportunities");
         indicator.setFraction(0.0);
-        for(MyClass sourceClass : oldClasses) {
+        for (MyClass sourceClass : oldClasses) {
             if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
                 double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
                 Clustering clustering = Clustering.getInstance(0, distanceMatrix);
@@ -341,7 +339,7 @@ public class DistanceMatrix {
                     if (candidate.isApplicable()) {
                         int sourceClassDependencies = candidate.getDistinctSourceDependencies();
                         int extractedClassDependencies = candidate.getDistinctTargetDependencies();
-                        if(sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate &&
+                        if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate &&
                                 sourceClassDependencies < extractedClassDependencies) {
                             candidateList.add(candidate);
                         }

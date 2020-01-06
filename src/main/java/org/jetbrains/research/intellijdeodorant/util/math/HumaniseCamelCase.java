@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.util.math;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HumaniseCamelCase {
     //----------------------------------------------------------------------- Static Properties and Constants
@@ -25,10 +25,10 @@ public class HumaniseCamelCase {
     public String humanise(String camelCaseString) {
         reset();
         Matcher wordMatcher = camelCaseWordMatcher(camelCaseString);
-        while(wordMatcher.find()) {
+        while (wordMatcher.find()) {
             String word = wordMatcher.group();
             boolean wordIsSingleCapitalLetter = word.matches("^[A-Z]$");
-            if(wordIsSingleCapitalLetter) {
+            if (wordIsSingleCapitalLetter) {
                 addToAcronym(word);
             } else {
                 appendAcronymIfThereIsOne();
@@ -58,7 +58,7 @@ public class HumaniseCamelCase {
     }
 
     private void appendAcronymIfThereIsOne() {
-        if(acronym.length() > 0) {
+        if (acronym.length() > 0) {
             boolean firstWord = humanisedString.length() == 0;
             humanisedString += firstWord ? acronym : " " + acronym;
             acronym = "";

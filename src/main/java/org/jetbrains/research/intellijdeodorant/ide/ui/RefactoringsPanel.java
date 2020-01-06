@@ -1,7 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
-
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.components.JBTabbedPane;

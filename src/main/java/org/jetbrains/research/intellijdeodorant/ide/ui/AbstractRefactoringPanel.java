@@ -25,10 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.ElementSelectionListener;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.EnterKeyListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType;
-import ui.functionalinterfaces.DoubleClickListener;
-import ui.functionalinterfaces.ElementSelectionListener;
-import ui.functionalinterfaces.EnterKeyListener;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -67,7 +67,7 @@ public class AbstractRefactoringPanel extends JPanel {
         this.detect_indicator_status_text_key = detect_indicator_status_text_key;
         this.refactoringType = refactoringType;
         this.model = model;
-        this.treeTable =  new TreeTable(model);
+        this.treeTable = new TreeTable(model);
         this.refactorDepth = refactorDepth;
         setLayout(new BorderLayout());
         setupGUI();
@@ -237,8 +237,8 @@ public class AbstractRefactoringPanel extends JPanel {
      * Opens definition of method and highlights specified element in the method.
      */
     public static void highlightStatement(@Nullable PsiMethod sourceMethod,
-                                           AnalysisScope scope,
-                                           PsiElement statement, boolean openInEditor) {
+                                          AnalysisScope scope,
+                                          PsiElement statement, boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -257,7 +257,7 @@ public class AbstractRefactoringPanel extends JPanel {
 
     //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
-                                          AnalysisScope scope, boolean openInEditor) {
+                                       AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 

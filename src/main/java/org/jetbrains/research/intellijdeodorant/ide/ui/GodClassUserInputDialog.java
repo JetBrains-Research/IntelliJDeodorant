@@ -17,7 +17,6 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractClassRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.GodClassPreviewResultDialog;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

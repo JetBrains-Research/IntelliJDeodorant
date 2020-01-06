@@ -28,8 +28,7 @@ public class GodClassTableModel extends AbstractTreeTableModel {
             } else {
                 return "";
             }
-        } else
-        if (o instanceof AbstractExtractClassCandidateRefactoring) {
+        } else if (o instanceof AbstractExtractClassCandidateRefactoring) {
             AbstractExtractClassCandidateRefactoring abstractCandidateRefactoring = (AbstractExtractClassCandidateRefactoring) o;
             ExtractClassCandidateRefactoring candidateRefactoring = (ExtractClassCandidateRefactoring) abstractCandidateRefactoring.getCandidateRefactoring();
             switch (index) {
