@@ -5,6 +5,7 @@ import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.util.FileContentUtil;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.jetbrains.research.intellijdeodorant.ast.util.TypeVisitor;
@@ -26,14 +27,11 @@ public class ExtractClassRefactoring {
     private static final String ACCESSOR_SUFFIX = "2";
     private PsiJavaFile sourceFile;
     private PsiClass sourceTypeDeclaration;
-    private Set<PsiElement> javaElementsToOpenInEditor;
     private Map<PsiMethod, Set<PlainVariable>> additionalArgumentsAddedToExtractedMethods;
     private Map<PsiMethod, Set<PsiParameter>> additionalParametersAddedToExtractedMethods;
     private Set<PsiMethod> sourceMethodBindingsChangedWithPublicModifier;
     private Set<PsiField> sourceFieldBindingsWithCreatedSetterMethod;
     private Set<PsiField> sourceFieldBindingsWithCreatedGetterMethod;
-    private Set<PsiField> fieldDeclarationsChangedWithPublicModifier; //TODO questionable field
-    private Set<?> memberTypeDeclarationsChangedWithPublicModifier; //TODO questionable field
     private Map<PsiMethod, Set<PsiMethodCallExpression>> oldMethodInvocationsWithinExtractedMethods;
     private Map<PsiMethod, Set<PsiMethodCallExpression>> newMethodInvocationsWithinExtractedMethods;
     private Map<PsiMethod, PsiMethod> oldToNewExtractedMethodDeclarationMap;
@@ -47,32 +45,22 @@ public class ExtractClassRefactoring {
     private Map<PsiMethod, Set<PsiParameter>> extractedClassConstructorParameterMap;
     private Set<PsiField> extractedFieldsWithThisExpressionInTheirInitializer;
 
-    // TODO comments
     private PsiElementFactory factory;
     private PsiFileFactory fileFactory;
     private Project project;
     private PsiManager psiManager;
+    private JavaCodeStyleManager javaCodeStyleManager;
+    private CodeStyleManager codeStyleManager;
 
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
                                    Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String extractedTypeName) {
         this.sourceFile = sourceFile;
-        //this.sourceCompilationUnit = sourceCompilationUnit;
         this.sourceTypeDeclaration = sourceTypeDeclaration;
-        //this.compilationUnitChanges = new LinkedHashMap<ICompilationUnit, CompilationUnitChange>();
-        //ICompilationUnit sourceICompilationUnit = (ICompilationUnit) sourceCompilationUnit.getJavaElement();
-        //MultiTextEdit sourceMultiTextEdit = new MultiTextEdit();
-        //CompilationUnitChange sourceCompilationUnitChange = new CompilationUnitChange("", sourceICompilationUnit);
-        //sourceCompilationUnitChange.setEdit(sourceMultiTextEdit);
-        //this.compilationUnitChanges.put(sourceICompilationUnit, sourceCompilationUnitChange);
-        //this.createCompilationUnitChanges = new LinkedHashMap<ICompilationUnit, CreateCompilationUnitChange>();
-        //this.javaElementsToOpenInEditor = new LinkedHashSet<IJavaElement>();
         this.additionalArgumentsAddedToExtractedMethods = new LinkedHashMap<>();
         this.additionalParametersAddedToExtractedMethods = new LinkedHashMap<>();
         this.sourceMethodBindingsChangedWithPublicModifier = new LinkedHashSet<>();
         this.sourceFieldBindingsWithCreatedSetterMethod = new LinkedHashSet<>();
         this.sourceFieldBindingsWithCreatedGetterMethod = new LinkedHashSet<>();
-        this.fieldDeclarationsChangedWithPublicModifier = new LinkedHashSet<>();
-        this.memberTypeDeclarationsChangedWithPublicModifier = new LinkedHashSet<>();
         this.oldMethodInvocationsWithinExtractedMethods = new LinkedHashMap<>();
         this.newMethodInvocationsWithinExtractedMethods = new LinkedHashMap<>();
         this.oldToNewExtractedMethodDeclarationMap = new LinkedHashMap<>();
@@ -80,11 +68,9 @@ public class ExtractClassRefactoring {
         this.extractedMethods = extractedMethods;
         this.delegateMethods = delegateMethods;
         this.extractedTypeName = extractedTypeName;
-        //this.statementRewriteMap = new LinkedHashMap<PsiStatement, ASTRewrite>();
         this.constructorFinalFieldAssignmentMap = new LinkedHashMap<>();
         this.extractedClassConstructorParameterMap = new LinkedHashMap<>();
         this.extractedFieldsWithThisExpressionInTheirInitializer = new LinkedHashSet<>();
-        //this.staticallyImportedMethods = new LinkedHashSet<>();
         for (PsiMethod extractedMethod : extractedMethods) {
             additionalArgumentsAddedToExtractedMethods.put(extractedMethod, new LinkedHashSet<>());
             additionalParametersAddedToExtractedMethods.put(extractedMethod, new LinkedHashSet<>());
@@ -94,6 +80,8 @@ public class ExtractClassRefactoring {
         this.factory = PsiElementFactory.getInstance(project);
         this.fileFactory = PsiFileFactory.getInstance(project);
         this.psiManager = PsiManager.getInstance(project);
+        this.codeStyleManager = CodeStyleManager.getInstance(project);
+        this.javaCodeStyleManager = JavaCodeStyleManager.getInstance(project);
     }
 
     public String getExtractedTypeName() {
@@ -145,20 +133,18 @@ public class ExtractClassRefactoring {
         Set<PsiField> modifiedFieldsInNonExtractedMethods = new LinkedHashSet<>();
         Set<PsiField> accessedFieldsInNonExtractedMethods = new LinkedHashSet<>();
 
-
-
         /*
-        Order of refactoring's changes are reorganised compared to the original plugin so
+        Order of refactoring's changes are reorganized compared to the original plugin so that
         the transitional code during the refactoring will always be compilable (which is vital for IDEA api)
 
-        As a part of it, we have to create extracted class before any changes to the original class, so at first we should
-        collect modified and accessed field in source class, and only then change them in
-        `modifyExtractedFieldAssignmentsInSourceClass` and `modifyExtractedFieldAccessesInSourceClass`
+        As a part of it, we have to create extracted class before any changes to the original class, so at first, we should
+        collect modified and accessed fields in source class, and only then change them in
+        `modifyExtractedFieldAssignmentsInSourceClass()` and `modifyExtractedFieldAccessesInSourceClass()`
          */
         collectExtractedFieldAssignmentsInSourceClass(extractedFieldFragments, modifiedFieldsInNonExtractedMethods, accessedFieldsInNonExtractedMethods);
         collectExtractedFieldAccessesInSourceClass(extractedFieldFragments, accessedFieldsInNonExtractedMethods);
 
-        createExtractedClass(modifiedFieldsInNonExtractedMethods, accessedFieldsInNonExtractedMethods);
+        PsiJavaFile extractedClassFile = createExtractedClass(modifiedFieldsInNonExtractedMethods, accessedFieldsInNonExtractedMethods);
 
         createExtractedTypeFieldReferenceInSourceClass();
 
@@ -182,6 +168,8 @@ public class ExtractClassRefactoring {
         }
 
         removeFieldFragmentsInSourceClass(extractedFieldFragments);
+
+        compileResults(extractedClassFile);
     }
 
     private PsiExpression convertPsiFieldToSetterCallExpression(PsiField psiField) {
@@ -283,7 +271,6 @@ public class ExtractClassRefactoring {
     }
 
     private void removeSourceMethods(Set<PsiMethod> methods) {
-        //TODO IDEA? Eclipse bug workaround: Overlapping TextEdits Exception when the x last methods of a type declaration are being removed
         for (PsiMethod method : methods) {
             method.delete();
         }
@@ -300,14 +287,23 @@ public class ExtractClassRefactoring {
                     for (PsiStatement statement : statements) {
                         List<PsiExpression> methodInvocations = expressionExtractor.getMethodInvocations(statement);
                         for (PsiExpression expression : methodInvocations) {
+
+                            if (!expression.isValid()) {
+                                //TODO same bug as below workaround
+                                continue;
+                            }
+
                             if (expression instanceof PsiMethodCallExpression) {
                                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                                PsiMethod extractedMethod = methodInvocation.resolveMethod();
-                                if (extractedMethod != null) {
+                                PsiMethod method = methodInvocation.resolveMethod();
+                                if (extractedMethods.contains(method)) {
                                     PsiExpression qualifier = methodInvocation.getMethodExpression().getQualifierExpression();
                                     if (qualifier == null || qualifier instanceof PsiThisExpression) {
-                                        qualifier.delete();
-                                        Set<PlainVariable> additionalArgumentsAddedToMovedMethod = additionalArgumentsAddedToExtractedMethods.get(extractedMethod);
+                                        if (qualifier != null) {
+                                            qualifier.delete();
+                                        }
+
+                                        Set<PlainVariable> additionalArgumentsAddedToMovedMethod = additionalArgumentsAddedToExtractedMethods.get(method);
                                         StringBuilder arguments = new StringBuilder();
 
                                         boolean isFirst = true;
@@ -320,24 +316,26 @@ public class ExtractClassRefactoring {
                                             isFirst = false;
                                         }
 
-                                        for (PlainVariable argument : additionalArgumentsAddedToMovedMethod) {
-                                            if (isThisVariable(argument)) {
-                                                if (isParentAnonymousClassDeclaration(methodInvocation.getNode())) {
-                                                    arguments.append(", ").append(sourceTypeDeclaration.getName()).append(".this");
+                                        if (additionalArgumentsAddedToMovedMethod != null) {
+                                            for (PlainVariable argument : additionalArgumentsAddedToMovedMethod) {
+                                                if (isThisVariable(argument)) {
+                                                    if (isParentAnonymousClassDeclaration(methodInvocation.getNode())) {
+                                                        arguments.append(", ").append(sourceTypeDeclaration.getName()).append(".this");
+                                                    } else {
+                                                        arguments.append(", this");
+                                                    }
                                                 } else {
-                                                    arguments.append(", this");
-                                                }
-                                            } else {
-                                                if (argument.isField()) {
-                                                    arguments.append(", this.").append(argument.getName());
-                                                } else {
-                                                    arguments.append(", ").append(argument.getName());
+                                                    if (argument.isField()) {
+                                                        arguments.append(", this.").append(argument.getName());
+                                                    } else {
+                                                        arguments.append(", ").append(argument.getName());
+                                                    }
                                                 }
                                             }
                                         }
 
-                                        String modifiedMethodCallExpressionText = extractedMethod.getName() + "(" + arguments.toString() + ")";
-                                        if (isStatic(extractedMethod)) {
+                                        String modifiedMethodCallExpressionText = method.getName() + "(" + arguments.toString() + ")";
+                                        if (isStatic(method)) {
                                             modifiedMethodCallExpressionText = extractedTypeName + "." + modifiedMethodCallExpressionText;
                                         } else {
                                             String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
@@ -346,7 +344,7 @@ public class ExtractClassRefactoring {
 
                                         expression.replace(factory.createExpressionFromText(modifiedMethodCallExpressionText, expression));
                                     } else {
-                                        delegateMethods.add(extractedMethod);
+                                        delegateMethods.add(method);
                                     }
                                 }
                             }
@@ -415,7 +413,23 @@ public class ExtractClassRefactoring {
         return false;
     }
 
-    private void createExtractedClass(Set<PsiField> modifiedFieldsInNonExtractedMethods, Set<PsiField> accessedFieldsInNonExtractedMethods) {
+    private Map<PsiMethod, PsiMethod> psiMethodMap;
+
+    private void dfs(PsiElement firstElement, PsiElement secondElement) {
+        if (firstElement instanceof PsiMethod && secondElement instanceof PsiMethod) {
+            psiMethodMap.put((PsiMethod) firstElement, (PsiMethod) secondElement);
+        }
+
+        for (int i = 0; i < firstElement.getChildren().length; i++) {
+            dfs(firstElement.getChildren()[i], secondElement.getChildren()[i]);
+        }
+    }
+
+    private PsiJavaFile createExtractedClass(Set<PsiField> modifiedFieldsInNonExtractedMethods, Set<PsiField> accessedFieldsInNonExtractedMethods) {
+        PsiJavaFile sandboxFile = (PsiJavaFile) sourceFile.copy();
+        psiMethodMap = new HashMap<>();
+        dfs(sourceFile, sandboxFile);
+
         String extractedClassFileName = extractedTypeName + ".java";
         PsiJavaFile extractedClassFile = (PsiJavaFile) fileFactory.createFileFromText(JavaLanguage.INSTANCE, "");
         extractedClassFile = (PsiJavaFile) extractedClassFile.setName(extractedClassFileName);
@@ -427,6 +441,14 @@ public class ExtractClassRefactoring {
 
         if (packageStatement != null) {
             extractedClassFile.setPackageName(packageStatement.getPackageName());
+        }
+
+        for (PsiImportStatement importStatement : sourceFile.getImportList().getImportStatements()) {
+            extractedClassFile.getImportList().add(importStatement);
+        }
+
+        for (PsiImportStaticStatement importStaticStatement : sourceFile.getImportList().getImportStaticStatements()) {
+            extractedClassFile.getImportList().add(importStaticStatement);
         }
 
         PsiClass serializableTypeBinding = implementsSerializableInterface(sourceTypeDeclaration);
@@ -473,15 +495,19 @@ public class ExtractClassRefactoring {
 
             extractedClass.addBefore(extractedFieldDeclaration, extractedClass.getRBrace());
         }
+
         for (PsiMethod constructor : constructorFinalFieldAssignmentMap.keySet()) {
             Map<PsiField, PsiAssignmentExpression> finalFieldAssignmentMap = constructorFinalFieldAssignmentMap.get(constructor);
             PsiMethod extractedClassConstructor = factory.createConstructor(extractedTypeName);
             extractedClassConstructor.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
             Set<PsiParameter> extractedClassConstructorParameters = extractedClassConstructorParameterMap.get(constructor);
-            for (PsiParameter variableDeclaration : extractedClassConstructorParameters) {
-                PsiType parameterType = variableDeclaration.getType(); //TODO check varargs
-                extractedClassConstructor.getParameterList().add(factory.createParameter(variableDeclaration.getName(), parameterType));
+
+            if (extractedClassConstructorParameters != null) {
+                for (PsiParameter variableDeclaration : extractedClassConstructorParameters) {
+                    PsiType parameterType = variableDeclaration.getType();
+                    extractedClassConstructor.getParameterList().add(factory.createParameter(variableDeclaration.getName(), parameterType));
+                }
             }
 
             extractedClassConstructor = (PsiMethod) extractedClass.addBefore(extractedClassConstructor, extractedClass.getRBrace());
@@ -503,26 +529,8 @@ public class ExtractClassRefactoring {
             }
         }
 
-
-        /*
-        // TODO comment
-        //TODO getALLMethod and fields!!!
-        for (PsiField psiField : sourceTypeDeclaration.getFields()) {
-            if (!extractedFieldFragments.contains(psiField)) {
-                extractedClass.addBefore(psiField, extractedClass.getRBrace());
-            }
-        }
-
-        for (PsiMethod psiMethod : sourceTypeDeclaration.getMethods()) {
-            if (!extractedMethods.contains(psiMethod)) {
-                extractedClass.addBefore(psiMethod, extractedClass.getRBrace());
-            }
-        }
-        //TODO end of comment
-*/
-
         for (PsiMethod method : extractedMethods) {
-            PsiMethod extractedMethodDeclaration = createExtractedMethodDeclaration(method, extractedClass);
+            createExtractedMethodDeclaration(method, extractedClass);
         }
 
         Map<PsiMethod, Integer> levelMap = new LinkedHashMap<>();
@@ -749,15 +757,21 @@ public class ExtractClassRefactoring {
             }
         }
 
+
         extractedClassFile.add(extractedClass);
 
-        compileResults(sourceFile, extractedClassFile);
+        extractedClassFile = (PsiJavaFile) sourceFile.getContainingDirectory().add(extractedClassFile);
+        FileContentUtil.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
+
+        return extractedClassFile;
     }
 
-    private void compileResults(PsiJavaFile sourceFile, PsiJavaFile extractedClassFile) {
-        extractedClassFile = (PsiJavaFile) CodeStyleManager.getInstance(project).reformat(extractedClassFile);
+    private void compileResults(PsiJavaFile extractedClassFile) {
+        extractedClassFile = (PsiJavaFile) codeStyleManager.reformat(extractedClassFile);
         sourceFile = (PsiJavaFile) CodeStyleManager.getInstance(project).reformat(sourceFile);
-        sourceFile.getContainingDirectory().add(extractedClassFile);
+
+        javaCodeStyleManager.optimizeImports(extractedClassFile);
+        javaCodeStyleManager.optimizeImports(sourceFile);
 
         FileContentUtil.reparseFiles(project, Collections.singleton(sourceFile.getContainingDirectory().getVirtualFile()), false);
     }
@@ -834,9 +848,10 @@ public class ExtractClassRefactoring {
         return null;
     }
 
-    private PsiMethod createExtractedMethodDeclaration(PsiMethod extractedMethod, PsiClass extractedClass) {
-        PsiMethod newMethodDeclaration = (PsiMethod) extractedMethod.copy();
-        newMethodDeclaration = (PsiMethod) extractedClass.addBefore(newMethodDeclaration, extractedClass.getRBrace());
+    private void createExtractedMethodDeclaration(PsiMethod extractedMethod, PsiClass extractedClass) {
+        PsiMethod newMethodDeclaration = psiMethodMap.get(extractedMethod);
+
+        newMethodDeclaration.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
         for (PsiAnnotation annotation : extractedMethod.getAnnotations()) {
             if (annotation instanceof MarkerAnnotation && annotation.getQualifiedName() != null && annotation.getQualifiedName().equals("Test")) {
@@ -846,7 +861,8 @@ public class ExtractClassRefactoring {
 
         modifySourceMemberAccessesInTargetClass(extractedMethod, newMethodDeclaration);
         modifySourceStaticFieldInstructionsInTargetClass(extractedMethod, newMethodDeclaration);
-        return extractedMethod;
+
+        extractedClass.addBefore(newMethodDeclaration, extractedClass.getRBrace());
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -947,11 +963,15 @@ public class ExtractClassRefactoring {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         oldToNewExtractedMethodDeclarationMap.put(sourceMethod, newMethodDeclaration);
         List<PsiExpression> sourceMethodInvocations = new ArrayList<>();
-        List<PsiExpression> sourceFieldInstructions = new ArrayList<>();
+        List<PsiReferenceExpression> sourceFieldInstructions = new ArrayList<>();
         List<PsiExpression> sourceAssignments = new ArrayList<>();
         Arrays.stream(sourceMethod.getBody().getStatements()).forEach(statement -> {
             sourceMethodInvocations.addAll(expressionExtractor.getMethodInvocations(statement));
-            sourceFieldInstructions.addAll(expressionExtractor.getVariableInstructions(statement));
+
+            for (PsiExpression expression : expressionExtractor.getVariableInstructions(statement)) {
+                sourceFieldInstructions.add((PsiReferenceExpression) expression);
+            }
+
             sourceAssignments.addAll(expressionExtractor.getAssignments(statement));
         });
 
@@ -985,7 +1005,7 @@ public class ExtractClassRefactoring {
             PsiVariable oldAssignedVariable = null;
             if (oldLeftHandSide instanceof PsiReferenceExpression) {
                 oldAssignedVariable = (PsiVariable) ((PsiReferenceExpression) oldLeftHandSide).resolve();
-            } //TODO does it works with Field access?
+            }
 
             PsiExpression oldRightHandSide = oldAssignment.getRExpression();
             PsiExpression newRightHandSide = newAssignment.getRExpression();
@@ -1217,7 +1237,7 @@ public class ExtractClassRefactoring {
                                 infixExpressionText += "1";
                                 setterMethodInvocationText += infixExpressionText + ")";
                                 setterMethodInvocationText = modifiedSourceTypeName + "." + setterMethodInvocationText;
-                                newPostfixExpression.replace(factory.createExpressionFromText(setterMethodInvocationText, sourceMethod));
+                                newPostfixExpression.replace(factory.createExpressionFromText(setterMethodInvocationText, null));
                             }
                         }
                     }
@@ -1409,6 +1429,7 @@ public class ExtractClassRefactoring {
                         if (!variableBindingCorrespondsToExtractedField(variableBinding)) {
                             if (!isAssignmentChild(expression)) {
                                 PsiReferenceExpression expressionName = newFieldInstructions.get(i);
+
                                 if (sourceFieldBindingsWithCreatedSetterMethod.contains(variableBindingField)) {
                                     if (isParentAnonymousClassDeclaration(simpleName.getNode()))
                                         sourceClassParameterShouldBeFinal = true;
@@ -1468,7 +1489,7 @@ public class ExtractClassRefactoring {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiReferenceExpression methodExpression = methodInvocation.getMethodExpression();
 
-                //TODO check correctness for inner classes like OuterClass.this.myMethod()
+                //TODO check correctness for inner classes like OuterClass.this.myMethod(). Original plugin howerer does not always work correct as well.
                 PsiExpression qualifierExpression = methodExpression.getQualifierExpression();
                 if (qualifierExpression == null || qualifierExpression instanceof PsiThisExpression) {
                     PsiMethod methodBinding = methodInvocation.resolveMethod();
@@ -1496,6 +1517,8 @@ public class ExtractClassRefactoring {
                                          Finds reference `this.myMethod1()` TWICE which is a problem: by the time we got to the second reference it will be invalidate
                                          and any work with that reference (i.e. replacement) will cause assertion error
                                          This is probably a bug in the `expressionExtractor`
+
+                                         UPD: Konstantin Lyubort probably fixed this in his pull request.
                                          */
 
                                         continue;
@@ -1635,7 +1658,7 @@ public class ExtractClassRefactoring {
                         Set<PsiMethodCallExpression> methodInvocations = newMethodInvocationsWithinExtractedMethods.get(newMethodDeclaration);
                         methodInvocations.add((PsiMethodCallExpression) newMethodInvocations.get(j));
                     }
-                    if (methodInvocation.getMethodExpression() != null && ((PsiMethod) methodInvocation.getMethodExpression()).getContainingClass().equals(sourceTypeDeclaration)) {
+                    if (methodInvocation.getMethodExpression() != null && ((PsiMethod) methodInvocation.getMethodExpression().resolve()).getContainingClass().equals(sourceTypeDeclaration)) {
                         if (!sourceMethodBindingsChangedWithPublicModifier.contains(methodInvocation.resolveMethod())) {
                             setPublicModifierToSourceMethod(methodInvocation.resolveMethod(), sourceTypeDeclaration);
                             sourceMethodBindingsChangedWithPublicModifier.add(methodInvocation.resolveMethod());
@@ -1819,6 +1842,11 @@ public class ExtractClassRefactoring {
         if (element instanceof PsiReferenceExpression) {
             PsiReferenceExpression expression = (PsiReferenceExpression) element;
             PsiExpression qualifier = expression.getQualifierExpression();
+
+            if (qualifier == null) {
+                return;
+            }
+
             if (qualifier instanceof PsiThisExpression) {
                 qualifier.delete();
             } else if (qualifier.getFirstChild() instanceof PsiThisExpression) {
@@ -1878,7 +1906,7 @@ public class ExtractClassRefactoring {
             String modifiedFieldName = originalFieldName.substring(0, 1).toUpperCase() + originalFieldName.substring(1);
             String getterMethodName = GETTER_PREFIX + modifiedFieldName;
             getterMethodName = appendAccessorMethodSuffix(getterMethodName, sourceTypeDeclaration.getMethods());
-            getterMethodInvocationText = getterMethodName;
+            getterMethodInvocationText = getterMethodName + "()";
         }
 
         if (newAccessedVariable.resolve() instanceof PsiField) {
@@ -1995,7 +2023,7 @@ public class ExtractClassRefactoring {
         for (PsiExpression expression : sourceVariableInstructions) {
             PsiReferenceExpression simpleName = (PsiReferenceExpression) expression;
             PsiVariable binding = (PsiVariable) simpleName.resolve();
-            if (binding instanceof PsiVariable) {
+            if (binding != null) {
                 if (binding instanceof PsiField && (binding.getModifierList().hasModifierProperty(PsiModifier.STATIC))) {
                     if (declaredInSourceTypeDeclarationOrSuperclass((PsiField) binding)) {
                         String qualifier = sourceTypeDeclaration.getName();
@@ -2077,6 +2105,7 @@ public class ExtractClassRefactoring {
         assigmentText += "." + fieldFragment.getName() + " = " + fieldFragment.getName() + ";"; //this.fieldName = fieldName (parameter)
         PsiStatement assignment = factory.createStatementFromText(assigmentText, sourceFile);
         setterMethodDeclaration.getBody().addBefore(assignment, setterMethodDeclaration.getBody().getRBrace());
+
         return setterMethodDeclaration;
     }
 
@@ -2091,8 +2120,9 @@ public class ExtractClassRefactoring {
         if (fieldFragment.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
             fieldFragment.getModifierList().setModifierProperty(PsiModifier.STATIC, true);
         }
-        PsiReturnStatement returnStatement = (PsiReturnStatement) factory.createStatementFromText("return " + fieldFragment.getName() + ";", sourceFile);
+        PsiReturnStatement returnStatement = (PsiReturnStatement) factory.createStatementFromText("return " + fieldFragment.getName() + ";", null);
         getterMethodDeclaration.getBody().addBefore(returnStatement, getterMethodDeclaration.getBody().getRBrace());
+
         return getterMethodDeclaration;
     }
 
@@ -2443,7 +2473,7 @@ public class ExtractClassRefactoring {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         Set<PsiMethod> contextMethods = getAllMethodDeclarationsInSourceClass();
         String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
-        boolean rewriteAST; //TODO use
+        boolean rewriteAST; //TODO use for review
         for (PsiMethod methodDeclaration : contextMethods) {
             if (!extractedMethods.contains(methodDeclaration)) {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
@@ -2452,6 +2482,10 @@ public class ExtractClassRefactoring {
                     for (PsiStatement statement : statements) {
                         List<PsiExpression> assignments = expressionExtractor.getAssignments(statement);
                         for (PsiExpression expression : assignments) {
+                            if (!expression.isValid()) {
+                                continue;
+                            }
+
                             PsiAssignmentExpression assignment = (PsiAssignmentExpression) expression;
                             PsiExpression leftHandSide = assignment.getLExpression();
                             PsiElement assignedVariable = null;
@@ -2471,17 +2505,24 @@ public class ExtractClassRefactoring {
                                     if (assignedVariable instanceof PsiVariable) {
                                         PsiVariable assignedVariableBinding = (PsiVariable) assignedVariable;
                                         if (assignedVariableBinding instanceof PsiField && fieldFragment.equals(assignedVariableBinding)) {
+                                            if (handleType == HandleType.COLLECT) {
+                                                modifiedFields.add(fieldFragment);
+                                            }
+
                                             if (methodDeclaration.isConstructor() && (assignedVariableBinding.getModifierList().hasModifierProperty(PsiModifier.FINAL))) {
-                                                if (assignment.getRExpression() instanceof PsiExpressionStatement) {
-                                                    PsiExpressionStatement assignmentStatement = (PsiExpressionStatement) assignment.getRExpression();
-                                                    assignmentStatement.delete();
+                                                if (assignment.getParent() instanceof PsiExpressionStatement) {
+                                                    PsiExpressionStatement assignmentStatement = (PsiExpressionStatement) assignment.getParent();
                                                     if (constructorFinalFieldAssignmentMap.containsKey(methodDeclaration)) {
                                                         Map<PsiField, PsiAssignmentExpression> finalFieldAssignmentMap = constructorFinalFieldAssignmentMap.get(methodDeclaration);
-                                                        finalFieldAssignmentMap.put(fieldFragment, assignment);
+                                                        finalFieldAssignmentMap.put(fieldFragment, (PsiAssignmentExpression) assignment.copy());
                                                     } else {
                                                         Map<PsiField, PsiAssignmentExpression> finalFieldAssignmentMap = new LinkedHashMap<>();
-                                                        finalFieldAssignmentMap.put(fieldFragment, assignment);
+                                                        finalFieldAssignmentMap.put(fieldFragment, (PsiAssignmentExpression) assignment.copy());
                                                         constructorFinalFieldAssignmentMap.put(methodDeclaration, finalFieldAssignmentMap);
+                                                    }
+
+                                                    if (handleType == HandleType.MODIFY) {
+                                                        assignmentStatement.delete();
                                                     }
                                                 }
                                             } else {
@@ -2538,10 +2579,6 @@ public class ExtractClassRefactoring {
                                                 }
                                             }
                                             rewriteAST = true;
-
-                                            if (handleType == HandleType.COLLECT) {
-                                                modifiedFields.add(fieldFragment);
-                                            }
                                         }
                                     }
                                 }
@@ -2554,6 +2591,10 @@ public class ExtractClassRefactoring {
                                         if (arrayBinding instanceof PsiVariable) {
                                             PsiVariable arrayVariableBinding = (PsiVariable) arrayBinding;
                                             if (arrayVariableBinding instanceof PsiField && fieldFragment.equals(arrayVariableBinding)) {
+                                                if (handleType == HandleType.COLLECT) {
+                                                    accessedFields.add(fieldFragment);
+                                                }
+
                                                 PsiMethodCallExpression getterMethodInvocation;
                                                 String getterMethodInvocationText = getterMethodName;
                                                 if (arrayVariableBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
@@ -2566,10 +2607,6 @@ public class ExtractClassRefactoring {
 
                                                 if (handleType == HandleType.MODIFY) {
                                                     arrayExpression.replace(getterMethodInvocation);
-                                                }
-
-                                                if (handleType == HandleType.COLLECT) {
-                                                    accessedFields.add(fieldFragment);
                                                 }
                                             }
                                         }
@@ -2592,6 +2629,10 @@ public class ExtractClassRefactoring {
                                     if (rightHandBinding instanceof PsiVariable) {
                                         PsiVariable accessedVariableBinding = (PsiVariable) rightHandBinding;
                                         if (accessedVariableBinding instanceof PsiField && fieldFragment.equals(accessedVariableBinding)) {
+                                            if (handleType == HandleType.COLLECT) {
+                                                accessedFields.add(fieldFragment);
+                                            }
+
                                             PsiMethodCallExpression getterMethodInvocation;
                                             String getterMethodInvocationText = getterMethodName;
                                             if (accessedVariableBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
@@ -2605,10 +2646,6 @@ public class ExtractClassRefactoring {
                                             if (handleType == HandleType.MODIFY) {
                                                 accessedVariable.replace(getterMethodInvocation);
                                             }
-
-                                            if (handleType == HandleType.COLLECT) {
-                                                accessedFields.add(fieldFragment);
-                                            }
                                         }
                                     }
                                 }
@@ -2618,7 +2655,7 @@ public class ExtractClassRefactoring {
                         for (PsiExpression expression : postfixExpressions) {
                             PsiPostfixExpression postfix = (PsiPostfixExpression) expression;
                             PsiExpression operand = postfix.getOperand();
-                            PsiElement assignedVariable = ((PsiReferenceExpression) operand).resolve(); //TODO maybe incorrect
+                            PsiElement assignedVariable = ((PsiReferenceExpression) operand).resolve();
                             List<PsiExpression> arrayAccesses = expressionExtractor.getArrayAccesses(operand);
                             for (PsiField fieldFragment : fieldFragments) {
                                 String originalFieldName = fieldFragment.getName();
@@ -2627,96 +2664,91 @@ public class ExtractClassRefactoring {
                                 getterMethodName = appendAccessorMethodSuffix(getterMethodName, this.extractedMethods);
                                 if (assignedVariable != null) {
                                     PsiVariable operandBinding = (PsiVariable) assignedVariable;
-                                    if (operandBinding instanceof PsiVariable) {
-                                        if (operandBinding instanceof PsiField && fieldFragment.equals(operandBinding)) {
-                                            PsiMethodCallExpression setterMethodInvocation;
-                                            String setterMethodInvocationText;
-                                            String setterMethodName = SETTER_PREFIX + modifiedFieldName;
-                                            setterMethodName = appendAccessorMethodSuffix(setterMethodName, this.extractedMethods);
-                                            setterMethodInvocationText = setterMethodName;
-
-                                            if (handleType == HandleType.COLLECT) {
-                                                accessedFields.add(fieldFragment);
-                                            }
-
-                                            String infixExpressionText = "";
-
-                                            String getterMethodInvocationText = getterMethodName;
-
-                                            if (operandBinding.getModifierList().hasExplicitModifier(PsiModifier.STATIC)) {
-                                                getterMethodInvocationText = extractedTypeName + "." + getterMethodInvocationText;
-                                            } else {
-                                                getterMethodInvocationText = modifiedExtractedTypeName + "." + getterMethodInvocationText;
-                                            }
-                                            getterMethodInvocationText += "()";
-
-                                            infixExpressionText += getterMethodInvocationText;
-                                            if (postfix.getOperationSign().getText().equals("++")) {
-                                                infixExpressionText += " + ";
-                                            } else if (postfix.getOperationSign().getText().equals("--")) {
-                                                infixExpressionText += " - ";
-                                            }
-                                            infixExpressionText += "1";
-
-                                            setterMethodInvocationText += '(';
-                                            setterMethodInvocationText += infixExpressionText;
-
-                                            if (handleType == HandleType.MODIFY && operand instanceof PsiQualifiedExpression) {
-                                                removeRedundantThisQualifierFromExpressions(operand);
-                                            }
-
-                                            if (operand instanceof PsiQualifiedExpression) {
-                                                String qualifier = ((PsiQualifiedExpression) operand).getQualifier().getText();
-                                                setterMethodInvocationText = modifiedExtractedTypeName + "." + qualifier + "." + setterMethodInvocationText;
-                                            } else if (operandBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
-                                                setterMethodInvocationText = extractedTypeName + "." + setterMethodInvocationText;
-                                            } else {
-                                                setterMethodInvocationText = modifiedExtractedTypeName + "." + setterMethodInvocationText;
-                                            }
-                                            setterMethodInvocationText += ")";
-
-                                            setterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(setterMethodInvocationText, null);
-
-                                            if (handleType == HandleType.MODIFY) {
-                                                postfix.replace(setterMethodInvocation);
-                                            }
-
-                                            rewriteAST = true;
-
-                                            if (handleType == HandleType.COLLECT) {
-                                                modifiedFields.add(fieldFragment);
-                                            }
+                                    if (operandBinding instanceof PsiField && fieldFragment.equals(operandBinding)) {
+                                        if (handleType == HandleType.COLLECT) {
+                                            accessedFields.add(fieldFragment);
+                                            modifiedFields.add(fieldFragment);
                                         }
+
+                                        PsiMethodCallExpression setterMethodInvocation;
+                                        String setterMethodInvocationText;
+                                        String setterMethodName = SETTER_PREFIX + modifiedFieldName;
+                                        setterMethodName = appendAccessorMethodSuffix(setterMethodName, this.extractedMethods);
+                                        setterMethodInvocationText = setterMethodName;
+
+
+
+                                        String infixExpressionText = "";
+
+                                        String getterMethodInvocationText = getterMethodName;
+
+                                        if (operandBinding.getModifierList().hasExplicitModifier(PsiModifier.STATIC)) {
+                                            getterMethodInvocationText = extractedTypeName + "." + getterMethodInvocationText;
+                                        } else {
+                                            getterMethodInvocationText = modifiedExtractedTypeName + "." + getterMethodInvocationText;
+                                        }
+                                        getterMethodInvocationText += "()";
+
+                                        infixExpressionText += getterMethodInvocationText;
+                                        if (postfix.getOperationSign().getText().equals("++")) {
+                                            infixExpressionText += " + ";
+                                        } else if (postfix.getOperationSign().getText().equals("--")) {
+                                            infixExpressionText += " - ";
+                                        }
+                                        infixExpressionText += "1";
+
+                                        setterMethodInvocationText += '(';
+                                        setterMethodInvocationText += infixExpressionText;
+
+                                        if (handleType == HandleType.MODIFY && operand instanceof PsiQualifiedExpression) {
+                                            removeRedundantThisQualifierFromExpressions(operand);
+                                        }
+
+                                        if (operand instanceof PsiQualifiedExpression) {
+                                            String qualifier = ((PsiQualifiedExpression) operand).getQualifier().getText();
+                                            setterMethodInvocationText = modifiedExtractedTypeName + "." + qualifier + "." + setterMethodInvocationText;
+                                        } else if (operandBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
+                                            setterMethodInvocationText = extractedTypeName + "." + setterMethodInvocationText;
+                                        } else {
+                                            setterMethodInvocationText = modifiedExtractedTypeName + "." + setterMethodInvocationText;
+                                        }
+                                        setterMethodInvocationText += ")";
+
+                                        setterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(setterMethodInvocationText, null);
+
+                                        if (handleType == HandleType.MODIFY) {
+                                            postfix.replace(setterMethodInvocation);
+                                        }
+
+                                        rewriteAST = true;
                                     }
                                 }
                                 for (PsiExpression expression2 : arrayAccesses) {
                                     PsiArrayAccessExpression arrayAccess = (PsiArrayAccessExpression) expression2;
                                     PsiExpression arrayExpression = arrayAccess.getArrayExpression();
-                                    PsiVariable arrayVariable = (PsiVariable) ((PsiReferenceExpression) arrayAccess).resolve(); //TODO maybe wrong
+                                    PsiVariable arrayVariable = (PsiVariable) ((PsiReferenceExpression) arrayAccess).resolve();
                                     if (arrayVariable != null) {
-                                        if (arrayVariable instanceof PsiVariable) {
-                                            if (arrayVariable instanceof PsiField && fieldFragment.equals(arrayVariable)) {
-                                                PsiMethodCallExpression getterMethodInvocation;
-                                                String getterMethodInvocationText;
-                                                getterMethodInvocationText = getterMethodName;
-                                                if (arrayVariable.getModifierList().hasExplicitModifier(PsiModifier.STATIC)) {
-                                                    getterMethodInvocationText = extractedTypeName + "." + getterMethodInvocationText;
-                                                } else {
-                                                    getterMethodInvocationText = modifiedExtractedTypeName + "." + getterMethodInvocationText;
-                                                }
-                                                getterMethodInvocationText += "()";
-                                                getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
-
-                                                if (handleType == HandleType.MODIFY) {
-                                                    arrayExpression.replace(getterMethodInvocation);
-                                                }
-
-                                                rewriteAST = true;
-
-                                                if (handleType == HandleType.COLLECT) {
-                                                    accessedFields.add(fieldFragment);
-                                                }
+                                        if (arrayVariable instanceof PsiField && fieldFragment.equals(arrayVariable)) {
+                                            if (handleType == HandleType.COLLECT) {
+                                                accessedFields.add(fieldFragment);
                                             }
+
+                                            PsiMethodCallExpression getterMethodInvocation;
+                                            String getterMethodInvocationText;
+                                            getterMethodInvocationText = getterMethodName;
+                                            if (arrayVariable.getModifierList().hasExplicitModifier(PsiModifier.STATIC)) {
+                                                getterMethodInvocationText = extractedTypeName + "." + getterMethodInvocationText;
+                                            } else {
+                                                getterMethodInvocationText = modifiedExtractedTypeName + "." + getterMethodInvocationText;
+                                            }
+                                            getterMethodInvocationText += "()";
+                                            getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
+
+                                            if (handleType == HandleType.MODIFY) {
+                                                arrayExpression.replace(getterMethodInvocation);
+                                            }
+
+                                            rewriteAST = true;
                                         }
                                     }
                                 }
@@ -2759,11 +2791,20 @@ public class ExtractClassRefactoring {
                             getterMethodName = appendAccessorMethodSuffix(getterMethodName, this.extractedMethods);
                             for (PsiExpression expression : accessedVariables) {
                                 PsiReferenceExpression accessedVariable = (PsiReferenceExpression) expression;
+
+                                if (!accessedVariable.isValid()) {
+                                    //TODO same bug of expressionExtractor as above
+                                    continue;
+                                }
+
                                 PsiElement binding = accessedVariable.resolve();
                                 if (binding instanceof PsiVariable) {
                                     PsiVariable accessedVariableBinding = (PsiVariable) binding;
                                     if (accessedVariableBinding instanceof PsiField && fieldFragment.equals(accessedVariableBinding)) {
                                         if (!isAssignmentChild(expression)) {
+                                            if (handleType == HandleType.COLLECT) {
+                                                accessedFields.add(fieldFragment);
+                                            }
 
                                             if (handleType == HandleType.MODIFY) {
                                                 removeRedundantThisQualifierFromExpressions(accessedVariable);
@@ -2774,7 +2815,7 @@ public class ExtractClassRefactoring {
                                             if (accessedVariableBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
                                                 getterMethodInvocationText = extractedTypeName + "." + getterMethodInvocationText;
                                             } else {
-                                                getterMethodInvocationText += modifiedExtractedTypeName + "." + getterMethodInvocationText;
+                                                getterMethodInvocationText = modifiedExtractedTypeName + "." + getterMethodInvocationText;
                                             }
                                             getterMethodInvocationText += "()";
                                             getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
@@ -2784,33 +2825,11 @@ public class ExtractClassRefactoring {
                                             }
 
                                             rewriteAST = true;
-
-
-                                            if (handleType == HandleType.COLLECT) {
-                                                accessedFields.add(fieldFragment);
-                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                        /*
-                        TODO
-
-                        if (rewriteAST) {
-                            if (!statementRewriteMap.containsKey(statement))
-                                statementRewriteMap.put(statement, sourceRewriter);
-							/*try {
-								TextEdit sourceEdit = sourceRewriter.rewriteAST();
-								ICompilationUnit sourceICompilationUnit = (ICompilationUnit)sourceCompilationUnit.getJavaElement();
-								CompilationUnitChange change = compilationUnitChanges.get(sourceICompilationUnit);
-								change.getEdit().addChild(sourceEdit);
-								change.addTextEditGroup(new TextEditGroup("Replace field access with invocation of getter method", new TextEdit[] {sourceEdit}));
-							} catch (JavaModelException e) {
-								e.printStackTrace();
-							}
-						}
-                         */
                     }
                 }
             }
@@ -2824,7 +2843,7 @@ public class ExtractClassRefactoring {
     }
 
     private void collectExtractedFieldAccessesInSourceClass(Set<PsiField> fieldFragments, Set<PsiField> accessedFields) {
-        handleExtractedFieldAccessesInSourceClass(fieldFragments, fieldFragments, HandleType.COLLECT);
+        handleExtractedFieldAccessesInSourceClass(fieldFragments, accessedFields, HandleType.COLLECT);
     }
 
     private Set<PsiMethod> getAllMethodDeclarationsInSourceClass() {
@@ -2834,6 +2853,7 @@ public class ExtractClassRefactoring {
         }
         List<PsiMethod> methodDeclarationList = Arrays.asList(sourceTypeDeclaration.getMethods());
         contextMethods.addAll(methodDeclarationList);
+        //ORIGINAL PLUGIN COMMENT
 		/*for(MethodDeclaration methodDeclaration : methodDeclarationList) {
 			contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
 		}*/
@@ -2845,6 +2865,7 @@ public class ExtractClassRefactoring {
             }
             List<PsiMethod> innerMethodDeclarationList = Arrays.asList(type.getMethods());
             contextMethods.addAll(innerMethodDeclarationList);
+            //ORIGINAL PLUGIN COMMENT
 			/*for(MethodDeclaration methodDeclaration : innerMethodDeclarationList) {
 				contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
 			}*/
