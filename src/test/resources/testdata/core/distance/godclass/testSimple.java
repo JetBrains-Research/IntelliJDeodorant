@@ -10,6 +10,7 @@ public class Simple {
     public int getSumMult() {
         changeA();
         int sum = 0;
+        SIZE += 1;
         for (int i = 0; i < SIZE; i++) {
             sum = sum * array[i] + array[i];
         }

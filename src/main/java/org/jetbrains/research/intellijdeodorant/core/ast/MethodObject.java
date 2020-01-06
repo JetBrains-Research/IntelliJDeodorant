@@ -433,8 +433,8 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean overridesMethod() {
         PsiMethod methodBinding = getMethodDeclaration();
-        return !(AnnotationUtil.findAnnotation(methodBinding, "Override") == null &&
-                methodBinding.findSuperMethods().length == 0);
+
+        return !(AnnotationUtil.findAnnotation(methodBinding, "Override") == null && methodBinding.findSuperMethods().length == 0);
     }
 
     public String getClassName() {
@@ -712,6 +712,7 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean containsFieldAccessOfEnclosingClass() {
         //check for field access like SegmentedTimeline.this.segmentsIncluded
+
         for (PlainVariable plainVariable : constructorObject.getNonDistinctUsedFieldsThroughThisReference()) {
             if (!plainVariable.isField() || plainVariable.getOrigin() == null) {
                 continue;
@@ -726,22 +727,5 @@ public class MethodObject implements AbstractMethodDeclaration {
         }
 
         return false;
-
-        /*
-        List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
-        for(FieldInstructionObject fieldInstruction : fieldInstructions) {
-            PsiElement element = fieldInstruction.getElement();
-            if(element.getParent() instanceof  PsiReferenceExpression) {
-                PsiReferenceExpression referenceExpression = (PsiReferenceExpression)  element.getParent();
-                if(referenceExpression.getChildren()[0] instanceof PsiThisExpression) {
-                    PsiThisExpression thisExpression = (PsiThisExpression)referenceExpression.getChildren()[0];
-                    if(thisExpression.getQualifier() != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-         */
     }
 }

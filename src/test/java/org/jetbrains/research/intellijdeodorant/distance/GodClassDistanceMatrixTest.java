@@ -24,13 +24,15 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractClassRefactoringOpportunities;
 
 public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestCase {
-    private static final String PATH_TO_TEST_DATA = "src/test/resources/testdata/core/distance/godclass/";
+    private static final String PATH_TO_TESTDATA = "src/test/resources/testdata/";
+    private static final String PATH_TO_TESTS = "/core/distance/godclass/";
 
     //TODO add some complicated actual project tests
 
     @Nullable
     private ExtractClassCandidateGroup getExractClassCandidateGroup(@NotNull String classFileName) {
-        myFixture.configureByFile(PATH_TO_TEST_DATA + classFileName);
+        myFixture.setTestDataPath(PATH_TO_TESTDATA);
+        myFixture.configureByFile(PATH_TO_TESTS + classFileName);
         Project project = myFixture.getProject();
         PsiFile psiFile = FilenameIndex.getFilesByName(project, classFileName, GlobalSearchScope.allScope(project))[0];
         ProjectInfo projectInfo = new ProjectInfo(project);
@@ -174,8 +176,14 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
         ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
 
         assertNull(group);
+    }
 
-        //TODO This is a BUG, method overrides toString so should not be extracted. Adding @Override helps, but, ofcourse, this annotation is not obligatory.
+    public void testEnclosingAccess() {
+        String classFileName = "TestEnclosingAccess.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
     }
 
     public void testOnlyMethods() {

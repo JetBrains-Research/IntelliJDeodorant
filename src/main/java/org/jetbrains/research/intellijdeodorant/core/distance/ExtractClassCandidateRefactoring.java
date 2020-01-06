@@ -242,35 +242,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 		return sourceClass.getEntitySet();
 	}
 
-	/*
-	TODO Should returns positions of all entries in entity set in order to highlight them in editor
-
-	@Override
-	public List<Position> getPositions() {
-		ArrayList<Position> positions = new ArrayList<Position>();
-		for(Entity entity : extractedEntities) {
-			if(entity instanceof MyMethod) {
-				MyMethod method = (MyMethod)entity;
-				Position position = new Position(method.getMethodObject().getMethodDeclaration().getStartPosition(), method.getMethodObject().getMethodDeclaration().getLength());
-				positions.add(position);
-			} else if(entity instanceof MyAttribute) {
-				MyAttribute attribute = (MyAttribute)entity;
-				VariableDeclarationFragment fragment = attribute.getFieldObject().getVariableDeclarationFragment();
-				FieldDeclaration fieldDeclaration = (FieldDeclaration)fragment.getParent();
-				Position position = null;
-				if(fieldDeclaration.fragments().size() > 1) {
-					position = new Position(fragment.getStartPosition(), fragment.getLength());
-				}
-				else {
-					position = new Position(fieldDeclaration.getStartPosition(), fieldDeclaration.getLength());
-				}
-				positions.add(position);
-			}
-		}
-		return positions;
-	}
-*/
-
 	public PsiClass getSourceClassTypeDeclaration() {
 		return (PsiClass) sourceClass.getClassObject().getAbstractTypeDeclaration().recoverASTNode();
 	}
@@ -302,21 +273,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 	public GodClassVisualizationData getGodClassVisualizationData() {
 		return visualizationData;
 	}
-
-    /*
-	TODO useless methods?
-
-	@Override
-	public IFile getSourceIFile() {
-		return sourceClass.getClassObject().getIFile();
-	}
-
-	@Override
-	public IFile getTargetIFile() {
-		return null;
-	}
-
-     */
 
 	public Integer getUserRate() {
 		return userRate;

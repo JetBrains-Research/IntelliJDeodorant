@@ -52,6 +52,9 @@ public class ExtractClassRefactoring {
     private JavaCodeStyleManager javaCodeStyleManager;
     private CodeStyleManager codeStyleManager;
 
+    //maps each method of the source file to it's copy in the sandbox file.
+    private Map<PsiMethod, PsiMethod> sourceToSandboxMap;
+
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
                                    Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String extractedTypeName) {
         this.sourceFile = sourceFile;
@@ -82,6 +85,7 @@ public class ExtractClassRefactoring {
         this.psiManager = PsiManager.getInstance(project);
         this.codeStyleManager = CodeStyleManager.getInstance(project);
         this.javaCodeStyleManager = JavaCodeStyleManager.getInstance(project);
+        this.sourceToSandboxMap = new LinkedHashMap<>();
     }
 
     public String getExtractedTypeName() {
@@ -413,22 +417,19 @@ public class ExtractClassRefactoring {
         return false;
     }
 
-    private Map<PsiMethod, PsiMethod> psiMethodMap;
-
-    private void dfs(PsiElement firstElement, PsiElement secondElement) {
+    private void mapSourceFileMethodsToSandboxCopies(PsiElement firstElement, PsiElement secondElement) {
         if (firstElement instanceof PsiMethod && secondElement instanceof PsiMethod) {
-            psiMethodMap.put((PsiMethod) firstElement, (PsiMethod) secondElement);
+            sourceToSandboxMap.put((PsiMethod) firstElement, (PsiMethod) secondElement);
         }
 
         for (int i = 0; i < firstElement.getChildren().length; i++) {
-            dfs(firstElement.getChildren()[i], secondElement.getChildren()[i]);
+            mapSourceFileMethodsToSandboxCopies(firstElement.getChildren()[i], secondElement.getChildren()[i]);
         }
     }
 
     private PsiJavaFile createExtractedClass(Set<PsiField> modifiedFieldsInNonExtractedMethods, Set<PsiField> accessedFieldsInNonExtractedMethods) {
         PsiJavaFile sandboxFile = (PsiJavaFile) sourceFile.copy();
-        psiMethodMap = new HashMap<>();
-        dfs(sourceFile, sandboxFile);
+        mapSourceFileMethodsToSandboxCopies(sourceFile, sandboxFile);
 
         String extractedClassFileName = extractedTypeName + ".java";
         PsiJavaFile extractedClassFile = (PsiJavaFile) fileFactory.createFileFromText(JavaLanguage.INSTANCE, "");
@@ -849,7 +850,12 @@ public class ExtractClassRefactoring {
     }
 
     private void createExtractedMethodDeclaration(PsiMethod extractedMethod, PsiClass extractedClass) {
-        PsiMethod newMethodDeclaration = psiMethodMap.get(extractedMethod);
+        /*
+        All new methods firstly updates in the 'sandbox' - full copy of the source file, in order to correctly resolve
+        all references (they cannot change in the source file directly because this file may hold a corresponding delegate methods)
+         */
+
+        PsiMethod newMethodDeclaration = sourceToSandboxMap.get(extractedMethod);
 
         newMethodDeclaration.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
@@ -2675,7 +2681,6 @@ public class ExtractClassRefactoring {
                                         String setterMethodName = SETTER_PREFIX + modifiedFieldName;
                                         setterMethodName = appendAccessorMethodSuffix(setterMethodName, this.extractedMethods);
                                         setterMethodInvocationText = setterMethodName;
-
 
 
                                         String infixExpressionText = "";

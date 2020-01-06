@@ -323,17 +323,9 @@ public class DistanceMatrix {
             }
         }
 
-        /*
-        TODO
-        if(indicator != null)
-            indicator.beginTask("Identification of Extract Class refactoring opportunities", oldClasses.size());
-         */
+        indicator.setText("Identification of Extract Class refactoring opportunities");
+        indicator.setFraction(0.0);
         for(MyClass sourceClass : oldClasses) {
-            /*
-            if(monitor != null && monitor.isCanceled())
-                throw new OperationCanceledException();
-                TODO
-            */
             if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
                 double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
                 Clustering clustering = Clustering.getInstance(0, distanceMatrix);
@@ -341,7 +333,10 @@ public class DistanceMatrix {
                 entities.addAll(sourceClass.getAttributeList());
                 entities.addAll(sourceClass.getMethodList());
                 HashSet<Cluster> clusters = clustering.clustering(entities);
+                int processedClusters = 0;
                 for (Cluster cluster : clusters) {
+                    processedClusters += 1;
+                    indicator.setFraction(((double) processedClusters) / clusters.size());
                     ExtractClassCandidateRefactoring candidate = new ExtractClassCandidateRefactoring(system, sourceClass, cluster.getEntities());
                     if (candidate.isApplicable()) {
                         int sourceClassDependencies = candidate.getDistinctSourceDependencies();
@@ -354,17 +349,8 @@ public class DistanceMatrix {
                 }
                 // Clustering End
             }
-            /*
-            if(monitor != null)
-                monitor.worked(1);
-                TODO
-             */
         }
-        /*
-        if(monitor != null)
-            monitor.done();
-            TODO
-         */
+        indicator.setFraction(1.0);
         return candidateList;
     }
 }
