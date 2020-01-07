@@ -1,7 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +15,7 @@ public abstract class CandidateRefactoring {
     protected abstract Set<String> getEntitySet();
 
     public abstract int getDistinctSourceDependencies();
-    
+
     public abstract int getDistinctTargetDependencies();
 
     public String getAnnotationText() {
