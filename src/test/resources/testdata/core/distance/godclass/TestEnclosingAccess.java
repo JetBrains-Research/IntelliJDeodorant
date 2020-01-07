@@ -14,13 +14,13 @@ public class TestEnclosingAccess {
             a += 1;
             b += 1;
             c += 1;
-            outerField += 1;
+            TestEnclosingAccess.this.outerField += 1;
         }
 
         public void fun2() {
             d += 1;
             e += 1;
-            outerField += 1;
+            TestEnclosingAccess.this.outerField += 1;
         }
     }
 }
