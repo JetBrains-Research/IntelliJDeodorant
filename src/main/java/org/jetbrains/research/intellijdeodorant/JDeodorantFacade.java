@@ -37,7 +37,7 @@ public class JDeodorantFacade {
         return moveMethodCandidateList;
     }
 
-    public static Set<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static TreeSet<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {

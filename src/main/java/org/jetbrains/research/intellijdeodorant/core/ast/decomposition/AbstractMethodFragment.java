@@ -342,7 +342,14 @@ public abstract class AbstractMethodFragment {
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
         TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
-        TypeObject returnType = TypeObject.extractTypeObject(methodInvocation.resolveMethod().getReturnType().getCanonicalText());
+
+        String canonicalText = "NA";
+        PsiType methodReturnType = methodInvocation.resolveMethod().getReturnType();
+        if (methodReturnType != null) {
+            canonicalText = methodReturnType.getCanonicalText();
+        }
+        TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
+
         MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
         methodInvocationObject.setMethodInvocation(methodInvocation);
         methodInvocationObject.setStatic(isMethodStatic);

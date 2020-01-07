@@ -31,6 +31,10 @@ public class RefactoringUtility {
     }
 
     public static PsiClass findDeclaringTypeDeclaration(PsiField variableBinding, PsiClass typeDeclaration) {
+        if (variableBinding == null) {
+            return null;
+        }
+
         if (typeDeclaration.equals(variableBinding.getContainingClass())) {
             return typeDeclaration;
         }

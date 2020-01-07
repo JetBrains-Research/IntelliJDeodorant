@@ -257,7 +257,11 @@ public class ExpressionExtractor {
     private List<PsiExpression> getExpressions(PsiElement[] elements) {
         List<PsiExpression> result = new ArrayList<>();
         for (PsiElement element : elements) {
-            result.addAll(getExpressions(element));
+            if (element instanceof PsiExpression) {
+                result.addAll(getExpressions((PsiExpression) element));
+            } else {
+                result.addAll(getExpressions(element));
+            }
         }
 
         return result;

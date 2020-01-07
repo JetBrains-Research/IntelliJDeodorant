@@ -4,12 +4,14 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ui.tree.TreeUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.StatementObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
+import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 
 import java.util.*;
@@ -712,7 +714,25 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean containsFieldAccessOfEnclosingClass() {
         //check for field access like SegmentedTimeline.this.segmentsIncluded
+        if (psiMethod.getBody() == null) {
+            return false;
+        }
 
+        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(psiMethod.getBody().getStatements());
+        for (PsiExpression expression : fieldAccesses) {
+            PsiReferenceExpression fieldReference = (PsiReferenceExpression) expression;
+            Collection<PsiElement> psiElements = PsiTreeUtil.findChildrenOfType(fieldReference, PsiThisExpression.class);
+
+            for (PsiElement thisExpressionElement : psiElements) {
+                PsiThisExpression thisExpression = (PsiThisExpression) thisExpressionElement;
+                if (thisExpression.getQualifier() != null) {
+                    return true;
+                }
+            }
+        }
+
+        /*
         for (PlainVariable plainVariable : constructorObject.getNonDistinctUsedFieldsThroughThisReference()) {
             if (!plainVariable.isField() || plainVariable.getOrigin() == null) {
                 continue;
@@ -725,6 +745,8 @@ public class MethodObject implements AbstractMethodDeclaration {
                 }
             }
         }
+
+         */
 
         return false;
     }
