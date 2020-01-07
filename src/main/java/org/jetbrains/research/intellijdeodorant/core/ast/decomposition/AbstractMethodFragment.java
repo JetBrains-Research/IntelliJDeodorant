@@ -344,9 +344,11 @@ public abstract class AbstractMethodFragment {
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
 
         String canonicalText = "NA";
-        PsiType methodReturnType = methodInvocation.resolveMethod().getReturnType();
-        if (methodReturnType != null) {
-            canonicalText = methodReturnType.getCanonicalText();
+        if (methodInvocation.resolveMethod() != null) {
+            PsiType methodReturnType = methodInvocation.resolveMethod().getReturnType();
+            if (methodReturnType != null) {
+                canonicalText = methodReturnType.getCanonicalText();
+            }
         }
         TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
 

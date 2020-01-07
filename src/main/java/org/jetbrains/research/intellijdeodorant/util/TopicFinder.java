@@ -64,7 +64,6 @@ public class TopicFinder {
     private static ArrayList<String> getStopWords() {
         ArrayList<String> stopWords = new ArrayList<String>();
 
-        //TODO fix read
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(new FileInputStream("src/main/resources/glasgowstoplist.txt")))) {
             String next = in.readLine();

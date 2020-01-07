@@ -2,15 +2,15 @@ package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.java.JavaLanguage;
+import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
-import com.intellij.psi.codeStyle.JavaCodeStyleImporter;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.FileContentUtil;
-import com.intellij.util.ui.tree.TreeUtil;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
@@ -54,7 +54,10 @@ public class ExtractClassRefactoring {
     private JavaCodeStyleManager javaCodeStyleManager;
     private CodeStyleManager codeStyleManager;
 
-    //maps each method of the source file to it's copy in the sandbox file.
+    /*
+    Each of the new method are being created inside 'sandbox' file - full copy of the source file, in order to correctly
+    resolve all references, which is vital for IDEA API. Then the copy of the sandboxed method are being added to the extracted class.
+     */
     private Map<PsiMethod, PsiMethod> sourceToSandboxMethodMap;
     private Map<PsiField, PsiField> sandboxToSourceFieldMap;
     private Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
@@ -102,6 +105,7 @@ public class ExtractClassRefactoring {
         this.extractedTypeName = targetTypeName;
     }
 
+    //Empty method in original plugin too.
     public void setLeaveDelegateForPublicMethods(boolean leaveDelegateForPublicMethods) {
     }
 
@@ -431,7 +435,7 @@ public class ExtractClassRefactoring {
         return false;
     }
 
-    private void mapSourceFileMethodsToSandboxCopies(PsiElement firstElement, PsiElement secondElement) {
+    private void mapSourceMembersAndSandboxCopies(PsiElement firstElement, PsiElement secondElement) {
         if (firstElement instanceof PsiMethod && secondElement instanceof PsiMethod) {
             sourceToSandboxMethodMap.put((PsiMethod) firstElement, (PsiMethod) secondElement);
         }
@@ -441,13 +445,13 @@ public class ExtractClassRefactoring {
         }
 
         for (int i = 0; i < firstElement.getChildren().length; i++) {
-            mapSourceFileMethodsToSandboxCopies(firstElement.getChildren()[i], secondElement.getChildren()[i]);
+            mapSourceMembersAndSandboxCopies(firstElement.getChildren()[i], secondElement.getChildren()[i]);
         }
     }
 
     private PsiJavaFile createExtractedClass(Set<PsiField> modifiedFieldsInNonExtractedMethods, Set<PsiField> accessedFieldsInNonExtractedMethods) {
         PsiJavaFile sandboxFile = (PsiJavaFile) sourceFile.copy();
-        mapSourceFileMethodsToSandboxCopies(sourceFile, sandboxFile);
+        mapSourceMembersAndSandboxCopies(sourceFile, sandboxFile);
 
         String extractedClassFileName = extractedTypeName + ".java";
         PsiJavaFile extractedClassFile = (PsiJavaFile) fileFactory.createFileFromText(JavaLanguage.INSTANCE, "");
@@ -456,6 +460,7 @@ public class ExtractClassRefactoring {
         PsiClass extractedClass = factory.createClass(extractedTypeName);
         extractedClass.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
+        //Just all possible imports and hope that IDEA will optimize it correctly.
         if (sourceFile.getPackageName() != null) {
             extractedClassFile.setPackageName(sourceFile.getPackageName());
             extractedClassFile.getImportList().add(factory.createImportStatementOnDemand(sourceFile.getPackageName() + "." + PsiTreeUtil.getChildOfType(sourceFile, PsiClass.class).getName()));
@@ -1027,7 +1032,6 @@ public class ExtractClassRefactoring {
         }
     }
 
-    //TODO explain what happened
     private void modifySourceMemberAccessesInTargetClass(PsiMethod sourceMethod, PsiMethod newMethodDeclaration) {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         oldToNewExtractedMethodDeclarationMap.put(sourceMethod, newMethodDeclaration);
@@ -1564,7 +1568,6 @@ public class ExtractClassRefactoring {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiReferenceExpression methodExpression = methodInvocation.getMethodExpression();
 
-                //TODO check correctness for inner classes like OuterClass.this.myMethod(). Original plugin howerer does not always work correct as well.
                 PsiExpression qualifierExpression = methodExpression.getQualifierExpression();
                 if (qualifierExpression == null || qualifierExpression instanceof PsiThisExpression) {
                     PsiMethod methodBinding = methodInvocation.resolveMethod();
@@ -1884,6 +1887,9 @@ public class ExtractClassRefactoring {
         }
     }
 
+    /**
+     * Transform signs such as '+=' to '+'
+     */
     private String removeEQFromOperationSign(PsiJavaToken operationSign) {
         String operationSignText = operationSign.getText();
         StringBuilder resultOperationSign = new StringBuilder();
@@ -1897,6 +1903,10 @@ public class ExtractClassRefactoring {
         return resultOperationSign.toString();
     }
 
+    /**
+     * Removes `this` qualifier from the extracted elements. Note that `OuterClass.this` are forbidden for the
+     * extracted members, so they does not check here.
+     */
     private void removeRedundantThisQualifierFromExpressions(PsiElement element) {
         if (element instanceof PsiReferenceExpression) {
             PsiReferenceExpression expression = (PsiReferenceExpression) element;
@@ -2091,7 +2101,7 @@ public class ExtractClassRefactoring {
         List<PsiExpression> newVariableInstructions = extractor.getVariableInstructions(newMethodDeclaration.getBody().getStatements());
 
         for (PsiExpression expression : newVariableInstructions) {
-            removeRedundantThisQualifierFromExpressions((PsiReferenceExpression) expression);
+            removeRedundantThisQualifierFromExpressions(expression);
         }
 
         for (PsiExpression expression : newVariableInstructions) {
@@ -2203,11 +2213,14 @@ public class ExtractClassRefactoring {
         return getterMethodDeclaration;
     }
 
-    //TODO comment
     private enum ModifyType {
         SOURCE, EXTRACTED
     }
 
+    /**
+     * This method both modifies a source class and collect info for the extracted one. Howewer, we cannot change source class
+     * before creating a new one, so here we make corresponding actions to the source class only if `modifyType` == SOURCE.
+     */
     private void createExtractedTypeFieldReferenceInSourceClass(ModifyType modifyType) {
         String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
 
@@ -2559,11 +2572,15 @@ public class ExtractClassRefactoring {
         COLLECT, MODIFY
     }
 
+    /**
+     * This map collects required info for the extracted class and modifies the source class. We cannot do the second before
+     * collecting thee first info to create an extracted class.
+     */
     private void handleExtractedFieldAssignmentsInSourceClass(Set<PsiField> fieldFragments, Set<PsiField> modifiedFields, Set<PsiField> accessedFields, HandleType handleType) {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         Set<PsiMethod> contextMethods = getAllMethodDeclarationsInSourceClass();
         String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
-        boolean rewriteAST; //TODO use for review
+        boolean rewriteAST; //TODO use for preview
         for (PsiMethod methodDeclaration : contextMethods) {
             if (!extractedMethods.contains(methodDeclaration)) {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
@@ -2585,7 +2602,6 @@ public class ExtractClassRefactoring {
 
                             PsiElement rightHandSide = assignment.getRExpression();
 
-                            //TODO comment
                             boolean deleteAssigmentStatement = false;
 
                             List<PsiExpression> arrayAccesses = expressionExtractor.getArrayAccesses(leftHandSide);
@@ -2683,7 +2699,6 @@ public class ExtractClassRefactoring {
                                     PsiExpression arrayExpression = arrayAccess.getArrayExpression();
 
                                     if (arrayExpression instanceof PsiMethodCallExpression) {
-                                        //TODO explain!!!!!!!!!!!!!!!!!!!!!
                                         continue;
                                     }
 
@@ -2864,7 +2879,7 @@ public class ExtractClassRefactoring {
                             }
                         }
 
-                        //TODO I DO actually need rewrite ast thing FOR preview
+                        //TODO I DO actually need rewriteAST thing FOR preview, when I realise it.
                     }
                 }
             }
@@ -3042,63 +3057,9 @@ public class ExtractClassRefactoring {
         return "Extract Class";
     }
 
-    /*
-    TODO
-
-    public RefactoringStatus checkInitialConditions(ProgressMonitor pm) {
-        RefactoringStatus status = new RefactoringStatus();
-        try {
-            pm.beginTask("Checking preconditions...", 1);
-        } finally {
-            pm.done();
-        }
-        return status;
+    public void checkInitialConditions(ProgressIndicator indicator) {
+        indicator.setText(IntelliJDeodorantBundle.message("god.class.identification.indicator.preconditions"));
     }
-
-     */
-
-    /*
-    TODO
-    public RefactoringStatus checkFinalConditions(IProgressMonitor pm)
-            throws CoreException, OperationCanceledException {
-        final RefactoringStatus status = new RefactoringStatus();
-        try {
-            pm.beginTask("Checking preconditions...", 2);
-            apply();
-        } finally {
-            pm.done();
-        }
-        return status;
-    }
-
-     */
-
-    /*
-    TODO
-    public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-        try {
-            pm.beginTask("Creating change...", 1);
-            final Collection<Change> changes = new ArrayList<Change>();
-            changes.addAll(compilationUnitChanges.values());
-            changes.addAll(createCompilationUnitChanges.values());
-            CompositeChange change = new CompositeChange(getName(), changes.toArray(new Change[changes.size()])) {
-                @Override
-                public ChangeDescriptor getDescriptor() {
-                    ICompilationUnit sourceICompilationUnit = (ICompilationUnit) sourceCompilationUnit.getJavaElement();
-                    String project = sourceICompilationUnit.getJavaProject().getElementName();
-                    String description = MessageFormat.format("Extracting class from ''{0}''", new Object[]{sourceTypeDeclaration.getName().getIdentifier()});
-                    String comment = null;
-                    return new RefactoringChangeDescriptor(new ExtractClassRefactoringDescriptor(project, description, comment,
-                            sourceCompilationUnit, sourceTypeDeclaration, sourceFile, extractedFieldFragments, extractedMethods, delegateMethods, extractedTypeName));
-                }
-            };
-            return change;
-        } finally {
-            pm.done();
-        }
-    }
-
-     */
 
     public PsiFile getSourceFile() {
         return sourceFile;
