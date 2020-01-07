@@ -444,8 +444,6 @@ public class ExpressionExtractor {
             if (instanceChecker.instanceOf(arrayInitializer))
                 expressionList.add(arrayInitializer);
         } else if (expression instanceof PsiReferenceExpression) {
-            //TODO plugin does not find field accesses such as FIELD.toString()
-            // probably because it finds PsiReferenceExpression FIELD.toString which is not a field access.
             PsiReferenceExpression simpleName = (PsiReferenceExpression) expression;
             expressionList.addAll(getExpressions(simpleName.getQualifierExpression()));
             if (instanceChecker.instanceOf(simpleName))
