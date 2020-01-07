@@ -98,7 +98,6 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         extractedClassNameLabel.setText("Extracted Class Name");
         //extractedClassNameLabel.setFont(); //TODO set font
 
-        //TODO extractedClassNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         extractedClassNameField.setText(refactoring.getExtractedTypeName());
         extractedClassNameField.getDocument().addDocumentListener(new DocumentListener() {
             @Override

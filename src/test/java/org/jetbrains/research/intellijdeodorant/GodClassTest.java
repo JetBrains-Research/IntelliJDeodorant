@@ -1,7 +1,9 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.projectRoots.JavaSdk;
@@ -10,6 +12,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.java.LanguageLevel;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +23,11 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandid
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Set;
+import java.net.URI;
+import java.util.*;
 
 
 /**
@@ -128,7 +133,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
 
             AbstractExtractClassRefactoring refactoring = new AbstractExtractClassRefactoring(candidate);
 
-            WriteCommandAction.runWriteCommandAction(getProject(), refactoring::apply);
+            WriteCommandAction.runWriteCommandAction(myFixture.getProject(), refactoring::apply);
 
             myFixture.copyDirectoryToProject(testName + "/expected", testName + "/expected");
 
@@ -149,12 +154,90 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         }
     }
 
+    public void testRefactoringMiner() {
+        //runLargeTest("refactoring_miner", "UMLModelASTReader", 0, 0, 0, Arrays.asList("gr", "uom", "java", "xmi"));
+    }
+
+    //TODO should run autotests on RefactoringMiner and some other large java projects.
+    private void runLargeTest(String testSourceRoot, String className, int groupNumber, int candidateNumber, int testNumber, List<String> packagePath) {
+        assertTrue(testNumber < 5);
+        assertTrue(testNumber >= 0);
+
+        testSourceRoot = "BIG_PROJECT_TESTS" + "/" + testSourceRoot + "/";
+        String classNameProduct = className + "Product";
+
+        myFixture.setTestDataPath(getTestDataPath() + testSourceRoot);
+
+        myFixture.copyDirectoryToProject(  "/initial", "/src");
+
+        Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(myFixture.getProject()), fakeProgressIndicator);
+
+        assert(groupNumber >= 0);
+        assertTrue(candidateGroups.size() > groupNumber);
+
+        ExtractClassCandidateGroup group = null;
+        for (ExtractClassCandidateGroup foundGroup : candidateGroups) {
+            group = foundGroup;
+
+            if (groupNumber == 0) {
+                break;
+            }
+
+            groupNumber--;
+        }
+
+        assertTrue(group.getCandidates().size() > candidateNumber);
+
+        ExtractClassCandidateRefactoring candidate = group.getCandidates().get(candidateNumber);
+
+        AbstractExtractClassRefactoring refactoring = new AbstractExtractClassRefactoring(candidate);
+
+        myFixture.copyDirectoryToProject("/expected_files/",  "/expected/");
+
+        VirtualFile mainDirectoryFile = myFixture.findFileInTempDir("");
+        PsiDirectory mainDirectory = myFixture.getPsiManager().findDirectory(mainDirectoryFile);
+
+        WriteCommandAction.runWriteCommandAction(getProject(), refactoring::apply);
+
+        PsiDirectory expectedDirectory = mainDirectory.findSubdirectory("expected");
+
+        PsiDirectory actualDirectory = mainDirectory.findSubdirectory("src");
+        for (String string : packagePath) {
+            actualDirectory = actualDirectory.findSubdirectory(string);
+        }
+
+        PsiFile actualSourceFile = actualDirectory.findFile(className + ".java");
+        PsiFile actualProductFile = actualDirectory.findFile(classNameProduct + ".java");
+
+        PsiFile expectedSourceFile = expectedDirectory.findFile( className + ".java");
+        PsiFile expectedProductFile = expectedDirectory.findFile(classNameProduct + ".java");
+
+        String filePathToSave = "src/test/resources/testdata/ide/refactoring/godclass/" + testSourceRoot;
+        saveResult(actualSourceFile, filePathToSave + "actual_files/" + testNumber + "/result.java");
+        saveResult(actualProductFile, filePathToSave + "actual_files/" + testNumber + "/resultProduct.java");
+
+        checkFilesAreEqual(actualSourceFile, expectedSourceFile);
+        checkFilesAreEqual(actualProductFile, expectedProductFile);
+    }
+
     private void saveResult(String filePath) {
-        PsiFile psiFile = myFixture.getPsiManager().findFile(myFixture.findFileInTempDir(filePath));
+        saveResult(null, filePath, "src/test/resources/testdata/ide/refactoring/godclass/" + filePath);
+    }
 
-        filePath = "src/test/resources/testdata/ide/refactoring/godclass/" + filePath;
+    private void saveResult(PsiFile psiFile, String filePathToSave) {
+        saveResult(psiFile, null, filePathToSave);
+    }
 
-        try (FileWriter writer = new FileWriter(filePath)) {
+    private void saveResult(PsiFile psiFile, String filePath, String filePathToSave) {
+        if (psiFile == null && filePath == null) {
+            return;
+        }
+
+        if (psiFile == null) {
+            psiFile = myFixture.getPsiManager().findFile(myFixture.findFileInTempDir(filePath));
+        }
+
+        try (FileWriter writer = new FileWriter(filePathToSave)) {
             writer.write(psiFile.getText());
         } catch (NullPointerException npe) {
             fail("Failed to create extracted file, source file got broken up or the wrong file structure in testdata have been made.");
@@ -192,7 +275,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         }
     }
 
-    private void checkFilesAreEqual(PsiFile result, PsiFile expected) {
+    private void checkFilesAreEqual(@NotNull PsiFile result, @NotNull PsiFile expected) {
         String[] resultTokens = result.getText().trim().split("\\s+");
         String[] expectedTokens = expected.getText().trim().split("\\s+");
         assertOrderedEquals(resultTokens, expectedTokens);

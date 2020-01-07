@@ -44,7 +44,7 @@ import static org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorin
 public class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private String detect_indicator_status_text_key; //TODO "type.state.checking.identification.indicator";
+    private String detect_indicator_status_text_key;
     private static final String REFRESH_NEEDED_TEXT = "refresh.needed.text";
 
     @NotNull
@@ -149,7 +149,6 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
-    //TODO comment
     public void doRefactor(AbstractCandidateRefactoring computationSlice) {
         TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
     }
@@ -255,13 +254,11 @@ public class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
-    //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
                                        AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 
-    //TODO
     public static void highlightField(@Nullable PsiField sourceField, AnalysisScope scope, boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
@@ -280,7 +277,6 @@ public class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
-    //TODO
     private static void highlightPsiElement(PsiElement psiElement, boolean openInEditor) {
         if (openInEditor) {
             EditorHelper.openInEditor(psiElement);
