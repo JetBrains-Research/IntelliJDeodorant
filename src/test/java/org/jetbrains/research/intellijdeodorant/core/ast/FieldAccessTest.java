@@ -97,11 +97,10 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testAccessViaThisTest() {
         String methodCode = "int thisTest() {\n" +
-                "        return this.FIELD;\n" +
+                "        return this.FIELD + 1;\n" +
                 "    }";
 
-        //TODO does not work access via this expression
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
 
