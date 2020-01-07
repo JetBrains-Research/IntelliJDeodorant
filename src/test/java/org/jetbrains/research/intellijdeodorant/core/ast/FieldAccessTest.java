@@ -1,10 +1,8 @@
-package core.ast;
+package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
-import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.distance.MyAttribute;
 import org.jetbrains.research.intellijdeodorant.core.distance.MyClass;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
@@ -15,8 +13,6 @@ import java.util.List;
 
 public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
     private String getPrefix() {
-        String className = "TestFieldAccess";
-
         return "package field.accesses;\n" +
                 "\n" +
                 "import org.jetbrains.annotations.NotNull;\n" +
@@ -31,7 +27,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "import java.util.function.Function;\n" +
                 "import java.util.function.Supplier;\n" +
                 "\n" +
-                "public class " + className + " {\n" +
+                "public class TestFieldAccess " + " {\n" +
                 "    private Integer FIELD = 100;\n" +
                 "    private int extraField = 5;\n" +
                 "    private static final int SWITCH_CASE_TEST = 5;\n";
@@ -64,7 +60,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
             fieldName = "SWITCH_CASE_TEST";
         }
 
-        assertTrue(fieldName + "'s entity set does not contain given method.", entitySet.size() == 2);
+        assertEquals(fieldName + "'s entity set does not contain given method.", 2, entitySet.size());
     }
 
     public void testSimpleTest() {
@@ -83,13 +79,20 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         testMethod(methodCode, 0);
     }
 
-    public void testSimpleAccessTest() {
-        String methodCode = "int binaryExpressionTest() {\n" +
-                "        return FIELD;\n" +
+    public void testAccessWithCallingMethodTest() {
+        String methodCode = "String binaryExpressionTest() {\n" +
+                "        return FIELD.toString();\n" +
                 "    }";
 
-        //TODO does not work
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
+    }
+
+    public void testAccessWithChainCallingMethodsTest() {
+        String methodCode = "int binaryExpressionTest() {\n" +
+                "        return FIELD.toString().length();\n" +
+                "    }";
+
+        testMethod(methodCode, 0);
     }
 
     public void testAccessViaThisTest() {
@@ -100,6 +103,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         //TODO does not work access via this expression
         //testMethod(methodCode, 0);
     }
+
 
     public void testComplexExpressionTest() {
         String methodCode = "int complexExpressionTest() {\n" +
@@ -327,7 +331,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 2);
     }
 
@@ -389,8 +393,8 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         testMethod(methodCode, 0);
     }
 
-    public void testSynzhronizedSyncTest() {
-        String methodCode = "void synzhronizedSyncTest() {\n" +
+    public void testSynchronizedSyncTest() {
+        String methodCode = "void synchronizedSyncTest() {\n" +
                 "        synchronized (FIELD) {\n" +
                 "            FIELD += 5;\n" +
                 "        }\n" +
@@ -399,8 +403,8 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         testMethod(methodCode, 0);
     }
 
-    public void testSynzhronizedBodyTest() {
-        String methodCode = "void synzhronizedBodyTest() {\n" +
+    public void testSynchronizedBodyTest() {
+        String methodCode = "void synchronizedBodyTest() {\n" +
                 "        synchronized (Integer.valueOf(5)) {\n" +
                 "            if (2 > 5) {\n" +
                 "            }\n" +
@@ -444,7 +448,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 0);
     }
 
@@ -463,7 +467,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 0);
     }
 
@@ -479,7 +483,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 0);
     }
 
@@ -500,7 +504,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 0);
     }
 
@@ -511,7 +515,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
                 "        }\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENTED BEHAVIOUR: TEST ORIGINAL PLUGIN +
+        //TODO PROBABLY AN INTENDED BEHAVIOUR: TEST ORIGINAL PLUGIN +
         //testMethod(methodCode, 0);
     }
 }
