@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces;
+package org.jetbrains.research.intellijdeodorant.ide.ui.listeners;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

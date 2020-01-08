@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
 
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;

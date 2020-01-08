@@ -20,9 +20,9 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsApplier;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 
 import javax.swing.*;

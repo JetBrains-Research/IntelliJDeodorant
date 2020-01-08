@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -7,9 +7,9 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.*;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractpanel.AbstractRefactoringPanel;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.QuadriFunction;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel;
+import org.jetbrains.research.intellijdeodorant.utils.QuadriFunction;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class TypeCheckRefactoringType extends RefactoringType {
     }
 
     @Override
-    Set<?> getNotAbstractRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator) {
+    public Set<?> getNotAbstractRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator) {
         return JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(projectInfo, indicator);
     }
 

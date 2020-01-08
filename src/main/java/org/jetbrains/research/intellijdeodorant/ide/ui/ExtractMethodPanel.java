@@ -31,11 +31,11 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSl
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PDGNode;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractMethodRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.MyExtractMethodProcessor;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.DoubleClickListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.ElementSelectionListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.EnterKeyListener;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.ExtractMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.MyExtractMethodProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 
 import javax.swing.*;

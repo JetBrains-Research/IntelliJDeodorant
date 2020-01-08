@@ -5,12 +5,11 @@ import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.command.WriteCommandAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractpanel.AbstractRefactoringPanel;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.PolymorphismRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.ReplaceTypeCodeWithStateStrategy;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.PolymorphismRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.ReplaceTypeCodeWithStateStrategy;
 
 import java.util.Collections;
 

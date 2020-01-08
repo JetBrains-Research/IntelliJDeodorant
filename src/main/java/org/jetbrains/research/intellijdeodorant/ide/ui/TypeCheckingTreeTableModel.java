@@ -1,13 +1,12 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.openapi.project.Project;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractpanel.AbstractTreeTableModel;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.TypeCheckElimination;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 
 import java.util.List;
 

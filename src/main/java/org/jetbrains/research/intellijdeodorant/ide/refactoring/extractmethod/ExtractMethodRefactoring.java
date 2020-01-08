@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
@@ -8,6 +8,7 @@ import com.intellij.psi.SmartPsiElementPointer;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSlice;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 
 import java.util.Optional;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces;
+package org.jetbrains.research.intellijdeodorant.ide.ui.listeners;
 
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;

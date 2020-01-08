@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
 
 import com.intellij.psi.PsiField;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;

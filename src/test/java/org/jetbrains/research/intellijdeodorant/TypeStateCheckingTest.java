@@ -17,8 +17,8 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.*;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.QuadriFunction;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.*;
+import org.jetbrains.research.intellijdeodorant.utils.QuadriFunction;
 
 import java.util.*;
 

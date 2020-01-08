@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.ui.abstractpanel;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
@@ -25,12 +25,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.DoubleClickListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.ElementSelectionListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces.EnterKeyListener;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;

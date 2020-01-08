@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.ui.functionalinterfaces;
+package org.jetbrains.research.intellijdeodorant.utils;
 
 @FunctionalInterface
 public interface QuadriFunction<T, U, V, S, R> {

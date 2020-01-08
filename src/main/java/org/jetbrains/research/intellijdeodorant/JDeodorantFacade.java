@@ -11,7 +11,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 
 import java.util.*;
 

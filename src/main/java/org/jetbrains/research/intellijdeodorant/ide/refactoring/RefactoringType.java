@@ -1,11 +1,10 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiClass;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +23,7 @@ abstract public class RefactoringType {
         return result;
     }
 
-    abstract Set<?> getNotAbstractRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator);
+    public abstract Set<?> getNotAbstractRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator);
 
     public abstract AbstractRefactoring newAbstractRefactoring(AbstractCandidateRefactoring candidateRefactoring);
 

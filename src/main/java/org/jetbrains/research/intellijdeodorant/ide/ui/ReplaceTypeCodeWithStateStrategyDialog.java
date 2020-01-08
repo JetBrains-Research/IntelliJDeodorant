@@ -6,7 +6,7 @@ import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.ui.RefactoringDialog;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.ReplaceTypeCodeWithStateStrategy;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.ReplaceTypeCodeWithStateStrategy;
 
 import javax.swing.*;
 import java.util.*;

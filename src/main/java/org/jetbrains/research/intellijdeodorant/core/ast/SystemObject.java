@@ -11,8 +11,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.inheritance.CompleteInheritanceDetection;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.TypeCheckElimination;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;

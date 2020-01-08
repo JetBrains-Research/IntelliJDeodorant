@@ -1,9 +1,9 @@
-package org.jetbrains.research.intellijdeodorant.ide.ui.abstractpanel;
+package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
