@@ -1,5 +1,11 @@
 package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
+import com.intellij.codeInspection.InspectionApplication;
+import com.intellij.codeInspection.InspectionEngine;
+import com.intellij.codeInspection.InspectionMain;
+import com.intellij.codeInspection.InspectionToolProvider;
+import com.intellij.codeInspection.ex.GlobalInspectionToolWrapper;
+import com.intellij.codeInspection.unneededThrows.RedundantThrowsDeclarationInspection;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -8,6 +14,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.refactoring.JavaRefactoringFactory;
+import com.intellij.refactoring.RefactoringFactory;
+import com.intellij.refactoring.changeSignature.JavaThrownExceptionInfo;
 import com.intellij.util.FileContentUtil;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -43,7 +52,7 @@ public class ExtractClassRefactoring {
     private String extractedTypeName;
     //this map holds for each constructor the assignment statements that initialize final extracted fields
     private Map<PsiMethod, Map<PsiField, PsiAssignmentExpression>> constructorFinalFieldAssignmentMap;
-    //this map hold the parameters that should be passed in each constructor of the extracted class
+    //this map holds the parameters that should be passed in each constructor of the extracted class
     private Map<PsiMethod, Set<PsiParameter>> extractedClassConstructorParameterMap;
     private Set<PsiField> extractedFieldsWithThisExpressionInTheirInitializer;
 
@@ -148,7 +157,7 @@ public class ExtractClassRefactoring {
         Set<PsiField> accessedFieldsInNonExtractedMethods = new LinkedHashSet<>();
 
         /*
-        Order of refactoring's changes are reorganized compared to the original plugin so that
+        Order of refactoring's changes are reorganised compared to the original plugin so that
         the transitional code during the refactoring will always be compilable (which is vital for IDEA api)
 
         As a part of it, we have to create extracted class before any changes to the original class, so at first, we should
@@ -156,7 +165,7 @@ public class ExtractClassRefactoring {
         `modifyExtractedFieldAssignmentsInSourceClass()` and `modifyExtractedFieldAccessesInSourceClass()`
 
         Same for `createExtractedTypeFieldReferenceInSourceClass()`. It both collects required parameters for the extracted class constructor
-        and creates corresponding field in the source class. We have to collect required parameters to create extracted class, but we cannot create field in the source class before creating extracted class.
+        and creates a corresponding field in the source class. We have to collect required parameters to create extracted class, but we cannot create field in the source class before creating extracted class.
          */
         collectExtractedFieldAssignmentsInSourceClass(extractedFieldFragments, modifiedFieldsInNonExtractedMethods, accessedFieldsInNonExtractedMethods);
         collectExtractedFieldAccessesInSourceClass(extractedFieldFragments, accessedFieldsInNonExtractedMethods);
@@ -779,10 +788,9 @@ public class ExtractClassRefactoring {
                 PsiClassType cloneableInterfaceType = RefactoringUtility.generateTypeFromTypeBinding(cloneableInterfaceTypeBinding, factory);
                 extractedClass.getImplementsList().add(factory.createReferenceElementByType(cloneableInterfaceType));
             } else {
-                extractedClass.getImplementsList().add(factory.createExpressionFromText("Cloneable", null));
+                extractedClass.getImplementsList().add(factory.createReferenceFromText("java.lang.Cloneable", null));
             }
         }
-
 
         extractedClassFile.add(extractedClass);
 
@@ -867,9 +875,11 @@ public class ExtractClassRefactoring {
 
             if (cloneMethodBinding.getThrowsList().getReferenceElements().length != 0) {
                 returnStatementText.append("try {\n").append(returnStatement.getText()).append("\n").append("} catch (CloneNotSupportedException e) {\n").append("throw new InternalError(\"Failed to implement Cloneable interface\");\n").append("}");
+                returnStatement = (PsiReturnStatement) factory.createStatementFromText(returnStatementText.toString(), null);
             }
 
-            cloneMethodDeclaration.getBody().addBefore(factory.createStatementFromText(returnStatementText.toString(), null), cloneMethodDeclaration.getBody().getRBrace());
+            cloneMethodDeclaration.getBody().addBefore(returnStatement, cloneMethodDeclaration.getBody().getRBrace());
+            cloneMethodDeclaration.getThrowsList().add(factory.createReferenceFromText("java.lang.CloneNotSupportedException", null));
             return cloneMethodDeclaration;
         }
         return null;
@@ -2459,7 +2469,7 @@ public class ExtractClassRefactoring {
                 PsiCodeBlock body = cloneMethodDeclaration.getBody();
 
                 PsiClassType sourceClassType = RefactoringUtility.generateTypeFromTypeBinding(sourceTypeDeclaration, factory);
-                PsiExpression superCloneInvocation = (PsiExpression) factory.createStatementFromText("(" + sourceClassType + ")" + " super.clone();", sourceFile);
+                PsiExpression superCloneInvocation = factory.createExpressionFromText("(" + sourceClassType.getClassName() + ")" + " super.clone()", null);
                 PsiStatement fragment = factory.createVariableDeclarationStatement("clone", sourceClassType, superCloneInvocation);
                 body.addBefore(fragment, body.getRBrace());
 

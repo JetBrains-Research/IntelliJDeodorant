@@ -284,10 +284,6 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiExpressionStatement) {
             PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
             StatementObject child = new StatementObject(expressionStatement, StatementType.EXPRESSION, parent);
-
-            AbstractExpression abstractExpression = new AbstractExpression(expressionStatement.getExpression(), child);
-            parent.addExpression(abstractExpression);
-
             parent.addStatement(child);
         } else if (statement instanceof PsiSwitchStatement) {
             /*

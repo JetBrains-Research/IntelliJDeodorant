@@ -88,7 +88,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testCircleDependency() {
-        runTest("TestCircleDependency");
+        runTest("TestCircleDependency", 0);
     }
 
     public void testRecursiveCall() {
