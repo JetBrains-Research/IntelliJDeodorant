@@ -12,8 +12,8 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 *Work in progress. The check mark indicates that the code smell is supported by IntelliJDeodorant.*
 
 - [x] Feature Envy problems can be resolved by appropriate Move Method refactorings.
-- [ ] Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.
-- [ ] State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.
+- [x] Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.
+- [x] State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.
 - [x] Long Method problems can be resolved by appropriate Extract Method refactorings.
 - [ ] God Class problems can be resolved by appropriate Extract Class refactorings.
 - [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
