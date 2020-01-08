@@ -409,9 +409,16 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private boolean isSubclassTypeAnInterface() {
         for (List<PsiType> subTypes : subclassTypeMap.values()) {
             for (PsiType subType : subTypes) {
-                // TODO: ad me
-//				if(subType.resolveBinding().isInterface())
-//					return true;
+				if(!(subType instanceof PsiClassType)) {
+                    continue;
+                }
+				PsiClass resolvedClass = ((PsiClassType) subType).resolve();
+				if (resolvedClass == null) {
+				    continue;
+                }
+				if (resolvedClass.isInterface()) {
+				    return true;
+                }
             }
         }
         return false;

@@ -99,6 +99,16 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         performSingleRefactoringTest();
     }
 
+    public void testSubinterface() {
+        initTest();
+        Project project = myFixture.getProject();
+        Set<TypeCheckEliminationGroup> set = JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
+                new ProjectInfo(project), fakeProgressIndicator
+        );
+        assertEquals(0, set.size());
+        checkTest();
+    }
+
     public void testSwitchOperator() {
         performSingleRefactoringTest();
     }
@@ -120,12 +130,14 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         eliminationGroupSizes = new ArrayList<>(eliminationGroupSizes);
         Project project = myFixture.getProject();
         while (eliminationGroupSizes.size() != 0) {
-            Set<TypeCheckEliminationGroup> set = JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
-                    new ProjectInfo(project), fakeProgressIndicator
-            );
-            assertEquals(set.size(), eliminationGroupSizes.size());
-            TypeCheckEliminationGroup eliminationGroup = set.iterator().next();
-            assertEquals(eliminationGroup.getCandidates().size(), eliminationGroupSizes.get(0).intValue());
+            Set<TypeCheckEliminationGroup> eliminationGroups =
+                    JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
+                            new ProjectInfo(project),
+                            fakeProgressIndicator
+                    );
+            assertEquals(eliminationGroupSizes.size(), eliminationGroups.size());
+            TypeCheckEliminationGroup eliminationGroup = eliminationGroups.iterator().next();
+            assertEquals(eliminationGroupSizes.get(0).intValue(), eliminationGroup.getCandidates().size());
             WriteCommandAction.runWriteCommandAction(
                     project,
                     () -> createRefactoring(eliminationGroup.getCandidates().get(0), project).apply()

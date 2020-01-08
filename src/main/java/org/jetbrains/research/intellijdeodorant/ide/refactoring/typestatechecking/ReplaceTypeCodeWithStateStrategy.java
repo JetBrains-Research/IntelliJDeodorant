@@ -642,7 +642,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                         if (returnStatementExpression instanceof PsiNewExpression) {
                                             PsiNewExpression classInstanceCreation = (PsiNewExpression) returnStatementExpression;
                                             PsiClass createdClass = (PsiClass) classInstanceCreation.getClassReference().resolve();
-                                            if (subclassNames.contains(createdClass.getQualifiedName())) {
+                                            if (createdClass != null && subclassNames.contains(createdClass.getQualifiedName())) {
                                                 matchCounter++;
                                             }
                                         }

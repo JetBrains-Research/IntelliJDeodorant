@@ -123,22 +123,22 @@ public class ClassObject extends ClassDeclarationObject {
 
     public List<TypeCheckElimination> generateTypeCheckEliminations() {
         List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
-        if(!_enum) {
-            for(MethodObject methodObject : methodList) {
+        if (!_enum) {
+            for (MethodObject methodObject : methodList) {
                 MethodBodyObject methodBodyObject = methodObject.getMethodBody();
-                if(methodBodyObject != null) {
+                if (methodBodyObject != null) {
                     List<TypeCheckElimination> list = methodBodyObject.generateTypeCheckEliminations();
-                    for(TypeCheckElimination typeCheckElimination : list) {
-                        if(!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
+                    for (TypeCheckElimination typeCheckElimination : list) {
+                        if (!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
                             TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
                                     typeCheckElimination,
-                                    (PsiClass)getAbstractTypeDeclaration().recoverASTNode(),
+                                    (PsiClass) getAbstractTypeDeclaration().recoverASTNode(),
                                     methodObject.getMethodDeclaration()
                             );
                             boolean hasTypeLocalVariableFieldOrMethod = typeCheckElimination.getTypeField() != null
                                     || typeCheckElimination.getTypeLocalVariable() != null
                                     || typeCheckElimination.getTypeMethodInvocation() != null;
-                            if(hasTypeLocalVariableFieldOrMethod
+                            if (hasTypeLocalVariableFieldOrMethod
                                     && typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType()
                                     && typeCheckElimination.isApplicable()) {
                                 typeCheckEliminations.add(typeCheckElimination);
