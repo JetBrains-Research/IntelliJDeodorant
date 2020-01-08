@@ -7,9 +7,9 @@ import java.util.List;
 import com.intellij.psi.*;
 
 public class StatementExtractor {
-    
+
     public StatementExtractor() {
-        
+
     }
 
     private StatementInstanceChecker instanceChecker;
@@ -19,7 +19,7 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getVariableDeclarationStatements(PsiStatement statement) {
+    public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) {
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
     }
@@ -34,17 +34,17 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getSwitchStatements(PsiStatement statement) {
+    public List<PsiStatement> getSwitchStatements(PsiElement statement) {
         instanceChecker = new InstanceOfSwitchStatement();
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getIfStatements(PsiStatement statement) {
+    public List<PsiStatement> getIfStatements(PsiElement statement) {
         instanceChecker = new InstanceOfIfStatement();
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getReturnStatements(PsiReturnStatement statement) {
+    public List<PsiStatement> getReturnStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfReturnStatement();
         return getStatements(statement);
     }
@@ -59,7 +59,7 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getEnhancedForStatements(PsiStatement statement) {
+    public List<PsiStatement> getEnhancedForStatements(PsiElement statement) {
         instanceChecker = new InstanceOfEnhancedForStatement();
         return getStatements(statement);
     }
@@ -84,7 +84,7 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    private List<PsiStatement> getStatements(PsiStatement statement) {
+    private List<PsiStatement> getStatements(PsiElement statement) {
         List<PsiStatement> statementList = new ArrayList<>();
         if (statement instanceof PsiCodeBlock) {
             PsiCodeBlock block = (PsiCodeBlock) statement;

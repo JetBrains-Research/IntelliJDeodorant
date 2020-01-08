@@ -11,6 +11,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 
 import java.util.*;
 
@@ -123,5 +124,18 @@ public class JDeodorantFacade {
                 }
             }
         }
+    }
+
+    public static Set<TypeCheckEliminationGroup> getTypeCheckEliminationRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+        new ASTReader(project, indicator);
+        SystemObject systemObject = ASTReader.getSystemObject();
+
+        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
+        for (ClassObject classObject : systemObject.getClassObjects()) {
+            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+                classObjectsToBeExamined.add(classObject);
+            }
+        }
+        return new TreeSet<>(systemObject.generateTypeCheckEliminations(classObjectsToBeExamined, indicator));
     }
 }

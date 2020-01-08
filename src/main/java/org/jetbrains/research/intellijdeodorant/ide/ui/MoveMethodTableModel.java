@@ -7,7 +7,7 @@ import com.intellij.ui.BooleanTableCellRenderer;
 import com.intellij.ui.JBColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 

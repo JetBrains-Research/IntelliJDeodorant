@@ -1,10 +1,12 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringVisitor;
 
 import java.util.Optional;
 

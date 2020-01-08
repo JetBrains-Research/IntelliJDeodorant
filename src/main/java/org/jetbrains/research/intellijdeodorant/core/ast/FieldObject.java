@@ -27,7 +27,7 @@ public class FieldObject extends VariableDeclarationObject {
         this.psiField = field;
     }
 
-    private PsiVariable getVariableDeclarationFragment() {
+    private PsiField getVariableDeclarationFragment() {
         return psiField;
     }
 
@@ -116,7 +116,7 @@ public class FieldObject extends VariableDeclarationObject {
         return sb.toString();
     }
 
-    public PsiVariable getVariableDeclaration() {
+    public PsiField getVariableDeclaration() {
         return getVariableDeclarationFragment();
     }
 }
