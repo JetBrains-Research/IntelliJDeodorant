@@ -376,6 +376,10 @@ public class MethodBodyObject {
             PsiForStatement forStatement = (PsiForStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(forStatement, StatementType.FOR, parent);
             parent.addStatement(child);
+
+            AbstractExpression abstractExpression = new AbstractExpression(forStatement.getCondition(), child);
+            child.addExpression(abstractExpression);
+
             processStatement(child, forStatement.getBody());
             processStatement(child, forStatement.getInitialization());
             processStatement(child, forStatement.getUpdate());
@@ -412,6 +416,13 @@ public class MethodBodyObject {
             StatementObject child = new StatementObject(expressionStatement, StatementType.EXPRESSION, parent);
             parent.addStatement(child);
         } else if (statement instanceof PsiSwitchStatement) {
+            /*
+            TODO does not process EXPRESSION
+            switch(...) {
+                case EXPRESSION:
+                    ...
+            }
+             */
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(switchStatement, StatementType.SWITCH, parent);
             AbstractExpression abstractExpression = new AbstractExpression(switchStatement.getExpression(), child);
@@ -450,6 +461,9 @@ public class MethodBodyObject {
             StatementObject child = new StatementObject(throwStatement, StatementType.THROW, parent);
             parent.addStatement(child);
         } else if (statement instanceof PsiTryStatement) {
+            /*
+            TODO does not process expression in catch and finally sections (see tests)
+             */
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             TryStatementObject child = new TryStatementObject(tryStatement, parent);
 
@@ -541,6 +555,15 @@ public class MethodBodyObject {
             PsiSwitchLabelStatement switchStatement = (PsiSwitchLabelStatement) statement;
             StatementObject child = new StatementObject(switchStatement, StatementType.SWITCH_CASE, parent);
             parent.addStatement(child);
+        } else if (statement instanceof PsiExpressionListStatement) {
+            PsiExpressionListStatement listStatement = (PsiExpressionListStatement) statement;
+            StatementObject child = new StatementObject(listStatement, StatementType.EXPRESSION_LIST, parent);
+            parent.addStatement(child);
+
+            for (PsiExpression psiExpression : listStatement.getExpressionList().getExpressions()) {
+                AbstractExpression abstractExpression = new AbstractExpression(psiExpression, child);
+                parent.addExpression(abstractExpression);
+            }
         }
     }
 
