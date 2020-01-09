@@ -1,25 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
 import com.intellij.psi.PsiElement;
+import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
-import org.jetbrains.research.intellijdeodorant.core.ast.AnonymousClassDeclarationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.ArrayCreationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.ClassInstanceCreationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.CreationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.LiteralObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.LocalVariableDeclarationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.LocalVariableInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.SuperFieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.SuperMethodInvocationObject;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*
  * CompositeStatementObject represents the following AST Statement subclasses:

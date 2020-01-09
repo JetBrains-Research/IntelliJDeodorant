@@ -1,18 +1,13 @@
 package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-
-import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
-import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
-import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
-import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 
 import java.util.*;

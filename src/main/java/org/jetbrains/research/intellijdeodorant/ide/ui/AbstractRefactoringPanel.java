@@ -70,7 +70,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
-        this.treeTable =  new TreeTable(model);
+        this.treeTable = new TreeTable(model);
         this.refactorDepth = refactorDepth;
         setLayout(new BorderLayout());
         setupGUI();
@@ -247,7 +247,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
     //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
-                                          AnalysisScope scope, boolean openInEditor) {
+                                       AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 

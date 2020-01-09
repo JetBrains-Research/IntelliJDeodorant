@@ -20,7 +20,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     private Map<MyMethod, Boolean> leaveDelegate;
     private String targetClassName;
     private GodClassVisualizationData visualizationData;
-    private Integer userRate;
     private List<String> topics;
 
     public ExtractClassCandidateRefactoring(MySystem system, MyClass sourceClass, ArrayList<Entity> extractedEntities) {
@@ -28,15 +27,15 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
         this.system = system;
         this.sourceClass = sourceClass;
         this.extractedEntities = extractedEntities;
-        this.leaveDelegate = new LinkedHashMap<MyMethod, Boolean>();
+        this.leaveDelegate = new LinkedHashMap<>();
         if (system.getClass(sourceClass.getName() + "Product") == null) {
             this.targetClassName = sourceClass.getClassObject().getPsiClass().getName() + "Product";
         } else {
             this.targetClassName = sourceClass.getClassObject().getPsiClass().getName() + "Product2";
         }
-        this.topics = new ArrayList<String>();
-        Set<MethodObject> extractedMethods = new LinkedHashSet<MethodObject>();
-        Set<FieldObject> extractedFields = new LinkedHashSet<FieldObject>();
+        this.topics = new ArrayList<>();
+        Set<MethodObject> extractedMethods = new LinkedHashSet<>();
+        Set<FieldObject> extractedFields = new LinkedHashSet<>();
         for (Entity entity : extractedEntities) {
             if (entity instanceof MyMethod) {
                 MyMethod myMethod = (MyMethod) entity;
@@ -76,7 +75,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     public Set<PsiMethod> getDelegateMethods() {
         Set<PsiMethod> delegateMethods = new LinkedHashSet<>();
         for (MyMethod method : leaveDelegate.keySet()) {
-            if (leaveDelegate.get(method) == true)
+            if (leaveDelegate.get(method))
                 delegateMethods.add(method.getMethodObject().getMethodDeclaration());
         }
         return delegateMethods;
@@ -97,11 +96,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
         return leaveDelegate;
     }
 
-    public boolean leaveDelegate(MyMethod method) {
-        return system.getSystemObject().containsMethodInvocation(method.getMethodObject().generateMethodInvocation(), sourceClass.getClassObject()) ||
-                system.getSystemObject().containsSuperMethodInvocation(method.getMethodObject().generateSuperMethodInvocation());
-    }
-
     public boolean isApplicable() {
         int methodCounter = 0;
         for (Entity entity : extractedEntities) {
@@ -120,11 +114,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
                 }
             }
         }
-        if (extractedEntities.size() <= 2 || methodCounter == 0 || !validRemainingMethodsInSourceClass() || !validRemainingFieldsInSourceClass() || visualizationData.containsNonAccessedFieldInExtractedClass()) {
-            return false;
-        } else {
-            return true;
-        }
+        return extractedEntities.size() > 2 && methodCounter != 0 && validRemainingMethodsInSourceClass() && validRemainingFieldsInSourceClass() && !visualizationData.containsNonAccessedFieldInExtractedClass();
     }
 
     private boolean validRemainingMethodsInSourceClass() {
@@ -197,34 +187,19 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     private boolean containsFieldAccessOfEnclosingClass(MyMethod method) {
-        if (method.getMethodObject().containsFieldAccessOfEnclosingClass()) {
-            return true;
-        } else
-            return false;
+        return method.getMethodObject().containsFieldAccessOfEnclosingClass();
     }
 
     private boolean overridesMethod(MyMethod method) {
-        if (method.getMethodObject().overridesMethod()) {
-            //System.out.println(this.toString() + "\toverrides method of superclass");
-            return true;
-        } else
-            return false;
+        return method.getMethodObject().overridesMethod();
     }
 
     private boolean containsSuperMethodInvocation(MyMethod method) {
-        if (method.getMethodObject().containsSuperMethodInvocation()) {
-            //System.out.println(this.toString() + "\tcontains super method invocation");
-            return true;
-        } else
-            return false;
+        return method.getMethodObject().containsSuperMethodInvocation();
     }
 
     private boolean isSynchronized(MyMethod method) {
-        if (method.getMethodObject().isSynchronized()) {
-            //System.out.println(this.toString() + "\tis synchronized");
-            return true;
-        } else
-            return false;
+        return method.getMethodObject().isSynchronized();
     }
 
     @Override
@@ -259,19 +234,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
         return visualizationData.toString();
     }
 
-
-    public GodClassVisualizationData getGodClassVisualizationData() {
-        return visualizationData;
-    }
-
-    public Integer getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(Integer userRate) {
-        this.userRate = userRate;
-    }
-
     public int compareTo(ExtractClassCandidateRefactoring other) {
         int thisSourceClassDependencies = this.getDistinctSourceDependencies();
         int otherSourceClassDependencies = other.getDistinctSourceDependencies();
@@ -289,7 +251,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     public void findTopics() {
-        List<String> codeElements = new ArrayList<String>();
+        List<String> codeElements = new ArrayList<>();
         for (Entity entity : this.extractedEntities) {
             if (entity instanceof MyAttribute) {
                 MyAttribute attribute = (MyAttribute) entity;

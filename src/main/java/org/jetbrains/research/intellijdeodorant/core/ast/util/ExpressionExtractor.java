@@ -1,8 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.util;
 
-import java.util.*;
-
 import com.intellij.psi.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ExpressionExtractor {
 

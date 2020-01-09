@@ -3,11 +3,10 @@ package org.jetbrains.research.intellijdeodorant.util;
 import org.jetbrains.research.intellijdeodorant.util.math.HumaniseCamelCase;
 import org.jetbrains.research.intellijdeodorant.util.math.Stemmer;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class TopicFinder {
     private static final ArrayList<String> stopWords = getStopWords();
@@ -62,9 +61,9 @@ public class TopicFinder {
     }
 
     private static ArrayList<String> getStopWords() {
-        ArrayList<String> stopWords = new ArrayList<String>();
+        ArrayList<String> stopWords = new ArrayList<>();
         try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(TopicFinder.class.getClassLoader().getResourceAsStream("glasgowstoplist.txt")))) {
+                new InputStreamReader(Objects.requireNonNull(TopicFinder.class.getClassLoader().getResourceAsStream("glasgowstoplist.txt"))))) {
             String next = in.readLine();
             while (next != null) {
                 stopWords.add(next);

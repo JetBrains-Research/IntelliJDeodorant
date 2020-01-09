@@ -5,16 +5,12 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import org.jetbrains.research.intellijdeodorant.core.FeatureEnvyVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isTestClass;
 
@@ -273,7 +269,7 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     public int getDistinctTargetDependencies() {
         return getFeatureEnvyVisualizationData().getDistinctTargetDependencies();
     }
-    
+
     public FeatureEnvyVisualizationData getVisualizationData() {
         return visualizationData;
     }

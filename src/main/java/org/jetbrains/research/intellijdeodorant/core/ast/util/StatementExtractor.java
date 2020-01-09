@@ -1,10 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.util;
 
+import com.intellij.psi.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.intellij.psi.*;
 
 public class StatementExtractor {
 

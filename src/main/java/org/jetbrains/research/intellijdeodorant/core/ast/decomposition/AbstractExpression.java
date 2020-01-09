@@ -1,11 +1,11 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import java.util.List;
-
 import com.intellij.psi.PsiExpression;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformationGenerator;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
+
+import java.util.List;
 
 public class AbstractExpression extends AbstractMethodFragment {
 

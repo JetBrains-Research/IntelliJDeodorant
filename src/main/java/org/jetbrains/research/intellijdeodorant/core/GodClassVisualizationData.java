@@ -23,12 +23,12 @@ public class GodClassVisualizationData implements VisualizationData {
         this.sourceClass = sourceClass;
         this.extractedMethods = extractedMethods;
         this.extractedFields = extractedFields;
-        this.internalMethodInvocationMap = new LinkedHashMap<MethodObject, Map<MethodInvocationObject, Integer>>();
-        this.externalMethodInvocationMap = new LinkedHashMap<MethodObject, Map<MethodInvocationObject, Integer>>();
-        this.internalFieldReadMap = new LinkedHashMap<MethodObject, Map<FieldInstructionObject, Integer>>();
-        this.internalFieldWriteMap = new LinkedHashMap<MethodObject, Map<FieldInstructionObject, Integer>>();
-        this.externalFieldReadMap = new LinkedHashMap<MethodObject, Map<FieldInstructionObject, Integer>>();
-        this.externalFieldWriteMap = new LinkedHashMap<MethodObject, Map<FieldInstructionObject, Integer>>();
+        this.internalMethodInvocationMap = new LinkedHashMap<>();
+        this.externalMethodInvocationMap = new LinkedHashMap<>();
+        this.internalFieldReadMap = new LinkedHashMap<>();
+        this.internalFieldWriteMap = new LinkedHashMap<>();
+        this.externalFieldReadMap = new LinkedHashMap<>();
+        this.externalFieldWriteMap = new LinkedHashMap<>();
 
         for (MethodObject method : extractedMethods) {
             List<MethodInvocationObject> methodInvocations = method.getNonDistinctInvokedMethodsThroughThisReference();
@@ -114,7 +114,7 @@ public class GodClassVisualizationData implements VisualizationData {
                 invocationMap.put(methodInvocation, 1);
             }
         } else {
-            Map<MethodInvocationObject, Integer> invocationMap = new LinkedHashMap<MethodInvocationObject, Integer>();
+            Map<MethodInvocationObject, Integer> invocationMap = new LinkedHashMap<>();
             invocationMap.put(methodInvocation, 1);
             map.put(method, invocationMap);
         }
@@ -130,7 +130,7 @@ public class GodClassVisualizationData implements VisualizationData {
                 fieldAccessMap.put(fieldInstruction, count);
             }
         } else {
-            Map<FieldInstructionObject, Integer> fieldAccessMap = new LinkedHashMap<FieldInstructionObject, Integer>();
+            Map<FieldInstructionObject, Integer> fieldAccessMap = new LinkedHashMap<>();
             fieldAccessMap.put(fieldInstruction, count);
             map.put(method, fieldAccessMap);
         }
@@ -157,7 +157,7 @@ public class GodClassVisualizationData implements VisualizationData {
             PsiElement psiElement = fieldInstruction.getElement();
             if (psiElement instanceof PsiField) {
                 PsiField psiField = (PsiField) psiElement;
-                if (psiField.getName() != null && psiField.getName().equals(variable.getName()))
+                if (psiField.getName().equals(variable.getName()))
                     return fieldInstruction;
             }
         }
@@ -244,7 +244,7 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public int getDistinctTargetDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<FieldInstructionObject>();
+        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
         for (MethodObject key : internalFieldReadMap.keySet()) {
             Map<FieldInstructionObject, Integer> value = internalFieldReadMap.get(key);
             fields.addAll(value.keySet());
@@ -253,7 +253,7 @@ public class GodClassVisualizationData implements VisualizationData {
             Map<FieldInstructionObject, Integer> value = internalFieldWriteMap.get(key);
             fields.addAll(value.keySet());
         }
-        Set<MethodInvocationObject> methods = new LinkedHashSet<MethodInvocationObject>();
+        Set<MethodInvocationObject> methods = new LinkedHashSet<>();
         for (MethodObject key : internalMethodInvocationMap.keySet()) {
             Map<MethodInvocationObject, Integer> value = internalMethodInvocationMap.get(key);
             methods.addAll(value.keySet());
@@ -262,7 +262,7 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public int getDistinctSourceDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<FieldInstructionObject>();
+        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
         for (MethodObject key : externalFieldReadMap.keySet()) {
             Map<FieldInstructionObject, Integer> value = externalFieldReadMap.get(key);
             fields.addAll(value.keySet());
@@ -271,7 +271,7 @@ public class GodClassVisualizationData implements VisualizationData {
             Map<FieldInstructionObject, Integer> value = externalFieldWriteMap.get(key);
             fields.addAll(value.keySet());
         }
-        Set<MethodInvocationObject> methods = new LinkedHashSet<MethodInvocationObject>();
+        Set<MethodInvocationObject> methods = new LinkedHashSet<>();
         for (MethodObject key : externalMethodInvocationMap.keySet()) {
             Map<MethodInvocationObject, Integer> value = externalMethodInvocationMap.get(key);
             methods.addAll(value.keySet());
@@ -280,7 +280,7 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public boolean containsNonAccessedFieldInExtractedClass() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<FieldInstructionObject>();
+        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
         for (MethodObject key : internalFieldReadMap.keySet()) {
             Map<FieldInstructionObject, Integer> value = internalFieldReadMap.get(key);
             fields.addAll(value.keySet());

@@ -9,7 +9,7 @@ public class AdjacencyList {
     public void addEdge(Node source, Node target, int weight) {
         LinkedHashSet<Edge> list;
         if (!adjacencies.containsKey(source)) {
-            list = new LinkedHashSet<Edge>();
+            list = new LinkedHashSet<>();
             adjacencies.put(source, list);
         } else {
             list = adjacencies.get(source);
