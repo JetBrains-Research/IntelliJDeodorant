@@ -30,6 +30,7 @@ public abstract class AbstractMethodInvocationObject {
         this.methodName = methodName;
         this.returnType = returnType;
         this.parameterList = parameterList;
+        this.thrownExceptions = new LinkedHashSet<>();
         this._static = false;
     }
 

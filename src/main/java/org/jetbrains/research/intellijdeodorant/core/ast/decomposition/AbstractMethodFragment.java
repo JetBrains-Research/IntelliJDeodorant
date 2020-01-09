@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
-
 import com.intellij.psi.util.PsiUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
@@ -12,9 +11,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
-import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
-import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
 import static java.util.stream.Collectors.toList;
+import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
@@ -342,8 +340,25 @@ public abstract class AbstractMethodFragment {
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
         TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
-        TypeObject returnType = TypeObject.extractTypeObject("UNK");
-        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
+
+        String canonicalText = "UNK";
+
+        PsiMethod resolvedMethod = methodInvocation.resolveMethod();
+
+        ArrayList<TypeObject> typeObjects = new ArrayList<>();
+        if (resolvedMethod != null) {
+            for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
+                typeObjects.add(TypeObject.extractTypeObject(parameter.getType().getCanonicalText()));
+            }
+
+            PsiType methodReturnType = resolvedMethod.getReturnType();
+            if (methodReturnType != null) {
+                canonicalText = methodReturnType.getCanonicalText();
+            }
+        }
+        TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
+
+        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType, typeObjects);
         methodInvocationObject.setMethodInvocation(methodInvocation);
         methodInvocationObject.setStatic(isMethodStatic);
         addMethodInvocation(methodInvocationObject);
@@ -364,9 +379,8 @@ public abstract class AbstractMethodFragment {
             if (methodInvocationObject.isStatic())
                 addStaticallyInvokedMethod(methodInvocationObject);
             else {
-                PsiClass sourceClass = getParentOfType(methodInvocation, PsiClass.class);
-                if (sourceClass != null && originClassName != null
-                        && originClassName.equals(sourceClass.getQualifiedName())) {
+                PsiExpression qualifier = methodInvocation.getMethodExpression().getQualifierExpression();
+                if (qualifier == null || qualifier instanceof PsiThisExpression) {
                     addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
                 }
             }
