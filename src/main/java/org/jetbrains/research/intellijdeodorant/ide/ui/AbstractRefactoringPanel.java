@@ -3,8 +3,6 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.TransactionGuard;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
@@ -15,7 +13,9 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiMethod;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
@@ -25,30 +25,29 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.DoubleClickListener;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.ElementSelectionListener;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.functionalinterfaces.EnterKeyListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Set;
-
-import static org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType.*;
+import java.util.List;
 
 /**
  * Panel for Type-State Checking refactorings.
  */
-public class AbstractRefactoringPanel extends JPanel {
+public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private String detect_indicator_status_text_key;
-    private static final String REFRESH_NEEDED_TEXT = "refresh.needed.text";
+    private static final String REFRESH_NEEDED_TEXT = "type.state.checking.refresh.needed.text";
 
+    private String detectIndicatorStatusTextKey;
     @NotNull
-    private final AnalysisScope scope;
+    protected final AnalysisScope scope;
     private AbstractTreeTableModel model;
     private final TreeTable treeTable;
     private final JButton doRefactorButton = new JButton();
@@ -62,12 +61,16 @@ public class AbstractRefactoringPanel extends JPanel {
     private RefactoringType refactoringType;
     private int refactorDepth;
 
-    public AbstractRefactoringPanel(@NotNull AnalysisScope scope, String detect_indicator_status_text_key, RefactoringType refactoringType, AbstractTreeTableModel model, int refactorDepth) {
+    public AbstractRefactoringPanel(@NotNull AnalysisScope scope,
+                                    String detectIndicatorStatusTextKey,
+                                    RefactoringType refactoringType,
+                                    AbstractTreeTableModel model,
+                                    int refactorDepth) {
         this.scope = scope;
-        this.detect_indicator_status_text_key = detect_indicator_status_text_key;
+        this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
-        this.treeTable = new TreeTable(model);
+        this.treeTable =  new TreeTable(model);
         this.refactorDepth = refactorDepth;
         setLayout(new BorderLayout());
         setupGUI();
@@ -92,7 +95,7 @@ public class AbstractRefactoringPanel extends JPanel {
     /**
      * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
      */
-    private void disableRefactoringsTable(boolean hideTree) {
+    protected void disableRefactoringsTable(boolean hideTree) {
         scrollPane.setVisible(true);
         treeTable.getTree().setSelectionPath(null);
         if (hideTree) {
@@ -149,9 +152,8 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
-    public void doRefactor(AbstractCandidateRefactoring computationSlice) {
-        TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
-    }
+    //TODO comment
+    protected abstract void doRefactor(AbstractCandidateRefactoring candidateRefactoring);
 
     /**
      * Enables Refactor button only if a suggestion is selected.
@@ -188,13 +190,13 @@ public class AbstractRefactoringPanel extends JPanel {
         ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
-                IntelliJDeodorantBundle.message(detect_indicator_status_text_key), true) {
+                IntelliJDeodorantBundle.message(detectIndicatorStatusTextKey), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    Set<AbstractCandidateRefactoringGroup> candidates =
+                    List<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
-                    model.setEliminationGroups(new ArrayList<>(candidates));
+                    model.setEliminationGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
                 });
             }
@@ -203,7 +205,7 @@ public class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Highlights type-checking code fragment.
+     * Highlights refactoring-specific code fragment.
      */
     private void highlightCode() {
         TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
@@ -216,20 +218,8 @@ public class AbstractRefactoringPanel extends JPanel {
         }
     }
 
-    protected AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
-        PsiClass sourceTypeDeclaration = candidate.getSourceClass();
-        PsiFile sourceFile = sourceTypeDeclaration.getContainingFile();
+    public AbstractRefactoring getAbstractRefactoringFromAbstractCandidateRefactoring(AbstractCandidateRefactoring candidate) {
         return refactoringType.newAbstractRefactoring(candidate);
-    }
-
-    /**
-     * Returns Runnable which performs specified refactoring.
-     */
-    private Runnable doExtract(AbstractCandidateRefactoring candidateRefactoring) {
-        return () -> {
-            AbstractRefactoring refactoring = getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
-            WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
-        };
     }
 
     /**
@@ -237,7 +227,8 @@ public class AbstractRefactoringPanel extends JPanel {
      */
     public static void highlightStatement(@Nullable PsiMethod sourceMethod,
                                           AnalysisScope scope,
-                                          PsiElement statement, boolean openInEditor) {
+                                          PsiElement statement,
+                                          boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -254,11 +245,13 @@ public class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
+    //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
-                                       AnalysisScope scope, boolean openInEditor) {
+                                          AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 
+    //TODO
     public static void highlightField(@Nullable PsiField sourceField, AnalysisScope scope, boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
@@ -277,6 +270,7 @@ public class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
+    //TODO
     private static void highlightPsiElement(PsiElement psiElement, boolean openInEditor) {
         if (openInEditor) {
             EditorHelper.openInEditor(psiElement);

@@ -3,10 +3,10 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractedConcept;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
 
 import java.util.ArrayList;
 import java.util.List;

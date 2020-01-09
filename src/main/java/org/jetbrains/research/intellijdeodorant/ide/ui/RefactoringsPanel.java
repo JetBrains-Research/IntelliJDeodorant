@@ -25,6 +25,7 @@ class RefactoringsPanel extends SimpleToolWindowPanel {
         jTabbedPane.add(IntelliJDeodorantBundle.message("feature.envy.smell.name"), new MoveMethodPanel(new AnalysisScope(project)));
         jTabbedPane.add(IntelliJDeodorantBundle.message("long.method.smell.name"), new ExtractMethodPanel(new AnalysisScope(project)));
         jTabbedPane.add(IntelliJDeodorantBundle.message("god.class.smell.name"), new GodClassPanel(new AnalysisScope(project)));
+        jTabbedPane.add(IntelliJDeodorantBundle.message("type.state.checking.smell.name"), new TypeCheckingPanel(new AnalysisScope(project)));
         setContent(jTabbedPane);
     }
 }

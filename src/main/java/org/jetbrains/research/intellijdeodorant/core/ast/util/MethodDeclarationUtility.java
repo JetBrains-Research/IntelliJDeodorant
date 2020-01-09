@@ -5,12 +5,79 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.Compo
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MethodDeclarationUtility {
 
-    public static PsiElement isGetter(PsiMethod methodDeclaration) {
+    public static PsiMethodCallExpression isDelegate(PsiMethod methodDeclaration) {
+        PsiClass parentClass = methodDeclaration.getContainingClass();
+        PsiCodeBlock methodBody = methodDeclaration.getBody();
+        if (methodBody != null) {
+            PsiStatement[] statements = methodBody.getStatements();
+            if (statements.length == 1) {
+                PsiStatement statement = statements[0];
+
+                PsiMethodCallExpression methodInvocation = null;
+                if (statement instanceof PsiReturnStatement) {
+                    PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
+                    if (returnStatement.getReturnValue() instanceof PsiMethodCallExpression) {
+                        methodInvocation = (PsiMethodCallExpression) returnStatement.getReturnValue();
+                    }
+                } else if (statement instanceof PsiExpressionStatement) {
+                    PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
+                    if (expressionStatement.getExpression() instanceof PsiMethodCallExpression) {
+                        methodInvocation = (PsiMethodCallExpression) expressionStatement.getExpression();
+                    }
+                }
+
+                if (methodInvocation != null) {
+                    PsiExpression methodInvocationExpression = methodInvocation.getMethodExpression().getQualifierExpression();
+                    if (methodInvocationExpression instanceof PsiMethodCallExpression) {
+                        PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
+                        List<PsiMethod> parentClassMethods = new ArrayList<>();
+                        if (parentClass.isEnum() || !parentClass.isAnnotationType()) {
+                            PsiMethod[] parentClassMethodArray = parentClass.getMethods();
+                            parentClassMethods.addAll(Arrays.asList(parentClassMethodArray));
+                        }
+                        boolean isDelegationChain = false;
+                        boolean foundInParentClass = false;
+                        for (PsiMethod parentClassMethod : parentClassMethods) {
+                            if (parentClassMethod.equals(previousChainedMethodInvocation.resolveMethod())) {
+                                foundInParentClass = true;
+                                PsiExpression getterField = isGetter(parentClassMethod);
+                                if (getterField == null) {
+                                    isDelegationChain = true;
+                                }
+                                break;
+                            }
+                        }
+                        if (!isDelegationChain && foundInParentClass) {
+                            return methodInvocation;
+                        }
+                    } else if (methodInvocationExpression instanceof PsiReferenceExpression) {
+                        PsiReferenceExpression simpleName = (PsiReferenceExpression) methodInvocationExpression;
+                        PsiElement binding = simpleName.resolve();
+                        if (binding instanceof PsiVariable) {
+                            PsiVariable variableBinding = (PsiVariable) binding;
+                            if (variableBinding instanceof PsiField || variableBinding instanceof PsiParameter) {
+                                return methodInvocation;
+                            }
+                        }
+                    } else if (methodInvocationExpression instanceof PsiThisExpression) {
+                        return methodInvocation;
+                    } else if (methodInvocationExpression == null) {
+                        return methodInvocation;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    // returns reference expression (see the difference between isSetter)
+    public static PsiExpression isGetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());
         if (methodBody != null) {
@@ -19,13 +86,16 @@ public class MethodDeclarationUtility {
                 PsiStatement statement = statements.get(0);
                 if (statement instanceof PsiReturnStatement) {
                     PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
-                    return returnStatement.getReturnValue();
+                    if (returnStatement.getReturnValue() instanceof PsiReferenceExpression) {
+                        return returnStatement.getReturnValue();
+                    }
                 }
             }
         }
         return null;
     }
 
+    // returns resolved reference (see the difference between isGetter)
     public static PsiElement isSetter(PsiMethod methodDeclaration) {
         PsiCodeBlock methodBody = methodDeclaration.getBody();
         List<PsiParameter> parameters = Arrays.asList(methodDeclaration.getParameterList().getParameters());

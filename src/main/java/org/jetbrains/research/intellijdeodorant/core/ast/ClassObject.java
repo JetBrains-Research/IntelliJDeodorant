@@ -2,6 +2,9 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TypeCheckCodeFragmentAnalyzer;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -116,6 +119,36 @@ public class ClassObject extends ClassDeclarationObject {
         if (type.getClassType().equals(className))
             return true;
         return type.getGenericType() != null && type.getGenericType().contains(className);
+    }
+
+    public List<TypeCheckElimination> generateTypeCheckEliminations() {
+        List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
+        if (!_enum) {
+            for (MethodObject methodObject : methodList) {
+                MethodBodyObject methodBodyObject = methodObject.getMethodBody();
+                if (methodBodyObject != null) {
+                    List<TypeCheckElimination> list = methodBodyObject.generateTypeCheckEliminations();
+                    for (TypeCheckElimination typeCheckElimination : list) {
+                        if (!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
+                            TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
+                                    typeCheckElimination,
+                                    (PsiClass) getAbstractTypeDeclaration().recoverASTNode(),
+                                    methodObject.getMethodDeclaration()
+                            );
+                            boolean hasTypeLocalVariableFieldOrMethod = typeCheckElimination.getTypeField() != null
+                                    || typeCheckElimination.getTypeLocalVariable() != null
+                                    || typeCheckElimination.getTypeMethodInvocation() != null;
+                            if (hasTypeLocalVariableFieldOrMethod
+                                    && typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType()
+                                    && typeCheckElimination.isApplicable()) {
+                                typeCheckEliminations.add(typeCheckElimination);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return typeCheckEliminations;
     }
 
     public void setAccess(Access access) {

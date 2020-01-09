@@ -4,6 +4,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.Entity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import static org.jetbrains.research.intellijdeodorant.util.math.DoubleArray.*;
 

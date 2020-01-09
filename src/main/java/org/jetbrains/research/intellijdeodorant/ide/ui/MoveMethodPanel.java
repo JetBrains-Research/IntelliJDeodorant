@@ -14,23 +14,22 @@ import com.intellij.ui.TableSpeedSearch;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsApplier;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
-import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
@@ -236,28 +235,5 @@ class MoveMethodPanel extends JPanel {
                 }
             }
         }.queue();
-    }
-
-    @FunctionalInterface
-    private interface DoubleClickListener extends MouseListener {
-        void onDoubleClick();
-
-        default void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() >= 2) {
-                onDoubleClick();
-            }
-        }
-
-        default void mousePressed(MouseEvent e) {
-        }
-
-        default void mouseReleased(MouseEvent e) {
-        }
-
-        default void mouseEntered(MouseEvent e) {
-        }
-
-        default void mouseExited(MouseEvent e) {
-        }
     }
 }

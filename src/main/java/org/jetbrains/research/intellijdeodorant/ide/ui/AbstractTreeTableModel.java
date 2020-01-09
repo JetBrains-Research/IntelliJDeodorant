@@ -1,7 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -11,10 +13,10 @@ import java.util.List;
 public abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
     private int numberOfColumns;
     private String[] columnNames;
-    protected List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
+    protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
     private RefactoringType refactoringType;
 
-    public AbstractTreeTableModel(List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
+    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
         super(new DefaultMutableTreeNode("root"));
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         this.columnNames = columnNames;
@@ -22,7 +24,7 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
         this.refactoringType = refactoringType;
     }
 
-    public void setEliminationGroups(List<RefactoringType.AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
+    public void setEliminationGroups(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
         this.candidateRefactoringGroups = candidateRefactoringGroups;
     }
 
@@ -63,13 +65,13 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public boolean isLeaf(Object node) {
-        return node instanceof RefactoringType.AbstractCandidateRefactoring;
+        return node instanceof AbstractCandidateRefactoring;
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
-            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
+        if (parent instanceof AbstractCandidateRefactoringGroup) {
+            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
             return group.getCandidates().get(index);
         }
         return candidateRefactoringGroups.get(index);
@@ -77,29 +79,17 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
-            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
+        if (parent instanceof AbstractCandidateRefactoringGroup) {
+            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
             return group.getCandidates().size();
         }
 
-        if (parent instanceof RefactoringType.AbstractCandidateRefactoring) {
+        if (parent instanceof AbstractCandidateRefactoring) {
             return 0;
         }
 
         return candidateRefactoringGroups.size();
     }
-
-    /*
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        if (parent instanceof RefactoringType.AbstractCandidateRefactoringGroup) {
-            RefactoringType.AbstractCandidateRefactoringGroup group = (RefactoringType.AbstractCandidateRefactoringGroup) parent;
-            RefactoringType.AbstractCandidateRefactoring candidate = (RefactoringType.AbstractCandidateRefactoring) child;
-            return group.getCandidates().indexOf(candidate);
-        }
-        return candidateRefactoringGroups.indexOf(child);
-    }
-     */
 
     RefactoringType getRefactoringType() {
         return refactoringType;

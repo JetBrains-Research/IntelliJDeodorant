@@ -3,9 +3,9 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.abstractrefactorings.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 import java.util.Collections;
 

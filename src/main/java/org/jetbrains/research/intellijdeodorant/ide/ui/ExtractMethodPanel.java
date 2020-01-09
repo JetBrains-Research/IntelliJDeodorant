@@ -5,7 +5,6 @@ import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.editor.Editor;
-
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
@@ -14,8 +13,9 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
-import com.intellij.psi.*;
-
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiStatement;
 import com.intellij.refactoring.HelpID;
 import com.intellij.refactoring.extractMethod.ExtractMethodHandler;
 import com.intellij.refactoring.extractMethod.PrepareFailedException;
@@ -24,28 +24,27 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSlice;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PDGNode;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.ExtractMethodRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.MyExtractMethodProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.ExtractMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.MyExtractMethodProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
+import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
-import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
@@ -294,54 +293,5 @@ class ExtractMethodPanel extends JPanel {
                 }
             }
         }.queue();
-    }
-
-    @FunctionalInterface
-    private interface DoubleClickListener extends MouseListener {
-        void onDoubleClick();
-
-        default void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() >= 2) {
-                onDoubleClick();
-            }
-        }
-
-        default void mousePressed(MouseEvent e) {
-        }
-
-        default void mouseReleased(MouseEvent e) {
-        }
-
-        default void mouseEntered(MouseEvent e) {
-        }
-
-        default void mouseExited(MouseEvent e) {
-        }
-    }
-
-    @FunctionalInterface
-    private interface EnterKeyListener extends KeyListener {
-        void onEnterKey();
-
-        default void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                onEnterKey();
-            }
-        }
-
-        default void keyTyped(KeyEvent e) {
-        }
-
-        default void keyReleased(KeyEvent e) {
-        }
-    }
-
-    @FunctionalInterface
-    private interface ElementSelectionListener extends TreeSelectionListener {
-        void onSelect();
-
-        default void valueChanged(TreeSelectionEvent var1) {
-            onSelect();
-        }
     }
 }
