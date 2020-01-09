@@ -477,9 +477,9 @@ public class PDGObjectSliceUnion {
         return false;
     }
 
+    //TODO: Provide an opportunity to customize this thresholds
     private boolean complyWithUserThresholds() {
-        int minimumSliceSize = 0;
-        int maximumSliceSize = 1000;
+        int maximumSliceSize = 0;
         int maximumDuplication = 100;
         double maximumRatioOfDuplicatedToExtracted = 1.0;
 
