@@ -153,7 +153,7 @@ public class PDG extends Graph {
             for (AbstractVariable definedVariable : pdgNode.definedVariables) {
                 if (definedVariable instanceof CompositeVariable) {
                     CompositeVariable compositeVariable = (CompositeVariable) definedVariable;
-                    if (compositeVariable.getName().equals(reference.getName())) {
+                    if (compositeVariable.getInitialVariable().equals(reference)) {
                         if (definedPropertiesMap.containsKey(compositeVariable)) {
                             LinkedHashSet<PDGNode> nodeCriteria = definedPropertiesMap.get(compositeVariable);
                             nodeCriteria.add(pdgNode);

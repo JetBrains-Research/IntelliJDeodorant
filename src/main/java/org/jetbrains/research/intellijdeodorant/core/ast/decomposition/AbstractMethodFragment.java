@@ -271,6 +271,11 @@ public abstract class AbstractMethodFragment {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiMethod resolveMethod = methodInvocation.resolveMethod();
                 String originClassName = "";
+
+                if (resolveMethod != null && resolveMethod.getContainingClass() != null) {
+                    originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                }
+
                 if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
                     PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
                     String methodName = methodExpression.getMethodExpression().getReferenceName();
@@ -349,7 +354,7 @@ public abstract class AbstractMethodFragment {
         addMethodInvocation(methodInvocationObject);
 
         AbstractVariable invoker = MethodDeclarationUtility
-                .processMethodInvocationExpression(methodInvocation.getMethodExpression().getQualifierExpression());
+                .processMethodInvocationExpression(getFirstQualifierInAChain(methodInvocation));
 
         if (invoker != null) {
             PlainVariable initialVariable = invoker.getInitialVariable();

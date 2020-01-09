@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
@@ -280,8 +281,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                 PsiExpression initializer = vDStatement.getInitializer();
                 PsiElement initializerSimpleName = null;
                 if (initializer != null) {
-                    if (initializer instanceof PsiVariable) {
-                        initializerSimpleName = initializer;
+                    if (initializer instanceof PsiReferenceExpression) {
+                        initializerSimpleName = ((PsiReferenceExpression) initializer).resolve();
                     }
                     if (initializerSimpleName != null) {
                         PsiVariable initializerVariableDeclaration = null;
@@ -312,7 +313,10 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                                    Set<VariableDeclarationObject> variableDeclarations, PsiAssignmentExpression assignment) {
         PsiExpression leftHandSideExpression = assignment.getLExpression();
         PsiExpression rightHandSideExpression = assignment.getRExpression();
-        PsiElement leftHandSideElement = leftHandSideExpression.getFirstChild();
+        PsiElement leftHandSideElement = null;
+        if (leftHandSideExpression instanceof PsiReferenceExpression) {
+            leftHandSideElement = ((PsiReferenceExpression) leftHandSideExpression).resolve();
+        }
         PsiVariable leftHandSideSimpleName = null;
         if (leftHandSideElement instanceof PsiVariable) {
             leftHandSideSimpleName = (PsiVariable) leftHandSideElement;
@@ -327,8 +331,21 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                 }
             }
             PsiElement rightHandSideSimpleName = null;
-            if (rightHandSideExpression != null) {
-                rightHandSideSimpleName = rightHandSideExpression;
+            if (rightHandSideExpression instanceof PsiReferenceExpression) {
+                rightHandSideSimpleName = ((PsiReferenceExpression) rightHandSideExpression).resolve();
+            } else if (rightHandSideExpression instanceof PsiAssignmentExpression) {
+                PsiAssignmentExpression rightHandSideAssignment = (PsiAssignmentExpression) rightHandSideExpression;
+                processAssignment(reachingAliasSet, variableDeclarations, rightHandSideAssignment);
+                PsiExpression leftHandSideExpressionOfRightHandSideAssignment = rightHandSideAssignment.getLExpression();
+                PsiElement leftHandSideSimpleNameOfRightHandSideAssignment = null;
+                if (leftHandSideExpressionOfRightHandSideAssignment instanceof PsiReferenceExpression) {
+                    leftHandSideSimpleNameOfRightHandSideAssignment = leftHandSideExpressionOfRightHandSideAssignment;
+                } else if (leftHandSideExpressionOfRightHandSideAssignment instanceof PsiVariable) {
+                    leftHandSideSimpleNameOfRightHandSideAssignment = leftHandSideExpressionOfRightHandSideAssignment;
+                }
+                if (leftHandSideSimpleNameOfRightHandSideAssignment != null) {
+                    rightHandSideSimpleName = leftHandSideSimpleNameOfRightHandSideAssignment;
+                }
             }
             if (rightHandSideSimpleName != null) {
                 PsiVariable rightHandSideVariableDeclaration = null;
@@ -417,8 +434,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                 if (rightHandSideExpression instanceof PsiNewExpression) {
                     PsiNewExpression classInstanceCreation = (PsiNewExpression) rightHandSideExpression;
                     PsiElement leftHandSideSimpleName = null;
-                    if (leftHandSideExpression instanceof PsiVariable) {
-                        leftHandSideSimpleName = leftHandSideExpression;
+                    if (((PsiReferenceExpressionImpl) leftHandSideExpression).resolve() instanceof PsiVariable) {
+                        leftHandSideSimpleName = ((PsiReferenceExpressionImpl) leftHandSideExpression).resolve();
                     }
                     if (leftHandSideSimpleName != null) {
                         PsiVariable leftHandSideVariableDeclaration = null;
@@ -482,12 +499,15 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                 if (psiElement instanceof PsiVariable) {
                     PsiVariable psiVariable = (PsiVariable) psiElement;
                     PsiExpression initializer = psiVariable.getInitializer();
-                    PsiExpression initializerSimpleName = null;
-                    if (initializer != null) {
-                        initializerSimpleName = initializer;
+                    PsiElement initializerSimpleName = null;
+                    if (initializer instanceof PsiReferenceExpression) {
+                        PsiElement element = ((PsiReferenceExpression) initializer).resolve();
+                        if (element instanceof PsiVariable) {
+                            initializerSimpleName = element;
+                        }
                     }
                     if (initializerSimpleName != null) {
-                        if (variableDeclaration.equals(initializerSimpleName.getLastChild())) {
+                        if (variableDeclaration.equals(initializerSimpleName)) {
                             return true;
                         }
                     }
@@ -501,8 +521,10 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             for (PsiExpression assignmentExpression : assignments) {
                 PsiAssignmentExpression assignment = (PsiAssignmentExpression) assignmentExpression;
                 PsiExpression rightHandSideExpression = assignment.getRExpression();
-                PsiElement rightHandSideSimpleName;
-                rightHandSideSimpleName = rightHandSideExpression;
+                PsiElement rightHandSideSimpleName = null;
+                if (rightHandSideExpression instanceof PsiReferenceExpression) {
+                    rightHandSideSimpleName = ((PsiReferenceExpression) rightHandSideExpression).resolve();
+                }
                 if (rightHandSideSimpleName != null) {
                     if (variableDeclaration.equals(rightHandSideSimpleName)) {
                         return true;
