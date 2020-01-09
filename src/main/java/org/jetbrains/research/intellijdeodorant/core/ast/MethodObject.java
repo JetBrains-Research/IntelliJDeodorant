@@ -222,17 +222,17 @@ public class MethodObject implements AbstractMethodDeclaration {
                     }
                 }
                 if (methodInvocation != null) {
-                    PsiExpression methodInvocationExpression = methodInvocation.getMethodExpression().getQualifierExpression();
+                    PsiExpression methodQualifierExpression = methodInvocation.getMethodExpression().getQualifierExpression();
                     List<MethodInvocationObject> methodInvocations = statementObject.getMethodInvocations();
 
-                    PsiElement resolved = null;
-                    if (methodInvocationExpression instanceof PsiReferenceExpression) {
-                        PsiReferenceExpression reference = (PsiReferenceExpression) methodInvocationExpression;
-                        resolved = reference.resolve();
+                    PsiElement resolvedElement = null;
+                    if (methodQualifierExpression instanceof PsiReferenceExpression) {
+                        PsiReferenceExpression reference = (PsiReferenceExpression) methodQualifierExpression;
+                        resolvedElement = reference.resolve();
                     }
 
-                    if (resolved instanceof PsiMethod) {
-                        PsiMethod previousChainedMethodInvocation = (PsiMethod) resolved;
+                    if (resolvedElement instanceof PsiMethod) {
+                        PsiMethod previousChainedMethodInvocation = (PsiMethod) resolvedElement;
                         List<PsiMethod> parentClassMethods = new ArrayList<>();
                         if (parentClass != null) {
                             parentClassMethods.addAll(Arrays.asList(parentClass.getMethods()));
@@ -251,41 +251,41 @@ public class MethodObject implements AbstractMethodDeclaration {
                         }
                         if (!isDelegationChain && foundInParentClass) {
                             for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                if (methodInvocationExpression.equals(methodInvocation.getMethodExpression())) {
+                                if (methodQualifierExpression.equals(methodInvocation.getMethodExpression())) {
                                     return methodInvocationObject;
                                 }
                             }
                         }
-                    } else if (resolved instanceof PsiField) {
-                        PsiField variableBinding = (PsiField) resolved;
+                    } else if (resolvedElement instanceof PsiField) {
+                        PsiField resolvedField = (PsiField) resolvedElement;
 
-                        if (variableBinding.getContainingClass().equals(parentClass) ||
-                                parentClass.isInheritor(variableBinding.getContainingClass(), true)) {
-                            for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
-                                    return methodInvocationObject;
-                                }
-                            }
-                        }
-                    } else if (resolved != null) {
-                        if (resolved instanceof PsiVariable) {
-                            if (resolved instanceof PsiParameter) {
+                        if (parentClass != null && resolvedField.getContainingClass() != null) {
+                            if (parentClass.equals(resolvedField.getContainingClass()) ||
+                                    parentClass.isInheritor(resolvedField.getContainingClass(), true)) {
                                 for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                                    if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                                    if (methodInvocation.equals(methodInvocationObject.getMethodInvocation())) {
                                         return methodInvocationObject;
                                     }
                                 }
                             }
                         }
-                    } else if (methodInvocationExpression instanceof PsiThisExpression) {
+                    } else if (resolvedElement != null) {
+                        if (resolvedElement instanceof PsiParameter) {
+                            for (MethodInvocationObject methodInvocationObject : methodInvocations) {
+                                if (methodInvocation.equals(methodInvocationObject.getMethodInvocation())) {
+                                    return methodInvocationObject;
+                                }
+                            }
+                        }
+                    } else if (methodQualifierExpression instanceof PsiThisExpression) {
                         for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                            if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                            if (methodInvocation.equals(methodInvocationObject.getMethodInvocation())) {
                                 return methodInvocationObject;
                             }
                         }
-                    } else if (methodInvocationExpression == null) {
+                    } else if (methodQualifierExpression == null) {
                         for (MethodInvocationObject methodInvocationObject : methodInvocations) {
-                            if (methodInvocationObject.getMethodInvocation().equals(methodInvocation)) {
+                            if (methodInvocation.equals(methodInvocationObject.getMethodInvocation())) {
                                 return methodInvocationObject;
                             }
                         }
