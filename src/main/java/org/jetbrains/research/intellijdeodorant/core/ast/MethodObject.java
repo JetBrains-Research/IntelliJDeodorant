@@ -452,8 +452,8 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean overridesMethod() {
         PsiMethod methodBinding = getMethodDeclaration();
-
-        return !(AnnotationUtil.findAnnotation(methodBinding, "Override") == null && methodBinding.findSuperMethods().length == 0);
+        return !(AnnotationUtil.findAnnotation(methodBinding, "Override") == null &&
+                methodBinding.findSuperMethods().length == 0);
     }
 
     public String getClassName() {

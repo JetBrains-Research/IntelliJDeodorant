@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
-
 import com.intellij.psi.util.PsiUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
@@ -12,9 +11,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
-import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
-import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
 import static java.util.stream.Collectors.toList;
+import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
