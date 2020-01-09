@@ -24,7 +24,6 @@ public class Test {
     }
 
     public void fun1() {
-
         testProduct.fun1();
     }
 

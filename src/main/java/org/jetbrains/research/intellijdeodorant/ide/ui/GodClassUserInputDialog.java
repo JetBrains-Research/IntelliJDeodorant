@@ -123,15 +123,10 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         restoreButton.addActionListener(e -> {
             extractedClassNameField.setText(refactoring.getExtractedTypeName());
             delegateButton.setSelected(false);
-            refactoring.setLeaveDelegateForPublicMethods(false);
         });
 
         delegateButton.addActionListener(e -> {
             JCheckBox source = (JCheckBox) e.getSource();
-            if (source.isSelected())
-                refactoring.setLeaveDelegateForPublicMethods(true);
-            else
-                refactoring.setLeaveDelegateForPublicMethods(false);
         });
 
         handleInputChanged(extractedClassNameField);

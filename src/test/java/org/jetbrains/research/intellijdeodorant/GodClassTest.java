@@ -19,8 +19,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandid
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 
@@ -105,6 +104,30 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestStaticMethodAccess2", 1);
     }
 
+    public void testSerializable() {
+        runTest("TestSerializable");
+    }
+
+    public void testSerializableTransientExtractedField() {
+        runTest("TestSerializableTransientExtractedField");
+    }
+
+    public void testSimpleClone() {
+        runTest("TestClone");
+    }
+
+    public void testAccessOfNewObject() {
+        runTest("TestAccessOfNewObject");
+    }
+
+    public void testChainedAccess() {
+        runTest("TestChainedAccess");
+    }
+
+    public void testChainedMethodAccess() {
+        runTest("TestChainedMethodAccess");
+    }
+
     private void runTest(String testName) {
         runTest(testName, 0);
     }
@@ -146,72 +169,6 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
             System.out.println(e.getAttachments()[0].getDisplayText());
             fail("something invalidates. See stack traces and attachment");
         }
-    }
-
-    public void testRefactoringMiner() {
-        //runLargeTest("refactoring_miner", "UMLModelASTReader", 0, 0, 0, Arrays.asList("gr", "uom", "java", "xmi"));
-    }
-
-    //TODO should run autotests on RefactoringMiner and some other large java projects.
-    private void runLargeTest(String testSourceRoot, String className, int groupNumber, int candidateNumber, int testNumber, List<String> packagePath) {
-        assertTrue(testNumber < 5);
-        assertTrue(testNumber >= 0);
-
-        testSourceRoot = "BIG_PROJECT_TESTS" + "/" + testSourceRoot + "/";
-        String classNameProduct = className + "Product";
-
-        myFixture.setTestDataPath(getTestDataPath() + testSourceRoot);
-
-        myFixture.copyDirectoryToProject(  "/initial", "/src");
-
-        Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(myFixture.getProject()), fakeProgressIndicator);
-
-        assert(groupNumber >= 0);
-        assertTrue(candidateGroups.size() > groupNumber);
-
-        ExtractClassCandidateGroup group = null;
-        for (ExtractClassCandidateGroup foundGroup : candidateGroups) {
-            group = foundGroup;
-
-            if (groupNumber == 0) {
-                break;
-            }
-
-            groupNumber--;
-        }
-
-        assertTrue(group.getCandidates().size() > candidateNumber);
-
-        ExtractClassCandidateRefactoring candidate = group.getCandidates().get(candidateNumber);
-
-        AbstractExtractClassRefactoring refactoring = new AbstractExtractClassRefactoring(candidate);
-
-        myFixture.copyDirectoryToProject("/expected_files/",  "/expected/");
-
-        VirtualFile mainDirectoryFile = myFixture.findFileInTempDir("");
-        PsiDirectory mainDirectory = myFixture.getPsiManager().findDirectory(mainDirectoryFile);
-
-        WriteCommandAction.runWriteCommandAction(getProject(), refactoring::apply);
-
-        PsiDirectory expectedDirectory = mainDirectory.findSubdirectory("expected");
-
-        PsiDirectory actualDirectory = mainDirectory.findSubdirectory("src");
-        for (String string : packagePath) {
-            actualDirectory = actualDirectory.findSubdirectory(string);
-        }
-
-        PsiFile actualSourceFile = actualDirectory.findFile(className + ".java");
-        PsiFile actualProductFile = actualDirectory.findFile(classNameProduct + ".java");
-
-        PsiFile expectedSourceFile = expectedDirectory.findFile( className + ".java");
-        PsiFile expectedProductFile = expectedDirectory.findFile(classNameProduct + ".java");
-
-        String filePathToSave = "src/test/resources/testdata/ide/refactoring/godclass/" + testSourceRoot;
-        saveResult(actualSourceFile, filePathToSave + "actual_files/" + testNumber + "/result.java");
-        saveResult(actualProductFile, filePathToSave + "actual_files/" + testNumber + "/resultProduct.java");
-
-        checkFilesAreEqual(actualSourceFile, expectedSourceFile);
-        checkFilesAreEqual(actualProductFile, expectedProductFile);
     }
 
     private void saveResult(String filePath) {
