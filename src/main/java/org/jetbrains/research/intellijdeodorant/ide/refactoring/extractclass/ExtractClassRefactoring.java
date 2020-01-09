@@ -2978,11 +2978,6 @@ public class ExtractClassRefactoring {
         }
         List<PsiMethod> methodDeclarationList = Arrays.asList(sourceTypeDeclaration.getMethods());
         contextMethods.addAll(methodDeclarationList);
-        //ORIGINAL PLUGIN COMMENT
-		/*for(MethodDeclaration methodDeclaration : methodDeclarationList) {
-			contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
-		}*/
-        //get methods of inner classes
         PsiClass[] types = sourceTypeDeclaration.getInnerClasses();
         for (PsiClass type : types) {
             for (PsiField fieldDeclaration : type.getFields()) {
@@ -2990,10 +2985,6 @@ public class ExtractClassRefactoring {
             }
             List<PsiMethod> innerMethodDeclarationList = Arrays.asList(type.getMethods());
             contextMethods.addAll(innerMethodDeclarationList);
-            //ORIGINAL PLUGIN COMMENT
-			/*for(MethodDeclaration methodDeclaration : innerMethodDeclarationList) {
-				contextMethods.addAll(getMethodDeclarationsWithinAnonymousClassDeclarations(methodDeclaration));
-			}*/
         }
         return contextMethods;
     }

@@ -10,7 +10,7 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.Ext
 import java.util.Collections;
 
 /**
- * Panel for Type-State Checking refactorings.
+ * Panel for God Class Checking refactorings.
  */
 public class GodClassPanel extends AbstractRefactoringPanel {
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "god.class.identification.indicator";

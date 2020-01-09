@@ -748,23 +748,6 @@ public class MethodObject implements AbstractMethodDeclaration {
                 }
             }
         }
-
-        /*
-        for (PlainVariable plainVariable : constructorObject.getNonDistinctUsedFieldsThroughThisReference()) {
-            if (!plainVariable.isField() || plainVariable.getOrigin() == null) {
-                continue;
-            }
-
-            PsiElement psiElement = plainVariable.getOrigin().getParent();
-            if (psiElement instanceof PsiClass) {
-                if (!((PsiClass) psiElement).equals(psiMethod.getContainingClass())) {
-                    return true;
-                }
-            }
-        }
-
-         */
-
         return false;
     }
 }
