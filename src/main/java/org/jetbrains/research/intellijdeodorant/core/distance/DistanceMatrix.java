@@ -330,12 +330,6 @@ public class DistanceMatrix {
                 ArrayList<Entity> entities = new ArrayList<>();
                 entities.addAll(sourceClass.getAttributeList());
                 entities.addAll(sourceClass.getMethodList());
-
-                if (sourceClass.getClassObject().getPsiClass().getName().contains("AbstractCategoryItemRenderer")) {
-                    sourceClass = sourceClass;
-                    System.out.println(5);
-                }
-
                 HashSet<Cluster> clusters = clustering.clustering(entities);
                 int processedClusters = 0;
 

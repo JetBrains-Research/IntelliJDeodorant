@@ -63,16 +63,13 @@ public class TopicFinder {
 
     private static ArrayList<String> getStopWords() {
         ArrayList<String> stopWords = new ArrayList<String>();
-
         try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(new FileInputStream("src/main/resources/glasgowstoplist.txt")))) {
+                new InputStreamReader(TopicFinder.class.getClassLoader().getResourceAsStream("glasgowstoplist.txt")))) {
             String next = in.readLine();
             while (next != null) {
                 stopWords.add(next);
                 next = in.readLine();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

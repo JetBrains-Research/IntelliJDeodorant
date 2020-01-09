@@ -477,7 +477,7 @@ public class ExtractClassRefactoring {
 
         PsiClass serializableTypeBinding = implementsSerializableInterface(sourceTypeDeclaration);
         if (serializableTypeBinding != null) {
-            extractedClass.getImplementsList().add(serializableTypeBinding);
+            extractedClass.getImplementsList().add(factory.createClassReferenceElement(serializableTypeBinding));
         }
 
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
@@ -861,17 +861,16 @@ public class ExtractClassRefactoring {
             cloneMethodDeclaration.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
             PsiMethodCallExpression superCloneMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText("super." + cloneMethodBinding.getName() + "()", sourceTypeDeclaration);
-            PsiReturnStatement returnStatement = (PsiReturnStatement) factory.createStatementFromText("return (" + extractedTypeName + ") " + superCloneMethodInvocation.getText(), sourceTypeDeclaration);
+            PsiElement returnStatement = factory.createStatementFromText("return (" + extractedTypeName + ") " + superCloneMethodInvocation.getText(), sourceTypeDeclaration);
 
             StringBuilder returnStatementText = new StringBuilder();
 
             if (cloneMethodBinding.getThrowsList().getReferenceElements().length != 0) {
-                returnStatementText.append("try {\n").append(returnStatement.getText()).append("\n").append("} catch (CloneNotSupportedException e) {\n").append("throw new InternalError(\"Failed to implement Cloneable interface\");\n").append("}");
-                returnStatement = (PsiReturnStatement) factory.createStatementFromText(returnStatementText.toString(), null);
+                returnStatementText.append("try {\n").append(returnStatement.getText()).append(";\n").append("} catch (CloneNotSupportedException e) {\n").append("throw new InternalError(\"Failed to implement Cloneable interface\");\n").append("}");
+                returnStatement = factory.createStatementFromText(returnStatementText.toString(), null);
             }
 
             cloneMethodDeclaration.getBody().addBefore(returnStatement, cloneMethodDeclaration.getBody().getRBrace());
-            cloneMethodDeclaration.getThrowsList().add(factory.createReferenceFromText("java.lang.CloneNotSupportedException", null));
             return cloneMethodDeclaration;
         }
         return null;
@@ -2409,17 +2408,17 @@ public class ExtractClassRefactoring {
             readObjectMethod.getThrowsList().add(factory.createReferenceElementByType(factory.createTypeByFQClassName("java.io.IOException")));
             readObjectMethod.getThrowsList().add(factory.createReferenceElementByType(factory.createTypeByFQClassName("java.lang.ClassNotFoundException")));
 
-            PsiCodeBlock methodBody = factory.createCodeBlockFromText("{return " + parameterSimpleName + "." + "defaultReadObject();}", sourceFile);
+            PsiCodeBlock methodBody = factory.createCodeBlockFromText("{}", null);
 
             String methodInvocationText = parameterSimpleName + "." + "defaultReadObject" + "();";
 
-            methodBody.addBefore(factory.createStatementFromText(methodInvocationText, null), methodBody.getRBrace());
+            methodBody.addAfter(factory.createStatementFromText(methodInvocationText, null), methodBody.getLBrace());
             PsiStatement assignmentStatement = createAssignmentStatementForReadObject(modifiedExtractedTypeName, parameterSimpleName);
 
-            methodBody.addBefore(assignmentStatement, methodBody.getRBrace());
+            methodBody.addAfter(assignmentStatement, methodBody.getLBrace());
 
             readObjectMethod.getBody().replace(methodBody);
-            sourceTypeDeclaration.addBefore(readObjectMethod, sourceTypeDeclaration.getLBrace());
+            sourceTypeDeclaration.addAfter(readObjectMethod, sourceTypeDeclaration.getLBrace());
         }
     }
 

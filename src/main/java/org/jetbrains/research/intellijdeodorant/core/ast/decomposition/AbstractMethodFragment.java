@@ -347,7 +347,12 @@ public abstract class AbstractMethodFragment {
 
         PsiMethod resolvedMethod = methodInvocation.resolveMethod();
 
+        ArrayList<TypeObject> typeObjects = new ArrayList<>();
         if (resolvedMethod != null) {
+            for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
+                typeObjects.add(TypeObject.extractTypeObject(parameter.getType().getCanonicalText()));
+            }
+
             PsiType methodReturnType = resolvedMethod.getReturnType();
             if (methodReturnType != null) {
                 canonicalText = methodReturnType.getCanonicalText();
@@ -355,7 +360,7 @@ public abstract class AbstractMethodFragment {
         }
         TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
 
-        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
+        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType, typeObjects);
         methodInvocationObject.setMethodInvocation(methodInvocation);
         methodInvocationObject.setStatic(isMethodStatic);
         addMethodInvocation(methodInvocationObject);
@@ -376,9 +381,8 @@ public abstract class AbstractMethodFragment {
             if (methodInvocationObject.isStatic())
                 addStaticallyInvokedMethod(methodInvocationObject);
             else {
-                PsiClass sourceClass = getParentOfType(methodInvocation, PsiClass.class);
-                if (sourceClass != null && originClassName != null
-                        && originClassName.equals(sourceClass.getQualifiedName())) {
+                PsiExpression qualifier = methodInvocation.getMethodExpression().getQualifierExpression();
+                if (qualifier == null || qualifier instanceof PsiThisExpression) {
                     addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
                 }
             }
