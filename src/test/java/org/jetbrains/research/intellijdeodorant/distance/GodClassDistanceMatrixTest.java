@@ -27,8 +27,6 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
     private static final String PATH_TO_TESTDATA = "src/test/resources/testdata/";
     private static final String PATH_TO_TESTS = "/core/distance/godclass/";
 
-    //TODO add some complicated actual project tests
-
     @Nullable
     private ExtractClassCandidateGroup getExractClassCandidateGroup(@NotNull String classFileName) {
         myFixture.setTestDataPath(PATH_TO_TESTDATA);
