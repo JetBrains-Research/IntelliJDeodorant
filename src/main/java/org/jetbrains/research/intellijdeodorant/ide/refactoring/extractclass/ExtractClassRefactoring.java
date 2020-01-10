@@ -59,8 +59,10 @@ public class ExtractClassRefactoring {
     private CodeStyleManager codeStyleManager;
 
     /*
-    Each of the new method are being created inside 'sandbox' file - full copy of the source file, in order to correctly
-    resolve all references, which is vital for IDEA API. Then the copy of the sandboxed method are being added to the extracted class.
+    We create each of the new methods inside 'sandbox' file - a full copy of the source file, in order to correctly
+    resolve all references, which is vital for IDEA API.
+
+    Then we add copies of the sandboxed methods to the extracted class.
      */
     private Map<PsiMethod, PsiMethod> sourceToSandboxMethodMap;
     private Map<PsiField, PsiField> sandboxToSourceFieldMap;
