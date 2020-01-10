@@ -1599,7 +1599,7 @@ public class ExtractClassRefactoring {
                                         if (!variableBindingCorrespondsToExtractedField(fieldName)) {
                                             if (fieldName.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
                                                 String qualifier = sourceTypeDeclaration.getName();
-                                                PsiExpression qualifiedName = factory.createExpressionFromText(qualifier + "." + fieldName.getName(), sourceMethod);
+                                                PsiExpression qualifiedName = factory.createExpressionFromText(qualifier + "." + fieldName.getName(), null);
                                                 PsiExpression newExpression = (PsiExpression) newMethodInvocation.replace(qualifiedName);
                                                 newMethodInvocations.set(j, newExpression);
                                                 setPublicModifierToSourceField(fieldName);
@@ -1615,11 +1615,11 @@ public class ExtractClassRefactoring {
 
                                                 String parameterNameString = createNameForParameterizedFieldAccess(fieldName.getName());
 
-                                                PsiExpression newExpression = (PsiExpression) newMethodInvocation.replace(factory.createExpressionFromText(parameterNameString, sourceMethod));
+                                                PsiExpression newExpression = (PsiExpression) newMethodInvocation.replace(factory.createExpressionFromText(parameterNameString, null));
                                                 newMethodInvocations.set(j, newExpression);
                                             }
                                         } else {
-                                            PsiExpression newExpression = (PsiExpression) newMethodInvocation.replace(factory.createExpressionFromText(fieldName.getText(), sourceMethod));
+                                            PsiExpression newExpression = (PsiExpression) newMethodInvocation.replace(factory.createExpressionFromText(fieldName.getName(), null));
                                             newMethodInvocations.set(j, newExpression);
                                         }
                                     } else {
@@ -1663,7 +1663,7 @@ public class ExtractClassRefactoring {
                         PsiClass superclassTypeBinding = null;
                         if (superclassType != null)
                             superclassTypeBinding = superclassType;
-                        while (superclassTypeBinding != null && !methodBinding.getContainingClass().equals(superclassTypeBinding)) {
+                        while (superclassTypeBinding != null && methodBinding != null && !superclassTypeBinding.equals(methodBinding.getContainingClass())) {
                             superclassTypeBinding = superclassTypeBinding.getSuperClass();
                         }
                         if (superclassTypeBinding != null) {
@@ -1756,7 +1756,13 @@ public class ExtractClassRefactoring {
         List<PsiExpression> newClassInstanceCreations = expressionExtractor.getClassInstanceCreations(newMethodDeclaration.getBody().getStatements());
         for (PsiExpression creation : newClassInstanceCreations) {
             PsiNewExpression classInstanceCreation = (PsiNewExpression) creation;
-            PsiExpression[] arguments = classInstanceCreation.getArgumentList().getExpressions();
+            PsiExpression[] arguments = new PsiExpression[0];
+
+            PsiExpressionList argumentList = classInstanceCreation.getArgumentList();
+            if (argumentList != null) {
+                arguments = argumentList.getExpressions();
+            }
+
             for (PsiExpression argument : arguments) {
                 if (argument instanceof PsiThisExpression) {
                     if (isParentAnonymousClassDeclaration(creation.getNode()))
@@ -1773,8 +1779,13 @@ public class ExtractClassRefactoring {
                 }
             }
             PsiNewExpression oldClassInstanceCreation = (PsiNewExpression) creation;
-            PsiClass classInstanceCreationTypeBinding = (PsiClass) oldClassInstanceCreation.getClassReference().resolve();
-            if (classInstanceCreationTypeBinding.getContainingClass() != null && oldClassInstanceCreation.getAnonymousClass() == null &&
+
+            PsiClass classInstanceCreationTypeBinding = null;
+            if (oldClassInstanceCreation.getClassReference() != null) {
+                classInstanceCreationTypeBinding = (PsiClass) oldClassInstanceCreation.getClassReference().resolve();
+            }
+
+            if (classInstanceCreationTypeBinding != null && classInstanceCreationTypeBinding.getContainingClass() != null && oldClassInstanceCreation.getAnonymousClass() == null &&
                     sourceTypeDeclaration.equals(classInstanceCreationTypeBinding.getContainingClass())) {
                 if (isParentAnonymousClassDeclaration(creation.getNode()))
                     sourceClassParameterShouldBeFinal = true;
@@ -1887,8 +1898,8 @@ public class ExtractClassRefactoring {
     }
 
     /**
-     * Removes `this` qualifier from the extracted elements. Note that `OuterClass.this` are forbidden for the
-     * extracted members, so they does not check here.
+     * Removes `this` qualifier from the extracted elements. Note that `OuterClass.this` and `super` are forbidden for the
+     * extracted members, so no need to remove them.
      */
     private void removeRedundantThisQualifierFromExpression(PsiElement element) {
         if (element instanceof PsiReferenceExpression) {
@@ -1897,6 +1908,25 @@ public class ExtractClassRefactoring {
 
             if (qualifier == null) {
                 return;
+            }
+
+            PsiElement resolvedElement = ((PsiReferenceExpression) element).resolve();
+
+            if (resolvedElement instanceof PsiField) {
+                PsiField sourceField = sandboxToSourceFieldMap.get(resolvedElement);
+                if (extractedFieldFragments.contains(sourceField)) {
+                    return;
+                }
+            } else if (resolvedElement instanceof PsiMethod) {
+                for (PsiMethod sourceMethod : sourceToSandboxMethodMap.keySet()) {
+                    if (sourceToSandboxMethodMap.get(sourceMethod).equals(resolvedElement)) {
+                        if (extractedMethods.contains(sourceMethod)) {
+                            return;
+                        } else {
+                            break;
+                        }
+                    }
+                }
             }
 
             if (qualifier instanceof PsiThisExpression) {

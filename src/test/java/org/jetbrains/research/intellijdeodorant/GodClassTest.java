@@ -19,8 +19,10 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandid
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -29,11 +31,14 @@ import java.util.*;
  * There should be an initial java file to perform Extract Class Refactoring inside `initial` directory and two (!) files with the expected results inside the `expected` folder
  * (if it is desired to check that there are no Extract Class Refactoring Opportunities for the class, `distance/GodClassDistanceMatrixTest` should be used instead)
  * And, finally, there should be a corresponding method inside this class.
- *
+ * <p>
  * It should be noted that the package name should be exactly `TestName`.actual !!!
  * The initial file should be named Test, same for the tested class inside this file, expected directory should contain `Test` and `TestProduct`
- *
+ * <p>
  * Expected results can be compared with the Actual ones inside the `actual` directory.
+ * <p>
+ * PLEASE NOTE THAT ANY SUPER CLASS REFERENCES WON'T RESOLVE
+ * That means any tests with super class references would probably give a wrong result. Create a real project and compare results if you are not sure.
  */
 public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TEST_ROOT = "src/test/resources/testdata/ide/refactoring/godclass/";
@@ -68,10 +73,6 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestSourceMemberAccessesInExtractedClass", 1);
     }
 
-    public void testSourceMemberAssigmentsInExtractedClass() {
-        runTest("TestSourceMemberAssigmentsesInExtractedClass", 1);
-    }
-
     public void testSimpleInner() {
         runTest("TestSimpleInner", 0);
     }
@@ -82,6 +83,10 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testCircleDependency() {
         runTest("TestCircleDependency", 0);
+    }
+
+    public void testSourceMemberAssigmentsInExtractedClass() {
+        runTest("TestSourceMemberAssigmentsesInExtractedClass", 1);
     }
 
     public void testRecursiveCall() {
@@ -128,12 +133,33 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestChainedMethodAccess");
     }
 
+    public void testSOEN_Jar() {
+        runTest("TestSOEN_Jar");
+    }
+
+    public void testSOEN_StackedBarRenderer3D() {
+        /*
+        TEST ACTUALLY GIVES A WRONG RESULT:
+        in `TestProduct::setIgnoreZeroValues` should be `test.notifyListeners()`, not just `notifyListeners()`.
+        That's just a result of unresolved reference to the super class, because source file is a raw .java file.
+        In real project it won't happen (and does not).
+        */
+
+        runTest("TestSOEN_StackedBarRenderer3D");
+    }
+
     private void runTest(String testName) {
         runTest(testName, 0);
     }
 
     private void runTest(String testName, int candidateNumber) {
+        runTest(testName,  candidateNumber, 0);
+    }
+
+    private void runTest(String testName, int candidateNumber, int groupNumber) {
         try {
+            assert groupNumber >= 0;
+
             String testClassName = "Test";
             String testClassProductName = "TestProduct";
 
@@ -142,8 +168,15 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
             Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(myFixture.getProject()), fakeProgressIndicator);
 
             assertTrue(candidateGroups.size() > 0);
-            assertTrue(candidateGroups.iterator().hasNext());
-            ExtractClassCandidateGroup group = candidateGroups.iterator().next();
+
+            ExtractClassCandidateGroup group = null;
+
+            Iterator<ExtractClassCandidateGroup> it = candidateGroups.iterator();
+
+            for (int i = 0; i <= groupNumber; i++) {
+                assertTrue(it.hasNext());
+                group = it.next();
+            }
 
             assertTrue(group.getCandidates().size() > candidateNumber);
             ExtractClassCandidateRefactoring candidate = group.getCandidates().get(candidateNumber);
