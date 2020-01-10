@@ -273,8 +273,7 @@ public abstract class AbstractMethodFragment {
                 }
 
                 if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
-                    PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
-                    PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
+                    PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodInvocation);
 
                     if (qualifierExpression == null) {
                         PsiMethod resolvedMethod = resolveMethod(methodInvocation);
@@ -303,7 +302,7 @@ public abstract class AbstractMethodFragment {
                         }
 
                         if (originClassName != null && !originClassName.equals("")) {
-                            processMethodInvocation(methodExpression, originClassName, false);
+                            processMethodInvocation(methodInvocation, originClassName, false);
                         }
                     }
                 } else {

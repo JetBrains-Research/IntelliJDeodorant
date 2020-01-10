@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.RefactorJBundle;
 import com.intellij.refactoring.ui.RefactoringDialog;
 import com.intellij.ui.components.JBLabelDecorator;
@@ -36,7 +37,6 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     private Label extractedClassNameLabel = new Label();
     private JTextField extractedClassNameField = new JTextField(); //TODO default size
     private JButton restoreButton = new JButton();
-    private JCheckBox delegateButton = new JCheckBox();
 
     public GodClassUserInputDialog(ExtractClassRefactoring refactoring) {
         super(refactoring.getSourceFile().getProject(), true);
@@ -118,15 +118,8 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
         restoreButton.setText("Restore Defaults");
 
-        delegateButton.setText("Keep original public methods as delegates to the extracted methods");
-
         restoreButton.addActionListener(e -> {
             extractedClassNameField.setText(refactoring.getExtractedTypeName());
-            delegateButton.setSelected(false);
-        });
-
-        delegateButton.addActionListener(e -> {
-            JCheckBox source = (JCheckBox) e.getSource();
         });
 
         handleInputChanged(extractedClassNameField);
@@ -134,10 +127,9 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
     private void placeControlsOnPanel() {
         final JPanel checkboxPanel = new JPanel(new BorderLayout());
-        checkboxPanel.add(delegateButton, BorderLayout.WEST);
         FormBuilder builder = FormBuilder.createFormBuilder()
                 .addComponent(
-                        JBLabelDecorator.createJBLabelDecorator(RefactorJBundle.message("extract.class.from.label", refactoring.getSourceFile().getName())) //TODO class name here, not file
+                        JBLabelDecorator.createJBLabelDecorator(RefactorJBundle.message("extract.class.from.label", PsiTreeUtil.findChildOfType(refactoring.getSourceFile(), PsiClass.class)))
                                 .setBold(true))
                 .addLabeledComponent(RefactorJBundle.message("name.for.new.class.label"), extractedClassNameField, UIUtil.LARGE_VGAP)
                 .addLabeledComponent(restoreButton, checkboxPanel);

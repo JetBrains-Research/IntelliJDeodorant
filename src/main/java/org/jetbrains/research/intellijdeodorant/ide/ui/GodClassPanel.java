@@ -3,6 +3,7 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
@@ -19,8 +20,10 @@ public class GodClassPanel extends AbstractRefactoringPanel {
         super(scope, DETECT_INDICATOR_STATUS_TEXT_KEY,
                 new ExtractClassRefactoringType(),
                 new GodClassTableModel(Collections.emptyList(),
-                        new String[]{"Source Class/General Concept", "Extractable Concept", "Source/Extracted accessed members"}),
-                4); //TODO fix last column values
+                        new String[]{IntelliJDeodorantBundle.message(("god.class.panel.source.class"),
+                                IntelliJDeodorantBundle.message("god.class.panel.extractable.concept"),
+                                IntelliJDeodorantBundle.message("god.class.panel.source.extracted.members"))}),
+                        4);
     }
 
     @Override
