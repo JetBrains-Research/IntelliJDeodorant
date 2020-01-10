@@ -283,19 +283,28 @@ public abstract class AbstractMethodFragment {
                         PsiMethod resolvedMethod = resolveMethod(methodInvocation);
                         if (resolvedMethod != null && resolvedMethod.getContainingClass() != null) {
                             boolean isStatic = resolvedMethod.hasModifier(JvmModifier.STATIC);
-                            originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+
+                            if (originClassName == null || originClassName.equals("")) {
+                                originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+                            }
+
                             processMethodInvocation(methodInvocation, originClassName, isStatic);
                         }
                     } else {
-                        PsiElement resolvedElement = qualifierExpression.resolve();
-                        if (resolvedElement instanceof PsiParameter
-                                && resolvedElement.getParent() instanceof PsiParameterList) {
-                            PsiType resolvedQualifierType = ((PsiParameter) resolvedElement).getType();
-                            originClassName = getQualifiedNameByType(resolvedQualifierType);
-                        } else if (resolvedElement instanceof PsiField) {
-                            PsiType resolvedQualifierType = ((PsiField) resolvedElement).getType();
-                            originClassName = getQualifiedNameByType(resolvedQualifierType);
+                        if (originClassName == null || originClassName.equals("")) {
+                            PsiElement resolvedElement = qualifierExpression.resolve();
+                            if (resolvedElement instanceof PsiVariable) {
+                                PsiType resolvedQualifierType = ((PsiVariable) resolvedElement).getType();
+
+                                if (resolvedQualifierType instanceof PsiClassReferenceType) {
+                                    PsiClass resolvedClass = ((PsiClassReferenceType) resolvedQualifierType).resolve();
+                                    if (resolvedClass != null) {
+                                        originClassName = resolvedClass.getQualifiedName();
+                                    }
+                                }
+                            }
                         }
+
                         if (originClassName != null && !originClassName.equals("")) {
                             processMethodInvocation(methodExpression, originClassName, false);
                         }
@@ -303,7 +312,9 @@ public abstract class AbstractMethodFragment {
                 } else {
                     boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
                     if (resolveMethod.getContainingClass() != null) {
-                        originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                        if (originClassName == null || originClassName.equals("")) {
+                            originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                        }
                     }
                     processMethodInvocation(methodInvocation, originClassName, isMethodStatic);
                 }
@@ -325,17 +336,6 @@ public abstract class AbstractMethodFragment {
             }
         }
         return null;
-    }
-
-    private String getQualifiedNameByType(PsiType classReferenceType) {
-        if (classReferenceType instanceof PsiClassReferenceType) {
-            PsiClass resolvedClass = ((PsiClassReferenceType) classReferenceType).resolve();
-            if (resolvedClass != null) {
-                return resolvedClass.getQualifiedName();
-            }
-        }
-
-        return "";
     }
 
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
