@@ -37,8 +37,8 @@ import java.util.Set;
  * <p>
  * Expected results can be compared with the Actual ones inside the `actual` directory.
  * <p>
- * PLEASE NOTE THAT ANY SUPER CLASS REFERENCES WON'T RESOLVE
- * That means any tests with super class references would probably give a wrong result. Create a real project and compare results if you are not sure.
+ * PLEASE NOTE THAT ANY SUPER CLASS REFERENCES WON'T RESOLVE (to the classes not inside the test file)
+ * That means any tests with super class references would probably give a wrong result. Run a real project and compare results if you are not sure.
  */
 public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TEST_ROOT = "src/test/resources/testdata/ide/refactoring/godclass/";
@@ -143,6 +143,8 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         in `TestProduct::setIgnoreZeroValues` should be `test.notifyListeners()`, not just `notifyListeners()`.
         That's just a result of unresolved reference to the super class, because source file is a raw .java file.
         In real project it won't happen (and does not).
+
+        (expected file is modified as well).
         */
 
         runTest("TestSOEN_StackedBarRenderer3D");
