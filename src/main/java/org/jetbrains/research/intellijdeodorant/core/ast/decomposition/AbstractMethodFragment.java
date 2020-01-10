@@ -11,8 +11,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
-import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
@@ -276,7 +274,6 @@ public abstract class AbstractMethodFragment {
 
                 if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
                     PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
-                    String methodName = methodExpression.getMethodExpression().getReferenceName();
                     PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
 
                     if (qualifierExpression == null) {
@@ -365,7 +362,7 @@ public abstract class AbstractMethodFragment {
         addMethodInvocation(methodInvocationObject);
 
         AbstractVariable invoker = MethodDeclarationUtility
-                .processMethodInvocationExpression(getFirstQualifierInAChain(methodInvocation));
+                .processMethodInvocationExpression(methodInvocation.getMethodExpression().getQualifierExpression());
 
         if (invoker != null) {
             PlainVariable initialVariable = invoker.getInitialVariable();
