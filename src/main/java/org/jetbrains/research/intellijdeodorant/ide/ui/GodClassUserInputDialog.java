@@ -1,41 +1,38 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
-import com.intellij.diff.DiffDialogHints;
-import com.intellij.diff.chains.DiffRequestChain;
-import com.intellij.diff.chains.SimpleDiffRequestChain;
-import com.intellij.diff.contents.FileDocumentContentImpl;
-import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.RefactorJBundle;
 import com.intellij.refactoring.ui.RefactoringDialog;
 import com.intellij.ui.components.JBLabelDecorator;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoring;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
-    private static final String TITLE = "Extracted Class Name";
+    private static final String TITLE = IntelliJDeodorantBundle.message("god.class.dialog.title");
+    private static final String RESTORE_DEFAULT = IntelliJDeodorantBundle.message("god.class.dialog.restore.default");
+    private static final String CLASS_NAME_NOT_VALID = IntelliJDeodorantBundle.message("god.class.dialog.class.name.not.valid");
+    private static final String CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG = IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists.javalang");
+    private static final String CLASS_NAME_ALREADY_EXISTS_KEY = "god.class.dialog.class.name.already.exists";
+
     private ExtractClassRefactoring refactoring;
     @Nullable
     private PsiPackage parentPackage;
     private List<String> javaLangClassNames;
     private JPanel mainPanel;
-    private Label extractedClassNameLabel = new Label();
-    private JTextField extractedClassNameField = new JTextField(); //TODO default size
+    private JTextField extractedClassNameField = new JTextField();
     private JButton restoreButton = new JButton();
 
     public GodClassUserInputDialog(ExtractClassRefactoring refactoring) {
@@ -68,16 +65,11 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         this.javaLangClassNames.add("Thread");
         this.javaLangClassNames.add("Void");
 
-        PsiPackageStatement packageStatement = ((PsiJavaFile) refactoring.getSourceFile()).getPackageStatement();
-        if (packageStatement != null) {
-            PsiJavaCodeReferenceElement packageReference = packageStatement.getPackageReference();
-            PsiElement target = packageReference.resolve();
-            if (target instanceof PsiPackage) {
-                parentPackage = (PsiPackage) target;
-            }
-        }
+        String packageName = PsiUtil.getPackageName(refactoring.getSourceClass());
+        parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
 
         initialiseControls();
+        setTitle(TITLE);
         init();
     }
 
@@ -91,13 +83,10 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        return new JPanel();
+        return null;
     }
 
     private void initialiseControls() {
-        extractedClassNameLabel.setText("Extracted Class Name");
-        //extractedClassNameLabel.setFont(); //TODO set font
-
         extractedClassNameField.setText(refactoring.getExtractedTypeName());
         extractedClassNameField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -116,23 +105,30 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             }
         });
 
-        restoreButton.setText("Restore Defaults");
+        restoreButton.setText(RESTORE_DEFAULT);
 
         restoreButton.addActionListener(e -> {
-            extractedClassNameField.setText(refactoring.getExtractedTypeName());
+            extractedClassNameField.setText(refactoring.getDefaultExtractedTypeName());
         });
 
         handleInputChanged(extractedClassNameField);
     }
 
     private void placeControlsOnPanel() {
-        final JPanel checkboxPanel = new JPanel(new BorderLayout());
         FormBuilder builder = FormBuilder.createFormBuilder()
                 .addComponent(
                         JBLabelDecorator.createJBLabelDecorator(RefactorJBundle.message("extract.class.from.label", PsiTreeUtil.findChildOfType(refactoring.getSourceFile(), PsiClass.class)))
                                 .setBold(true))
-                .addLabeledComponent(RefactorJBundle.message("name.for.new.class.label"), extractedClassNameField, UIUtil.LARGE_VGAP)
-                .addLabeledComponent(restoreButton, checkboxPanel);
+                .addLabeledComponent(RefactorJBundle.message("name.for.new.class.label"), extractedClassNameField, UIUtil.LARGE_VGAP);
+
+        JComponent emptyComponent = new JComponent() {
+            @Override
+            public void setInheritsPopupMenu(boolean value) {
+                super.setInheritsPopupMenu(value);
+            }
+        };
+
+        builder.addLabeledComponent(restoreButton, emptyComponent);
 
         mainPanel = builder.addVerticalGap(5).getPanel();
     }
@@ -141,65 +137,42 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         setErrorText(message);
     }
 
-    private void setPageComplete(boolean value) {
+    private void mayApplyRefactoring(boolean value) {
         getRefactorAction().setEnabled(value);
         getPreviewAction().setEnabled(value);
     }
 
     private void handleInputChanged(JTextField textField) {
+        String className = textField.getText();
         String classNamePattern = "[a-zA-Z_][a-zA-Z0-9_]*";
-        if (!Pattern.matches(classNamePattern, textField.getText())) {
-            setPageComplete(false);
-            String message = "Type name \"" + textField.getText() + "\" is not valid";
-            setMessage(message);
+        if (!Pattern.matches(classNamePattern, className)) {
+            mayApplyRefactoring(false);
+            setMessage(CLASS_NAME_NOT_VALID);
             return;
-        } else if (parentPackage != null) {
-            PsiPackage lookuppackage = parentPackage;
-            while (lookuppackage != null) {
-                if (lookuppackage.containsClassNamed(textField.getText())) {
-                    setPageComplete(false);
-                    String message = "A Type named \"" + textField.getText() + "\" already exists in package " + parentPackage.getName();
-                    setMessage(message);
-                    return;
-                }
-
-                lookuppackage = lookuppackage.getParentPackage();
-            }
-        } else if (javaLangClassNames.contains(textField.getText())) {
-            setPageComplete(false);
-            String message = "Type \"" + textField.getText() + "\" already exists in package java.lang";
-            setMessage(message);
+        } else if (parentPackage != null && parentPackage.containsClassNamed(className)) {
+            mayApplyRefactoring(false);
+            setMessage(IntelliJDeodorantBundle.message(CLASS_NAME_ALREADY_EXISTS_KEY, parentPackage.getName()));
+            return;
+        } else if (javaLangClassNames.contains(className)) {
+            mayApplyRefactoring(false);
+            setMessage(CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG);
             return;
         } else {
-            refactoring.setExtractedTypeName(textField.getText());
+            refactoring.setExtractedTypeName(className);
         }
 
-        setPageComplete(true);
+        mayApplyRefactoring(true);
         setMessage("");
     }
 
     @Override
     protected void doAction() {
         if (isPreviewUsages()) {
-            VirtualFile v1 = refactoring.getSourceFile().getVirtualFile();
-            Document document1 = FileDocumentManager.getInstance().getDocument(v1);
-            FileDocumentContentImpl fileDocumentContent1 = new FileDocumentContentImpl(getProject(), document1, v1);
-
-            VirtualFile v2 = refactoring.getSourceFile().getVirtualFile();
-            Document document2 = FileDocumentManager.getInstance().getDocument(v2);
-            FileDocumentContentImpl fileDocumentContent2 = new FileDocumentContentImpl(getProject(), document2, v2);
-
-            SimpleDiffRequest simpleDiffRequest = new SimpleDiffRequest("difffff", fileDocumentContent1, fileDocumentContent2,
-                    refactoring.getSourceFile().getName(), refactoring.getSourceFile().getName());
-
-            DiffRequestChain chain = new SimpleDiffRequestChain(simpleDiffRequest);
-            GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT);
-            previewResultDialog.show();
-
-            setPreviewResults(false);
+            //TODO
         } else {
-            WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
             closeOKAction();
+            refactoring.setExtractedTypeName(extractedClassNameField.getText());
+            WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
         }
     }
 

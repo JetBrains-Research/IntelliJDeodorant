@@ -16,21 +16,28 @@ import java.util.Collections;
 public class GodClassPanel extends AbstractRefactoringPanel {
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "god.class.identification.indicator";
 
+    private static final String[] COLUMN_NAMES = new String[]{IntelliJDeodorantBundle.message("god.class.panel.source.class"),
+            IntelliJDeodorantBundle.message("god.class.panel.extractable.concept"),
+            IntelliJDeodorantBundle.message("god.class.panel.source.extracted.members")};
+
+    private static final int REFACTOR_DEPTH = 4;
+
     public GodClassPanel(@NotNull AnalysisScope scope) {
-        super(scope, DETECT_INDICATOR_STATUS_TEXT_KEY,
+        super(scope,
+                DETECT_INDICATOR_STATUS_TEXT_KEY,
                 new ExtractClassRefactoringType(),
-                new GodClassTableModel(Collections.emptyList(),
-                        new String[]{IntelliJDeodorantBundle.message(("god.class.panel.source.class"),
-                                IntelliJDeodorantBundle.message("god.class.panel.extractable.concept"),
-                                IntelliJDeodorantBundle.message("god.class.panel.source.extracted.members"))}),
-                        4);
+                new GodClassTreeTableModel(Collections.emptyList(), COLUMN_NAMES),
+                REFACTOR_DEPTH);
     }
 
     @Override
-    public void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
+    protected void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
+        AbstractExtractClassRefactoring abstractRefactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
+
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
-            AbstractExtractClassRefactoring refactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
-            GodClassUserInputDialog dialog = new GodClassUserInputDialog(refactoring.getRefactoring());
+            removeHighlighters(scope.getProject());
+            disableRefactoringsTable(true);
+            GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
             dialog.show();
         });
     }

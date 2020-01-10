@@ -11,8 +11,8 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.Ext
 import java.util.ArrayList;
 import java.util.List;
 
-public class GodClassTableModel extends AbstractTreeTableModel {
-    public GodClassTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames) {
+public class GodClassTreeTableModel extends AbstractTreeTableModel {
+    public GodClassTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames) {
         super(candidateRefactoringGroups, columnNames, new ExtractClassRefactoringType());
     }
 
@@ -37,13 +37,12 @@ public class GodClassTableModel extends AbstractTreeTableModel {
                 case 1:
                     return candidateRefactoring.getSourceEntity();
                 case 2:
-                    return candidateRefactoring.getExtractedFieldFragments().size();
+                    return candidateRefactoring.getExtractedFieldFragments().size() + "/" + candidateRefactoring.getExtractedMethods().size();
             }
         }
 
         return "";
     }
-
 
     @Override
     public int getChildCount(Object parent) {

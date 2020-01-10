@@ -106,7 +106,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
                     extractClassCandidateRefactoring.getExtractedFieldFragments(),
                     extractClassCandidateRefactoring.getExtractedMethods(),
                     extractClassCandidateRefactoring.getDelegateMethods(),
-                    extractClassCandidateRefactoring.getTargetClassName());
+                    extractClassCandidateRefactoring.getDefaultTargetClassName());
         }
 
         @Override

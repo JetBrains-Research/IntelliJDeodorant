@@ -83,24 +83,6 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         testMethod(methodCode, 0);
     }
 
-    public void testSimpleAccessTest() {
-        String methodCode = "int binaryExpressionTest() {\n" +
-                "        return FIELD;\n" +
-                "    }";
-
-        //TODO does not work
-        //testMethod(methodCode, 0);
-    }
-
-    public void testAccessViaThisTest() {
-        String methodCode = "int thisTest() {\n" +
-                "        return this.FIELD;\n" +
-                "    }";
-
-        //TODO does not work access via this expression
-        //testMethod(methodCode, 0);
-    }
-
     public void testComplexExpressionTest() {
         String methodCode = "int complexExpressionTest() {\n" +
                 "        return ((FIELD * 2) + (FIELD + 6)) * 6;\n" +
@@ -374,11 +356,10 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testReturnStatementTest() {
         String methodCode = "int returnStatementTest() {\n" +
-                "        return FIELD;\n" +
+                "        return FIELD + FIELD;\n" +
                 "    }";
 
-        //TODO PROBABLY AN INTENDED MECHANIC: TEST ORIGINAL PLUGIN +
-        //testMethod(methodCode, 0);
+        testMethod(methodCode, 0);
     }
 
     public void testReturnComplexStatementTest() {

@@ -43,6 +43,7 @@ public class ExtractClassRefactoring {
     private Set<PsiField> extractedFieldFragments;
     private Set<PsiMethod> extractedMethods;
     private Set<PsiMethod> delegateMethods;
+    private String defaultExtractedTypeName;
     private String extractedTypeName;
     //this map holds for each constructor the assignment statements that initialize final extracted fields
     private Map<PsiMethod, Map<PsiField, PsiAssignmentExpression>> constructorFinalFieldAssignmentMap;
@@ -64,10 +65,9 @@ public class ExtractClassRefactoring {
     private Map<PsiMethod, PsiMethod> sourceToSandboxMethodMap;
     private Map<PsiField, PsiField> sandboxToSourceFieldMap;
     private Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
-    private PsiJavaFile sandboxFile;
 
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
-                                   Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String extractedTypeName) {
+                                   Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
         this.sourceFile = sourceFile;
         this.sourceTypeDeclaration = sourceTypeDeclaration;
         this.additionalArgumentsAddedToExtractedMethods = new LinkedHashMap<>();
@@ -81,7 +81,8 @@ public class ExtractClassRefactoring {
         this.extractedFieldFragments = extractedFieldFragments;
         this.extractedMethods = extractedMethods;
         this.delegateMethods = delegateMethods;
-        this.extractedTypeName = extractedTypeName;
+        this.defaultExtractedTypeName = defaultExtractedTypeName;
+        this.extractedTypeName = defaultExtractedTypeName;
         this.constructorFinalFieldAssignmentMap = new LinkedHashMap<>();
         this.extractedClassConstructorParameterMap = new LinkedHashMap<>();
         this.extractedFieldsWithThisExpressionInTheirInitializer = new LinkedHashSet<>();
@@ -103,6 +104,10 @@ public class ExtractClassRefactoring {
 
     public String getExtractedTypeName() {
         return extractedTypeName;
+    }
+
+    public String getDefaultExtractedTypeName() {
+        return defaultExtractedTypeName;
     }
 
     public void setExtractedTypeName(String targetTypeName) {
@@ -446,7 +451,7 @@ public class ExtractClassRefactoring {
     }
 
     private PsiJavaFile createExtractedClass(Set<PsiField> modifiedFieldsInNonExtractedMethods, Set<PsiField> accessedFieldsInNonExtractedMethods) {
-        sandboxFile = (PsiJavaFile) sourceFile.copy();
+        PsiJavaFile sandboxFile = (PsiJavaFile) sourceFile.copy();
         mapSourceMembersAndSandboxCopies(sourceFile, sandboxFile);
 
         String extractedClassFileName = extractedTypeName + ".java";
@@ -2596,7 +2601,6 @@ public class ExtractClassRefactoring {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         Set<PsiMethod> contextMethods = getAllMethodDeclarationsInSourceClass();
         String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
-        boolean rewriteAST; //TODO use for preview
         for (PsiMethod methodDeclaration : contextMethods) {
             if (!extractedMethods.contains(methodDeclaration)) {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
@@ -2706,7 +2710,6 @@ public class ExtractClassRefactoring {
                                                     rightHandSide = ((PsiMethodCallExpression) rightHandSide).getArgumentList();
                                                 }
                                             }
-                                            rewriteAST = true;
                                         }
                                     }
                                 }
@@ -2880,7 +2883,6 @@ public class ExtractClassRefactoring {
                                             postfix.replace(setterMethodInvocation);
                                         }
 
-                                        rewriteAST = true;
                                     }
                                 }
                                 for (PsiExpression expression2 : arrayAccesses) {
@@ -2920,14 +2922,11 @@ public class ExtractClassRefactoring {
                                                 arrayExpression.replace(getterMethodInvocation);
                                             }
 
-                                            rewriteAST = true;
                                         }
                                     }
                                 }
                             }
                         }
-
-                        //TODO I DO actually need rewriteAST thing FOR preview, when I realise it.
                     }
                 }
             }
@@ -3084,6 +3083,10 @@ public class ExtractClassRefactoring {
 
     public void checkInitialConditions(ProgressIndicator indicator) {
         indicator.setText(IntelliJDeodorantBundle.message("god.class.identification.indicator.preconditions"));
+    }
+
+    public PsiClass getSourceClass() {
+        return sourceTypeDeclaration;
     }
 
     public PsiFile getSourceFile() {

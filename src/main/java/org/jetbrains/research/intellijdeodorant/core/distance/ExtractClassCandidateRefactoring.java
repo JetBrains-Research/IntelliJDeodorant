@@ -49,12 +49,8 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
         this.visualizationData = new GodClassVisualizationData(sourceClass.getClassObject(), extractedMethods, extractedFields);
     }
 
-    public String getTargetClassName() {
+    public String getDefaultTargetClassName() {
         return targetClassName;
-    }
-
-    public void setTargetClassName(String targetClassName) {
-        this.targetClassName = targetClassName;
     }
 
     public List<Entity> getExtractedEntities() {
