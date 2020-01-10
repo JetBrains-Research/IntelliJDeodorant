@@ -383,6 +383,12 @@ public class ExpressionExtractor {
                 for (PsiExpression argument : arguments)
                     expressionList.addAll(getExpressions(argument));
             }
+            if (classInstanceCreation.isArrayCreation()) {
+                PsiExpression[] arrayDimensions = classInstanceCreation.getArrayDimensions();
+                for (PsiExpression arrayDimension: arrayDimensions) {
+                    expressionList.addAll(getExpressions(arrayDimension));
+                }
+            }
             if (instanceChecker.instanceOf(classInstanceCreation))
                 expressionList.add(classInstanceCreation);
             PsiAnonymousClass anonymousClassDeclaration = classInstanceCreation.getAnonymousClass();
