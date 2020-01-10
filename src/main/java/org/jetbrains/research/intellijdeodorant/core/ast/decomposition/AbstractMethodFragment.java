@@ -291,10 +291,10 @@ public abstract class AbstractMethodFragment {
                         if (resolvedElement instanceof PsiParameter
                                 && resolvedElement.getParent() instanceof PsiParameterList) {
                             PsiType resolvedQualifierType = ((PsiParameter) resolvedElement).getType();
-                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
+                            originClassName = getQualifiedNameByType(resolvedQualifierType);
                         } else if (resolvedElement instanceof PsiField) {
                             PsiType resolvedQualifierType = ((PsiField) resolvedElement).getType();
-                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
+                            originClassName = getQualifiedNameByType(resolvedQualifierType);
                         }
                         if (originClassName != null && !originClassName.equals("")) {
                             processMethodInvocation(methodExpression, originClassName, false);
@@ -327,19 +327,15 @@ public abstract class AbstractMethodFragment {
         return null;
     }
 
-    private String findClassBySimpleNameAndGetQualifiedName(PsiType classReferenceType, String methodName) {
-        String classQualifiedName = "";
+    private String getQualifiedNameByType(PsiType classReferenceType) {
         if (classReferenceType instanceof PsiClassReferenceType) {
-            String classSimpleName = ((PsiClassReferenceType) classReferenceType).getName();
-            List<PsiClass> candidateClasses = getExaminedProject().getClasses().stream()
-                    .filter(psiClass -> classSimpleName.equals(psiClass.getName())).collect(toList());
-            for (PsiClass psiClass : candidateClasses) {
-                if (psiClass.findMethodsByName(methodName, true).length != 0) {
-                    classQualifiedName = psiClass.getQualifiedName();
-                }
+            PsiClass resolvedClass = ((PsiClassReferenceType) classReferenceType).resolve();
+            if (resolvedClass != null) {
+                return resolvedClass.getQualifiedName();
             }
         }
-        return classQualifiedName;
+
+        return "";
     }
 
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
