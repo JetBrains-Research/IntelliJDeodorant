@@ -8,6 +8,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
+import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
@@ -1193,8 +1194,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public String toString() {
-        return typeCheckClass.getQualifiedName() + "::" +
-                typeCheckMethod.toString();
+        return PsiUtils.calculateSignature(typeCheckMethod);
     }
 
     public int getGroupSizeAtClassLevel() {
@@ -1204,40 +1204,6 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     public void setGroupSizeAtClassLevel(int groupSizeAtClassLevel) {
         this.groupSizeAtClassLevel = groupSizeAtClassLevel;
     }
-
-    // TODO: add me
-//	public boolean matchingStatesOrSubTypes(TypeCheckElimination other) {
-//		if(!this.staticFieldMap.isEmpty() && !other.staticFieldMap.isEmpty()) {
-//			Set<String> originalStaticFields = new LinkedHashSet<String>();
-//			for(List<SimpleName> staticFields : this.staticFieldMap.values()) {
-//				for(SimpleName staticField : staticFields)
-//					originalStaticFields.add(staticField.getIdentifier());
-//			}
-//			for(SimpleName staticField : this.additionalStaticFields) {
-//				originalStaticFields.add(staticField.getIdentifier());
-//			}
-//			for(List<SimpleName> staticFields : other.staticFieldMap.values()) {
-//				for(SimpleName staticField : staticFields) {
-//					if(originalStaticFields.contains(staticField.getIdentifier()))
-//						return true;
-//				}
-//			}
-//		}
-//		else if(!this.subclassTypeMap.isEmpty() && !other.subclassTypeMap.isEmpty()) {
-//			InheritanceTree tree = null;
-//			if(this.existingInheritanceTree != null)
-//				tree = this.existingInheritanceTree;
-//			if(this.inheritanceTreeMatchingWithStaticTypes != null && tree == null)
-//				tree = this.inheritanceTreeMatchingWithStaticTypes;
-//			for(List<Type> subTypes : other.subclassTypeMap.values()) {
-//				for(Type subType : subTypes) {
-//					if(tree.contains(subType.resolveBinding().getQualifiedName()))
-//						return true;
-//				}
-//			}
-//		}
-//		return false;
-//	}
 
     public Integer getUserRate() {
         return userRate;

@@ -29,8 +29,8 @@ abstract public class RefactoringType {
 
     public abstract AbstractCandidateRefactoringGroup newAbstractCandidateRefactoringGroup(Object candidateRefactoringGroup);
 
-    public abstract static class AbstractCandidateRefactoring {
-        private Object candidateRefactoring;
+    public abstract static class AbstractCandidateRefactoring implements Refactoring {
+        protected Object candidateRefactoring;
 
         public AbstractCandidateRefactoring(Object candidateRefactoring) {
             this.candidateRefactoring = candidateRefactoring;

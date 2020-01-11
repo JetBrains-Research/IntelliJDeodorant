@@ -29,7 +29,7 @@ public class PsiUtils {
         final String methodName = method.getName();
         final StringBuilder out = new StringBuilder(50);
         out.append(className);
-        out.append('.');
+        out.append("::");
         out.append(methodName);
         out.append('(');
         final PsiParameterList parameterList = method.getParameterList();

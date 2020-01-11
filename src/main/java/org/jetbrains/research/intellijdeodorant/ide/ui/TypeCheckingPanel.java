@@ -48,7 +48,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
 
         Runnable applyRefactoring = () -> {
             removeHighlighters(scope.getProject());
-            disableRefactoringsTable(true);
+            showRefreshingProposal();
             WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
         };
 
@@ -62,5 +62,10 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         } else {
             applyRefactoring.run();
         }
+    }
+
+    @Override
+    protected String getExportDefaultFilename() {
+        return "TypeStateChecking.txt";
     }
 }

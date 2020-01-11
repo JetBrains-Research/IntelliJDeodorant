@@ -5,6 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
@@ -75,6 +76,12 @@ public class TypeCheckRefactoringType extends RefactoringType {
         @Override
         public String toString() {
             return getCandidateRefactoring().toString();
+        }
+
+        @NotNull
+        @Override
+        public String getDescription() {
+            return candidateRefactoring.toString();
         }
     }
 
