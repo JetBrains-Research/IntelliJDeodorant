@@ -29,7 +29,6 @@ public class Edge implements Comparable<Edge> {
             return this.from.equals(edge.from) && this.to.equals(edge.to);
         }
         return false;
-        // :thi
     }
 
     public int hashCode() {

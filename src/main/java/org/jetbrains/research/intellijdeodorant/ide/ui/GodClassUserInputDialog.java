@@ -1,7 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.psi.*;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiPackage;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.RefactorJBundle;
@@ -26,6 +28,8 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     private static final String CLASS_NAME_NOT_VALID = IntelliJDeodorantBundle.message("god.class.dialog.class.name.not.valid");
     private static final String CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG = IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists.javalang");
     private static final String CLASS_NAME_ALREADY_EXISTS_KEY = "god.class.dialog.class.name.already.exists";
+
+    private static final int MAIN_PANEL_VERTICAL_GAP = 5;
 
     private ExtractClassRefactoring refactoring;
     @Nullable
@@ -130,7 +134,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
         builder.addLabeledComponent(restoreButton, emptyComponent);
 
-        mainPanel = builder.addVerticalGap(5).getPanel();
+        mainPanel = builder.addVerticalGap(MAIN_PANEL_VERTICAL_GAP).getPanel();
     }
 
     private void setMessage(String message) {
@@ -167,16 +171,18 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
     @Override
     protected void doAction() {
-        if (isPreviewUsages()) {
-            //TODO
-        } else {
-            closeOKAction();
-            refactoring.setExtractedTypeName(extractedClassNameField.getText());
-            WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
-        }
+        closeOKAction();
+        refactoring.setExtractedTypeName(extractedClassNameField.getText());
+        WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
     }
 
+    @Override
     protected boolean hasHelpAction() {
+        return false;
+    }
+
+    @Override
+    protected boolean hasPreviewButton() {
         return false;
     }
 }
