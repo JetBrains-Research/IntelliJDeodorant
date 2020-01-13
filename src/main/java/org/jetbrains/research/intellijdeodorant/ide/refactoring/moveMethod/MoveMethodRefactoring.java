@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
@@ -21,7 +21,8 @@ public class MoveMethodRefactoring implements Refactoring {
     SmartPsiElementPointer<PsiMethod> method;
     private final @NotNull
     SmartPsiElementPointer<PsiClass> targetClass;
-    private final @NotNull String qualifiedMethodName;
+    private final @NotNull
+    String qualifiedMethodName;
     private final int sourceAccessedMembers;
     private final int targetAccessedMembers;
 
@@ -136,6 +137,12 @@ public class MoveMethodRefactoring implements Refactoring {
     @Override
     public String getDescription() {
         return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
+    }
+
+    @NotNull
+    @Override
+    public String getExportDefaultFilename() {
+        return "Feature-Envy";
     }
 
     @NotNull

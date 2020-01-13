@@ -16,7 +16,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.SuperFieldInstructionOb
 import org.jetbrains.research.intellijdeodorant.core.ast.SuperMethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
 
 import java.util.*;
 

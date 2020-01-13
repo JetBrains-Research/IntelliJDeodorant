@@ -6,10 +6,10 @@ import com.intellij.openapi.command.WriteCommandAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.PolymorphismRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.ReplaceTypeCodeWithStateStrategy;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.ReplaceTypeCodeWithStateStrategy;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.PolymorphismRefactoring;
 
 import java.util.Collections;
 
@@ -28,7 +28,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
     private static final int REFACTOR_DEPTH = 3;
 
     TypeCheckingPanel(@NotNull AnalysisScope scope) {
-        super(  scope,
+        super(scope,
                 DETECT_INDICATOR_STATUS_TEXT_KEY,
                 new TypeCheckRefactoringType(scope.getProject()),
                 new TypeCheckingTreeTableModel(
@@ -64,8 +64,4 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         }
     }
 
-    @Override
-    protected String getExportDefaultFilename() {
-        return "TypeStateChecking.txt";
-    }
 }

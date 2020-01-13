@@ -4,7 +4,7 @@ import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TypeCheckCodeFragmentAnalyzer;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
 
 import java.util.List;
 import java.util.ArrayList;

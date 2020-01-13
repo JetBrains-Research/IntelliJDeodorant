@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
-    private static final String REFRESH_NEEDED_TEXT = "type.state.checking.refresh.needed.text";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
+    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
 
     private String detectIndicatorStatusTextKey;
     @NotNull
@@ -75,8 +75,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
-        this.treeTable =  new TreeTable(model);
+        this.treeTable = new TreeTable(model);
         this.refactorDepth = refactorDepth;
+        refreshLabel.setForeground(JBColor.GRAY);
         setLayout(new BorderLayout());
         setupGUI();
     }
@@ -111,7 +112,6 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         exportButton.setEnabled(false);
         scrollPane.setViewportView(refreshLabel);
     }
-
 
     /**
      * Hides treeTable with refactorings and leaves panel empty
@@ -168,7 +168,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         List<? extends Refactoring> refactorings = model.getCandidateRefactoringGroups().stream()
                 .flatMap(group -> group.getCandidates().stream())
                 .collect(Collectors.toList());
-        ExportResultsUtil.export(refactorings, this, getExportDefaultFilename());
+        ExportResultsUtil.export(refactorings, this);
     }
 
     /**
@@ -252,10 +252,6 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         return refactoringType.newAbstractRefactoring(candidate);
     }
 
-    protected String getExportDefaultFilename() {
-        return null;
-    }
-
     /**
      * Opens definition of method and highlights specified element in the method.
      */
@@ -281,7 +277,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
     //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
-                                          AnalysisScope scope, boolean openInEditor) {
+                                       AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 

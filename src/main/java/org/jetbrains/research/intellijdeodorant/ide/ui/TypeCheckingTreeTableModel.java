@@ -3,11 +3,11 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType.AbstractTypeCheckCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 
 import java.util.List;
 
@@ -38,6 +38,7 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
                     return Double.toString(group.getAverageNumberOfStatementsInGroup());
             }
         }
+
         if (o instanceof AbstractTypeCheckCandidateRefactoring) {
             AbstractTypeCheckCandidateRefactoring abstractTypeCheckElimination = (AbstractTypeCheckCandidateRefactoring) o;
             TypeCheckElimination typeCheckElimination = (TypeCheckElimination) abstractTypeCheckElimination.getCandidateRefactoring();

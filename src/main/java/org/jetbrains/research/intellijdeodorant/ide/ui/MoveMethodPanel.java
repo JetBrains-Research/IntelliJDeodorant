@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMember;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TableSpeedSearch;
 import com.intellij.ui.components.JBPanel;
@@ -20,7 +21,7 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsApplier;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
@@ -45,7 +46,8 @@ class MoveMethodPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "feature.envy.detect.indicator.status";
     private static final String TOTAL_LABEL_TEXT_KEY = "total.label";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
+    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
 
     @NotNull
     private final AnalysisScope scope;
@@ -61,6 +63,10 @@ class MoveMethodPanel extends JPanel {
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
+    private JLabel refreshLabel = new JLabel(
+            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+            SwingConstants.CENTER
+    );
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -82,8 +88,9 @@ class MoveMethodPanel extends JPanel {
         table.getSelectionModel().setSelectionMode(SINGLE_SELECTION);
         table.setAutoCreateRowSorter(true);
         setupTableLayout();
+        refreshLabel.setForeground(JBColor.GRAY);
         scrollPane = ScrollPaneFactory.createScrollPane(table);
-        scrollPane.setVisible(false);
+        scrollPane.setViewportView(refreshLabel);
         return scrollPane;
     }
 
@@ -138,7 +145,10 @@ class MoveMethodPanel extends JPanel {
     }
 
     private List<MoveMethodRefactoring> getValidRefactoringsSuggestions() {
-        return refactorings.stream().filter(refactoring -> refactoring.getOptionalMethod().isPresent()).collect(Collectors.toList());
+        return refactorings.stream()
+                .filter(refactoring -> refactoring.getOptionalMethod()
+                        .isPresent())
+                .collect(Collectors.toList());
     }
 
     private void enableButtonsOnConditions() {
@@ -146,7 +156,8 @@ class MoveMethodPanel extends JPanel {
         selectAllButton.setEnabled(model.getRowCount() != 0);
         deselectAllButton.setEnabled(model.isAnySelected());
         refreshButton.setEnabled(true);
-        exportButton.setEnabled(refactorings.stream().anyMatch(refactoring -> refactoring.getOptionalMethod().isPresent()));
+        exportButton.setEnabled(refactorings.stream()
+                .anyMatch(refactoring -> refactoring.getOptionalMethod().isPresent()));
     }
 
     private void disableAllButtons() {
@@ -199,9 +210,9 @@ class MoveMethodPanel extends JPanel {
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);
-                    scrollPane.setVisible(true);
                     infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
-
+                    scrollPane.setVisible(true);
+                    scrollPane.setViewportView(table);
                     enableButtonsOnConditions();
                 });
             }

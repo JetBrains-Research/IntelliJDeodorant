@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking;
 
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
@@ -410,15 +410,15 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private boolean isSubclassTypeAnInterface() {
         for (List<PsiType> subTypes : subclassTypeMap.values()) {
             for (PsiType subType : subTypes) {
-				if(!(subType instanceof PsiClassType)) {
+                if (!(subType instanceof PsiClassType)) {
                     continue;
                 }
-				PsiClass resolvedClass = ((PsiClassType) subType).resolve();
-				if (resolvedClass == null) {
-				    continue;
+                PsiClass resolvedClass = ((PsiClassType) subType).resolve();
+                if (resolvedClass == null) {
+                    continue;
                 }
-				if (resolvedClass.isInterface()) {
-				    return true;
+                if (resolvedClass.isInterface()) {
+                    return true;
                 }
             }
         }
@@ -631,10 +631,8 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 }
             }
         }
-        if (!statementList.isEmpty())
-            return true;
-        else
-            return false;
+
+        return !statementList.isEmpty();
     }
 
     private boolean containsSuperMethodInvocation() {

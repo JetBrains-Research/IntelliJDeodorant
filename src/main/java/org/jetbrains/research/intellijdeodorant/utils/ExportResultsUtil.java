@@ -24,22 +24,10 @@ public class ExportResultsUtil {
      * @param panel        panel of current project.
      */
     public static void export(List<? extends Refactoring> refactorings, JPanel panel) {
-        String defaultFilename = "";
-        if (!refactorings.isEmpty()) {
-            defaultFilename = refactorings.get(0).getClass().getSimpleName() + ".txt";
-        }
-        export(refactorings, panel, defaultFilename);
-    }
-
-    /**
-     * @param refactorings    list of refactoring suggestions.
-     * @param panel           panel of current project.
-     * @param defaultFilename default name for the file in the dialog
-     */
-    public static void export(List<? extends Refactoring> refactorings, JPanel panel, String defaultFilename) {
+        if (refactorings.isEmpty()) return;
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(panel);
-        FileDialog fileDialog = new FileDialog(frame, IntelliJDeodorantBundle.message("export.title"), FileDialog.SAVE);
-        fileDialog.setFile(defaultFilename);
+        FileDialog fileDialog = new FileDialog(frame, IntelliJDeodorantBundle.message("export"), FileDialog.SAVE);
+        fileDialog.setFile(refactorings.get(0).getExportDefaultFilename() + ".txt");
         fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
         fileDialog.setVisible(true);
         if (fileDialog.getDirectory() == null || fileDialog.getFile() == null) {

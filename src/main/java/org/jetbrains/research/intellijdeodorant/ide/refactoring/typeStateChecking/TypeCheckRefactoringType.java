@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -82,6 +82,12 @@ public class TypeCheckRefactoringType extends RefactoringType {
         @Override
         public String getDescription() {
             return candidateRefactoring.toString();
+        }
+
+        @NotNull
+        @Override
+        public String getExportDefaultFilename() {
+            return "Type-State-Checking";
         }
     }
 
