@@ -16,4 +16,11 @@ public interface Refactoring {
      */
     @NotNull
     String getDescription();
+
+    /**
+     * Returns default name for the exported file.
+     */
+    @NotNull
+    String getExportDefaultFilename();
+
 }

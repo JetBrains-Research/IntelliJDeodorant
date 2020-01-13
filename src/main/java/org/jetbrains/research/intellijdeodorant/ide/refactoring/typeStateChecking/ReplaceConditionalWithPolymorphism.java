@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;

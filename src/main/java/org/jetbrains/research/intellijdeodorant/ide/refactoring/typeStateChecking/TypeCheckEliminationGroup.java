@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking;
 
 import com.intellij.psi.PsiField;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
@@ -12,7 +12,7 @@ public class TypeCheckEliminationGroup implements Comparable<TypeCheckEliminatio
     private double averageNumberOfStatementsInGroup;
 
     public TypeCheckEliminationGroup() {
-        this.candidates = new ArrayList<TypeCheckElimination>();
+        this.candidates = new ArrayList<>();
     }
 
     public void addCandidate(TypeCheckElimination elimination) {

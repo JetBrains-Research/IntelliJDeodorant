@@ -25,17 +25,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
+import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Panel for Type-State Checking refactorings.
@@ -43,7 +46,8 @@ import java.util.List;
 public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String REFRESH_NEEDED_TEXT = "type.state.checking.refresh.needed.text";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
+    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
 
     private String detectIndicatorStatusTextKey;
     @NotNull
@@ -52,6 +56,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private final TreeTable treeTable;
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
+    private final JButton exportButton = new JButton();
     private JScrollPane scrollPane = new JBScrollPane();
     private JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
@@ -70,8 +75,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
-        this.treeTable =  new TreeTable(model);
+        this.treeTable = new TreeTable(model);
         this.refactorDepth = refactorDepth;
+        refreshLabel.setForeground(JBColor.GRAY);
         setLayout(new BorderLayout());
         setupGUI();
     }
@@ -79,28 +85,41 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
-        disableRefactoringsTable(true);
+        showRefreshingProposal();
+    }
+
+    private void removeSelection() {
+        treeTable.getTree().setSelectionPath(null);
     }
 
     /**
      * Shows treeTable with available refactorings.
      */
-    private void enableRefactoringsTable() {
+    private void showRefactoringsTable() {
+        removeSelection();
         scrollPane.setVisible(true);
-        treeTable.getTree().setSelectionPath(null);
         model.reload();
+        exportButton.setEnabled(!model.getCandidateRefactoringGroups().isEmpty());
         scrollPane.setViewportView(treeTable);
     }
 
     /**
      * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
      */
-    protected void disableRefactoringsTable(boolean hideTree) {
+    protected void showRefreshingProposal() {
+        removeSelection();
         scrollPane.setVisible(true);
-        treeTable.getTree().setSelectionPath(null);
-        if (hideTree) {
-            scrollPane.setViewportView(refreshLabel);
-        }
+        exportButton.setEnabled(false);
+        scrollPane.setViewportView(refreshLabel);
+    }
+
+    /**
+     * Hides treeTable with refactorings and leaves panel empty
+     */
+    private void showEmptyPanel() {
+        removeSelection();
+        exportButton.setEnabled(false);
+        scrollPane.setVisible(false);
     }
 
     /**
@@ -130,14 +149,26 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
         doRefactorButton.setEnabled(false);
-        doRefactorButton.addActionListener(e -> refactorSelected());
+        doRefactorButton.addActionListener(l -> refactorSelected());
         buttonPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonPanel.add(refreshButton);
+
+        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.addActionListener(l -> exportResults());
+        buttonPanel.add(exportButton);
+
         panel.add(buttonPanel, BorderLayout.EAST);
         return panel;
+    }
+
+    private void exportResults() {
+        List<? extends Refactoring> refactorings = model.getCandidateRefactoringGroups().stream()
+                .flatMap(group -> group.getCandidates().stream())
+                .collect(Collectors.toList());
+        ExportResultsUtil.export(refactorings, this);
     }
 
     /**
@@ -147,7 +178,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
         if (selectedPath.getPathCount() == refactorDepth) {
             AbstractCandidateRefactoring computationSlice = (AbstractCandidateRefactoring) selectedPath.getLastPathComponent();
-            disableRefactoringsTable(false);
+            removeSelection();
             doRefactor(computationSlice);
         }
     }
@@ -178,8 +209,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
         }
-        doRefactorButton.setEnabled(false);
-        scrollPane.setVisible(false);
+        showEmptyPanel();
         calculateRefactorings();
     }
 
@@ -196,8 +226,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     List<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
-                    model.setEliminationGroups(candidates);
-                    ApplicationManager.getApplication().invokeLater(() -> enableRefactoringsTable());
+                    model.setCandidateRefactoringGroups(candidates);
+                    ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
             }
         };
@@ -247,7 +277,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
     //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
-                                          AnalysisScope scope, boolean openInEditor) {
+                                       AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 

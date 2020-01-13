@@ -24,8 +24,12 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
         this.refactoringType = refactoringType;
     }
 
-    public void setEliminationGroups(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
+    public void setCandidateRefactoringGroups(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups) {
         this.candidateRefactoringGroups = candidateRefactoringGroups;
+    }
+
+    public List<AbstractCandidateRefactoringGroup> getCandidateRefactoringGroups() {
+        return this.candidateRefactoringGroups;
     }
 
     @Override
