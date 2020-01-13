@@ -16,7 +16,7 @@ public class Test {
 
         /*
         Bug in the original plugin. It gives here
-        `testProduct.getChained().testProduct.setB(testProduct.getB() + 1);`
+        `chained.testProduct.setB(testProduct.getB() + 1);`
 
         But should be
         `testProduct.getChained().testProduct.setB(testProduct.getChained().testProduct.getB() + 1);`
