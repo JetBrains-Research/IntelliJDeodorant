@@ -20,13 +20,11 @@ public class Test {
         e += 1;
 
         /*
-        Yet another bug in the original plugin. It gives here
+        Bug in the original plugin. It gives here
         `testProduct.getChained().testProduct.setB(testProduct.getB() + 1);`
 
         But should be
         `testProduct.getChained().testProduct.setB(testProduct.getChained().testProduct.getB() + 1);`
-
-        No motivation to find and reproduce this bug
          */
         chained.b += 1;
 
