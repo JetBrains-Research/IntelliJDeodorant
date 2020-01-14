@@ -10,7 +10,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.FileContentUtil;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -18,8 +17,9 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringUtility;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.PreviewProcessor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.PreviewProcessor.SourceFileAndClass;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiElementPair;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiMethodPair;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.SourceFileAndClass;
 import org.jetbrains.research.intellijdeodorant.util.math.AdjacencyList;
 import org.jetbrains.research.intellijdeodorant.util.math.Edge;
 import org.jetbrains.research.intellijdeodorant.util.math.Node;
@@ -60,7 +60,7 @@ public class ExtractClassRefactoring {
     private JavaCodeStyleManager javaCodeStyleManager;
     private CodeStyleManager codeStyleManager;
 
-    private Map<PsiElement, PsiElement> previewElementsMap;
+    private Map<PsiMethod, PsiMethod> updatedSourceMethodToInitialCopy = new LinkedHashMap<>();
 
     /*
     We create each of the new methods inside 'sandbox' file - a full copy of the source file, in order to correctly
@@ -72,7 +72,11 @@ public class ExtractClassRefactoring {
     private Map<PsiField, PsiField> sandboxToSourceFieldMap;
     private Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
 
-    private PreviewProcessor previewProcessor = new PreviewProcessor();
+    private ExtractClassPreviewProcessor previewProcessor = new ExtractClassPreviewProcessor();
+
+    private List<PsiMethodPair> methodComparingList = previewProcessor.getMethodComparingList();
+    private Map<PsiMethod, ArrayList<PsiElementPair>> methodElementsComparingMap = previewProcessor.getMethodElementsComparingMap();
+
 
     /**
      * True if we are not actually performing a refactoring, just collecting intermediate changes to create a preview.
@@ -89,7 +93,7 @@ public class ExtractClassRefactoring {
     public void setPreviewUsage() {
         previewUsage = true;
 
-        SourceFileAndClass clone = PreviewProcessor.cloneSourceFile(sourceFile, sourceTypeDeclaration, extractedFieldFragments, extractedMethods, delegateMethods);
+        SourceFileAndClass clone = ExtractClassPreviewProcessor.cloneSourceFile(sourceFile, sourceTypeDeclaration, extractedFieldFragments, extractedMethods, delegateMethods);
         this.sourceFile = clone.getSourceFile();
         this.sourceTypeDeclaration = clone.getSourceTypeDeclaration();
 
@@ -226,11 +230,9 @@ public class ExtractClassRefactoring {
         commitResults(extractedClassFile);
     }
 
-    public PreviewProcessor getPreviewProcessor() {
+    public ExtractClassPreviewProcessor getPreviewProcessor() {
         return previewProcessor;
     }
-
-
 
     private PsiExpression convertPsiFieldToSetterCallExpression(PsiField psiField) {
         String originalFieldName = psiField.getNameIdentifier().getText();
@@ -978,10 +980,6 @@ public class ExtractClassRefactoring {
 
         PsiMethod realExtractedMethod = (PsiMethod) extractedClass.addBefore(newMethodDeclaration, extractedClass.getRBrace());
         sandboxToExtractedMethodMap.put(newMethodDeclaration, realExtractedMethod);
-
-        if (previewUsage) {
-            previewProcessor.getMethodComparingMap().put((PsiMethod) extractedMethod.copy(), (PsiMethod) realExtractedMethod.copy());
-        }
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -2635,6 +2633,16 @@ public class ExtractClassRefactoring {
         }
     }
 
+    private PsiMethod getInitialSourceMethod(PsiMethod methodDeclaration) {
+        if (!updatedSourceMethodToInitialCopy.containsKey(methodDeclaration)) {
+            PsiMethod initialSourceMethod = (PsiMethod) methodDeclaration.copy();
+            updatedSourceMethodToInitialCopy.put(methodDeclaration, initialSourceMethod);
+            methodElementsComparingMap.put(initialSourceMethod, new ArrayList<>());
+            methodComparingList.add(new PsiMethodPair(initialSourceMethod, methodDeclaration));
+        }
+
+        return updatedSourceMethodToInitialCopy.get(methodDeclaration);
+    }
 
     private enum HandleType {
         COLLECT, MODIFY
@@ -2651,9 +2659,19 @@ public class ExtractClassRefactoring {
         for (PsiMethod methodDeclaration : contextMethods) {
             if (!extractedMethods.contains(methodDeclaration)) {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
+
+                PsiMethod initialSourceMethod = null;
+                List<PsiElementPair> comparingList = null;
+                if (previewUsage && handleType == HandleType.MODIFY) {
+                    initialSourceMethod = getInitialSourceMethod(methodDeclaration);
+                    comparingList = methodElementsComparingMap.get(initialSourceMethod);
+                }
+
                 if (methodBody != null) {
                     PsiStatement[] statements = methodBody.getStatements();
-                    for (PsiStatement statement : statements) {
+                    for (int i = 0; i < statements.length; i++) {
+                        PsiStatement statement = statements[i];
+
                         List<PsiExpression> assignments = expressionExtractor.getAssignments(statement);
                         for (PsiExpression expression : assignments) {
                             if (!expression.isValid()) {
@@ -2973,6 +2991,10 @@ public class ExtractClassRefactoring {
                                     }
                                 }
                             }
+                        }
+
+                        if (initialSourceMethod != null) {
+                            comparingList.add(new PsiElementPair(initialSourceMethod.getBody().getStatements()[i], statement, initialSourceMethod));
                         }
                     }
                 }

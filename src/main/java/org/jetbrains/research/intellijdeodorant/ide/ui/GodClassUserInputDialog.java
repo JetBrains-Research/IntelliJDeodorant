@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+import com.intellij.openapi.fileTypes.*;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
     private static final String TITLE = IntelliJDeodorantBundle.message("god.class.dialog.title");

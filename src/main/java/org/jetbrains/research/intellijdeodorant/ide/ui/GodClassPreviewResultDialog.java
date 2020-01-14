@@ -2,54 +2,37 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.diff.DiffContentFactory;
 import com.intellij.diff.DiffDialogHints;
-import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.actions.impl.MutableDiffRequestChain;
 import com.intellij.diff.chains.DiffRequestChain;
-import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.contents.DiffContent;
-import com.intellij.diff.contents.FileDocumentContentImpl;
 import com.intellij.diff.impl.CacheDiffRequestChainProcessor;
 import com.intellij.diff.impl.DiffRequestProcessor;
 import com.intellij.diff.impl.DiffWindow;
-import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.diff.util.DiffUtil;
-import com.intellij.lang.java.JavaLanguage;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElementFactory;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.panels.HorizontalLayout;
-import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
-import com.intellij.vcs.log.history.FileHistoryDiffPreview;
-import org.intellij.lang.annotations.JdkConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.PreviewProcessor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiElementPair;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiMethodPair;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
-import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import java.awt.*;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class GodClassPreviewResultDialog extends DiffWindow {
     private MutableDiffRequestChain myChain;
-    private PreviewProcessor previewProcessor;
+    private ExtractClassPreviewProcessor previewProcessor;
     private Project project;
 
     public GodClassPreviewResultDialog(@Nullable Project project, @NotNull MutableDiffRequestChain requestChain, @NotNull DiffDialogHints hints, ExtractClassRefactoring refactoring) {
@@ -62,20 +45,13 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
         previewProcessor = refactoring.getPreviewProcessor();
 
-        PsiElementFactory factory = PsiElementFactory.getInstance(project);
-        PsiFileFactory fileFactory = PsiFileFactory.getInstance(project);
-
-        Set<PsiMethod> keys = previewProcessor.getMethodComparingMap().keySet();
-        PsiMethod method2 = previewProcessor.getMethodComparingMap().get(keys.iterator().next());
-
-        PsiFile file1 = fileFactory.createFileFromText(JavaLanguage.INSTANCE, keys.iterator().next().getText());
-        PsiFile file2 = fileFactory.createFileFromText(JavaLanguage.INSTANCE, method2.getText());
+        PsiMethod method1 = previewProcessor.getMethodComparingList().get(5).getInitialPsiMethod();
+        PsiMethod method2 = previewProcessor.getMethodComparingList().get(5).getUpdatedPsiMethod();
 
         DiffContentFactory contentFactory = DiffContentFactory.getInstance();
-        //DiffRequestFactory requestFactory = DiffRequestFactory.getInstance();
 
-        DiffContent c1 = contentFactory.create(project, file1.getVirtualFile());
-        DiffContent c2 = contentFactory.create(project, file2.getVirtualFile());
+        DiffContent c1 = contentFactory.create(project, method1.getText(), JavaFileType.INSTANCE);
+        DiffContent c2 = contentFactory.create(project, method2.getText(), JavaFileType.INSTANCE);
 
         myChain.setContent1(c1);
         myChain.setContent2(c2);
@@ -137,7 +113,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
             @Override
             public String getColumnName(int column) {
-                return "lol";
+                return "";
             }
 
             @Override
@@ -150,7 +126,13 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
             @Override
             public Object getValueAt(Object node, int column) {
-                return "kek " + node.toString();
+                if (node instanceof PsiMethodPair) {
+                    return ((PsiMethodPair) node).getInitialPsiMethod().getName();
+                } else if (node instanceof PsiElementPair) {
+                    return ((PsiElementPair) node).getInitialPsiElement().getText();
+                }
+
+                return "";
             }
 
             @Override
@@ -168,21 +150,27 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
             @Override
             public boolean isLeaf(Object node) {
-                return false;
+                return node instanceof PsiElementPair;
             }
 
             @Override
             public Object getChild(Object parent, int index) {
-                if (index < 5) {
-                    return "lol " + index;
-                } else {
-                    return null;
+                if (parent instanceof PsiMethodPair) {
+                    PsiMethod initialMethod = ((PsiMethodPair) parent).getInitialPsiMethod();
+                    return previewProcessor.getMethodElementsComparingMap().get(initialMethod);
                 }
+
+                return previewProcessor.getMethodComparingList().get(index);
             }
 
             @Override
             public int getChildCount(Object parent) {
-                return 5;
+                if (parent instanceof PsiMethodPair) {
+                    PsiMethod initialMethod = ((PsiMethodPair) parent).getInitialPsiMethod();
+                    return previewProcessor.getMethodElementsComparingMap().get(initialMethod).size();
+                }
+
+                return previewProcessor.getMethodComparingList().size();
             }
         }
     }

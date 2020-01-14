@@ -1,15 +1,13 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass;
 
 import com.intellij.psi.*;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 //TODO comment I guess
-public class PreviewProcessor {
-    private Map<PsiMethod, PsiMethod> methodComparingMap = new LinkedHashMap<>();
+public class ExtractClassPreviewProcessor {
+    private List<PsiMethodPair> methodComparingList = new ArrayList<>();
+    private Map<PsiMethod, ArrayList<PsiElementPair>> methodElementsComparingMap = new LinkedHashMap<>();
 
     public static SourceFileAndClass cloneSourceFile(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration, Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods) {
         PsiJavaFile copyFile = (PsiJavaFile) sourceFile.copy();
@@ -67,8 +65,12 @@ public class PreviewProcessor {
         }
     }
 
-    public Map<PsiMethod, PsiMethod> getMethodComparingMap() {
-        return methodComparingMap;
+    public List<PsiMethodPair> getMethodComparingList() {
+        return methodComparingList;
+    }
+
+    public Map<PsiMethod, ArrayList<PsiElementPair>> getMethodElementsComparingMap() {
+        return methodElementsComparingMap;
     }
 
     public static class SourceFileAndClass {
@@ -86,6 +88,48 @@ public class PreviewProcessor {
 
         public PsiJavaFile getSourceFile() {
             return sourceFile;
+        }
+    }
+
+    public static class PsiMethodPair {
+        private PsiMethod initialPsiMethod;
+        private PsiMethod updatedPsiMethod;
+
+        public PsiMethodPair(PsiMethod initialPsiMethod, PsiMethod updatedPsiMethod) {
+            this.initialPsiMethod = initialPsiMethod;
+            this.updatedPsiMethod = updatedPsiMethod;
+        }
+
+        public PsiMethod getInitialPsiMethod() {
+            return initialPsiMethod;
+        }
+
+        public PsiMethod getUpdatedPsiMethod() {
+            return updatedPsiMethod;
+        }
+    }
+
+    public static class PsiElementPair {
+        private PsiElement initialPsiElement;
+        private PsiElement updatedPsiElement;
+        private PsiMethod initialMethod;
+
+        public PsiElementPair(PsiElement initialPsiElement, PsiElement updatedPsiElement, PsiMethod initialMethod) {
+            this.initialPsiElement = initialPsiElement;
+            this.updatedPsiElement = updatedPsiElement;
+            this.initialMethod = initialMethod;
+        }
+
+        public PsiElement getInitialPsiElement() {
+            return initialPsiElement;
+        }
+
+        public PsiElement getUpdatedPsiElement() {
+            return updatedPsiElement;
+        }
+
+        public PsiMethod getInitialMethod() {
+            return initialMethod;
         }
     }
 }
