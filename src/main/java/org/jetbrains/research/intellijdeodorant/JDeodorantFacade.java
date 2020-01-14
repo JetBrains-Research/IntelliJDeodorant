@@ -8,7 +8,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
 import org.jetbrains.research.intellijdeodorant.core.distance.*;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
 import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
