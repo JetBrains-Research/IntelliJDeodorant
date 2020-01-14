@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 
 public interface RefactoringVisitor<R> {
     @NotNull

@@ -31,8 +31,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSl
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PDGNode;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.ExtractMethodRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod.MyExtractMethodProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.MyExtractMethodProcessor;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListener;
@@ -58,7 +58,8 @@ class ExtractMethodPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "long.method.detect.indicator.status";
     private static final String EXTRACT_METHOD_REFACTORING_NAME = "extract.method.refactoring.name";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export.button";
+    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
+    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
 
     @NotNull
     private final AnalysisScope scope;
@@ -68,6 +69,10 @@ class ExtractMethodPanel extends JPanel {
     private final List<ExtractMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
+    private JLabel refreshLabel = new JLabel(
+            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+            SwingConstants.CENTER
+    );
 
     ExtractMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
@@ -91,8 +96,9 @@ class ExtractMethodPanel extends JPanel {
         jTree.addKeyListener((EnterKeyListener) this::openMethodDefinition);
         jTree.addTreeSelectionListener((ElementSelectionListener) this::enableRefactorButtonIfAnySelected);
         jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        refreshLabel.setForeground(JBColor.GRAY);
         scrollPane = ScrollPaneFactory.createScrollPane(jTree);
-        scrollPane.setVisible(false);
+        scrollPane.setViewportView(refreshLabel);
         return scrollPane;
     }
 
@@ -125,12 +131,16 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Filters available refactorings suggestions from refactoring list
+     * Filters available refactorings suggestions from refactoring list.
      *
-     * @return list of available refactorings suggestions
+     * @return list of available refactorings suggestions.
      */
     private List<ExtractMethodRefactoring> getAvailableRefactoringSuggestions() {
-        return refactorings.stream().filter(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().allMatch(ASTSlice::areSliceStatementsValid)).collect(Collectors.toList());
+        return refactorings.stream()
+                .filter(extractMethodRefactoring -> extractMethodRefactoring.getCandidates()
+                        .stream()
+                        .allMatch(ASTSlice::areSliceStatementsValid))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -146,7 +156,10 @@ class ExtractMethodPanel extends JPanel {
     }
 
     private boolean isAnyRefactoringSuggestionAvailable() {
-        return refactorings.stream().anyMatch(extractMethodRefactoring -> extractMethodRefactoring.getCandidates().stream().anyMatch(ASTSlice::areSliceStatementsValid));
+        return refactorings.stream()
+                .anyMatch(extractMethodRefactoring -> extractMethodRefactoring.getCandidates()
+                        .stream()
+                        .anyMatch(ASTSlice::areSliceStatementsValid));
     }
 
     /**
@@ -196,6 +209,7 @@ class ExtractMethodPanel extends JPanel {
                     exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
                     ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
                     jTree.setModel(model);
+                    scrollPane.setViewportView(jTree);
                     scrollPane.setVisible(true);
                 });
             }
