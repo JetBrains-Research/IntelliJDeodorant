@@ -18,6 +18,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringUtility;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.PreviewProcessor;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.PreviewProcessor.SourceFileAndClass;
 import org.jetbrains.research.intellijdeodorant.util.math.AdjacencyList;
 import org.jetbrains.research.intellijdeodorant.util.math.Edge;
 import org.jetbrains.research.intellijdeodorant.util.math.Node;
@@ -58,6 +60,8 @@ public class ExtractClassRefactoring {
     private JavaCodeStyleManager javaCodeStyleManager;
     private CodeStyleManager codeStyleManager;
 
+    private Map<PsiElement, PsiElement> previewElementsMap;
+
     /*
     We create each of the new methods inside 'sandbox' file - a full copy of the source file, in order to correctly
     resolve all references, which is vital for IDEA API.
@@ -68,10 +72,36 @@ public class ExtractClassRefactoring {
     private Map<PsiField, PsiField> sandboxToSourceFieldMap;
     private Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
 
+    private PreviewProcessor previewProcessor = new PreviewProcessor();
+
+    /**
+     * True if we are not actually performing a refactoring, just collecting intermediate changes to create a preview.
+     */
+    private boolean previewUsage;
+
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
                                    Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
         this.sourceFile = sourceFile;
         this.sourceTypeDeclaration = sourceTypeDeclaration;
+        init(extractedFieldFragments, extractedMethods, delegateMethods, defaultExtractedTypeName);
+    }
+
+    public void setPreviewUsage() {
+        previewUsage = true;
+
+        SourceFileAndClass clone = PreviewProcessor.cloneSourceFile(sourceFile, sourceTypeDeclaration, extractedFieldFragments, extractedMethods, delegateMethods);
+        this.sourceFile = clone.getSourceFile();
+        this.sourceTypeDeclaration = clone.getSourceTypeDeclaration();
+
+        init(extractedFieldFragments, extractedMethods, delegateMethods, defaultExtractedTypeName);
+    }
+
+    private void init(Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
+        this.project = sourceFile.getProject();
+        this.extractedFieldFragments = extractedFieldFragments;
+        this.extractedMethods = extractedMethods;
+        this.delegateMethods = delegateMethods;
+
         this.additionalArgumentsAddedToExtractedMethods = new LinkedHashMap<>();
         this.additionalParametersAddedToExtractedMethods = new LinkedHashMap<>();
         this.sourceMethodBindingsChangedWithPublicModifier = new LinkedHashSet<>();
@@ -80,20 +110,17 @@ public class ExtractClassRefactoring {
         this.oldMethodInvocationsWithinExtractedMethods = new LinkedHashMap<>();
         this.newMethodInvocationsWithinExtractedMethods = new LinkedHashMap<>();
         this.oldToNewExtractedMethodDeclarationMap = new LinkedHashMap<>();
-        this.extractedFieldFragments = extractedFieldFragments;
-        this.extractedMethods = extractedMethods;
-        this.delegateMethods = delegateMethods;
+
         this.defaultExtractedTypeName = defaultExtractedTypeName;
         this.extractedTypeName = defaultExtractedTypeName;
         this.constructorFinalFieldAssignmentMap = new LinkedHashMap<>();
         this.extractedClassConstructorParameterMap = new LinkedHashMap<>();
         this.extractedFieldsWithThisExpressionInTheirInitializer = new LinkedHashSet<>();
-        for (PsiMethod extractedMethod : extractedMethods) {
+        for (PsiMethod extractedMethod : this.extractedMethods) {
             additionalArgumentsAddedToExtractedMethods.put(extractedMethod, new LinkedHashSet<>());
             additionalParametersAddedToExtractedMethods.put(extractedMethod, new LinkedHashSet<>());
         }
 
-        this.project = sourceFile.getProject();
         this.factory = PsiElementFactory.getInstance(project);
         this.fileFactory = PsiFileFactory.getInstance(project);
         this.psiManager = PsiManager.getInstance(project);
@@ -102,6 +129,7 @@ public class ExtractClassRefactoring {
         this.sourceToSandboxMethodMap = new LinkedHashMap<>();
         this.sandboxToSourceFieldMap = new LinkedHashMap<>();
         this.sandboxToExtractedMethodMap = new LinkedHashMap<>();
+        this.previewUsage = previewUsage;
     }
 
     public String getExtractedTypeName() {
@@ -197,6 +225,12 @@ public class ExtractClassRefactoring {
 
         commitResults(extractedClassFile);
     }
+
+    public PreviewProcessor getPreviewProcessor() {
+        return previewProcessor;
+    }
+
+
 
     private PsiExpression convertPsiFieldToSetterCallExpression(PsiField psiField) {
         String originalFieldName = psiField.getNameIdentifier().getText();
@@ -788,8 +822,11 @@ public class ExtractClassRefactoring {
 
         extractedClassFile.add(extractedClass);
 
-        extractedClassFile = (PsiJavaFile) sourceFile.getContainingDirectory().add(extractedClassFile);
-        FileContentUtil.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
+        if (sourceFile.getContainingDirectory() != null) {
+            extractedClassFile = (PsiJavaFile) sourceFile.getContainingDirectory().add(extractedClassFile);
+        }
+
+        //FileContentUtil.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
 
         return extractedClassFile;
     }
@@ -829,6 +866,10 @@ public class ExtractClassRefactoring {
     }
 
     private void commitResults(PsiJavaFile extractedClassFile) {
+        if (previewUsage) {
+            return;
+        }
+
         commit(extractedClassFile);
         commit(sourceFile);
     }
@@ -937,6 +978,10 @@ public class ExtractClassRefactoring {
 
         PsiMethod realExtractedMethod = (PsiMethod) extractedClass.addBefore(newMethodDeclaration, extractedClass.getRBrace());
         sandboxToExtractedMethodMap.put(newMethodDeclaration, realExtractedMethod);
+
+        if (previewUsage) {
+            previewProcessor.getMethodComparingMap().put((PsiMethod) extractedMethod.copy(), (PsiMethod) realExtractedMethod.copy());
+        }
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

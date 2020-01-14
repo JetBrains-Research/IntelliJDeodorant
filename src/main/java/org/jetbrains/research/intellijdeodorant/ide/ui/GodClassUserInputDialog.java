@@ -1,6 +1,19 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
+import com.intellij.diff.DiffContentFactory;
+import com.intellij.diff.DiffDialogHints;
+import com.intellij.diff.DiffRequestFactory;
+import com.intellij.diff.actions.impl.MutableDiffRequestChain;
+import com.intellij.diff.chains.DiffRequestChain;
+import com.intellij.diff.chains.SimpleDiffRequestChain;
+import com.intellij.diff.contents.DiffContent;
+import com.intellij.diff.contents.FileContentImpl;
+import com.intellij.diff.contents.FileDocumentContentImpl;
+import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
@@ -17,6 +30,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -168,7 +182,28 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     @Override
     protected void doAction() {
         if (isPreviewUsages()) {
-            //TODO
+            VirtualFile v1 = refactoring.getSourceFile().getVirtualFile();
+
+            DiffContentFactory contentFactory = DiffContentFactory.getInstance();
+            DiffRequestFactory requestFactory = DiffRequestFactory.getInstance();
+
+            DiffContent c1 = contentFactory.create(getProject(), v1);
+            DiffContent c2 = contentFactory.create(getProject(), v1);
+
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(c1, c2);
+
+
+            //SimpleDiffRequest r1 = new SimpleDiffRequest("difffff", f1, f2,
+              //      refactoring.getSourceFile().getName(), refactoring.getSourceFile().getName());
+
+            //SimpleDiffRequest r2 = new SimpleDiffRequest("difffff", f1, f2,
+              //      refactoring.getSourceFile().getName(), refactoring.getSourceFile().getName());
+
+
+            GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT, refactoring);
+            previewResultDialog.show();
+
+            setPreviewResults(false);
         } else {
             closeOKAction();
             refactoring.setExtractedTypeName(extractedClassNameField.getText());
