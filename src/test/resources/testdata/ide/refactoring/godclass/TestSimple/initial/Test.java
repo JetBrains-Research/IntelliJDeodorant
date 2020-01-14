@@ -4,7 +4,7 @@ public class Test {
     public int toto = 10;
 
     private int SIZE = 100;
-    private int[] array = new int[6];
+    private int[] array = new int[SIZE];
     private int random = 5;
 
     public int getSumMult() {

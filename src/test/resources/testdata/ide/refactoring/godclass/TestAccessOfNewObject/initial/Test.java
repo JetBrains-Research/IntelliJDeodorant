@@ -26,7 +26,6 @@ public class Test {
         test.c = c + 5;
 
         //This is a bug in the original plugin. Actually it gives here test.testProduct.setD(d);
-        //I have no motivation to find and reproduce this bug.
         test.d = d;
 
         test.e = e + d + a + b + c;

@@ -2,7 +2,7 @@ package TestSimple.actual;
 
 public class TestProduct {
     private int toto = 10;
-    private int[] array = new int[6];
+    private int[] array = new int[SIZE];
     private int SIZE = 100;
 
     public int[] getArray() {

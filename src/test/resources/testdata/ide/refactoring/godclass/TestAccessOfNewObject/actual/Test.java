@@ -24,7 +24,6 @@ public class Test {
         test.c = c + 5;
 
         //This is a bug in the original plugin. Actually it gives here test.testProduct.setD(d);
-        //I have no motivation to find and reproduce this bug.
         test.testProduct.setD(testProduct.getD());
 
         test.testProduct.setE(testProduct.getE() + testProduct.getD() + a + b + c);

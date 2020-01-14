@@ -11,6 +11,9 @@ import com.intellij.diff.contents.FileContentImpl;
 import com.intellij.diff.contents.FileDocumentContentImpl;
 import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiPackage;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -40,6 +43,8 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     private static final String CLASS_NAME_NOT_VALID = IntelliJDeodorantBundle.message("god.class.dialog.class.name.not.valid");
     private static final String CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG = IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists.javalang");
     private static final String CLASS_NAME_ALREADY_EXISTS_KEY = "god.class.dialog.class.name.already.exists";
+
+    private static final int MAIN_PANEL_VERTICAL_GAP = 5;
 
     private ExtractClassRefactoring refactoring;
     @Nullable
@@ -144,7 +149,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
         builder.addLabeledComponent(restoreButton, emptyComponent);
 
-        mainPanel = builder.addVerticalGap(5).getPanel();
+        mainPanel = builder.addVerticalGap(MAIN_PANEL_VERTICAL_GAP).getPanel();
     }
 
     private void setMessage(String message) {
@@ -211,6 +216,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         }
     }
 
+    @Override
     protected boolean hasHelpAction() {
         return false;
     }

@@ -24,7 +24,7 @@ public class Test implements Cloneable {
         test.b = b;
         test.c = c + 5;
 
-        //Original plugin gives here `test.testProduct.setD(d);` This is bug. I have no motivation to find it and reproduce.
+        //Original plugin gives here `test.testProduct.setD(d);` This is a bug.
         test.d = d;
 
         test.e = e + d + a + b + c;
