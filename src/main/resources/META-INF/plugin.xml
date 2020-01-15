@@ -4,12 +4,13 @@
     <vendor email="zarina.kurbatova@gmail.com">Zarina Kurbatova</vendor>
 
     <description><![CDATA[An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
-        <p>Currently, the plugin supports four code smells:
+        <p>Currently, the plugin supports following code smells:
             <ul>
-               <li>Feature Envy problems can be resolved by appropriate Move Method refactorings.</li>
-               <li>Long Method problems can be resolved by appropriate Extract Method refactorings.</li>
-               <li>Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.</li>
-               <li>State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.</li>
+               <li>Feature Envy problems can be resolved by appropriate Move Method refactorings</li>
+               <li>Long Method problems can be resolved by appropriate Extract Method refactorings</li>
+               <li>Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings</li>
+               <li>State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings</li>
+               <li>God Class problems can be resolved by appropriate Extract Class refactorings</li>
             </ul>
         </p>
          ]]>
