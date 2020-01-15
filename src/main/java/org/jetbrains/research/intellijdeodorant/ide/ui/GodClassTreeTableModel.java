@@ -4,9 +4,9 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandid
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractedConcept;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassCandidateRefactoringGroup;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.java.JavaLanguage;
