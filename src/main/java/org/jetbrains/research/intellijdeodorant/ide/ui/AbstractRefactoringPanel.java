@@ -16,11 +16,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
+import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -85,6 +87,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
+        registerPsiModificationListener();
         showRefreshingProposal();
     }
 
@@ -135,6 +138,19 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         treeTable.getTree().addTreeSelectionListener((ElementSelectionListener) this::enableRefactorButtonIfAnySelected);
         scrollPane = ScrollPaneFactory.createScrollPane(treeTable);
         return scrollPane;
+    }
+
+    /**
+     * Adds a listener that invalidates found refactoring opportunities if the structure of PSI is changed.
+     */
+    private void registerPsiModificationListener() {
+        MessageBus projectMessageBus = scope.getProject().getMessageBus();
+        projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, new PsiModificationTracker.Listener() {
+            @Override
+            public void modificationCountChanged() {
+                ApplicationManager.getApplication().invokeLater(() -> showRefreshingProposal());
+            }
+        });
     }
 
     /**
