@@ -8,8 +8,8 @@ import com.intellij.psi.PsiReferenceExpression;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
-import org.jetbrains.research.intellijdeodorant.util.math.Cluster;
-import org.jetbrains.research.intellijdeodorant.util.math.Clustering;
+import org.jetbrains.research.intellijdeodorant.utils.math.Cluster;
+import org.jetbrains.research.intellijdeodorant.utils.math.Clustering;
 
 import java.util.*;
 

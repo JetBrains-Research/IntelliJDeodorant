@@ -18,10 +18,10 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringUtility;
-import org.jetbrains.research.intellijdeodorant.util.math.AdjacencyList;
-import org.jetbrains.research.intellijdeodorant.util.math.Edge;
-import org.jetbrains.research.intellijdeodorant.util.math.Node;
-import org.jetbrains.research.intellijdeodorant.util.math.TarjanAlgorithm;
+import org.jetbrains.research.intellijdeodorant.utils.math.AdjacencyList;
+import org.jetbrains.research.intellijdeodorant.utils.math.Edge;
+import org.jetbrains.research.intellijdeodorant.utils.math.Node;
+import org.jetbrains.research.intellijdeodorant.utils.math.TarjanAlgorithm;
 
 import java.util.*;
 

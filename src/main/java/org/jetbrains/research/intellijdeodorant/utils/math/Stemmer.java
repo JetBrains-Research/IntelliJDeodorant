@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.util.math;
+package org.jetbrains.research.intellijdeodorant.utils.math;
 
 /*
 

@@ -1,7 +1,7 @@
-package org.jetbrains.research.intellijdeodorant.util;
+package org.jetbrains.research.intellijdeodorant.utils;
 
-import org.jetbrains.research.intellijdeodorant.util.math.HumaniseCamelCase;
-import org.jetbrains.research.intellijdeodorant.util.math.Stemmer;
+import org.jetbrains.research.intellijdeodorant.utils.math.HumaniseCamelCase;
+import org.jetbrains.research.intellijdeodorant.utils.math.Stemmer;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -8,7 +8,7 @@ import org.jetbrains.research.intellijdeodorant.core.GodClassVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
-import org.jetbrains.research.intellijdeodorant.util.TopicFinder;
+import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
 
