@@ -5,6 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateGroup;
 import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
@@ -77,6 +78,18 @@ public class ExtractClassRefactoringType extends RefactoringType {
         @Override
         public String toString() {
             return ((ExtractClassCandidateRefactoring) getCandidateRefactoring()).getTopics().toString();
+        }
+
+        @NotNull
+        @Override
+        public String getDescription() {
+            return candidateRefactoring.toString();
+        }
+
+        @NotNull
+        @Override
+        public String getExportDefaultFilename() {
+            return "God-Class-Refactoring";
         }
     }
 
