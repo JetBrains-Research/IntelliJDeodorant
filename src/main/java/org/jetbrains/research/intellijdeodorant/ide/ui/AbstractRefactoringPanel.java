@@ -141,7 +141,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Adds listener which invalidates found refactoring opportunities if Psi structure of project is changed.
+     * Adds a listener that invalidates found refactoring opportunities if the structure of PSI is changed.
      */
     private void registerPsiModificationListener() {
         MessageBus projectMessageBus = scope.getProject().getMessageBus();
