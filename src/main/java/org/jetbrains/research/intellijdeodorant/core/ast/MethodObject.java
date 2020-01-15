@@ -6,10 +6,11 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.StatementObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.StatementObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
+import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 
 import java.util.*;
@@ -118,7 +119,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
-    FieldInstructionObject isGetter() {
+    public FieldInstructionObject isGetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -140,7 +141,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    FieldInstructionObject isSetter() {
+    public FieldInstructionObject isSetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -726,5 +727,27 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public String getSignature() {
         return constructorObject.getSignature();
+    }
+
+    public boolean containsFieldAccessOfEnclosingClass() {
+        //check for field access like SegmentedTimeline.this.segmentsIncluded
+        if (psiMethod.getBody() == null) {
+            return false;
+        }
+
+        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(psiMethod.getBody().getStatements());
+        for (PsiExpression expression : fieldAccesses) {
+            PsiReferenceExpression fieldReference = (PsiReferenceExpression) expression;
+            Collection<PsiElement> psiElements = PsiTreeUtil.findChildrenOfType(fieldReference, PsiThisExpression.class);
+
+            for (PsiElement thisExpressionElement : psiElements) {
+                PsiThisExpression thisExpression = (PsiThisExpression) thisExpressionElement;
+                if (thisExpression.getQualifier() != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

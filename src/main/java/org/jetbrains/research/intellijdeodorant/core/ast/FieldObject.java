@@ -119,4 +119,10 @@ public class FieldObject extends VariableDeclarationObject {
     public PsiField getVariableDeclaration() {
         return getVariableDeclarationFragment();
     }
+
+    public FieldInstructionObject generateFieldInstruction() {
+        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, this.psiField);
+        fieldInstruction.setStatic(this._static);
+        return fieldInstruction;
+    }
 }

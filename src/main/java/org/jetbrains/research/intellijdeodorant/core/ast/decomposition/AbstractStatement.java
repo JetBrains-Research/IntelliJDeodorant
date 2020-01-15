@@ -1,12 +1,12 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import java.util.List;
-
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiStatement;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformationGenerator;
+
+import java.util.List;
 
 /**
  * Represents a PsiStatement (the equivalent of Statement from Eclipse AST).

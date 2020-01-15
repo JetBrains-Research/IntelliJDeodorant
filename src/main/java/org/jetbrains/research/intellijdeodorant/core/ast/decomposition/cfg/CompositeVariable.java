@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiVariable;
 
 public class CompositeVariable extends AbstractVariable {
@@ -16,7 +17,7 @@ public class CompositeVariable extends AbstractVariable {
                 argument.getType(), argument.isField(), argument.isParameter(), argument.isStatic(), rightPart);
     }
 
-    private CompositeVariable(PsiVariable origin, String variableName, String variableType,
+    private CompositeVariable(PsiElement origin, String variableName, String variableType,
                               boolean isField, boolean isParameter, boolean isStatic, AbstractVariable rightPart) {
         super(origin, variableName, variableType, isField, isParameter, isStatic);
         this.rightPart = rightPart;

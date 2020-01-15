@@ -1,13 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 import com.intellij.lang.jvm.JvmModifier;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
 import com.intellij.psi.PsiVariable;
 
 public abstract class AbstractVariable {
-    final PsiVariable origin;
+    final PsiElement origin; //Could be either PsiVariable or PsiClass in order to represent "this" element, that in Eclipse is instance of IVariableBinding, but not in IDEA.
     final String name;
     final String type;
     final boolean isField;
@@ -24,7 +26,7 @@ public abstract class AbstractVariable {
         this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
     }
 
-    AbstractVariable(PsiVariable origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
+    AbstractVariable(PsiElement origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
         this.origin = origin;
         this.name = name;
         this.type = type;
@@ -33,7 +35,7 @@ public abstract class AbstractVariable {
         this.isStatic = isStatic;
     }
 
-    public PsiVariable getOrigin() {
+    public PsiElement getOrigin() {
         return origin;
     }
 

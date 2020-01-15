@@ -1,16 +1,12 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
+import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractExpression;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 class MyAbstractExpression {
 

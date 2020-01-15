@@ -7,6 +7,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
+import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
@@ -34,6 +35,41 @@ public class JDeodorantFacade {
         List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<>(candidateRefactoring);
         Collections.sort(moveMethodCandidateList);
         return moveMethodCandidateList;
+    }
+
+    public static TreeSet<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+        new ASTReader(project, indicator);
+        SystemObject systemObject = ASTReader.getSystemObject();
+        if (systemObject != null) {
+            Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
+
+            Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
+            for (ClassObject classObject : classObjectsToBeExamined) {
+                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
+                    classNamesToBeExamined.add(classObject.getName());
+            }
+            MySystem system = new MySystem(systemObject, true);
+            DistanceMatrix distanceMatrix = new DistanceMatrix(system);
+
+            List<ExtractClassCandidateRefactoring> extractClassCandidateList = new ArrayList<>(distanceMatrix.getExtractClassCandidateRefactorings(classNamesToBeExamined, indicator));
+
+            HashMap<String, ExtractClassCandidateGroup> groupedBySourceClassMap = new HashMap<>();
+            for (ExtractClassCandidateRefactoring candidate : extractClassCandidateList) {
+                if (groupedBySourceClassMap.containsKey(candidate.getSourceEntity())) {
+                    groupedBySourceClassMap.get(candidate.getSourceEntity()).addCandidate(candidate);
+                } else {
+                    ExtractClassCandidateGroup group = new ExtractClassCandidateGroup(candidate.getSourceEntity());
+                    group.addCandidate(candidate);
+                    groupedBySourceClassMap.put(candidate.getSourceEntity(), group);
+                }
+            }
+            for (String sourceClass : groupedBySourceClassMap.keySet()) {
+                groupedBySourceClassMap.get(sourceClass).groupConcepts();
+            }
+            return new TreeSet<>(groupedBySourceClassMap.values());
+        } else {
+            return new TreeSet<>();
+        }
     }
 
     public static Set<ASTSliceGroup> getExtractMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {

@@ -42,9 +42,6 @@ import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Panel for Type-State Checking refactorings.
- */
 public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
@@ -52,6 +49,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
 
     private String detectIndicatorStatusTextKey;
+
     @NotNull
     protected final AnalysisScope scope;
     private AbstractTreeTableModel model;
@@ -192,14 +190,13 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      */
     private void refactorSelected() {
         TreePath selectedPath = treeTable.getTree().getSelectionPath();
-        if (selectedPath.getPathCount() == refactorDepth) {
+        if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
             AbstractCandidateRefactoring computationSlice = (AbstractCandidateRefactoring) selectedPath.getLastPathComponent();
             removeSelection();
             doRefactor(computationSlice);
         }
     }
 
-    //TODO comment
     protected abstract void doRefactor(AbstractCandidateRefactoring candidateRefactoring);
 
     /**
@@ -291,13 +288,11 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
-    //TODO
     public static void highlightMethod(@Nullable PsiMethod sourceMethod,
                                        AnalysisScope scope, boolean openInEditor) {
         highlightStatement(sourceMethod, scope, sourceMethod, openInEditor);
     }
 
-    //TODO
     public static void highlightField(@Nullable PsiField sourceField, AnalysisScope scope, boolean openInEditor) {
         new Task.Backgroundable(scope.getProject(), "Search Definition") {
             @Override
@@ -316,7 +311,6 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         }.queue();
     }
 
-    //TODO
     private static void highlightPsiElement(PsiElement psiElement, boolean openInEditor) {
         if (openInEditor) {
             EditorHelper.openInEditor(psiElement);
@@ -335,7 +329,6 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                 0
         );
 
-        // TODO remove? editor.getMarkupModel().removeAllHighlighters();
         editor.getMarkupModel().addRangeHighlighter(
                 psiElement.getTextRange().getStartOffset(),
                 psiElement.getTextRange().getEndOffset(),
