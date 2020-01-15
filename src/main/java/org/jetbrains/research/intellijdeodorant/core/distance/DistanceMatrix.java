@@ -1,15 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.psi.*;
-import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.ParameterObject;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.core.ast.*;
+import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
+import org.jetbrains.research.intellijdeodorant.utils.math.Cluster;
+import org.jetbrains.research.intellijdeodorant.utils.math.Clustering;
 
 import java.util.*;
 
@@ -24,6 +24,7 @@ public class DistanceMatrix {
     private final Map<String, Set<String>> classMap;
     private final MySystem system;
     private final int maximumNumberOfSourceClassMembersAccessedByMoveMethodCandidate = 2;
+    private static final int maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate = 2;
 
     public DistanceMatrix(MySystem system) {
         this.system = system;
@@ -276,6 +277,7 @@ public class DistanceMatrix {
                 if (classMap.containsKey(classOrigin)) accessMap.put(classOrigin, list);
             }
         }
+
         for (String key1 : accessMap.keySet()) {
             ClassObject classObject = ASTReader.getSystemObject().getClassObject(key1);
             if (classObject != null && classObject.getSuperclass() != null) {
@@ -307,4 +309,47 @@ public class DistanceMatrix {
         return jaccardDistanceMatrix;
     }
 
+    public List<ExtractClassCandidateRefactoring> getExtractClassCandidateRefactorings(Set<String> classNamesToBeExamined, ProgressIndicator indicator) {
+        List<ExtractClassCandidateRefactoring> candidateList = new ArrayList<>();
+        Iterator<MyClass> classIt = system.getClassIterator();
+        ArrayList<MyClass> oldClasses = new ArrayList<>();
+
+        while (classIt.hasNext()) {
+            MyClass myClass = classIt.next();
+            if (classNamesToBeExamined.contains(myClass.getName())) {
+                oldClasses.add(myClass);
+            }
+        }
+
+        indicator.setText("Identification of Extract Class refactoring opportunities");
+        indicator.setFraction(0.0);
+        for (MyClass sourceClass : oldClasses) {
+            if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
+                double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
+                Clustering clustering = Clustering.getInstance(0, distanceMatrix);
+                ArrayList<Entity> entities = new ArrayList<>();
+                entities.addAll(sourceClass.getAttributeList());
+                entities.addAll(sourceClass.getMethodList());
+                HashSet<Cluster> clusters = clustering.clustering(entities);
+                int processedClusters = 0;
+
+                for (Cluster cluster : clusters) {
+                    processedClusters += 1;
+                    indicator.setFraction(((double) processedClusters) / clusters.size());
+                    ExtractClassCandidateRefactoring candidate = new ExtractClassCandidateRefactoring(system, sourceClass, cluster.getEntities());
+                    if (candidate.isApplicable()) {
+                        int sourceClassDependencies = candidate.getDistinctSourceDependencies();
+                        int extractedClassDependencies = candidate.getDistinctTargetDependencies();
+                        if (sourceClassDependencies <= maximumNumberOfSourceClassMembersAccessedByExtractClassCandidate &&
+                                sourceClassDependencies < extractedClassDependencies) {
+                            candidateList.add(candidate);
+                        }
+                    }
+                }
+                // Clustering End
+            }
+        }
+        indicator.setFraction(1.0);
+        return candidateList;
+    }
 }

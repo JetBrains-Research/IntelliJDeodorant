@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
 public enum ExpressionType {
-    
+
     NORMAL_ANNOTATION,
     MARKER_ANNOTATION,
     SINGLE_MEMBER_ANNOTATION,

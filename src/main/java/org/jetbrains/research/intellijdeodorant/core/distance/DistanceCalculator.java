@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 class DistanceCalculator {
 

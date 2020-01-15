@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-abstract class CandidateRefactoring {
+public abstract class CandidateRefactoring {
     public abstract String getSourceEntity();
 
     public abstract String getSource();
@@ -15,7 +15,7 @@ abstract class CandidateRefactoring {
     protected abstract Set<String> getEntitySet();
 
     public abstract int getDistinctSourceDependencies();
-    
+
     public abstract int getDistinctTargetDependencies();
 
     public String getAnnotationText() {

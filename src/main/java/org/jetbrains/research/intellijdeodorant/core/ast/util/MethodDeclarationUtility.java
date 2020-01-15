@@ -1,9 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.util;
 
 import com.intellij.psi.*;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.CompositeVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

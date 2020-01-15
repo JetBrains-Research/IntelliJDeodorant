@@ -21,7 +21,7 @@ public class MyAttributeInstruction {
     public void setReference(boolean reference) {
         this.reference = reference;
     }
-    
+
     public String getClassOrigin() {
         return classOrigin;
     }
@@ -39,14 +39,14 @@ public class MyAttributeInstruction {
     }
 
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
 
         if (o instanceof MyAttributeInstruction) {
-            MyAttributeInstruction attribute = (MyAttributeInstruction)o;
+            MyAttributeInstruction attribute = (MyAttributeInstruction) o;
             return this.classOrigin.equals(attribute.classOrigin) && this.classType.equals(attribute.classType) &&
-                this.name.equals(attribute.name);
+                    this.name.equals(attribute.name);
         }
         return false;
     }

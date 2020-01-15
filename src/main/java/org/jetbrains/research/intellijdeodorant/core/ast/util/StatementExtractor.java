@@ -1,10 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.util;
 
+import com.intellij.psi.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.intellij.psi.*;
 
 public class StatementExtractor {
 
@@ -20,6 +20,11 @@ public class StatementExtractor {
     }
 
     public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) {
+        instanceChecker = new InstanceOfVariableDeclarationStatement();
+        return getStatements(statement);
+    }
+
+    public List<PsiStatement> getVariableDeclarationStatements(PsiStatement[] statement) {
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
     }
@@ -45,6 +50,11 @@ public class StatementExtractor {
     }
 
     public List<PsiStatement> getReturnStatements(PsiStatement statement) {
+        instanceChecker = new InstanceOfReturnStatement();
+        return getStatements(statement);
+    }
+
+    public List<PsiStatement> getReturnStatements(PsiStatement[] statement) {
         instanceChecker = new InstanceOfReturnStatement();
         return getStatements(statement);
     }
@@ -82,6 +92,15 @@ public class StatementExtractor {
     public List<PsiStatement> getTypeDeclarationStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfTypeDeclarationStatement();
         return getStatements(statement);
+    }
+
+    private List<PsiStatement> getStatements(PsiStatement[] statements) {
+        List<PsiStatement> result = new ArrayList<>();
+        for (PsiStatement statement : statements) {
+            result.addAll(getStatements(statement));
+        }
+
+        return result;
     }
 
     private List<PsiStatement> getStatements(PsiElement statement) {
