@@ -6,7 +6,7 @@ import com.intellij.psi.tree.IElementType;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;

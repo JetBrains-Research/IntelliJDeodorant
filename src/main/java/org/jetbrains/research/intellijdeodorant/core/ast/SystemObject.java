@@ -11,8 +11,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.inheritance.CompleteInheritanceDetection;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
@@ -522,7 +522,7 @@ public class SystemObject {
                                 tagElement.getName();
                                 if ("see".equals(tagElement.getName())) {
                                     PsiElement[] fragments = tagElement.getDataElements();
-                                    for(PsiElement fragment : fragments) {
+                                    for (PsiElement fragment : fragments) {
                                         if (!(fragment instanceof PsiDocMethodOrFieldRef)) {
                                             continue;
                                         }
@@ -531,7 +531,7 @@ public class SystemObject {
                                             continue;
                                         }
                                         PsiElement resolvedRef = memberRef.resolve();
-                                        if(staticField.equals(resolvedRef)) {
+                                        if (staticField.equals(resolvedRef)) {
                                             typeCheckElimination.putStaticFieldSubclassTypeMapping(staticField, subclassName);
                                             matchCounter++;
                                             break;

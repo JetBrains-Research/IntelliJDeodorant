@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod;
 
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
