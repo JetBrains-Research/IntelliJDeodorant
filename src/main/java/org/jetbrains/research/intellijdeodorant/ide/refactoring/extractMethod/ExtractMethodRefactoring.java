@@ -1,4 +1,4 @@
-package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractmethod;
+package org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.Computable;
@@ -39,7 +39,7 @@ public class ExtractMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns method from which code is proposed to be extracted into separate method.
+     * Returns a method from which code is proposed to be extracted into a separate method.
      */
     public @NotNull
     PsiMethod getMethod() {
@@ -48,7 +48,7 @@ public class ExtractMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns method that is moved in this refactoring.
+     * Returns a method that is proposed to be moved in this refactoring.
      */
     public @NotNull
     Optional<PsiMethod> getOptionalMethod() {
@@ -66,5 +66,11 @@ public class ExtractMethodRefactoring implements Refactoring {
         Optional<PsiMethod> method = getOptionalMethod();
         return method.map(psiMethod -> String.join(DELIMITER, getHumanReadableName(psiMethod.getContainingClass()),
                 getHumanReadableName(psiMethod), candidates.iterator().next().getLocalVariableCriterion().getName())).orElse("");
+    }
+
+    @NotNull
+    @Override
+    public String getExportDefaultFilename() {
+        return "Long-Method";
     }
 }
