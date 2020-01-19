@@ -2,6 +2,10 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationDisplayType;
+import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
@@ -13,6 +17,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
@@ -39,6 +44,7 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +53,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String EXPORT_BUTTON_TEXT_KEY = "export";
     private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
+    private static final String FILES_CONTAIN_COMPILATION_ERRORS = "files.contain.compilation.errors";
+    private static final String INTELLIJDEODORANT = "intellijdeodorant";
+    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(IntelliJDeodorantBundle.message(INTELLIJDEODORANT), NotificationDisplayType.STICKY_BALLOON, true);
 
     private String detectIndicatorStatusTextKey;
 
@@ -64,6 +73,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     );
 
     private RefactoringType refactoringType;
+    private static Notification errorNotification;
     private int refactorDepth;
 
     public AbstractRefactoringPanel(@NotNull AnalysisScope scope,
@@ -109,6 +119,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      */
     protected void showRefreshingProposal() {
         removeSelection();
+        if (errorNotification != null && !errorNotification.isExpired()) {
+            errorNotification.expire();
+        }
         scrollPane.setVisible(true);
         exportButton.setEnabled(false);
         scrollPane.setViewportView(refreshLabel);
@@ -239,6 +252,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     List<RefactoringType.AbstractCandidateRefactoringGroup> candidates =
                             refactoringType.getRefactoringOpportunities(projectInfo, indicator);
+                    if (candidates == null) {
+                        showCompilationErrorNotification(getProject());
+                        candidates = new ArrayList<>();
+                    }
                     model.setCandidateRefactoringGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
@@ -343,6 +360,12 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         if (editor == null) {
             return;
         }
+
         editor.getMarkupModel().removeAllHighlighters();
+    }
+
+    public static void showCompilationErrorNotification(Project project) {
+        errorNotification = NOTIFICATION_GROUP.createNotification(IntelliJDeodorantBundle.message(FILES_CONTAIN_COMPILATION_ERRORS), MessageType.ERROR);
+        Notifications.Bus.notify(errorNotification, project);
     }
 }

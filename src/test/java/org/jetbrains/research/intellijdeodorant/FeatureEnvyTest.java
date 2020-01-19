@@ -146,7 +146,7 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
                 "public class A {\n" +
                 "\n" +
                 "  public boolean testMethod(B bClass) {\n" +
-                "        if (bClass.getFirstField().equals(\"abc\")) {\n" +
+                "        if (bClass.getFirstField() == 1) {\n" +
                 "            return true;\n" +
                 "        }\n" +
                 "        else return false;\n" +
@@ -157,9 +157,9 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
                 "\n" +
                 "public class B {\n" +
                 "\n" +
-                "    public String firstField;\n" +
+                "    public int firstField;\n" +
                 "\n" +
-                "    public String getFirstField() {\n" +
+                "    public int getFirstField() {\n" +
                 "       return firstField;" +
                 "    }\n" +
                 "}";
@@ -206,7 +206,7 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
                 "\n" +
                 "  public void testMethod(B bClass) {\n" +
                 "       if (sourceMethod1() > 100) {" +
-                "               bClass.firstField = new Date().getTime();\n" +
+                "               bClass.firstField = 6;\n" +
                 "               bClass.emptyMethod();" +
                 "           }\n" +
                 "    }" +

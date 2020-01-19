@@ -25,7 +25,7 @@ import org.jetbrains.research.intellijdeodorant.utils.math.TarjanAlgorithm;
 
 import java.util.*;
 
-@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "ConstantConditions"})
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class ExtractClassRefactoring {
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
@@ -464,10 +464,8 @@ public class ExtractClassRefactoring {
         extractedClass.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
 
         //Just all possible imports and hope that IDEA will optimize it correctly.
-        if (sourceFile.getPackageName() != null) {
-            extractedClassFile.setPackageName(sourceFile.getPackageName());
-            extractedClassFile.getImportList().add(factory.createImportStatementOnDemand(sourceFile.getPackageName() + "." + PsiTreeUtil.getChildOfType(sourceFile, PsiClass.class).getName()));
-        }
+        extractedClassFile.setPackageName(sourceFile.getPackageName());
+        extractedClassFile.getImportList().add(factory.createImportStatementOnDemand(sourceFile.getPackageName() + "." + PsiTreeUtil.getChildOfType(sourceFile, PsiClass.class).getName()));
 
         for (PsiImportStatement importStatement : sourceFile.getImportList().getImportStatements()) {
             extractedClassFile.getImportList().add(importStatement);

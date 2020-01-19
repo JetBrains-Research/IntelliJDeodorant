@@ -1,22 +1,77 @@
 package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
 import org.jetbrains.research.intellijdeodorant.core.distance.*;
-import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
-import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
-import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 
 import java.util.*;
 
 public class JDeodorantFacade {
+    private static class ErrorVisitor extends PsiRecursiveElementVisitor {
+        boolean containsError = false;
+
+        @Override
+        public void visitElement(PsiElement element) {
+            if (element instanceof PsiErrorElement) {
+                containsError = true;
+                return;
+            }
+
+            if (element instanceof PsiMember) {
+                if (element.getParent() == null || element.getParent() instanceof PsiClass && ((PsiMember) element).getContainingClass() == null) {
+                    containsError = true;
+                    return;
+                }
+            }
+
+            if (element instanceof PsiMethod) {
+                PsiMethod method = (PsiMethod) element;
+                PsiClass psiClass = method.getContainingClass();
+
+                if (psiClass == null) {
+                    containsError = true;
+                    return;
+                }
+
+                if (!psiClass.isInterface() && method.getBody() == null && !method.getModifierList().hasExplicitModifier(PsiModifier.ABSTRACT)) {
+                    containsError = true;
+                    return;
+                }
+
+                if (!method.isConstructor() && method.getReturnType() == null) {
+                    containsError = true;
+                    return;
+                }
+            }
+
+            if (element instanceof PsiReferenceExpression) {
+                PsiReferenceExpression referenceExpression = (PsiReferenceExpression) element;
+
+                if (!referenceExpression.getText().equals("super") && referenceExpression.resolve() == null) {
+                    containsError = true;
+                    return;
+                }
+            }
+
+            if (containsError) {
+                return;
+            }
+
+            super.visitElement(element);
+        }
+    }
+
+    private static boolean containsErrors(ClassObject classObject) {
+        ErrorVisitor errorVisitor = new ErrorVisitor();
+        classObject.getPsiClass().accept(errorVisitor);
+        return errorVisitor.containsError;
+    }
 
     public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
@@ -25,7 +80,11 @@ public class JDeodorantFacade {
         Set<String> classNamesToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : classObjectsToBeExamined) {
             if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
-                classNamesToBeExamined.add(classObject.getName());
+                if (containsErrors(classObject)) {
+                    return null;
+                }
+
+            classNamesToBeExamined.add(classObject.getName());
         }
         MySystem system = new MySystem(ASTReader.getSystemObject(), false);
         DistanceMatrix distanceMatrix = new DistanceMatrix(system);
@@ -46,7 +105,11 @@ public class JDeodorantFacade {
             Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
-                    classNamesToBeExamined.add(classObject.getName());
+                    if (containsErrors(classObject)) {
+                        return null;
+                    }
+
+                classNamesToBeExamined.add(classObject.getName());
             }
             MySystem system = new MySystem(systemObject, true);
             DistanceMatrix distanceMatrix = new DistanceMatrix(system);
@@ -82,6 +145,10 @@ public class JDeodorantFacade {
 
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
+                    if (containsErrors(classObject)) {
+                        return null;
+                    }
+
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
                     while (methodIterator.hasNext()) {
                         MethodObject methodObject = methodIterator.next();
@@ -169,6 +236,10 @@ public class JDeodorantFacade {
         Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : systemObject.getClassObjects()) {
             if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+                if (containsErrors(classObject)) {
+                    return null;
+                }
+
                 classObjectsToBeExamined.add(classObject);
             }
         }
