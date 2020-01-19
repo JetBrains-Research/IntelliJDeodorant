@@ -1,7 +1,17 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.compiler.CompileContext;
+import com.intellij.openapi.compiler.CompileStatusNotification;
+import com.intellij.openapi.compiler.CompilerManager;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.psi.*;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiVariable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
@@ -9,68 +19,41 @@ import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
 import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel;
 
 import java.util.*;
 
 public class JDeodorantFacade {
-    private static class ErrorVisitor extends PsiRecursiveElementVisitor {
-        boolean containsError = false;
+    public static void runAfterCompilationCheck(ProjectInfo projectInfo, ProgressIndicator indicator, Task task) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            List<PsiClass> classes = projectInfo.getClasses();
 
-        @Override
-        public void visitElement(PsiElement element) {
-            if (element instanceof PsiErrorElement) {
-                containsError = true;
-                return;
+            if (!classes.isEmpty()) {
+                myCompileStatusNotification callback = new myCompileStatusNotification(task);
+                VirtualFile[] virtualFiles = classes.stream().map(classObject -> classObject.getContainingFile().getVirtualFile()).toArray(VirtualFile[]::new);
+                Project project = classes.iterator().next().getContainingFile().getProject();
+                CompilerManager.getInstance(project).compile(virtualFiles, callback);
+            } else {
+                ProgressManager.getInstance().run(task);
             }
-
-            if (element instanceof PsiMember) {
-                if (element.getParent() == null || element.getParent() instanceof PsiClass && ((PsiMember) element).getContainingClass() == null) {
-                    containsError = true;
-                    return;
-                }
-            }
-
-            if (element instanceof PsiMethod) {
-                PsiMethod method = (PsiMethod) element;
-                PsiClass psiClass = method.getContainingClass();
-
-                if (psiClass == null) {
-                    containsError = true;
-                    return;
-                }
-
-                if (!psiClass.isInterface() && method.getBody() == null && !method.getModifierList().hasExplicitModifier(PsiModifier.ABSTRACT)) {
-                    containsError = true;
-                    return;
-                }
-
-                if (!method.isConstructor() && method.getReturnType() == null) {
-                    containsError = true;
-                    return;
-                }
-            }
-
-            if (element instanceof PsiReferenceExpression) {
-                PsiReferenceExpression referenceExpression = (PsiReferenceExpression) element;
-
-                if (!referenceExpression.getText().equals("super") && referenceExpression.resolve() == null) {
-                    containsError = true;
-                    return;
-                }
-            }
-
-            if (containsError) {
-                return;
-            }
-
-            super.visitElement(element);
-        }
+        });
     }
 
-    private static boolean containsErrors(ClassObject classObject) {
-        ErrorVisitor errorVisitor = new ErrorVisitor();
-        classObject.getPsiClass().accept(errorVisitor);
-        return errorVisitor.containsError;
+    private static class myCompileStatusNotification implements CompileStatusNotification {
+        private Task task;
+
+        private myCompileStatusNotification(Task task) {
+            this.task = task;
+        }
+
+        @Override
+        public void finished(boolean aborted, int errors, int warnings, @NotNull CompileContext compileContext) {
+            if (errors == 0 && !aborted) {
+                ProgressManager.getInstance().run(task);
+            } else {
+                AbstractRefactoringPanel.showCompilationErrorNotification(task.getProject());
+            }
+        }
     }
 
     public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
@@ -80,11 +63,7 @@ public class JDeodorantFacade {
         Set<String> classNamesToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : classObjectsToBeExamined) {
             if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
-                if (containsErrors(classObject)) {
-                    return null;
-                }
-
-            classNamesToBeExamined.add(classObject.getName());
+                classNamesToBeExamined.add(classObject.getName());
         }
         MySystem system = new MySystem(ASTReader.getSystemObject(), false);
         DistanceMatrix distanceMatrix = new DistanceMatrix(system);
@@ -101,15 +80,10 @@ public class JDeodorantFacade {
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
-
             Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
-                    if (containsErrors(classObject)) {
-                        return null;
-                    }
-
-                classNamesToBeExamined.add(classObject.getName());
+                    classNamesToBeExamined.add(classObject.getName());
             }
             MySystem system = new MySystem(systemObject, true);
             DistanceMatrix distanceMatrix = new DistanceMatrix(system);
@@ -142,13 +116,8 @@ public class JDeodorantFacade {
         Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<>();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
-
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
-                    if (containsErrors(classObject)) {
-                        return null;
-                    }
-
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
                     while (methodIterator.hasNext()) {
                         MethodObject methodObject = methodIterator.next();
@@ -236,10 +205,6 @@ public class JDeodorantFacade {
         Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : systemObject.getClassObjects()) {
             if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
-                if (containsErrors(classObject)) {
-                    return null;
-                }
-
                 classObjectsToBeExamined.add(classObject);
             }
         }

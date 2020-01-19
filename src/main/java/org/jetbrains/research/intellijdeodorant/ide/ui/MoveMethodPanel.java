@@ -194,18 +194,11 @@ class MoveMethodPanel extends JPanel {
         Project project = scope.getProject();
         ProjectInfo projectInfo = new ProjectInfo(project);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
-                IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     List<MoveMethodCandidateRefactoring> candidates = JDeodorantFacade.getMoveMethodRefactoringOpportunities(projectInfo, indicator);
-
-                    if (candidates == null) {
-                        AbstractRefactoringPanel.showCompilationErrorNotification(project);
-                        candidates = new ArrayList<>();
-                    }
-
                     final List<MoveMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
                             .map(x ->
                                     new MoveMethodRefactoring(x.getSourceMethodDeclaration(),
@@ -223,7 +216,8 @@ class MoveMethodPanel extends JPanel {
                 });
             }
         };
-        ProgressManager.getInstance().run(backgroundable);
+
+        AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, project, projectInfo);
     }
 
     private void onDoubleClick() {

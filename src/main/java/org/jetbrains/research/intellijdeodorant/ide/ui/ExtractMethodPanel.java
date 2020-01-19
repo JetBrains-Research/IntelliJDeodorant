@@ -200,11 +200,6 @@ class ExtractMethodPanel extends JPanel {
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     Set<ASTSliceGroup> candidates = getExtractMethodRefactoringOpportunities(projectInfo, indicator);
-                    if (candidates == null) {
-                        AbstractRefactoringPanel.showCompilationErrorNotification(getProject());
-                        candidates = new HashSet<>();
-                    }
-
                     final List<ExtractMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
@@ -217,7 +212,8 @@ class ExtractMethodPanel extends JPanel {
                 });
             }
         };
-        ProgressManager.getInstance().run(backgroundable);
+
+        AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
     }
 
     /**

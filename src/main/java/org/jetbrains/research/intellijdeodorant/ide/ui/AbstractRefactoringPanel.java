@@ -31,6 +31,7 @@ import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
@@ -90,6 +91,17 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         refreshLabel.setForeground(JBColor.GRAY);
         setLayout(new BorderLayout());
         setupGUI();
+    }
+
+    public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable, Project project, ProjectInfo projectInfo) {
+        final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("compiling.project"), true) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                JDeodorantFacade.runAfterCompilationCheck(projectInfo, indicator, afterCompilationBackgroundable);
+            }
+        };
+
+        ProgressManager.getInstance().run(compilationBackgroundable);
     }
 
     private void setupGUI() {
@@ -261,7 +273,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                 });
             }
         };
-        ProgressManager.getInstance().run(backgroundable);
+
+        runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
     }
 
     /**
