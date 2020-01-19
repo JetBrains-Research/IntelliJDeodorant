@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 
-import org.jetbrains.research.intellijdeodorant.util.TopicFinder;
+import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
 

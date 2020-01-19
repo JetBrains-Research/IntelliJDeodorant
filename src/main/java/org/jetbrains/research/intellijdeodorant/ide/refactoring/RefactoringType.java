@@ -14,9 +14,9 @@ abstract public class RefactoringType {
     public abstract boolean instanceOfCandidateRefactoring(Object o);
 
     public List<AbstractCandidateRefactoringGroup> getRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator) {
-        Set<?> notAbstractRefactorOpporunities = getNotAbstractRefactoringOpportunities(projectInfo, indicator);
+        Set<?> notAbstractRefactoringOpportunities = getNotAbstractRefactoringOpportunities(projectInfo, indicator);
         List<AbstractCandidateRefactoringGroup> result = new ArrayList<>();
-        for (Object candidate : notAbstractRefactorOpporunities) {
+        for (Object candidate : notAbstractRefactoringOpportunities) {
             result.add(newAbstractCandidateRefactoringGroup(candidate));
         }
 
@@ -29,8 +29,8 @@ abstract public class RefactoringType {
 
     public abstract AbstractCandidateRefactoringGroup newAbstractCandidateRefactoringGroup(Object candidateRefactoringGroup);
 
-    public abstract static class AbstractCandidateRefactoring {
-        private Object candidateRefactoring;
+    public abstract static class AbstractCandidateRefactoring implements Refactoring {
+        protected Object candidateRefactoring;
 
         public AbstractCandidateRefactoring(Object candidateRefactoring) {
             this.candidateRefactoring = candidateRefactoring;

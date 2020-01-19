@@ -8,7 +8,7 @@ import org.jetbrains.research.intellijdeodorant.core.GodClassVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
-import org.jetbrains.research.intellijdeodorant.util.TopicFinder;
+import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
 
@@ -78,14 +78,15 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     public Set<PsiField> getExtractedFieldFragments() {
-        Set<PsiField> extractedFieldFragments = new LinkedHashSet<>();
-        for (Entity entity : extractedEntities) {
-            if (entity instanceof MyAttribute) {
-                MyAttribute attribute = (MyAttribute) entity;
-                extractedFieldFragments.add(attribute.getFieldObject().getVariableDeclaration());
+        Map<Integer, PsiField> extractedFieldFragmentMap = new TreeMap<>();
+        for(Entity entity : extractedEntities) {
+            if(entity instanceof MyAttribute) {
+                MyAttribute attribute = (MyAttribute)entity;
+                int index = sourceClass.getAttributeList().indexOf(attribute);
+                extractedFieldFragmentMap.put(index, attribute.getFieldObject().getVariableDeclaration());
             }
         }
-        return extractedFieldFragments;
+        return new LinkedHashSet<>(extractedFieldFragmentMap.values());
     }
 
     public Map<MyMethod, Boolean> getLeaveDelegate() {

@@ -7,7 +7,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.Abstr
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.typestatechecking.TypeCheckElimination;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
 
 import java.util.*;
 

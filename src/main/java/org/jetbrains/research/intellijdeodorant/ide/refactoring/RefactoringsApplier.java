@@ -8,7 +8,7 @@ import com.intellij.psi.*;
 import com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog;
 import com.intellij.refactoring.move.moveMembers.MoveMembersDialog;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.movemethod.MoveMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 
 import java.util.*;
