@@ -227,6 +227,8 @@ public class ExtractClassRefactoring {
 
         removeFieldFragmentsInSourceClass(extractedFieldFragments);
 
+        previewProcessor.removeUnchangedMethods();
+
         commitResults(extractedClassFile);
     }
 
@@ -348,7 +350,15 @@ public class ExtractClassRefactoring {
                 if (methodBody != null) {
                     PsiStatement[] statements = methodBody.getStatements();
                     for (PsiStatement statement : statements) {
+
+                        PsiStatement originalStatement = null;
+                        if (previewUsage) {
+                            originalStatement = statement;
+                            statement = (PsiStatement) statement.copy();
+                        }
+
                         List<PsiExpression> methodInvocations = expressionExtractor.getMethodInvocations(statement);
+                        boolean rewriteAST = false;
                         for (PsiExpression expression : methodInvocations) {
                             if (expression instanceof PsiMethodCallExpression) {
                                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
@@ -404,11 +414,16 @@ public class ExtractClassRefactoring {
                                         }
 
                                         expression.replace(factory.createExpressionFromText(modifiedMethodCallExpressionText, expression));
+                                        rewriteAST = true;
                                     } else {
                                         delegateMethods.add(method);
                                     }
                                 }
                             }
+                        }
+
+                        if (previewUsage && rewriteAST) {
+                            previewProcessor.putIntoMethodComparingMap(methodDeclaration, originalStatement, statement);
                         }
                     }
                 }
@@ -2672,6 +2687,8 @@ public class ExtractClassRefactoring {
                     for (int i = 0; i < statements.length; i++) {
                         PsiStatement statement = statements[i];
 
+                        boolean rewriteAST = false;
+
                         List<PsiExpression> assignments = expressionExtractor.getAssignments(statement);
                         for (PsiExpression expression : assignments) {
                             if (!expression.isValid()) {
@@ -2717,6 +2734,7 @@ public class ExtractClassRefactoring {
                                                     }
 
                                                     if (handleType == HandleType.MODIFY) {
+                                                        rewriteAST = true;
                                                         deleteAssigmentStatement = true;
                                                     }
                                                 }
@@ -2773,6 +2791,7 @@ public class ExtractClassRefactoring {
                                                 if (handleType == HandleType.MODIFY) {
                                                     rightHandSide = assignment.replace(factory.createExpressionFromText(setterMethodInvocationText, null));
                                                     rightHandSide = ((PsiMethodCallExpression) rightHandSide).getArgumentList();
+                                                    rewriteAST = true;
                                                 }
                                             }
                                         }
@@ -2814,6 +2833,7 @@ public class ExtractClassRefactoring {
                                                 getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
 
                                                 if (handleType == HandleType.MODIFY) {
+                                                    rewriteAST = true;
                                                     arrayExpression.replace(getterMethodInvocation);
                                                 }
                                             }
@@ -2862,6 +2882,7 @@ public class ExtractClassRefactoring {
                                             getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
 
                                             if (handleType == HandleType.MODIFY) {
+                                                rewriteAST = true;
                                                 accessedVariable.replace(getterMethodInvocation);
                                             }
                                         }
@@ -2945,6 +2966,7 @@ public class ExtractClassRefactoring {
                                         setterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(setterMethodInvocationText, null);
 
                                         if (handleType == HandleType.MODIFY) {
+                                            rewriteAST = true;
                                             postfix.replace(setterMethodInvocation);
                                         }
 
@@ -2984,6 +3006,7 @@ public class ExtractClassRefactoring {
                                             getterMethodInvocation = (PsiMethodCallExpression) factory.createExpressionFromText(getterMethodInvocationText, null);
 
                                             if (handleType == HandleType.MODIFY) {
+                                                rewriteAST = true;
                                                 arrayExpression.replace(getterMethodInvocation);
                                             }
 
@@ -2993,7 +3016,7 @@ public class ExtractClassRefactoring {
                             }
                         }
 
-                        if (initialSourceMethod != null) {
+                        if (initialSourceMethod != null && rewriteAST) {
                             comparingList.add(new PsiElementPair(initialSourceMethod.getBody().getStatements()[i], statement, initialSourceMethod));
                         }
                     }

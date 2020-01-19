@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import com.intellij.openapi.fileTypes.*;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
     private static final String TITLE = IntelliJDeodorantBundle.message("god.class.dialog.title");
@@ -47,6 +49,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
     private static final int MAIN_PANEL_VERTICAL_GAP = 5;
 
+    private AbstractExtractClassRefactoring abstractRefactoring;
     private ExtractClassRefactoring refactoring;
     @Nullable
     private PsiPackage parentPackage;
@@ -55,10 +58,11 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     private JTextField extractedClassNameField = new JTextField();
     private JButton restoreButton = new JButton();
 
-    public GodClassUserInputDialog(ExtractClassRefactoring refactoring) {
-        super(refactoring.getSourceFile().getProject(), true);
+    public GodClassUserInputDialog(AbstractExtractClassRefactoring abstractRefactoring) {
+        super(abstractRefactoring.getRefactoring().getSourceFile().getProject(), true);
 
-        this.refactoring = refactoring;
+        this.abstractRefactoring = abstractRefactoring;
+        this.refactoring = abstractRefactoring.getRefactoring();
         this.javaLangClassNames = new ArrayList<>();
         this.javaLangClassNames.add("Boolean");
         this.javaLangClassNames.add("Byte");
@@ -188,28 +192,18 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     @Override
     protected void doAction() {
         if (isPreviewUsages()) {
-            VirtualFile v1 = refactoring.getSourceFile().getVirtualFile();
-
             DiffContentFactory contentFactory = DiffContentFactory.getInstance();
-            DiffRequestFactory requestFactory = DiffRequestFactory.getInstance();
-
-            DiffContent c1 = contentFactory.create(getProject(), v1);
-            DiffContent c2 = contentFactory.create(getProject(), v1);
+            DiffContent c1 = contentFactory.create("");
+            DiffContent c2 = contentFactory.create("");
 
             MutableDiffRequestChain chain = new MutableDiffRequestChain(c1, c2);
-
-
-            //SimpleDiffRequest r1 = new SimpleDiffRequest("difffff", f1, f2,
-              //      refactoring.getSourceFile().getName(), refactoring.getSourceFile().getName());
-
-            //SimpleDiffRequest r2 = new SimpleDiffRequest("difffff", f1, f2,
-              //      refactoring.getSourceFile().getName(), refactoring.getSourceFile().getName());
-
 
             GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT, refactoring);
             previewResultDialog.show();
 
             setPreviewResults(false);
+
+            refactoring = abstractRefactoring.renewRefactoring();;
         } else {
             closeOKAction();
             refactoring.setExtractedTypeName(extractedClassNameField.getText());

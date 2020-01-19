@@ -65,12 +65,36 @@ public class ExtractClassPreviewProcessor {
         }
     }
 
+    public void putIntoMethodComparingMap(PsiMethod method, PsiElement originalElement, PsiElement newElement) {
+        ArrayList<PsiElementPair> comparingList;
+        if (!methodElementsComparingMap.containsKey(method)) {
+            comparingList = new ArrayList<>();
+            methodElementsComparingMap.put(method, comparingList);
+        } else {
+            comparingList = methodElementsComparingMap.get(method);
+        }
+
+        comparingList.add(new PsiElementPair(originalElement, newElement, method));
+    }
+
     public List<PsiMethodPair> getMethodComparingList() {
         return methodComparingList;
     }
 
     public Map<PsiMethod, ArrayList<PsiElementPair>> getMethodElementsComparingMap() {
         return methodElementsComparingMap;
+    }
+
+    public void removeUnchangedMethods() {
+        for (Iterator<PsiMethodPair> it = methodComparingList.iterator(); it.hasNext();) {
+            PsiMethodPair methodPair = it.next();
+
+            List<PsiElementPair> changedElements = methodElementsComparingMap.get(methodPair.getInitialPsiMethod());
+            if (changedElements.size() == 0) {
+                methodElementsComparingMap.remove(methodPair.getInitialPsiMethod());
+                it.remove();
+            }
+        }
     }
 
     public static class SourceFileAndClass {
@@ -130,6 +154,14 @@ public class ExtractClassPreviewProcessor {
 
         public PsiMethod getInitialMethod() {
             return initialMethod;
+        }
+
+        public void setInitialPsiElement(PsiElement initialPsiElement) {
+            this.initialPsiElement = initialPsiElement;
+        }
+
+        public void setUpdatedPsiElement(PsiElement updatedPsiElement) {
+            this.updatedPsiElement = updatedPsiElement;
         }
     }
 }

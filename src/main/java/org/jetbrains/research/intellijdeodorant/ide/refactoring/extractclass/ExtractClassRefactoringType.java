@@ -99,19 +99,26 @@ public class ExtractClassRefactoringType extends RefactoringType {
 
     public static class AbstractExtractClassRefactoring extends AbstractRefactoring {
         private ExtractClassRefactoring refactoring;
+        private ExtractClassCandidateRefactoring candidateRefactoring;
 
         public AbstractExtractClassRefactoring(ExtractClassCandidateRefactoring extractClassCandidateRefactoring) {
-            this.refactoring = new ExtractClassRefactoring(extractClassCandidateRefactoring.getSourceFile(),
-                    extractClassCandidateRefactoring.getSourceClassTypeDeclaration(),
-                    extractClassCandidateRefactoring.getExtractedFieldFragments(),
-                    extractClassCandidateRefactoring.getExtractedMethods(),
-                    extractClassCandidateRefactoring.getDelegateMethods(),
-                    extractClassCandidateRefactoring.getDefaultTargetClassName());
+            this.candidateRefactoring = extractClassCandidateRefactoring;
+            renewRefactoring();
         }
 
         @Override
         public void apply() {
             refactoring.apply();
+        }
+
+        public ExtractClassRefactoring renewRefactoring() {
+            this.refactoring = new ExtractClassRefactoring(candidateRefactoring.getSourceFile(),
+                    candidateRefactoring.getSourceClassTypeDeclaration(),
+                    candidateRefactoring.getExtractedFieldFragments(),
+                    candidateRefactoring.getExtractedMethods(),
+                    candidateRefactoring.getDelegateMethods(),
+                    candidateRefactoring.getDefaultTargetClassName());
+            return refactoring;
         }
 
         public ExtractClassRefactoring getRefactoring() {
