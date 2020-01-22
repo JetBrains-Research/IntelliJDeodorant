@@ -1,5 +1,10 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.compiler.ProblemsView;
+import com.intellij.compiler.impl.ProblemsViewImpl;
+import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
+import com.intellij.ide.errorTreeView.impl.ErrorTreeViewConfiguration;
+import com.intellij.notification.Notification;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompileScope;
@@ -10,13 +15,9 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowId;
-import com.intellij.openapi.wm.impl.InternalDecorator;
-import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiVariable;
-import com.intellij.ui.content.MessageView;
+import com.intellij.ui.content.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
@@ -27,8 +28,6 @@ import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 import org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel;
 
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 public class JDeodorantFacade {
@@ -40,10 +39,14 @@ public class JDeodorantFacade {
                 VirtualFile[] virtualFiles = classes.stream().map(classObject -> classObject.getContainingFile().getVirtualFile()).toArray(VirtualFile[]::new);
                 Project project = classes.iterator().next().getContainingFile().getProject();
 
-                setVisibleMessageContainer(project, false);
+                ErrorTreeViewConfiguration configuration = ErrorTreeViewConfiguration.getInstance(project);
+                boolean wasHideWarnings = configuration.isHideWarnings();
+                boolean wasHideInfoMessages = configuration.isHideInfoMessages();
+                configuration.setHideWarnings(true);
+                configuration.setHideInfoMessages(true);
 
                 CompilerManager compilerManager = CompilerManager.getInstance(project);
-                myCompileStatusNotification callback = new myCompileStatusNotification(task, project);
+                myCompileStatusNotification callback = new myCompileStatusNotification(task, project, wasHideWarnings, wasHideInfoMessages);
                 CompileScope compileScope = compilerManager.createFilesCompileScope(virtualFiles);
                 compilerManager.make(compileScope, callback);
             } else {
@@ -52,51 +55,30 @@ public class JDeodorantFacade {
         });
     }
 
-    private static void setVisibleMessageContainer(Project project, boolean visible) {
-        Container messageComponentContainer = MessageView.SERVICE.getInstance(project).getContentManager().getComponent().getParent();
-        while (messageComponentContainer != null) {
-            if (messageComponentContainer instanceof InternalDecorator) {
-                InternalDecorator internalDecorator = (InternalDecorator) messageComponentContainer;
-                if (internalDecorator.toString() != null && internalDecorator.toString().equals("Messages")) {
-                    break;
-                }
-            }
-
-            messageComponentContainer = messageComponentContainer.getParent();
-        }
-
-        if (messageComponentContainer != null) {
-            messageComponentContainer.setVisible(visible);
-            ((InternalDecorator) messageComponentContainer).setHeaderVisible(visible);
-            messageComponentContainer.repaint();
-        }
-    }
-
     private static class myCompileStatusNotification implements CompileStatusNotification {
         private Task task;
         private Project project;
+        boolean wasHideWarnings;
+        boolean wasHideInfoMessages;
 
-        private myCompileStatusNotification(Task task, Project project) {
+        private myCompileStatusNotification(Task task, Project project, boolean wasHideWarnings, boolean wasHideInfoMessages) {
             this.task = task;
             this.project = project;
-        }
-
-        private void hideMessageToolWindow() {
-            setVisibleMessageContainer(project, true);
-            ToolWindowManagerImpl toolWindowManager = (ToolWindowManagerImpl) ToolWindowManagerImpl.getInstance(project);
-            ToolWindow toolWindow = toolWindowManager.getToolWindow(ToolWindowId.MESSAGES_WINDOW);
-            if (toolWindow != null) {
-                toolWindow.hide(null);
-            }
+            this.wasHideWarnings = wasHideWarnings;
+            this.wasHideInfoMessages = wasHideInfoMessages;
         }
 
         @Override
         public void finished(boolean aborted, int errors, int warnings, @NotNull CompileContext compileContext) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ErrorTreeViewConfiguration configuration = ErrorTreeViewConfiguration.getInstance(project);
+                configuration.setHideWarnings(wasHideWarnings);
+                configuration.setHideInfoMessages(wasHideInfoMessages);
+            });
+
             if (errors == 0 && !aborted) {
-                ApplicationManager.getApplication().invokeLater(this::hideMessageToolWindow);
                 ProgressManager.getInstance().run(task);
             } else {
-                ApplicationManager.getApplication().invokeLater(() -> setVisibleMessageContainer(project, true));
                 AbstractRefactoringPanel.showCompilationErrorNotification(task.getProject());
             }
         }
