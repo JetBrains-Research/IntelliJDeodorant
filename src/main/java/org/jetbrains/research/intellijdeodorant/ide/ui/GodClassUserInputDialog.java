@@ -2,22 +2,12 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.diff.DiffContentFactory;
 import com.intellij.diff.DiffDialogHints;
-import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.actions.impl.MutableDiffRequestChain;
-import com.intellij.diff.chains.DiffRequestChain;
-import com.intellij.diff.chains.SimpleDiffRequestChain;
 import com.intellij.diff.contents.DiffContent;
-import com.intellij.diff.contents.FileContentImpl;
-import com.intellij.diff.contents.FileDocumentContentImpl;
-import com.intellij.diff.requests.SimpleDiffRequest;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiPackage;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.RefactorJBundle;
@@ -28,17 +18,15 @@ import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import com.intellij.openapi.fileTypes.*;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
     private static final String TITLE = IntelliJDeodorantBundle.message("god.class.dialog.title");
@@ -203,7 +191,8 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
             setPreviewResults(false);
 
-            refactoring = abstractRefactoring.renewRefactoring();;
+            refactoring = abstractRefactoring.renewRefactoring();
+            ;
         } else {
             closeOKAction();
             refactoring.setExtractedTypeName(extractedClassNameField.getText());

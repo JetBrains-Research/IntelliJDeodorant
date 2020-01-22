@@ -38,10 +38,8 @@ public class GodClassPanel extends AbstractRefactoringPanel {
 
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
             removeHighlighters(scope.getProject());
-            disableRefactoringsTable(true);
             GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring);
             showRefreshingProposal();
-            GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
             dialog.show();
         });
     }

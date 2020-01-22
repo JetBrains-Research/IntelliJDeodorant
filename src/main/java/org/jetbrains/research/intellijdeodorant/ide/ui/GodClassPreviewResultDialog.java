@@ -21,10 +21,10 @@ import com.intellij.ui.treeStructure.treetable.TreeTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiElementPair;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiMethodPair;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
 
 import javax.swing.*;

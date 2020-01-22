@@ -17,13 +17,10 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringUtility;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiElementPair;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiMethodPair;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.SourceFileAndClass;
-import org.jetbrains.research.intellijdeodorant.util.math.AdjacencyList;
-import org.jetbrains.research.intellijdeodorant.util.math.Edge;
-import org.jetbrains.research.intellijdeodorant.util.math.Node;
-import org.jetbrains.research.intellijdeodorant.util.math.TarjanAlgorithm;
 import org.jetbrains.research.intellijdeodorant.utils.math.AdjacencyList;
 import org.jetbrains.research.intellijdeodorant.utils.math.Edge;
 import org.jetbrains.research.intellijdeodorant.utils.math.Node;
