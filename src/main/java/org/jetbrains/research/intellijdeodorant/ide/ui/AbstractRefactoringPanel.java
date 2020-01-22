@@ -97,7 +97,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("compiling.project"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                JDeodorantFacade.runAfterCompilationCheck(projectInfo, indicator, afterCompilationBackgroundable);
+                JDeodorantFacade.runAfterCompilationCheck(projectInfo, afterCompilationBackgroundable);
             }
         };
 

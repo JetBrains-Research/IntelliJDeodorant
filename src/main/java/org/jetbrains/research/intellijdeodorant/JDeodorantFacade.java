@@ -2,6 +2,7 @@ package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.compiler.CompileContext;
+import com.intellij.openapi.compiler.CompileScope;
 import com.intellij.openapi.compiler.CompileStatusNotification;
 import com.intellij.openapi.compiler.CompilerManager;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -9,8 +10,13 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowId;
+import com.intellij.openapi.wm.impl.InternalDecorator;
+import com.intellij.openapi.wm.impl.ToolWindowManagerImpl;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiVariable;
+import com.intellij.ui.content.MessageView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
@@ -21,42 +27,83 @@ import org.jetbrains.research.intellijdeodorant.core.distance.*;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 import org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel;
 
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 public class JDeodorantFacade {
-    public static void runAfterCompilationCheck(ProjectInfo projectInfo, ProgressIndicator indicator, Task task) {
+    public static void runAfterCompilationCheck(ProjectInfo projectInfo, Task task) {
         ApplicationManager.getApplication().invokeLater(() -> {
             List<PsiClass> classes = projectInfo.getClasses();
 
             if (!classes.isEmpty()) {
-                myCompileStatusNotification callback = new myCompileStatusNotification(task);
                 VirtualFile[] virtualFiles = classes.stream().map(classObject -> classObject.getContainingFile().getVirtualFile()).toArray(VirtualFile[]::new);
                 Project project = classes.iterator().next().getContainingFile().getProject();
-                CompilerManager.getInstance(project).compile(virtualFiles, callback);
+
+                setVisibleMessageContainer(project, false);
+
+                CompilerManager compilerManager = CompilerManager.getInstance(project);
+                myCompileStatusNotification callback = new myCompileStatusNotification(task, project);
+                CompileScope compileScope = compilerManager.createFilesCompileScope(virtualFiles);
+                compilerManager.make(compileScope, callback);
             } else {
                 ProgressManager.getInstance().run(task);
             }
         });
     }
 
+    private static void setVisibleMessageContainer(Project project, boolean visible) {
+        Container messageComponentContainer = MessageView.SERVICE.getInstance(project).getContentManager().getComponent().getParent();
+        while (messageComponentContainer != null) {
+            if (messageComponentContainer instanceof InternalDecorator) {
+                InternalDecorator internalDecorator = (InternalDecorator) messageComponentContainer;
+                if (internalDecorator.toString() != null && internalDecorator.toString().equals("Messages")) {
+                    break;
+                }
+            }
+
+            messageComponentContainer = messageComponentContainer.getParent();
+        }
+
+        if (messageComponentContainer != null) {
+            messageComponentContainer.setVisible(visible);
+            ((InternalDecorator) messageComponentContainer).setHeaderVisible(visible);
+            messageComponentContainer.repaint();
+        }
+    }
+
     private static class myCompileStatusNotification implements CompileStatusNotification {
         private Task task;
+        private Project project;
 
-        private myCompileStatusNotification(Task task) {
+        private myCompileStatusNotification(Task task, Project project) {
             this.task = task;
+            this.project = project;
+        }
+
+        private void hideMessageToolWindow() {
+            setVisibleMessageContainer(project, true);
+            ToolWindowManagerImpl toolWindowManager = (ToolWindowManagerImpl) ToolWindowManagerImpl.getInstance(project);
+            ToolWindow toolWindow = toolWindowManager.getToolWindow(ToolWindowId.MESSAGES_WINDOW);
+            if (toolWindow != null) {
+                toolWindow.hide(null);
+            }
         }
 
         @Override
         public void finished(boolean aborted, int errors, int warnings, @NotNull CompileContext compileContext) {
             if (errors == 0 && !aborted) {
+                ApplicationManager.getApplication().invokeLater(this::hideMessageToolWindow);
                 ProgressManager.getInstance().run(task);
             } else {
+                ApplicationManager.getApplication().invokeLater(() -> setVisibleMessageContainer(project, true));
                 AbstractRefactoringPanel.showCompilationErrorNotification(task.getProject());
             }
         }
     }
 
-    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo
+                                                                                                     project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
         Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(ASTReader.getSystemObject().getClassObjects());
 
@@ -75,7 +122,8 @@ public class JDeodorantFacade {
         return moveMethodCandidateList;
     }
 
-    public static TreeSet<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static TreeSet<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo
+                                                                                                      project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {
@@ -109,13 +157,15 @@ public class JDeodorantFacade {
         }
     }
 
-    public static Set<ASTSliceGroup> getExtractMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static Set<ASTSliceGroup> getExtractMethodRefactoringOpportunities(ProjectInfo
+                                                                                      project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
 
         SystemObject systemObject = ASTReader.getSystemObject();
         Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<>();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
+
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
@@ -129,7 +179,8 @@ public class JDeodorantFacade {
         return extractedSliceGroups;
     }
 
-    private static void processMethod(final Set<ASTSliceGroup> extractedSliceGroups, ClassObject classObject, MethodObject methodObject) {
+    private static void processMethod(final Set<ASTSliceGroup> extractedSliceGroups, ClassObject
+            classObject, MethodObject methodObject) {
         if (methodObject.getMethodBody() != null) {
             CFG cfg = new CFG(methodObject);
             PDG pdg = new PDG(cfg, classObject.getPsiFile(), classObject.getFieldsAccessedInsideMethod(methodObject));
@@ -198,7 +249,8 @@ public class JDeodorantFacade {
         }
     }
 
-    public static Set<TypeCheckEliminationGroup> getTypeCheckEliminationRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static Set<TypeCheckEliminationGroup> getTypeCheckEliminationRefactoringOpportunities(ProjectInfo
+                                                                                                         project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
         SystemObject systemObject = ASTReader.getSystemObject();
 
