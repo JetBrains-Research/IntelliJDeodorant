@@ -4,7 +4,6 @@ import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -21,8 +20,8 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsApplier;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 
@@ -194,8 +193,7 @@ class MoveMethodPanel extends JPanel {
         Project project = scope.getProject();
         ProjectInfo projectInfo = new ProjectInfo(project);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
-                IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
@@ -217,7 +215,8 @@ class MoveMethodPanel extends JPanel {
                 });
             }
         };
-        ProgressManager.getInstance().run(backgroundable);
+
+        AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, project, projectInfo);
     }
 
     private void onDoubleClick() {

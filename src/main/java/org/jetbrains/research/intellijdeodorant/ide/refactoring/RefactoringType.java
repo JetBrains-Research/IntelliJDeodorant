@@ -15,6 +15,10 @@ abstract public class RefactoringType {
 
     public List<AbstractCandidateRefactoringGroup> getRefactoringOpportunities(ProjectInfo projectInfo, ProgressIndicator indicator) {
         Set<?> notAbstractRefactoringOpportunities = getNotAbstractRefactoringOpportunities(projectInfo, indicator);
+        if (notAbstractRefactoringOpportunities == null) {
+            return null;
+        }
+
         List<AbstractCandidateRefactoringGroup> result = new ArrayList<>();
         for (Object candidate : notAbstractRefactoringOpportunities) {
             result.add(newAbstractCandidateRefactoringGroup(candidate));

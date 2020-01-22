@@ -93,7 +93,7 @@ public class PsiUtils {
         PsiClass[] psiClasses = psiFile.getClasses();
         for (PsiClass psiClass : psiClasses) {
             allClasses.add(psiClass);
-            allClasses.addAll(Arrays.asList(psiClass.getAllInnerClasses()));
+            allClasses.addAll(Arrays.asList(psiClass.getInnerClasses()));
         }
         return allClasses;
     }
