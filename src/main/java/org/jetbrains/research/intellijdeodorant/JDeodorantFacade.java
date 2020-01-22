@@ -1,10 +1,6 @@
 package org.jetbrains.research.intellijdeodorant;
 
-import com.intellij.compiler.ProblemsView;
-import com.intellij.compiler.impl.ProblemsViewImpl;
-import com.intellij.ide.errorTreeView.NewErrorTreeViewPanel;
 import com.intellij.ide.errorTreeView.impl.ErrorTreeViewConfiguration;
-import com.intellij.notification.Notification;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.compiler.CompileContext;
 import com.intellij.openapi.compiler.CompileScope;
@@ -17,7 +13,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiVariable;
-import com.intellij.ui.content.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
