@@ -5,15 +5,42 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 
 import java.util.*;
 
+/**
+ * Class that collects changes during the Extract Class Refactoring in order to show them later.
+ */
 public class ExtractClassPreviewProcessor {
+    /**
+     * Holds initial and updated PsiMethods (to compare)
+     */
     private List<PsiMethodComparingPair> methodComparingList = new ArrayList<>();
+
+    /**
+     * For each updated PsiMethod holds all changes applied to this method
+     * (or null in case this changes are not being collected)
+     */
     private Map<PsiMethod, ArrayList<PsiElementComparingPair>> methodElementsComparingMap = new LinkedHashMap<>();
+
+    /**
+     * Holds class-level changes (field adding/removing etc)
+     */
     private List<PsiElementChange> psiElementChanges = new ArrayList<>();
+
+    /**
+     * Copy of the source class at it's initial state
+     */
     private PsiClassWrapper initialSourceClass;
+
+    /**
+     * Source class after refactoring
+     */
     private PsiClassWrapper updatedSourceClass;
     private PsiClassWrapper extractedClass;
+
     private Map<PsiElement, PsiElement> updatedSourceElementsToInitial = new HashMap<>();
 
+    /**
+     * Creates a copy of the source file (of the real project file) in order to make all changes to the copy file
+     */
     public CopiedData cloneSourceFile(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration, Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods) {
         PsiJavaFile copyFileToUpdate = (PsiJavaFile) sourceFile.copy();
         PsiJavaFile copyFileToCompareWithInitial = (PsiJavaFile) sourceFile.copy();
@@ -67,6 +94,9 @@ public class ExtractClassPreviewProcessor {
         return methodElementsComparingMap;
     }
 
+    /**
+     * Remove method comparision if there are no changes
+     */
     public void removeUnchangedMethods() {
         for (Iterator<PsiMethodComparingPair> it = methodComparingList.iterator(); it.hasNext(); ) {
             PsiMethodComparingPair methodPair = it.next();
@@ -120,6 +150,10 @@ public class ExtractClassPreviewProcessor {
         return updatedSourceElementsToInitial;
     }
 
+    /**
+     * Add to `psiElementChanges` new `psiElementChange` that was initialised with the elements from the updated class,
+     * as `psiElementChanges` should hold elements of the initial-copy class
+     */
     public void addToPsiElementChangesFromUpdatedClass(PsiElementChange psiElementChange) {
         PsiElement element = psiElementChange.getPsiElement();
         if (element != null) {
@@ -142,6 +176,9 @@ public class ExtractClassPreviewProcessor {
         psiElementChanges.add(psiElementChange);
     }
 
+    /**
+     * Sort all changes by their offset
+     */
     public void sortChanges() {
         methodComparingList.sort(Comparator.comparingInt(p -> p.getInitialPsiMethod().getTextOffset()));
 
@@ -189,6 +226,9 @@ public class ExtractClassPreviewProcessor {
     public static class PsiMethodComparingPair {
         private PsiMethod initialPsiMethod;
         private PsiMethod updatedPsiMethod;
+        /**
+         * Description to show in the preview dialog
+         */
         private String description;
         private static final String UPDATED_METHOD = IntelliJDeodorantBundle.message("god.class.preview.updated.method");
         /**
@@ -255,28 +295,28 @@ public class ExtractClassPreviewProcessor {
             return initialMethod;
         }
 
-        public void setInitialPsiElement(PsiElement initialPsiElement) {
-            this.initialPsiElement = initialPsiElement;
-        }
-
-        public void setUpdatedPsiElement(PsiElement updatedPsiElement) {
-            this.updatedPsiElement = updatedPsiElement;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
         @Override
         public String toString() {
             return description;
         }
     }
 
+    /**
+     * Change applied to some element in the source class, at a class level (added/removed field etc)
+     */
     public static class PsiElementChange {
         private PsiElement psiElement;
         private CHANGE_TYPE change_type;
+        /**
+         * Description to show in the preview result dialog
+         */
         private String description;
+
+        /**
+         * For ADD_AFTER, ADD_BEFORE -- element to add after/before
+         * For REPLACE -- element to replace with
+         * For REMOVE -- null
+         */
         private PsiElement anchor;
 
         public PsiElement getPsiElement() {
@@ -320,6 +360,9 @@ public class ExtractClassPreviewProcessor {
         }
     }
 
+    /**
+     * Wrapper to correctly show description in the preview result dialog.
+     */
     public static class PsiClassWrapper {
         private PsiClass psiClass;
         private String description;
