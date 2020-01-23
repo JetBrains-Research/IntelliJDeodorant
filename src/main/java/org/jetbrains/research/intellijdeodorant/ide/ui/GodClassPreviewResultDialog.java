@@ -9,9 +9,9 @@ import com.intellij.diff.impl.DiffRequestProcessor;
 import com.intellij.diff.impl.DiffWindow;
 import com.intellij.diff.util.DiffUtil;
 import com.intellij.ide.highlighter.JavaFileType;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.ui.JBSplitter;
@@ -25,7 +25,6 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.Ext
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementComparingPair;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiMethodComparingPair;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
 
 import javax.swing.*;
@@ -124,7 +123,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
                     PsiElement parent = null;
                     switch (elementChange.getChange_type()) {
-                        case ADD_AFTER: case ADD_BEFORE: {
+                        case ADD_AFTER:
+                        case ADD_BEFORE: {
                             parent = elementChange.getAnchor().getParent().getParent(); //PsiElement -> PsiCodeBlock -> PsiBodyOwner
                             break;
                         }
@@ -143,7 +143,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                     ExtractClassPreviewProcessor.mapElementsToCopy(parent, parentCopy, initialToCopy);
 
                     switch (elementChange.getChange_type()) {
-                        case ADD_BEFORE: case ADD_AFTER: {
+                        case ADD_BEFORE:
+                        case ADD_AFTER: {
                             source = getTextAndReformat(parent);
 
                             PsiElement elementToAdd = initialToCopy.get(elementChange.getPsiElement());
@@ -283,7 +284,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
             public Object getChild(Object parent, int index) {
                 if (parent instanceof PsiMethodComparingPair) {
                     PsiMethod initialMethod = ((PsiMethodComparingPair) parent).getInitialPsiMethod();
-                    List<PsiElementComparingPair> children =  previewProcessor.getMethodElementsComparingMap().get(initialMethod);
+                    List<PsiElementComparingPair> children = previewProcessor.getMethodElementsComparingMap().get(initialMethod);
                     if (children != null) {
                         return children.get(index);
                     }
