@@ -134,7 +134,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testSOEN_Jar() {
-        //runTest("TestSOEN_Jar");
+        runTest("TestSOEN_Jar");
     }
 
     public void testSOEN_StackedBarRenderer3D() {
@@ -147,7 +147,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         (expected file is modified as well).
         */
 
-        //runTest("TestSOEN_StackedBarRenderer3D");
+        runTest("TestSOEN_StackedBarRenderer3D");
     }
 
     private void runTest(String testName) {

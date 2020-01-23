@@ -160,6 +160,14 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
         assertNull(group);
     }
 
+    public void testPublicFields() {
+        String classFileName = "testPublicFields.java";
+
+        ExtractClassCandidateGroup group = getExractClassCandidateGroup(classFileName);
+
+        assertNull(group);
+    }
+
     public void testOverride() {
         String classFileName = "testOverride.java";
 
