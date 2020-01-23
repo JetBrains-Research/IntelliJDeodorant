@@ -17,10 +17,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationUtility;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringUtility;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiElementPair;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.PsiMethodPair;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractclass.ExtractClassPreviewProcessor.SourceFileAndClass;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.*;
 import org.jetbrains.research.intellijdeodorant.utils.math.AdjacencyList;
 import org.jetbrains.research.intellijdeodorant.utils.math.Edge;
 import org.jetbrains.research.intellijdeodorant.utils.math.Node;
@@ -28,7 +25,9 @@ import org.jetbrains.research.intellijdeodorant.utils.math.TarjanAlgorithm;
 
 import java.util.*;
 
-@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.CHANGE_TYPE.*;
+
+@SuppressWarnings({"BooleanMethodIsAlwaysInverted", "ConstantConditions"})
 public class ExtractClassRefactoring {
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
@@ -75,14 +74,36 @@ public class ExtractClassRefactoring {
 
     private ExtractClassPreviewProcessor previewProcessor = new ExtractClassPreviewProcessor();
 
-    private List<PsiMethodPair> methodComparingList = previewProcessor.getMethodComparingList();
-    private Map<PsiMethod, ArrayList<PsiElementPair>> methodElementsComparingMap = previewProcessor.getMethodElementsComparingMap();
-
+    private List<PsiMethodComparingPair> methodComparingList = previewProcessor.getMethodComparingList();
+    private Map<PsiMethod, ArrayList<PsiElementComparingPair>> methodElementsComparingMap = previewProcessor.getMethodElementsComparingMap();
 
     /**
      * True if we are not actually performing a refactoring, just collecting intermediate changes to create a preview.
      */
     private boolean previewUsage;
+
+    private Map<PsiElement, PsiElement> updatedSourceElementsToInitial;
+
+    private static final String UPDATED_EXTRACTED_METHOD_INVOCATION = IntelliJDeodorantBundle.message("god.class.preview.updated.extracted.method.invocation");
+    private static final String UPDATED_EXTRACTED_FIELD_ACCESS = IntelliJDeodorantBundle.message("god.class.preview.updated.extracted.field.access");
+    private static final String UPDATED_EXTRACTED_FIELD_ASSIGMENT = IntelliJDeodorantBundle.message("god.class.preview.updated.extracted.field.assigment");
+    private static final String CREATED_FIELD_HOLDING_REFERENCE = IntelliJDeodorantBundle.message("god.class.preview.create.field.holding.reference");
+    private static final String INITIALISE_EXTRACTED_FIELD = IntelliJDeodorantBundle.message("god.class.preview.initialise.extracted.field");
+    private static final String REMOVE_EXTRACTED_FIELD = IntelliJDeodorantBundle.message("god.class.preview.remove.extracted.method");
+    private static final String LEAVE_DELEGATE = IntelliJDeodorantBundle.message("god.class.preview.leave.delegate");
+    private static final String REMOVE_EXTRACTED_METHOD = IntelliJDeodorantBundle.message("god.class.preview.remove.extracted.method");
+    private static final String CREATE_SETTER = IntelliJDeodorantBundle.message("god.class.preview.create.setter");
+    private static final String CREATE_GETTER = IntelliJDeodorantBundle.message("god.class.preview.create.getter");
+    private static final String CHANGED_ACCESS_TO_PUBLIC = IntelliJDeodorantBundle.message("god.class.preview.changed.access.to.public");
+    private static final String INITIALISE_FIELD_HOLDING_REFERENCE = IntelliJDeodorantBundle.message("god.class.preview.initialise.field.holding.reference");
+    private static final String UPDATE_WRITE_OBJECT = IntelliJDeodorantBundle.message("god.class.preview.update.write.object");
+    private static final String CREATE_WRITE_OBJECT = IntelliJDeodorantBundle.message("god.class.preview.create.write.object");
+    private static final String UPDATE_READ_OBJECT = IntelliJDeodorantBundle.message("god.class.preview.update.read.object");
+    private static final String CREATE_READ_OBJECT = IntelliJDeodorantBundle.message("god.class.preview.create.read.object");
+    private static final String UPDATE_CLONE = IntelliJDeodorantBundle.message("god.class.preview.update.clone");
+    private static final String CREATE_CLONE = IntelliJDeodorantBundle.message("god.class.preview.create.clone");
+    private static final String UPDATED_SOURCE_CLASS = IntelliJDeodorantBundle.message("god.class.preview.updates.source.class");
+    private static final String CREATED_EXTRACTED_CLASS = IntelliJDeodorantBundle.message("god.class.preview.created.extracted.class");
 
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
                                    Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
@@ -94,11 +115,15 @@ public class ExtractClassRefactoring {
     public void setPreviewUsage() {
         previewUsage = true;
 
-        SourceFileAndClass clone = ExtractClassPreviewProcessor.cloneSourceFile(sourceFile, sourceTypeDeclaration, extractedFieldFragments, extractedMethods, delegateMethods);
-        this.sourceFile = clone.getSourceFile();
-        this.sourceTypeDeclaration = clone.getSourceTypeDeclaration();
+        CopiedData clone = previewProcessor.cloneSourceFile(sourceFile, sourceTypeDeclaration, extractedFieldFragments, extractedMethods, delegateMethods);
+        this.sourceFile = clone.getFileToUpdate();
+        this.sourceTypeDeclaration = clone.getClassToUpdate();
 
         init(extractedFieldFragments, extractedMethods, delegateMethods, defaultExtractedTypeName);
+
+        updatedSourceElementsToInitial = previewProcessor.getUpdatedSourceElementsToInitial();
+        previewProcessor.setInitialSourceClass(new PsiClassWrapper(clone.getSourceClassInitialCopy(), UPDATED_SOURCE_CLASS));
+        previewProcessor.setUpdatedSourceClass(new PsiClassWrapper(sourceTypeDeclaration, ""));
     }
 
     private void init(Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
@@ -134,7 +159,6 @@ public class ExtractClassRefactoring {
         this.sourceToSandboxMethodMap = new LinkedHashMap<>();
         this.sandboxToSourceFieldMap = new LinkedHashMap<>();
         this.sandboxToExtractedMethodMap = new LinkedHashMap<>();
-        this.previewUsage = previewUsage;
     }
 
     public String getExtractedTypeName() {
@@ -266,6 +290,16 @@ public class ExtractClassRefactoring {
                 if (psiMethod.isConstructor()) {
                     PsiStatement psiStatement = convertPsiFieldToSetterCallStatement(psiField);
                     psiMethod.getBody().addBefore(psiStatement, psiMethod.getBody().getRBrace());
+
+                    if (previewUsage) {
+                        previewProcessor.addToPsiElementChangesFromUpdatedClass(
+                                new PsiElementChange(
+                                        psiStatement,
+                                        ADD_BEFORE,
+                                        INITIALISE_EXTRACTED_FIELD + " " + psiField.getName(),
+                                        psiMethod.getBody().getRBrace()));
+                    }
+
                 }
             }
         }
@@ -331,6 +365,15 @@ public class ExtractClassRefactoring {
         }
 
         sourceMethod.getBody().addBefore(delegationStatement, sourceMethod.getBody().getRBrace());
+
+        if (previewUsage) {
+            PsiMethod initialSourceMethod = (PsiMethod) updatedSourceElementsToInitial.get(sourceMethod);
+            previewProcessor.getMethodComparingList().add(new PsiMethodComparingPair(
+                    initialSourceMethod,
+                    sourceMethod,
+                    LEAVE_DELEGATE + " " + sourceMethod.getName(),
+                    true));
+        }
     }
 
     private void removeSourceMethods(Set<PsiMethod> methods) {
@@ -339,6 +382,13 @@ public class ExtractClassRefactoring {
          */
         for (PsiMethod method : methods) {
             method.delete();
+
+            if (previewUsage) {
+                previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(
+                        method,
+                        REMOVE,
+                        REMOVE_EXTRACTED_METHOD + " " + method.getName()));
+            }
         }
     }
 
@@ -350,13 +400,16 @@ public class ExtractClassRefactoring {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
                 if (methodBody != null) {
                     PsiStatement[] statements = methodBody.getStatements();
-                    for (PsiStatement statement : statements) {
 
-                        PsiStatement originalStatement = null;
-                        if (previewUsage) {
-                            originalStatement = statement;
-                            statement = (PsiStatement) statement.copy();
-                        }
+                    PsiMethod initialSourceMethod = null;
+                    List<PsiElementComparingPair> comparingList = null;
+                    if (previewUsage) {
+                        initialSourceMethod = getInitialSourceMethod(methodDeclaration);
+                        comparingList = methodElementsComparingMap.get(initialSourceMethod);
+                    }
+
+                    for (int i = 0; i < statements.length; i++) {
+                        PsiStatement statement = statements[i];
 
                         List<PsiExpression> methodInvocations = expressionExtractor.getMethodInvocations(statement);
                         boolean rewriteAST = false;
@@ -423,8 +476,12 @@ public class ExtractClassRefactoring {
                             }
                         }
 
-                        if (previewUsage && rewriteAST) {
-                            previewProcessor.putIntoMethodComparingMap(methodDeclaration, originalStatement, statement);
+                        if (previewUsage && initialSourceMethod != null && rewriteAST) {
+                            comparingList.add(new ExtractClassPreviewProcessor.PsiElementComparingPair(
+                                    initialSourceMethod.getBody().getStatements()[i],
+                                    statement,
+                                    initialSourceMethod,
+                                    UPDATED_EXTRACTED_METHOD_INVOCATION));
                         }
                     }
                 }
@@ -836,13 +893,13 @@ public class ExtractClassRefactoring {
             }
         }
 
+        previewProcessor.setExtractedClass(new PsiClassWrapper(extractedClass, CREATED_EXTRACTED_CLASS));
+
         extractedClassFile.add(extractedClass);
 
         if (sourceFile.getContainingDirectory() != null) {
             extractedClassFile = (PsiJavaFile) sourceFile.getContainingDirectory().add(extractedClassFile);
         }
-
-        //FileContentUtil.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
 
         return extractedClassFile;
     }
@@ -883,6 +940,7 @@ public class ExtractClassRefactoring {
 
     private void commitResults(PsiJavaFile extractedClassFile) {
         if (previewUsage) {
+            previewProcessor.sortChanges();
             return;
         }
 
@@ -1069,6 +1127,14 @@ public class ExtractClassRefactoring {
                         + "this." + fieldDeclaration.getName() + " = " + fieldDeclaration.getName() + ";\n" + "}", sourceTypeDeclaration);
 
                 sourceTypeDeclaration.addBefore(psiMethod, sourceTypeDeclaration.getRBrace());
+
+                if (previewUsage) {
+                    previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(
+                            psiMethod,
+                            ADD_BEFORE,
+                            CREATE_SETTER + " " + variableBinding.getName(),
+                            sourceTypeDeclaration.getRBrace()));
+                }
             }
         }
     }
@@ -1086,6 +1152,14 @@ public class ExtractClassRefactoring {
                         + "}", sourceTypeDeclaration);
 
                 sourceTypeDeclaration.addBefore(psiMethod, sourceTypeDeclaration.getRBrace());
+
+                if (previewUsage) {
+                    previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(
+                            psiMethod,
+                            ADD_BEFORE,
+                            CREATE_GETTER + " " + variableBinding.getName(),
+                            sourceTypeDeclaration.getRBrace()));
+                }
             }
         }
     }
@@ -2240,6 +2314,10 @@ public class ExtractClassRefactoring {
 
     private void updateBodyDeclarationAccessModifier(PsiClass memberType) {
         memberType.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
+
+        if (previewUsage) {
+            previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(memberType.getModifierList(), REPLACE, CHANGED_ACCESS_TO_PUBLIC));
+        }
     }
 
     private void setPublicModifierToSourceField(PsiField variableBinding) {
@@ -2248,6 +2326,10 @@ public class ExtractClassRefactoring {
         }
 
         variableBinding.getModifierList().setModifierProperty(PsiModifier.PUBLIC, true);
+
+        if (previewUsage) {
+            previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(variableBinding, REPLACE, CHANGED_ACCESS_TO_PUBLIC));
+        }
     }
 
     private PsiMethod createSetterMethodDeclaration(PsiField fieldFragment) {
@@ -2382,8 +2464,24 @@ public class ExtractClassRefactoring {
                         }
 
                         constructor.getBody().addAfter(assigmentStatement, lastStatement);
+
+                        if (previewUsage) {
+                            previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(
+                                    assigmentStatement.copy(),
+                                    ADD_AFTER,
+                                    INITIALISE_FIELD_HOLDING_REFERENCE,
+                                    lastStatement));
+                        }
                     } else {
                         constructor.getBody().addAfter(assigmentStatement, constructor.getBody().getLBrace());
+
+                        if (previewUsage) {
+                            previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(
+                                    assigmentStatement.copy(),
+                                    ADD_AFTER,
+                                    INITIALISE_FIELD_HOLDING_REFERENCE,
+                                    constructor.getBody().getLBrace()));
+                        }
                     }
                 }
 
@@ -2404,7 +2502,12 @@ public class ExtractClassRefactoring {
                 updateWriteObjectInSourceClass(modifiedExtractedTypeName);
             }
             updateCloneInSourceClass(modifiedExtractedTypeName);
+
             sourceTypeDeclaration.addAfter(extractedReferenceFieldDeclaration, sourceTypeDeclaration.getLBrace());
+
+            if (previewUsage) {
+                previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(extractedReferenceFieldDeclaration, ADD_AFTER, CREATED_FIELD_HOLDING_REFERENCE, sourceTypeDeclaration.getLBrace()));
+            }
         }
     }
 
@@ -2427,6 +2530,11 @@ public class ExtractClassRefactoring {
                             methodBody.addAfter(methodInvocationStatement, methodBody.getLBrace());
                         }
                     }
+
+                    if (previewUsage) {
+                        PsiMethod initialMethod = (PsiMethod) updatedSourceElementsToInitial.get(method);
+                        previewProcessor.getMethodComparingList().add(new PsiMethodComparingPair(initialMethod, method, UPDATE_WRITE_OBJECT, true));
+                    }
                 }
             }
         }
@@ -2444,8 +2552,11 @@ public class ExtractClassRefactoring {
             PsiStatement methodInvocationStatement2 = createMethodInvocationStatementForWriteObject(modifiedExtractedTypeName, parameterSimpleName);
 
             writeObjectMethod.getBody().addBefore(methodInvocationStatement2, writeObjectMethod.getBody().getRBrace());
-
             sourceTypeDeclaration.addBefore(writeObjectMethod, sourceTypeDeclaration.getRBrace());
+
+            if (previewUsage) {
+                previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(writeObjectMethod, ADD_BEFORE, CREATE_WRITE_OBJECT, sourceTypeDeclaration.getRBrace()));
+            }
         }
     }
 
@@ -2474,9 +2585,15 @@ public class ExtractClassRefactoring {
                             methodBody.addAfter(assignmentStatement, methodBody.getLBrace());
                         }
                     }
+
+                    if (previewUsage) {
+                        PsiMethod initialMethod = (PsiMethod) updatedSourceElementsToInitial.get(method);
+                        previewProcessor.getMethodComparingList().add(new PsiMethodComparingPair(initialMethod, method, UPDATE_READ_OBJECT, true));
+                    }
                 }
             }
         }
+
         if (!methodFound) {
             PsiMethod readObjectMethod = factory.createMethod("readObject", PsiType.VOID);
             readObjectMethod.getParameterList().add(factory.createParameter("stream", factory.createTypeByFQClassName("java.io.ObjectInputStream")));
@@ -2497,7 +2614,12 @@ public class ExtractClassRefactoring {
             methodBody.addAfter(assignmentStatement, methodBody.getLBrace());
 
             readObjectMethod.getBody().replace(methodBody);
+
             sourceTypeDeclaration.addAfter(readObjectMethod, sourceTypeDeclaration.getLBrace());
+
+            if (previewUsage) {
+                previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(readObjectMethod, ADD_AFTER, CREATE_READ_OBJECT, sourceTypeDeclaration.getLBrace()));
+            }
         }
     }
 
@@ -2520,11 +2642,17 @@ public class ExtractClassRefactoring {
 
                             PsiStatement assignmentStatement = createAssignmentStatementForClone(fragment.getName(), modifiedExtractedTypeName);
                             methodBody.addAfter(assignmentStatement, firstStatement);
+
+                            if (previewUsage) {
+                                PsiMethod initialMethod = (PsiMethod) updatedSourceElementsToInitial.get(method);
+                                previewProcessor.getMethodComparingList().add(new PsiMethodComparingPair(initialMethod, method, UPDATE_CLONE, true));
+                            }
                         }
                     }
                 }
             }
         }
+
         if (!methodFound) {
             PsiMethod cloneMethodBinding = findCloneMethod(sourceTypeDeclaration.getSuperClass());
             if (cloneMethodBinding != null) {
@@ -2551,6 +2679,10 @@ public class ExtractClassRefactoring {
 
                 cloneMethodDeclaration.getBody().replace(body);
                 sourceTypeDeclaration.addBefore(cloneMethodDeclaration, sourceTypeDeclaration.getRBrace());
+
+                if (previewUsage) {
+                    previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(cloneMethodDeclaration, ADD_BEFORE, CREATE_CLONE, sourceTypeDeclaration.getRBrace()));
+                }
             }
         }
     }
@@ -2644,15 +2776,18 @@ public class ExtractClassRefactoring {
     private void removeFieldFragmentsInSourceClass(Set<PsiField> fieldFragments) {
         for (PsiField field : fieldFragments) {
             field.delete();
+            if (previewUsage) {
+                previewProcessor.addToPsiElementChangesFromUpdatedClass(new PsiElementChange(field, REMOVE, REMOVE_EXTRACTED_FIELD + " " + field.getName()));
+            }
         }
     }
 
     private PsiMethod getInitialSourceMethod(PsiMethod methodDeclaration) {
         if (!updatedSourceMethodToInitialCopy.containsKey(methodDeclaration)) {
-            PsiMethod initialSourceMethod = (PsiMethod) methodDeclaration.copy();
+            PsiMethod initialSourceMethod = (PsiMethod) updatedSourceElementsToInitial.get(methodDeclaration);
             updatedSourceMethodToInitialCopy.put(methodDeclaration, initialSourceMethod);
             methodElementsComparingMap.put(initialSourceMethod, new ArrayList<>());
-            methodComparingList.add(new PsiMethodPair(initialSourceMethod, methodDeclaration));
+            methodComparingList.add(new PsiMethodComparingPair(initialSourceMethod, methodDeclaration));
         }
 
         return updatedSourceMethodToInitialCopy.get(methodDeclaration);
@@ -2675,7 +2810,7 @@ public class ExtractClassRefactoring {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
 
                 PsiMethod initialSourceMethod = null;
-                List<PsiElementPair> comparingList = null;
+                List<PsiElementComparingPair> comparingList = null;
                 if (previewUsage && handleType == HandleType.MODIFY) {
                     initialSourceMethod = getInitialSourceMethod(methodDeclaration);
                     comparingList = methodElementsComparingMap.get(initialSourceMethod);
@@ -3015,8 +3150,12 @@ public class ExtractClassRefactoring {
                             }
                         }
 
-                        if (initialSourceMethod != null && rewriteAST) {
-                            comparingList.add(new PsiElementPair(initialSourceMethod.getBody().getStatements()[i], statement, initialSourceMethod));
+                        if (previewUsage && initialSourceMethod != null && rewriteAST) {
+                            comparingList.add(new ExtractClassPreviewProcessor.PsiElementComparingPair(
+                                    initialSourceMethod.getBody().getStatements()[i],
+                                    factory.createStatementFromText(statement.getText(), null),
+                                    initialSourceMethod,
+                                    UPDATED_EXTRACTED_FIELD_ASSIGMENT));
                         }
                     }
                 }
@@ -3041,10 +3180,21 @@ public class ExtractClassRefactoring {
         for (PsiMethod methodDeclaration : contextMethods) {
             if (!extractedMethods.contains(methodDeclaration)) {
                 PsiCodeBlock methodBody = methodDeclaration.getBody();
+
+                PsiMethod initialSourceMethod = null;
+                List<ExtractClassPreviewProcessor.PsiElementComparingPair> comparingList = null;
+                if (previewUsage && handleType == HandleType.MODIFY) {
+                    initialSourceMethod = getInitialSourceMethod(methodDeclaration);
+                    comparingList = methodElementsComparingMap.get(initialSourceMethod);
+                }
+
                 if (methodBody != null) {
                     PsiStatement[] statements = methodBody.getStatements();
-                    for (PsiStatement statement : statements) {
+
+                    for (int i = 0; i < statements.length; i++) {
+                        PsiStatement statement = statements[i];
                         boolean rewriteAST = false;
+
                         List<PsiExpression> accessedVariables = expressionExtractor.getVariableInstructions(statement);
                         for (PsiField fieldFragment : fieldFragments) {
                             String originalFieldName = fieldFragment.getName();
@@ -3092,6 +3242,14 @@ public class ExtractClassRefactoring {
                                     }
                                 }
                             }
+                        }
+
+                        if (previewUsage && initialSourceMethod != null && rewriteAST) {
+                            comparingList.add(new ExtractClassPreviewProcessor.PsiElementComparingPair(
+                                    initialSourceMethod.getBody().getStatements()[i],
+                                    statement,
+                                    initialSourceMethod,
+                                    UPDATED_EXTRACTED_FIELD_ACCESS));
                         }
                     }
                 }
@@ -3169,11 +3327,7 @@ public class ExtractClassRefactoring {
     }
 
     public String getName() {
-        return "Extract Class";
-    }
-
-    public void checkInitialConditions(ProgressIndicator indicator) {
-        indicator.setText(IntelliJDeodorantBundle.message("god.class.identification.indicator.preconditions"));
+        return IntelliJDeodorantBundle.message("god.class.name");
     }
 
     public PsiClass getSourceClass() {

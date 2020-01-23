@@ -21,6 +21,7 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.impl.PsiModificationTrackerImpl;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
@@ -76,6 +77,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private RefactoringType refactoringType;
     private static Notification errorNotification;
     private int refactorDepth;
+
+    private boolean isPreviewUsage;
 
     public AbstractRefactoringPanel(@NotNull AnalysisScope scope,
                                     String detectIndicatorStatusTextKey,
@@ -171,7 +174,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, new PsiModificationTracker.Listener() {
             @Override
             public void modificationCountChanged() {
-                ApplicationManager.getApplication().invokeLater(() -> showRefreshingProposal());
+                if (!isPreviewUsage) {
+                    ApplicationManager.getApplication().invokeLater(() -> showRefreshingProposal());
+                }
             }
         });
     }
@@ -380,5 +385,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     public static void showCompilationErrorNotification(Project project) {
         errorNotification = NOTIFICATION_GROUP.createNotification(IntelliJDeodorantBundle.message(FILES_CONTAIN_COMPILATION_ERRORS), MessageType.ERROR);
         Notifications.Bus.notify(errorNotification, project);
+    }
+
+    public void setPreviewUsage(boolean previewUsage) {
+        isPreviewUsage = previewUsage;
     }
 }

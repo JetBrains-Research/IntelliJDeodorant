@@ -18,7 +18,6 @@ import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 import javax.swing.*;
@@ -45,8 +44,9 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     private JPanel mainPanel;
     private JTextField extractedClassNameField = new JTextField();
     private JButton restoreButton = new JButton();
+    private AbstractRefactoringPanel godClassPanel;
 
-    public GodClassUserInputDialog(AbstractExtractClassRefactoring abstractRefactoring) {
+    public GodClassUserInputDialog(AbstractExtractClassRefactoring abstractRefactoring, AbstractRefactoringPanel godClassPanel) {
         super(abstractRefactoring.getRefactoring().getSourceFile().getProject(), true);
 
         this.abstractRefactoring = abstractRefactoring;
@@ -76,6 +76,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         this.javaLangClassNames.add("System");
         this.javaLangClassNames.add("Thread");
         this.javaLangClassNames.add("Void");
+        this.godClassPanel = godClassPanel;
 
         String packageName = PsiUtil.getPackageName(refactoring.getSourceClass());
         parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
@@ -180,19 +181,27 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     @Override
     protected void doAction() {
         if (isPreviewUsages()) {
+            godClassPanel.setPreviewUsage(true);
+
             DiffContentFactory contentFactory = DiffContentFactory.getInstance();
             DiffContent c1 = contentFactory.create("");
             DiffContent c2 = contentFactory.create("");
 
             MutableDiffRequestChain chain = new MutableDiffRequestChain(c1, c2);
 
-            GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT, refactoring);
+            refactoring.setPreviewUsage();
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+                refactoring.apply();
+            });
+
+            GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT, refactoring.getPreviewProcessor());
             previewResultDialog.show();
 
-            setPreviewResults(false);
-
             refactoring = abstractRefactoring.renewRefactoring();
-            ;
+
+            setPreviewResults(false);
+            godClassPanel.setPreviewUsage(false);
         } else {
             closeOKAction();
             refactoring.setExtractedTypeName(extractedClassNameField.getText());
