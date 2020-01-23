@@ -103,6 +103,9 @@ public class GodClassPreviewResultDialog extends DiffWindow {
             scrollPane = ScrollPaneFactory.createScrollPane(treeTable);
         }
 
+        /**
+         * Updates diff window with the selected change from the Tree List.
+         */
         private void updateDiff() {
             TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
 
@@ -216,11 +219,15 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                 return "";
             }
 
-            element = codeStyleManager.reformat(element);
+            element = codeStyleManager
+                    .reformat(element);
             element = javaCodeStyleManager.shortenClassReferences(element);
             return element.getText();
         }
 
+        /**
+         * Holds all changes during the refactoring application
+         */
         private class TreeTableList extends DefaultTreeModel implements TreeTableModel {
 
             private TreeTableList() {
