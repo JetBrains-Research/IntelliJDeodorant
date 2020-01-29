@@ -8,10 +8,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
 import org.jetbrains.research.intellijdeodorant.core.distance.*;
-import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
-import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
-import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
 
 import java.util.*;
@@ -42,7 +38,6 @@ public class JDeodorantFacade {
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
-
             Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())

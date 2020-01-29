@@ -41,10 +41,8 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
@@ -214,7 +212,8 @@ class ExtractMethodPanel extends JPanel {
                 });
             }
         };
-        ProgressManager.getInstance().run(backgroundable);
+
+        AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
     }
 
     /**
