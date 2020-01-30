@@ -88,7 +88,7 @@ public class ExtractClassRefactoring {
     private static final String UPDATED_EXTRACTED_FIELD_ASSIGMENT = IntelliJDeodorantBundle.message("god.class.preview.updated.extracted.field.assigment");
     private static final String CREATED_FIELD_HOLDING_REFERENCE = IntelliJDeodorantBundle.message("god.class.preview.create.field.holding.reference");
     private static final String INITIALISE_EXTRACTED_FIELD = IntelliJDeodorantBundle.message("god.class.preview.initialise.extracted.field");
-    private static final String REMOVE_EXTRACTED_FIELD = IntelliJDeodorantBundle.message("god.class.preview.remove.extracted.method");
+    private static final String REMOVE_EXTRACTED_FIELD = IntelliJDeodorantBundle.message("god.class.preview.remove.extracted.field");
     private static final String LEAVE_DELEGATE = IntelliJDeodorantBundle.message("god.class.preview.leave.delegate");
     private static final String REMOVE_EXTRACTED_METHOD = IntelliJDeodorantBundle.message("god.class.preview.remove.extracted.method");
     private static final String CREATE_SETTER = IntelliJDeodorantBundle.message("god.class.preview.create.setter");
