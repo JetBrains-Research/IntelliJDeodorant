@@ -7,6 +7,9 @@ import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.compiler.CompileScope;
+import com.intellij.openapi.compiler.CompileStatusNotification;
+import com.intellij.openapi.compiler.CompilerManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
@@ -18,6 +21,8 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
@@ -32,7 +37,6 @@ import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
-import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
@@ -55,12 +59,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
     private static final String EXPORT_BUTTON_TEXT_KEY = "export";
     private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
-    private static final String FILES_CONTAIN_COMPILATION_ERRORS = "files.contain.compilation.errors";
-    private static final String INTELLIJDEODORANT = "intellijdeodorant";
-    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(IntelliJDeodorantBundle.message(INTELLIJDEODORANT), NotificationDisplayType.STICKY_BALLOON, true);
-
+    private static final NotificationGroup NOTIFICATION_GROUP =
+            new NotificationGroup(IntelliJDeodorantBundle.message("intellijdeodorant"), NotificationDisplayType.STICKY_BALLOON, true);
     private String detectIndicatorStatusTextKey;
-
     @NotNull
     protected final AnalysisScope scope;
     private AbstractTreeTableModel model;
@@ -73,7 +74,6 @@ public abstract class AbstractRefactoringPanel extends JPanel {
             IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
             SwingConstants.CENTER
     );
-
     private RefactoringType refactoringType;
     private static Notification errorNotification;
     private int refactorDepth;
@@ -97,14 +97,42 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable, Project project, ProjectInfo projectInfo) {
-        final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("compiling.project"), true) {
+        final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("project.compiling.indicator.text"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                JDeodorantFacade.runAfterCompilationCheck(projectInfo, afterCompilationBackgroundable);
+                runAfterCompilationCheck(projectInfo, afterCompilationBackgroundable);
             }
         };
 
         ProgressManager.getInstance().run(compilationBackgroundable);
+    }
+
+    /**
+     * Runs task only if there are no compilation errors in the project.
+     */
+    private static void runAfterCompilationCheck(ProjectInfo projectInfo, Task task) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            List<PsiClass> classes = projectInfo.getClasses();
+
+            if (!classes.isEmpty()) {
+                VirtualFile[] virtualFiles = classes.stream()
+                        .map(classObject -> classObject.getContainingFile().getVirtualFile()).toArray(VirtualFile[]::new);
+                Project project = projectInfo.getProject();
+
+                CompilerManager compilerManager = CompilerManager.getInstance(project);
+                CompileStatusNotification callback = (aborted, errors, warnings, compileContext) -> {
+                    if (errors == 0 && !aborted) {
+                        ProgressManager.getInstance().run(task);
+                    } else {
+                        AbstractRefactoringPanel.showCompilationErrorNotification(project);
+                    }
+                };
+                CompileScope compileScope = compilerManager.createFilesCompileScope(virtualFiles);
+                compilerManager.make(compileScope, callback);
+            } else {
+                ProgressManager.getInstance().run(task);
+            }
+        });
     }
 
     private void setupGUI() {
@@ -383,7 +411,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     public static void showCompilationErrorNotification(Project project) {
-        errorNotification = NOTIFICATION_GROUP.createNotification(IntelliJDeodorantBundle.message(FILES_CONTAIN_COMPILATION_ERRORS), MessageType.ERROR);
+        errorNotification = NOTIFICATION_GROUP.createNotification(IntelliJDeodorantBundle.message("compilation.error.notification.text"), MessageType.ERROR);
         Notifications.Bus.notify(errorNotification, project);
     }
 
