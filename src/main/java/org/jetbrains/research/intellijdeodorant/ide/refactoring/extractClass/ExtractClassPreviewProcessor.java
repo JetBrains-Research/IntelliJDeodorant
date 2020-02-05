@@ -6,32 +6,31 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import java.util.*;
 
 /**
- * Class that collects changes during the Extract Class Refactoring in order to show them later.
+ * Collects the changes during the Extract Class Refactoring in order to show them later.
  */
 public class ExtractClassPreviewProcessor {
     /**
-     * Holds initial and updated PsiMethods (to compare)
+     * Stores initial and updated {@link PsiMethod} insanities (to compare).
      */
     private List<PsiMethodComparingPair> methodComparingList = new ArrayList<>();
 
     /**
-     * For each updated PsiMethod holds all changes applied to this method
-     * (or null in case this changes are not being collected)
+     * For each updated {@link PsiMethod}, stores all changes applied to the method or null if there are no changes.
      */
     private Map<PsiMethod, ArrayList<PsiElementComparingPair>> methodElementsComparingMap = new LinkedHashMap<>();
 
     /**
-     * Holds class-level changes (field adding/removing etc)
+     * Stores class-level changes (field adding/removing, etc).
      */
     private List<PsiElementChange> psiElementChanges = new ArrayList<>();
 
     /**
-     * Copy of the source class at it's initial state
+     * Copy of the source class at it's initial state.
      */
     private PsiClassWrapper initialSourceClass;
 
     /**
-     * Source class after refactoring
+     * Source class after refactoring.
      */
     private PsiClassWrapper updatedSourceClass;
     private PsiClassWrapper extractedClass;
@@ -39,9 +38,11 @@ public class ExtractClassPreviewProcessor {
     private Map<PsiElement, PsiElement> updatedSourceElementsToInitial = new HashMap<>();
 
     /**
-     * Creates a copy of the source file (of the real project file) in order to make all changes to the copy file
+     * Creates a copy of the source file (of the real project file) in order to make all changes to the copy file.
      */
-    public CopiedData cloneSourceFile(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration, Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods) {
+    public CopiedData cloneSourceFile(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
+                                      Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods,
+                                      Set<PsiMethod> delegateMethods) {
         PsiJavaFile copyFileToUpdate = (PsiJavaFile) sourceFile.copy();
         PsiJavaFile copyFileToCompareWithInitial = (PsiJavaFile) sourceFile.copy();
 
@@ -95,7 +96,7 @@ public class ExtractClassPreviewProcessor {
     }
 
     /**
-     * Remove method comparision if there are no changes
+     * Removes a method comparision if there are no changes.
      */
     public void removeUnchangedMethods() {
         for (Iterator<PsiMethodComparingPair> it = methodComparingList.iterator(); it.hasNext(); ) {
@@ -151,8 +152,8 @@ public class ExtractClassPreviewProcessor {
     }
 
     /**
-     * Add to `psiElementChanges` new `psiElementChange` that was initialised with the elements from the updated class,
-     * as `psiElementChanges` should hold elements of the initial-copy class
+     * Adds to `psiElementChanges` new change that was initialised with the elements from the updated class,
+     * as `psiElementChanges` should store elements of the initial-copy class.
      */
     public void addToPsiElementChangesFromUpdatedClass(PsiElementChange psiElementChange) {
         PsiElement element = psiElementChange.getPsiElement();
@@ -177,7 +178,7 @@ public class ExtractClassPreviewProcessor {
     }
 
     /**
-     * Sort all changes by their offset
+     * Sorts all changes by their offset.
      */
     public void sortChanges() {
         methodComparingList.sort(Comparator.comparingInt(p -> p.getInitialPsiMethod().getTextOffset()));
@@ -227,7 +228,7 @@ public class ExtractClassPreviewProcessor {
         private PsiMethod initialPsiMethod;
         private PsiMethod updatedPsiMethod;
         /**
-         * Description to show in the preview dialog
+         * Description to show in the preview dialog.
          */
         private String description;
         private static final String UPDATED_METHOD = IntelliJDeodorantBundle.message("god.class.preview.updated.method");
@@ -302,13 +303,13 @@ public class ExtractClassPreviewProcessor {
     }
 
     /**
-     * Change applied to some element in the source class, at a class level (added/removed field etc)
+     * Change that was applied to some element in the source class, at a class level (added/removed field etc).
      */
     public static class PsiElementChange {
         private PsiElement psiElement;
-        private CHANGE_TYPE change_type;
+        private ChangeType changeType;
         /**
-         * Description to show in the preview result dialog
+         * Description to show in the preview result dialog.
          */
         private String description;
 
@@ -335,21 +336,24 @@ public class ExtractClassPreviewProcessor {
             this.anchor = anchor;
         }
 
-        public CHANGE_TYPE getChange_type() {
-            return change_type;
+        public ChangeType getChangeType() {
+            return changeType;
         }
 
-        public enum CHANGE_TYPE {
-            REMOVE, ADD_AFTER, ADD_BEFORE, REPLACE
+        public enum ChangeType {
+            REMOVE,
+            ADD_AFTER,
+            ADD_BEFORE,
+            REPLACE
         }
 
-        public PsiElementChange(PsiElement psiElement, CHANGE_TYPE change_type, String description) {
-            this(psiElement, change_type, description, null);
+        public PsiElementChange(PsiElement psiElement, ChangeType changeType, String description) {
+            this(psiElement, changeType, description, null);
         }
 
-        public PsiElementChange(PsiElement psiElement, CHANGE_TYPE change_type, String description, PsiElement anchor) {
+        public PsiElementChange(PsiElement psiElement, ChangeType changeType, String description, PsiElement anchor) {
             this.psiElement = psiElement;
-            this.change_type = change_type;
+            this.changeType = changeType;
             this.description = description;
             this.anchor = anchor;
         }

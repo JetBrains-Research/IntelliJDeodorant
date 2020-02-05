@@ -24,7 +24,7 @@ import org.jetbrains.research.intellijdeodorant.utils.math.TarjanAlgorithm;
 
 import java.util.*;
 
-import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.CHANGE_TYPE.*;
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.ChangeType.*;
 
 @SuppressWarnings({"BooleanMethodIsAlwaysInverted", "ConstantConditions"})
 public class ExtractClassRefactoring {
@@ -1862,7 +1862,8 @@ public class ExtractClassRefactoring {
                         Set<PsiMethodCallExpression> methodInvocations = newMethodInvocationsWithinExtractedMethods.get(newMethodDeclaration);
                         methodInvocations.add((PsiMethodCallExpression) newMethodInvocations.get(j));
                     }
-                    if (methodInvocation.getMethodExpression() != null && ((PsiMethod) methodInvocation.getMethodExpression().resolve()).getContainingClass().equals(sourceTypeDeclaration)) {
+                    if (methodInvocation.getMethodExpression() != null
+                            && ((PsiMethod) methodInvocation.getMethodExpression().resolve()).getContainingClass().equals(sourceTypeDeclaration)) {
                         if (!sourceMethodBindingsChangedWithPublicModifier.contains(methodInvocation.resolveMethod())) {
                             setPublicModifierToSourceMethod(methodInvocation.resolveMethod(), sourceTypeDeclaration);
                             sourceMethodBindingsChangedWithPublicModifier.add(methodInvocation.resolveMethod());
@@ -1927,8 +1928,9 @@ public class ExtractClassRefactoring {
                 classInstanceCreationTypeBinding = (PsiClass) newClassInstanceCreation.getClassReference().resolve();
             }
 
-            if (classInstanceCreationTypeBinding != null && classInstanceCreationTypeBinding.getContainingClass() != null && newClassInstanceCreation.getAnonymousClass() == null &&
-                    sourceTypeDeclaration.equals(classInstanceCreationTypeBinding.getContainingClass())) {
+            if (classInstanceCreationTypeBinding != null && classInstanceCreationTypeBinding.getContainingClass() != null
+                    && newClassInstanceCreation.getAnonymousClass() == null
+                    && sourceTypeDeclaration.equals(classInstanceCreationTypeBinding.getContainingClass())) {
                 if (isParentAnonymousClassDeclaration(creation.getNode()))
                     sourceClassParameterShouldBeFinal = true;
                 if (classInstanceCreationTypeBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
@@ -2756,8 +2758,9 @@ public class ExtractClassRefactoring {
                                         PsiTypeCastExpression castExpression = (PsiTypeCastExpression) expression;
                                         if (castExpression.getOperand() instanceof PsiMethodCallExpression) {
                                             PsiMethodCallExpression superMethodInvocation = (PsiMethodCallExpression) castExpression.getOperand();
-                                            if (superMethodInvocation.getFirstChild() instanceof PsiSuperExpression && superMethodInvocation.resolveMethod().getName().equals("clone") &&
-                                                    superMethodInvocation.getArgumentList().getExpressionCount() == 0) {
+                                            if (superMethodInvocation.getFirstChild() instanceof PsiSuperExpression
+                                                    && superMethodInvocation.resolveMethod().getName().equals("clone")
+                                                    && superMethodInvocation.getArgumentList().getExpressionCount() == 0) {
                                                 return variableDeclarationStatement;
                                             }
                                         }

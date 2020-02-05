@@ -36,8 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.CHANGE_TYPE.ADD_AFTER;
-import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.CHANGE_TYPE.ADD_BEFORE;
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.ChangeType.ADD_AFTER;
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.ChangeType.ADD_BEFORE;
 
 public class GodClassPreviewResultDialog extends DiffWindow {
     private MutableDiffRequestChain myChain;
@@ -47,7 +47,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
     private JavaCodeStyleManager javaCodeStyleManager;
     private CodeStyleManager codeStyleManager;
 
-    public GodClassPreviewResultDialog(@NotNull Project project, @NotNull MutableDiffRequestChain requestChain, @NotNull DiffDialogHints hints, ExtractClassPreviewProcessor previewProcessor) {
+    public GodClassPreviewResultDialog(@NotNull Project project, @NotNull MutableDiffRequestChain requestChain,
+                                       @NotNull DiffDialogHints hints, ExtractClassPreviewProcessor previewProcessor) {
         super(project, requestChain, hints);
         this.myChain = requestChain;
         this.project = project;
@@ -75,7 +76,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
             BorderLayout layout = new BorderLayout();
             myPanel.setLayout(layout);
             createTablePanel();
-            layout.addLayoutComponent(scrollPane, BorderLayout.WEST);
+            layout.addLayoutComponent(scrollPane, BorderLayout.CENTER);
             myPanel.add(scrollPane);
             getComponent().add(myPanel, BorderLayout.NORTH);
 
@@ -125,7 +126,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                     PsiElementChange elementChange = (PsiElementChange) lastComponent;
 
                     PsiElement parent = null;
-                    switch (elementChange.getChange_type()) {
+                    switch (elementChange.getChangeType()) {
                         case ADD_AFTER:
                         case ADD_BEFORE: {
                             parent = elementChange.getAnchor().getParent().getParent(); //PsiElement -> PsiCodeBlock -> PsiBodyOwner
@@ -145,7 +146,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                     Map<PsiElement, PsiElement> initialToCopy = new HashMap<>();
                     ExtractClassPreviewProcessor.mapElementsToCopy(parent, parentCopy, initialToCopy);
 
-                    switch (elementChange.getChange_type()) {
+                    switch (elementChange.getChangeType()) {
                         case ADD_BEFORE:
                         case ADD_AFTER: {
                             source = getTextAndReformat(parent);
@@ -157,9 +158,9 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
                             PsiElement anchor = initialToCopy.get(elementChange.getAnchor());
 
-                            if (elementChange.getChange_type() == ADD_BEFORE) {
+                            if (elementChange.getChangeType() == ADD_BEFORE) {
                                 anchor.getParent().addBefore(elementToAdd, anchor);
-                            } else if (elementChange.getChange_type() == ADD_AFTER) {
+                            } else if (elementChange.getChangeType() == ADD_AFTER) {
                                 anchor.getParent().addAfter(elementToAdd, anchor);
                             }
                             updated = getTextAndReformat(parentCopy);
@@ -219,14 +220,13 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                 return "";
             }
 
-            element = codeStyleManager
-                    .reformat(element);
+            element = codeStyleManager.reformat(element);
             element = javaCodeStyleManager.shortenClassReferences(element);
             return element.getText();
         }
 
         /**
-         * Holds all changes during the refactoring application
+         * Holds all changes during the refactoring application.
          */
         private class TreeTableList extends DefaultTreeModel implements TreeTableModel {
 
