@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 

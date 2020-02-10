@@ -6,16 +6,17 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiStatement;
+import com.intellij.psi.SmartPsiElementPointer;
 import com.intellij.refactoring.HelpID;
 import com.intellij.refactoring.extractMethod.ExtractMethodHandler;
 import com.intellij.refactoring.extractMethod.PrepareFailedException;
@@ -290,17 +291,19 @@ class ExtractMethodPanel extends JPanel {
             @Override
             public void onSuccess() {
                 if (sourceMethod != null) {
-                    Set<PsiStatement> statements = slice.getSliceStatements();
-                    PsiStatement psiStatement = statements.iterator().next();
-                    if (psiStatement.isValid()) {
+                    Set<SmartPsiElementPointer<PsiElement>> statements = slice.getSliceStatements();
+                    PsiStatement psiStatement = (PsiStatement) statements.iterator().next().getElement();
+                    if (psiStatement != null && psiStatement.isValid()) {
                         EditorHelper.openInEditor(psiStatement);
                         Editor editor = FileEditorManager.getInstance(sourceMethod.getProject()).getSelectedTextEditor();
                         if (editor != null) {
-                            TextAttributes attributes = new TextAttributes(editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR),
-                                    new JBColor(new Color(84, 168, 78), new Color(16, 105, 15)), null, null, 0);
+                            TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
+                            ;
                             editor.getMarkupModel().removeAllHighlighters();
-                            statements.forEach(statement -> editor.getMarkupModel().addRangeHighlighter(statement.getTextRange().getStartOffset(),
-                                    statement.getTextRange().getEndOffset(), HighlighterLayer.SELECTION, attributes, HighlighterTargetArea.EXACT_RANGE));
+                            statements.forEach(statement ->
+                                    editor.getMarkupModel().addRangeHighlighter(statement.getElement().getTextRange().getStartOffset(),
+                                            statement.getElement().getTextRange().getEndOffset(), HighlighterLayer.SELECTION,
+                                            attributes, HighlighterTargetArea.EXACT_RANGE));
                         }
                     }
                 }

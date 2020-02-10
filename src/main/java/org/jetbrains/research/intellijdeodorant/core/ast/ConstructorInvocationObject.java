@@ -14,11 +14,11 @@ public class ConstructorInvocationObject extends AbstractMethodInvocationObject 
         super(originClassType, methodName, returnType, parameterList);
     }
 
-    public void setConstructorInvocation(PsiConstructorCall constructorInvocation) {
-        this.methodInvocation = ASTInformationGenerator.generateASTInformation(constructorInvocation);
-    }
+/*    public void setConstructorInvocation(PsiConstructorCall constructorInvocation) {
+        this.methodInvocation = toPointer(constructorInvocation);
+    }*/
 
     public PsiConstructorCall getConstructorInvocation() {
-        return (PsiConstructorCall) this.methodInvocation.recoverASTNode();
+        return (PsiConstructorCall) this.methodInvocation.getElement();
     }
 }

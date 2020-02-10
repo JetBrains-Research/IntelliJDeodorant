@@ -176,4 +176,13 @@ public class PsiUtils {
         }
         return null;
     }
+
+    public static SmartPsiElementPointer<PsiElement> toPointer(@NotNull PsiElement psiElement) {
+        return SmartPointerManager.createPointer(psiElement);
+    }
+
+    public static SmartPsiElementPointer<PsiExpression> toPointer(@NotNull PsiExpression psiElement) {
+        return SmartPointerManager.createPointer(psiElement);
+    }
+
 }

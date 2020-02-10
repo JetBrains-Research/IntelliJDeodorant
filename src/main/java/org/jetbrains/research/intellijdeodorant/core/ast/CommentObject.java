@@ -1,9 +1,13 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiComment;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 class CommentObject {
-    private ASTInformation comment;
+    private SmartPsiElementPointer<PsiElement> comment;
     private final String text;
     private final CommentType type;
     private final int startLine;
@@ -18,11 +22,11 @@ class CommentObject {
     }
 
     public void setComment(PsiComment comment) {
-        this.comment = ASTInformationGenerator.generateASTInformation(comment);
+        this.comment = toPointer(comment);
     }
 
     public PsiComment getComment() {
-        return (PsiComment) comment.recoverASTNode();
+        return (PsiComment) comment.getElement();
     }
 
     public String getText() {
@@ -44,11 +48,11 @@ class CommentObject {
 
 
     public int getStartPosition() {
-        return comment.getStartPosition();
+        return getComment().getStartOffsetInParent();
     }
 
     public int getLength() {
-        return comment.getLength();
+        return getComment().getTextLength();
     }
 
     public boolean equals(Object o) {

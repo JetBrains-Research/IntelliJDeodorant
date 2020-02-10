@@ -1,6 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.SmartPsiElementPointer;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -13,6 +15,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class ConstructorObject implements AbstractMethodDeclaration {
 
     String name;
@@ -22,7 +26,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
     String className;
     private MethodBodyObject methodBody;
     private final Set<String> exceptionsInJavaDocThrows;
-    private ASTInformation methodDeclaration;
+    private SmartPsiElementPointer<PsiElement> methodDeclaration;
     private volatile int hashCode = 0;
 
     public ConstructorObject() {
@@ -33,12 +37,11 @@ public class ConstructorObject implements AbstractMethodDeclaration {
     }
 
     public void setMethodDeclaration(PsiMethod methodDeclaration) {
-        this.methodDeclaration = ASTInformationGenerator.generateASTInformation(methodDeclaration);
+        this.methodDeclaration = toPointer(methodDeclaration);
     }
 
     public PsiMethod getMethodDeclaration() {
-        //return this.methodDeclaration;
-        return (PsiMethod) this.methodDeclaration.recoverASTNode();
+        return (PsiMethod) this.methodDeclaration.getElement();
     }
 
     public void setMethodBody(MethodBodyObject methodBody) {

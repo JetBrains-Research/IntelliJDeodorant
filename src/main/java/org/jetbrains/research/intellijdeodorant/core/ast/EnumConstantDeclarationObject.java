@@ -1,16 +1,20 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiDeclarationStatement;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.SmartPsiElementPointer;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractExpression;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 class EnumConstantDeclarationObject {
     private final String name;
     private final List<AbstractExpression> arguments;
     private String enumName;
-    private ASTInformation enumConstantDeclaration;
+    private SmartPsiElementPointer<PsiElement> enumConstantDeclaration;
     private volatile int hashCode = 0;
 
     public EnumConstantDeclarationObject(String name) {
@@ -19,11 +23,11 @@ class EnumConstantDeclarationObject {
     }
 
     public void setEnumConstantDeclaration(PsiDeclarationStatement enumConstantDeclaration) {
-        this.enumConstantDeclaration = ASTInformationGenerator.generateASTInformation(enumConstantDeclaration);
+        this.enumConstantDeclaration = toPointer(enumConstantDeclaration);
     }
 
     public PsiDeclarationStatement getEnumConstantDeclaration() {
-        return (PsiDeclarationStatement) this.enumConstantDeclaration.recoverASTNode();
+        return (PsiDeclarationStatement) this.enumConstantDeclaration.getElement();
     }
 
     public String getName() {

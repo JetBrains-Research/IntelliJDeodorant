@@ -1,11 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiArrayAccessExpression;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 class ArrayAccessObject {
     private final TypeObject type;
-    private ASTInformation arrayAccess;
-	
+    private SmartPsiElementPointer<PsiExpression> arrayAccess;
+
     public ArrayAccessObject(TypeObject type) {
         this.type = type;
     }
@@ -15,10 +19,10 @@ class ArrayAccessObject {
     }
 
     public PsiArrayAccessExpression getArrayAccess() {
-        return (PsiArrayAccessExpression) this.arrayAccess.recoverASTNode();
+        return (PsiArrayAccessExpression) this.arrayAccess.getElement();
     }
 
     public void setArrayAccess(PsiArrayAccessExpression arrayAccess) {
-        this.arrayAccess = ASTInformationGenerator.generateASTInformation(arrayAccess);
+        this.arrayAccess = toPointer(arrayAccess);
     }
 }

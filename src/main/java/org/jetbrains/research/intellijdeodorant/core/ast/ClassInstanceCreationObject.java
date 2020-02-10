@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class ClassInstanceCreationObject extends CreationObject {
 
     private final List<TypeObject> parameterList;
@@ -22,11 +24,11 @@ public class ClassInstanceCreationObject extends CreationObject {
     }
 
     public PsiNewExpression getClassInstanceCreation() {
-        return (PsiNewExpression) this.creation.recoverASTNode();
+        return (PsiNewExpression) this.creation.getElement();
     }
 
     public void setClassInstanceCreation(PsiExpression creation) {
-        this.creation = ASTInformationGenerator.generateASTInformation(creation);
+        this.creation = toPointer(creation);
     }
 
     public void addParameter(TypeObject parameterType) {

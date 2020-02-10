@@ -12,6 +12,7 @@ import com.intellij.openapi.compiler.CompileStatusNotification;
 import com.intellij.openapi.compiler.CompilerManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -378,15 +379,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         if (editor == null) {
             return;
         }
-        Color foregroundColor = editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR);
-        Color backgroundColor = new JBColor(new Color(84, 168, 78), new Color(16, 105, 15));
-        TextAttributes attributes = new TextAttributes(foregroundColor,
-                backgroundColor,
-                null,
-                null,
-                0
-        );
 
+        TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
         editor.getMarkupModel().addRangeHighlighter(
                 psiElement.getTextRange().getStartOffset(),
                 psiElement.getTextRange().getEndOffset(),

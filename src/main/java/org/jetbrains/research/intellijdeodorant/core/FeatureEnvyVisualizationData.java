@@ -210,7 +210,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 if (localVariableInstruction != null)
                     variableTypeBinding = localVariableInstruction.getReference();
             }
-            PsiClass targetClassBinding = (PsiClass) targetClass.getAbstractTypeDeclaration().recoverASTNode();
+            PsiClass targetClassBinding = (PsiClass) targetClass.getAbstractTypeDeclaration();
             if (variable.getType().equals(targetClass.getName()) ||
                     (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getOriginalElement()))) {
                 FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
@@ -264,7 +264,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 if (localVariableInstruction != null)
                     variableType = localVariableInstruction.getReference();
             }
-            PsiElement targetPsiClass = targetClassObject.getAbstractTypeDeclaration().recoverASTNode();
+            PsiElement targetPsiClass = targetClassObject.getAbstractTypeDeclaration();
             if (variable.getType().equals(targetClassObject.getPsiClass().getQualifiedName())) {
                 List<MethodInvocationObject> externalMethodInvocations = externalMethodInvocationMap.get(abstractVariable);
                 handleExternalMethodInvocation(externalMethodInvocations);

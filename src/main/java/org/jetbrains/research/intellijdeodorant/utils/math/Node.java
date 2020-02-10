@@ -1,21 +1,23 @@
 package org.jetbrains.research.intellijdeodorant.utils.math;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class Node implements Comparable<Node> {
 
-    protected final PsiElement name;
-    protected boolean visited = false;   // used for Kosaraju's algorithm and Edmonds's algorithm
+    protected final SmartPsiElementPointer<PsiElement> name;
     protected int lowlink = -1;          // used for Tarjan's algorithm
     protected int index = -1;            // used for Tarjan's algorithm
     private volatile int hashCode = 0;
 
     public Node(final PsiElement argName) {
-        name = argName;
+        name = toPointer(argName);
     }
 
     public PsiElement getName() {
-        return name;
+        return name.getElement();
     }
 
     public boolean equals(Object o) {
@@ -24,7 +26,7 @@ public class Node implements Comparable<Node> {
 
         if (o instanceof Node) {
             Node node = (Node) o;
-            return this.name.equals(node.name);
+            return getName().equals(node.getName());
         }
         return false;
     }
@@ -32,7 +34,7 @@ public class Node implements Comparable<Node> {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 37 * result + name.hashCode();
+            result = 37 * result + getName().hashCode();
             hashCode = result;
         }
         return hashCode;

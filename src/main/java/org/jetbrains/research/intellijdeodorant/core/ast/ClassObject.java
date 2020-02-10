@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class ClassObject extends ClassDeclarationObject {
 
     private final List<ConstructorObject> constructorList;
@@ -21,10 +23,10 @@ public class ClassObject extends ClassDeclarationObject {
     private boolean _static;
     private boolean _enum;
     private Access access;
-    private ASTInformation typeDeclaration;
+    private SmartPsiElementPointer<PsiElement> typeDeclaration;
     private final String psiType;
-    private final PsiJavaFile psiFile;
-    private final PsiClass psiClass;
+    private final SmartPsiElementPointer<PsiElement> psiFile;
+    private final SmartPsiElementPointer<PsiElement> psiClass;
 
     public ClassObject(PsiClass psiClass) {
         this.psiType = psiClass.getQualifiedName();
@@ -37,17 +39,17 @@ public class ClassObject extends ClassDeclarationObject {
         this._static = psiClass.hasModifier(JvmModifier.STATIC);
         this._enum = psiClass.isEnum();
         this.access = Access.NONE;
-        this.typeDeclaration = ASTInformationGenerator.generateASTInformation(psiClass);
-        this.psiFile = (PsiJavaFile) psiClass.getContainingFile();
-        this.psiClass = psiClass;
+        this.typeDeclaration = toPointer(psiClass);
+        this.psiFile = toPointer(psiClass.getContainingFile());
+        this.psiClass = toPointer(psiClass);
     }
 
     public void setAbstractTypeDeclaration(PsiDeclarationStatement typeDeclaration) {
-        this.typeDeclaration = ASTInformationGenerator.generateASTInformation(typeDeclaration);
+        this.typeDeclaration = toPointer(typeDeclaration);
     }
 
-    public ASTInformation getAbstractTypeDeclaration() {
-        return typeDeclaration;
+    public PsiElement getAbstractTypeDeclaration() {
+        return typeDeclaration.getElement();
     }
 
     public ClassObject getClassObject() {
@@ -59,7 +61,7 @@ public class ClassObject extends ClassDeclarationObject {
     }
 
     public PsiJavaFile getPsiFile() {
-        return psiFile;
+        return (PsiJavaFile) psiFile.getElement();
     }
 
     private boolean isFriend(String className) {
@@ -132,7 +134,7 @@ public class ClassObject extends ClassDeclarationObject {
                         if (!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
                             TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
                                     typeCheckElimination,
-                                    (PsiClass) getAbstractTypeDeclaration().recoverASTNode(),
+                                    (PsiClass) getAbstractTypeDeclaration(),
                                     methodObject.getMethodDeclaration()
                             );
                             boolean hasTypeLocalVariableFieldOrMethod = typeCheckElimination.getTypeField() != null
@@ -285,6 +287,6 @@ public class ClassObject extends ClassDeclarationObject {
     }
 
     public PsiClass getPsiClass() {
-        return psiClass;
+        return (PsiClass) psiClass.getElement();
     }
 }

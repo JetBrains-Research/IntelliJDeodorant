@@ -378,8 +378,6 @@ public class MethodBodyObject {
             PsiForeachStatement enhancedForStatement = (PsiForeachStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(enhancedForStatement, StatementType.ENHANCED_FOR, parent);
             PsiParameter variableDeclaration = enhancedForStatement.getIterationParameter();
-            AbstractExpression variableDeclarationName = new AbstractExpression(variableDeclaration.getInitializer(), child);
-            child.addExpression(variableDeclarationName);
             if (variableDeclaration.getInitializer() != null) {
                 AbstractExpression variableDeclarationInitializer = new AbstractExpression(variableDeclaration.getInitializer(), child);
                 child.addExpression(variableDeclarationInitializer);

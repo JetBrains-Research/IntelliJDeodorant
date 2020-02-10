@@ -4,6 +4,8 @@ import com.intellij.psi.PsiMethodCallExpression;
 
 import java.util.List;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class MethodInvocationObject extends AbstractMethodInvocationObject {
 
     public MethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
@@ -15,10 +17,10 @@ public class MethodInvocationObject extends AbstractMethodInvocationObject {
     }
 
     public void setMethodInvocation(PsiMethodCallExpression methodInvocation) {
-        this.methodInvocation = ASTInformationGenerator.generateASTInformation(methodInvocation);
+        this.methodInvocation = toPointer(methodInvocation);
     }
 
     public PsiMethodCallExpression getMethodInvocation() {
-        return (PsiMethodCallExpression) this.methodInvocation.recoverASTNode();
+        return (PsiMethodCallExpression) this.methodInvocation.getElement();
     }
 }

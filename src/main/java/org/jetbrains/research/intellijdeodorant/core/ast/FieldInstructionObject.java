@@ -1,22 +1,25 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class FieldInstructionObject {
-
     private final String ownerClass;
     private final TypeObject type;
     private final String name;
     private boolean _static;
-    private PsiElement element;
+    private SmartPsiElementPointer<PsiElement> element;
     private volatile int hashCode = 0;
 
-    public FieldInstructionObject(String ownerClass, TypeObject type, String name, PsiElement element) {
+    public FieldInstructionObject(String ownerClass, TypeObject type, String name, PsiField element) {
         this.ownerClass = ownerClass;
         this.type = type;
         this.name = name;
         this._static = false;
-        this.element = element;
+        this.element = toPointer(element);
     }
 
     public String getOwnerClass() {
@@ -40,7 +43,7 @@ public class FieldInstructionObject {
     }
 
     public PsiElement getElement() {
-        return this.element;
+        return this.element.getElement();
     }
 
     public boolean equals(Object o) {

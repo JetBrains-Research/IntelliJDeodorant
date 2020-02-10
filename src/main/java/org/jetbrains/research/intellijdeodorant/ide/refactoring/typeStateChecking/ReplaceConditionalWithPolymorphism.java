@@ -123,7 +123,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
     private void modifyInheritanceHierarchy() {
         String abstractClassFullyQualifiedName = typeCheckElimination.getAbstractClassName();
         PsiClass abstractClass = ClassUtil.findPsiClass(PsiManager.getInstance(project), abstractClassFullyQualifiedName);
-        PsiFile abstractClassFile = abstractClass.getContainingFile();
 
         Set<PsiField> accessedFields = typeCheckElimination.getAccessedFields();
         Set<PsiField> assignedFields = typeCheckElimination.getAssignedFields();
@@ -131,7 +130,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
         Set<PsiMethod> superAccessedMethods = typeCheckElimination.getSuperAccessedMethods();
         Set<PsiField> superAccessedFields = typeCheckElimination.getSuperAccessedFieldBindings();
         Set<PsiField> superAssignedFields = typeCheckElimination.getSuperAssignedFieldBindings();
-        Set<PsiType> requiredImportDeclarationsBasedOnSignature = getRequiredImportDeclarationsBasedOnSignature();
 
         if (!typeCheckElimination.getSubclassNames().contains(abstractClassFullyQualifiedName)) {
             boolean isAbstract = abstractClass.getModifierList().hasExplicitModifier(PsiModifier.ABSTRACT);
@@ -158,7 +156,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
         }
 
         for (int i = 0; i < subclassNames.size(); i++) {
-            ArrayList<PsiStatement> statements = null;
+            ArrayList<PsiStatement> statements;
             DefaultMutableTreeNode remainingIfStatementExpression = null;
             if (i < typeCheckStatements.size()) {
                 statements = typeCheckStatements.get(i);
@@ -168,8 +166,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 statements = typeCheckElimination.getDefaultCaseStatements();
             }
             PsiClass subClass = ClassUtil.findPsiClass(PsiManager.getInstance(project), subclassNames.get(i));
-            PsiFile subClassFile = subClass.getContainingFile();
-
             PsiMethod concreteMethod = createPolymorphicMethodHeader();
             PsiCodeBlock concreteMethodBody = concreteMethod.getBody();
             ExpressionExtractor expressionExtractor = new ExpressionExtractor();

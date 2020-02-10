@@ -23,7 +23,6 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
     private final Map<PsiMethodCallExpression, PsiMethod> additionalMethodsToBeMoved;
     private String movedMethodName;
     private final FeatureEnvyVisualizationData visualizationData;
-    private Integer userRate;
 
     public MoveMethodCandidateRefactoring(MySystem system, MyClass sourceClass, MyClass targetClass, MyMethod sourceMethod) {
         this.system = system;
@@ -236,14 +235,6 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
                 counter++;
         }
         return counter;
-    }
-
-    public Integer getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(Integer userRate) {
-        this.userRate = userRate;
     }
 
     public int compareTo(MoveMethodCandidateRefactoring other) {

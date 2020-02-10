@@ -1,11 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.SmartPsiElementPointer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class FieldObject extends VariableDeclarationObject {
 
@@ -15,7 +19,7 @@ public class FieldObject extends VariableDeclarationObject {
     private boolean _static;
     private Access access;
     private String className;
-    private final PsiField psiField;
+    private final SmartPsiElementPointer<PsiElement> psiField;
     private volatile int hashCode = 0;
 
     public FieldObject(TypeObject type, String fieldName, PsiField field) {
@@ -24,11 +28,11 @@ public class FieldObject extends VariableDeclarationObject {
         this._static = false;
         this.access = Access.NONE;
         this.commentList = new ArrayList<>();
-        this.psiField = field;
+        this.psiField = toPointer(field);
     }
 
     private PsiField getVariableDeclarationFragment() {
-        return psiField;
+        return (PsiField) psiField.getElement();
     }
 
     public void setAccess(Access access) {
@@ -74,7 +78,7 @@ public class FieldObject extends VariableDeclarationObject {
 
         if (o instanceof FieldObject) {
             FieldObject fieldObject = (FieldObject) o;
-            return this.psiField.equals(fieldObject.psiField);
+            return Objects.equals(getVariableDeclarationFragment(), fieldObject.getVariableDeclarationFragment());
         }
         return false;
     }
@@ -99,7 +103,7 @@ public class FieldObject extends VariableDeclarationObject {
             result = 37 * result + className.hashCode();
             result = 37 * result + name.hashCode();
             result = 37 * result + type.hashCode();
-            result = 37 * result + psiField.hashCode();
+            result = 37 * result + getVariableDeclarationFragment().hashCode();
             hashCode = result;
         }
         return hashCode;
@@ -121,7 +125,7 @@ public class FieldObject extends VariableDeclarationObject {
     }
 
     public FieldInstructionObject generateFieldInstruction() {
-        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, this.psiField);
+        FieldInstructionObject fieldInstruction = new FieldInstructionObject(this.className, this.type, this.name, getVariableDeclarationFragment());
         fieldInstruction.setStatic(this._static);
         return fieldInstruction;
     }

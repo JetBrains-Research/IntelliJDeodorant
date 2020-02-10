@@ -394,7 +394,7 @@ public class SystemObject {
         if (resolvedClass == null) {
             return false;
         }
-        return resolvedClass.isEnum() || resolvedClass.getQualifiedName().equals("java.lang.String");
+        return resolvedClass.isEnum() || "java.lang.String".equals(resolvedClass.getQualifiedName());
     }
 
     private PsiType handleTypeMethodInvocation(PsiMethodCallExpression typeMethodInvocation, TypeCheckElimination elimination) {
@@ -511,8 +511,7 @@ public class SystemObject {
             for (PsiField staticField : staticFields) {
                 for (String subclassName : inheritanceHierarchySubclassNames) {
                     ClassObject classObject = getClassObject(subclassName);
-                    ASTInformation classDeclarationAstInformation = classObject.getAbstractTypeDeclaration();
-                    PsiElement abstractTypeDeclaration = classDeclarationAstInformation.recoverASTNode();
+                    PsiElement abstractTypeDeclaration = classObject.getAbstractTypeDeclaration();
                     if (abstractTypeDeclaration instanceof PsiClass) {
                         PsiClass typeDeclaration = (PsiClass) abstractTypeDeclaration;
                         PsiDocComment javadoc = typeDeclaration.getDocComment();

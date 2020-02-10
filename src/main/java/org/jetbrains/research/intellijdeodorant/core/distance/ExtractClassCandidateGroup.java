@@ -10,8 +10,8 @@ public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandid
 
     public ExtractClassCandidateGroup(String source) {
         this.source = source;
-        this.candidates = new ArrayList<ExtractClassCandidateRefactoring>();
-        this.extractedConcepts = new ArrayList<ExtractedConcept>();
+        this.candidates = new ArrayList<>();
+        this.extractedConcepts = new ArrayList<>();
     }
 
     public ArrayList<ExtractedConcept> getExtractedConcepts() {
@@ -32,17 +32,17 @@ public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandid
     }
 
     public void groupConcepts() {
-        ArrayList<ExtractClassCandidateRefactoring> tempCandidates = new ArrayList<ExtractClassCandidateRefactoring>(candidates);
-        Collections.sort(tempCandidates, new ClusterSizeComparator());
+        ArrayList<ExtractClassCandidateRefactoring> tempCandidates = new ArrayList<>(candidates);
+        tempCandidates.sort(new ClusterSizeComparator());
         while (!tempCandidates.isEmpty()) {
-            Set<Entity> conceptEntities = new HashSet<Entity>(tempCandidates.get(0).getExtractedEntities());
-            Set<Integer> indexSet = new LinkedHashSet<Integer>();
+            Set<Entity> conceptEntities = new HashSet<>(tempCandidates.get(0).getExtractedEntities());
+            Set<Integer> indexSet = new LinkedHashSet<>();
             indexSet.add(0);
-            int previousSize = 0;
+            int previousSize;
             do {
                 previousSize = conceptEntities.size();
                 for (int i = 1; i < tempCandidates.size(); i++) {
-                    HashSet<Entity> copiedConceptEntities = new HashSet<Entity>(conceptEntities);
+                    HashSet<Entity> copiedConceptEntities = new HashSet<>(conceptEntities);
                     copiedConceptEntities.retainAll(tempCandidates.get(i).getExtractedEntities());
                     if (!copiedConceptEntities.isEmpty()) {
                         conceptEntities.addAll(tempCandidates.get(i).getExtractedEntities());
@@ -50,7 +50,7 @@ public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandid
                     }
                 }
             } while (previousSize < conceptEntities.size());
-            Set<ExtractClassCandidateRefactoring> candidatesToBeRemoved = new HashSet<ExtractClassCandidateRefactoring>();
+            Set<ExtractClassCandidateRefactoring> candidatesToBeRemoved = new HashSet<>();
             ExtractedConcept newConcept = new ExtractedConcept(conceptEntities, source);
             for (Integer j : indexSet) {
                 newConcept.addConceptCluster(tempCandidates.get(j));
@@ -72,8 +72,8 @@ public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandid
     }
 
     public int compareTo(ExtractClassCandidateGroup other) {
-        TreeSet<ExtractClassCandidateRefactoring> thisSet = new TreeSet<ExtractClassCandidateRefactoring>(this.candidates);
-        TreeSet<ExtractClassCandidateRefactoring> otherSet = new TreeSet<ExtractClassCandidateRefactoring>(other.candidates);
+        TreeSet<ExtractClassCandidateRefactoring> thisSet = new TreeSet<>(this.candidates);
+        TreeSet<ExtractClassCandidateRefactoring> otherSet = new TreeSet<>(other.candidates);
         ExtractClassCandidateRefactoring thisFirst = thisSet.first();
         ExtractClassCandidateRefactoring otherFirst = otherSet.first();
         int comparison = thisFirst.compareTo(otherFirst);

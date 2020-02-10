@@ -4,11 +4,13 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl;
 import com.intellij.psi.tree.IElementType;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class LiteralObject {
     private LiteralType literalType;
     private String value;
     private TypeObject type;
-    private ASTInformation literal;
+    private SmartPsiElementPointer<PsiExpression> literal;
     private volatile int hashCode = 0;
 
     public LiteralObject(PsiExpression expression) {
@@ -48,7 +50,7 @@ public class LiteralObject {
                 value = literalExpression.getCanonicalText();
                 type = TypeObject.extractTypeObject(literalExpressionType.toString());
             }
-            this.literal = ASTInformationGenerator.generateASTInformation(expression);
+            this.literal = toPointer(expression);
         }
     }
 
@@ -67,17 +69,17 @@ public class LiteralObject {
     public PsiExpression getLiteral() {
         PsiExpression expression = null;
         if (literalType.equals(LiteralType.BOOLEAN)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         } else if (literalType.equals(LiteralType.CHARACTER)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         } else if (literalType.equals(LiteralType.NULL)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         } else if (literalType.equals(LiteralType.NUMBER)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         } else if (literalType.equals(LiteralType.STRING)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         } else if (literalType.equals(LiteralType.TYPE)) {
-            expression = (PsiLiteralExpression) literal.recoverASTNode();
+            expression = literal.getElement();
         }
         return expression;
     }

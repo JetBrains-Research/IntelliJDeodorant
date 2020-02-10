@@ -25,7 +25,8 @@ import java.awt.*;
 
 public class GitHubErrorReporter extends ErrorReportSubmitter {
     @Override
-    public boolean submit(@NotNull IdeaLoggingEvent[] events, String additionalInfo, @NotNull Component parentComponent, @NotNull Consumer<SubmittedReportInfo> consumer) {
+    public boolean submit(@NotNull IdeaLoggingEvent[] events, String additionalInfo, @NotNull Component parentComponent,
+                          @NotNull Consumer<SubmittedReportInfo> consumer) {
         GitHubErrorBean errorBean = new GitHubErrorBean(events[0].getThrowable(), IdeaLogger.ourLastActionId);
         return doSubmit(events[0], parentComponent, consumer, errorBean, additionalInfo);
     }

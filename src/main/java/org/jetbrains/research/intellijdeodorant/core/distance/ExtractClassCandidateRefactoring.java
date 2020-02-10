@@ -79,9 +79,9 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 
     public Set<PsiField> getExtractedFieldFragments() {
         Map<Integer, PsiField> extractedFieldFragmentMap = new TreeMap<>();
-        for(Entity entity : extractedEntities) {
-            if(entity instanceof MyAttribute) {
-                MyAttribute attribute = (MyAttribute)entity;
+        for (Entity entity : extractedEntities) {
+            if (entity instanceof MyAttribute) {
+                MyAttribute attribute = (MyAttribute) entity;
                 int index = sourceClass.getAttributeList().indexOf(attribute);
                 extractedFieldFragmentMap.put(index, attribute.getFieldObject().getVariableDeclaration());
             }
@@ -111,15 +111,19 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
                 }
             }
         }
-        return extractedEntities.size() > 2 && methodCounter != 0 && validRemainingMethodsInSourceClass() && validRemainingFieldsInSourceClass() && !visualizationData.containsNonAccessedFieldInExtractedClass();
+        return extractedEntities.size() > 2 && methodCounter != 0 && validRemainingMethodsInSourceClass()
+                && validRemainingFieldsInSourceClass() && !visualizationData.containsNonAccessedFieldInExtractedClass();
     }
 
     private boolean validRemainingMethodsInSourceClass() {
         for (MyMethod sourceMethod : sourceClass.getMethodList()) {
             if (!extractedEntities.contains(sourceMethod)) {
                 MethodObject methodObject = sourceMethod.getMethodObject();
-                if (!methodObject.isStatic() && !methodObject.isAbstract() && methodObject.isGetter() == null && methodObject.isSetter() == null && methodObject.isDelegate() == null &&
-                        !isReadObject(methodObject) && !isWriteObject(methodObject) && !isEquals(methodObject) && !isHashCode(methodObject) && !isClone(methodObject) && !isCompareTo(methodObject) && !isToString(methodObject)) {
+                if (!methodObject.isStatic() && !methodObject.isAbstract() && methodObject.isGetter() == null
+                        && methodObject.isSetter() == null && methodObject.isDelegate() == null &&
+                        !isReadObject(methodObject) && !isWriteObject(methodObject) && !isEquals(methodObject)
+                        && !isHashCode(methodObject) && !isClone(methodObject) && !isCompareTo(methodObject)
+                        && !isToString(methodObject)) {
                     return true;
                 }
             }
@@ -145,7 +149,8 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 
     private boolean isReadObject(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("readObject") && parameterTypeList.size() == 1 && parameterTypeList.get(0).getClassType().equals("java.io.ObjectInputStream");
+        return methodObject.getName().equals("readObject") && parameterTypeList.size() == 1
+                && parameterTypeList.get(0).getClassType().equals("java.io.ObjectInputStream");
     }
 
     private boolean isWriteObject(MyMethod method) {
@@ -154,7 +159,8 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 
     private boolean isWriteObject(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("writeObject") && parameterTypeList.size() == 1 && parameterTypeList.get(0).getClassType().equals("java.io.ObjectOutputStream");
+        return methodObject.getName().equals("writeObject") && parameterTypeList.size() == 1
+                && parameterTypeList.get(0).getClassType().equals("java.io.ObjectOutputStream");
     }
 
     private boolean isEquals(MethodObject methodObject) {
@@ -165,22 +171,26 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 
     private boolean isHashCode(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("hashCode") && methodObject.getReturnType().getClassType().equals("int") && parameterTypeList.size() == 0;
+        return methodObject.getName().equals("hashCode") && methodObject.getReturnType().getClassType().equals("int")
+                && parameterTypeList.size() == 0;
     }
 
     private boolean isToString(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("toString") && methodObject.getReturnType().getClassType().equals("java.lang.String") && parameterTypeList.size() == 0;
+        return methodObject.getName().equals("toString") && methodObject.getReturnType().getClassType().equals("java.lang.String")
+                && parameterTypeList.size() == 0;
     }
 
     private boolean isClone(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("clone") && methodObject.getReturnType().getClassType().equals("java.lang.Object") && parameterTypeList.size() == 0;
+        return methodObject.getName().equals("clone") && methodObject.getReturnType().getClassType().equals("java.lang.Object")
+                && parameterTypeList.size() == 0;
     }
 
     private boolean isCompareTo(MethodObject methodObject) {
         List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("compareTo") && methodObject.getReturnType().getClassType().equals("int") && parameterTypeList.size() == 1;
+        return methodObject.getName().equals("compareTo") && methodObject.getReturnType().getClassType().equals("int")
+                && parameterTypeList.size() == 1;
     }
 
     private boolean containsFieldAccessOfEnclosingClass(MyMethod method) {
@@ -205,7 +215,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     public PsiClass getSourceClassTypeDeclaration() {
-        return (PsiClass) sourceClass.getClassObject().getAbstractTypeDeclaration().recoverASTNode();
+        return (PsiClass) sourceClass.getClassObject().getAbstractTypeDeclaration();
     }
 
     @Override

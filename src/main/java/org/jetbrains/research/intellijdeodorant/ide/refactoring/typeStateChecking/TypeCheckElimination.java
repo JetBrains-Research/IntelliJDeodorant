@@ -14,19 +14,20 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private Map<PsiExpression, ArrayList<PsiStatement>> typeCheckMap;
     private ArrayList<PsiStatement> defaultCaseStatements;
     private Map<PsiExpression, List<PsiField>> staticFieldMap;
     private Map<PsiExpression, List<PsiType>> subclassTypeMap;
-    private PsiField typeField;
-    private PsiMethod typeFieldGetterMethod;
-    private PsiMethod typeFieldSetterMethod;
-    private PsiStatement typeCheckCodeFragment;
+    private SmartPsiElementPointer<PsiElement> typeField;
+    private SmartPsiElementPointer<PsiElement> typeFieldGetterMethod;
+    private SmartPsiElementPointer<PsiElement> typeFieldSetterMethod;
+    private SmartPsiElementPointer<PsiElement> typeCheckCodeFragment;
     private CompositeStatementObject typeCheckCompositeStatement;
-    private PsiMethod typeCheckMethod;
-    private PsiClass typeCheckClass;
-    //	private IFile typeCheckIFile;
+    private SmartPsiElementPointer<PsiElement> typeCheckMethod;
+    private SmartPsiElementPointer<PsiElement> typeCheckClass;
     private LinkedHashSet<PsiField> additionalStaticFields;
     private LinkedHashSet<PsiField> accessedFields;
     private LinkedHashSet<PsiField> assignedFields;
@@ -40,12 +41,12 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private LinkedHashSet<PsiVariable> assignedLocalVariables;
     private LinkedHashSet<PsiMethod> accessedMethods;
     private LinkedHashSet<PsiMethod> superAccessedMethods;
-    private PsiVariable typeLocalVariable;
-    private PsiMethodCallExpression typeMethodInvocation;
-    private PsiField foreignTypeField;
+    private SmartPsiElementPointer<PsiElement> typeLocalVariable;
+    private SmartPsiElementPointer<PsiExpression> typeMethodInvocation;
+    private SmartPsiElementPointer<PsiElement> foreignTypeField;
     private InheritanceTree existingInheritanceTree;
     private InheritanceTree inheritanceTreeMatchingWithStaticTypes;
-    private Map<PsiField, String> staticFieldSubclassTypeMap;
+    private Map<PsiElement, String> staticFieldSubclassTypeMap;
     private Map<PsiExpression, DefaultMutableTreeNode> remainingIfStatementExpressionMap;
     private String abstractMethodName;
     private volatile int hashCode = 0;
@@ -274,35 +275,35 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public PsiField getTypeField() {
-        return typeField;
+        return typeField == null ? null : (PsiField) typeField.getElement();
     }
 
     public void setTypeField(PsiField typeField) {
-        this.typeField = typeField;
+        this.typeField = toPointer(typeField);
     }
 
     public PsiMethod getTypeFieldGetterMethod() {
-        return typeFieldGetterMethod;
+        return typeFieldGetterMethod == null ? null : (PsiMethod) typeFieldGetterMethod.getElement();
     }
 
     public void setTypeFieldGetterMethod(PsiMethod typeFieldGetterMethod) {
-        this.typeFieldGetterMethod = typeFieldGetterMethod;
+        this.typeFieldGetterMethod = toPointer(typeFieldGetterMethod);
     }
 
     public PsiMethod getTypeFieldSetterMethod() {
-        return typeFieldSetterMethod;
+        return typeFieldSetterMethod == null ? null : (PsiMethod) typeFieldSetterMethod.getElement();
     }
 
     public void setTypeFieldSetterMethod(PsiMethod typeFieldSetterMethod) {
-        this.typeFieldSetterMethod = typeFieldSetterMethod;
+        this.typeFieldSetterMethod = toPointer(typeFieldSetterMethod);
     }
 
     public PsiStatement getTypeCheckCodeFragment() {
-        return typeCheckCodeFragment;
+        return (PsiStatement) typeCheckCodeFragment.getElement();
     }
 
     public void setTypeCheckCodeFragment(PsiStatement typeCheckCodeFragment) {
-        this.typeCheckCodeFragment = typeCheckCodeFragment;
+        this.typeCheckCodeFragment = toPointer(typeCheckCodeFragment);
     }
 
     public CompositeStatementObject getTypeCheckCompositeStatement() {
@@ -314,52 +315,44 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public PsiMethod getTypeCheckMethod() {
-        return typeCheckMethod;
+        return (PsiMethod) typeCheckMethod.getElement();
     }
 
     public void setTypeCheckMethod(PsiMethod typeCheckMethod) {
-        this.typeCheckMethod = typeCheckMethod;
+        this.typeCheckMethod = toPointer(typeCheckMethod);
         this.abstractMethodName = typeCheckMethod.getName();
     }
 
     public PsiClass getTypeCheckClass() {
-        return typeCheckClass;
+        return (PsiClass) typeCheckClass.getElement();
     }
 
     public void setTypeCheckClass(PsiClass typeCheckClass) {
-        this.typeCheckClass = typeCheckClass;
+        this.typeCheckClass = toPointer(typeCheckClass);
     }
 
-//	public IFile getTypeCheckIFile() {
-//		return typeCheckIFile;
-//	}
-
-//	public void setTypeCheckIFile(IFile typeCheckIFile) {
-//		this.typeCheckIFile = typeCheckIFile;
-//	}
-
     public PsiVariable getTypeLocalVariable() {
-        return typeLocalVariable;
+        return typeLocalVariable == null ? null : (PsiVariable) typeLocalVariable.getElement();
     }
 
     public void setTypeLocalVariable(PsiVariable typeLocalVariable) {
-        this.typeLocalVariable = typeLocalVariable;
+        this.typeLocalVariable = toPointer(typeLocalVariable);
     }
 
     public PsiMethodCallExpression getTypeMethodInvocation() {
-        return typeMethodInvocation;
+        return typeMethodInvocation == null ? null : (PsiMethodCallExpression) typeMethodInvocation.getElement();
     }
 
     public void setTypeMethodInvocation(PsiMethodCallExpression typeMethodInvocation) {
-        this.typeMethodInvocation = typeMethodInvocation;
+        this.typeMethodInvocation = toPointer(typeMethodInvocation);
     }
 
     public PsiField getForeignTypeField() {
-        return foreignTypeField;
+        return foreignTypeField == null ? null : (PsiField) foreignTypeField.getElement();
     }
 
     public void setForeignTypeField(PsiField foreignTypeField) {
-        this.foreignTypeField = foreignTypeField;
+        this.foreignTypeField = toPointer(foreignTypeField);
     }
 
     public InheritanceTree getExistingInheritanceTree() {
@@ -388,18 +381,16 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public boolean isApplicable() {
-        if (!containsLocalVariableAssignment() && !containsBranchingStatement() && !containsSuperMethodInvocation() && !containsSuperFieldAccess() &&
-                !isSubclassTypeAnInterface() && !returnStatementAfterTypeCheckCodeFragment() && !typeCheckClassPartOfExistingInheritanceTree())
-            return true;
-        else
-            return false;
+        return !containsLocalVariableAssignment() && !containsBranchingStatement() && !containsSuperMethodInvocation()
+                && !containsSuperFieldAccess() && !isSubclassTypeAnInterface()
+                && !returnStatementAfterTypeCheckCodeFragment() && !typeCheckClassPartOfExistingInheritanceTree();
     }
 
     private boolean typeCheckClassPartOfExistingInheritanceTree() {
         Collection<List<PsiType>> subTypeCollection = subclassTypeMap.values();
         for (List<PsiType> subTypes : subTypeCollection) {
             for (PsiType subType : subTypes) {
-                if (subType.equals(PsiTypesUtil.getClassType(typeCheckClass))) {
+                if (subType.equals(PsiTypesUtil.getClassType(getTypeCheckClass()))) {
                     return true;
                 }
             }
@@ -428,7 +419,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private boolean returnStatementAfterTypeCheckCodeFragment() {
         //check if the type-check code fragment contains return statements having an expression
         StatementExtractor statementExtractor = new StatementExtractor();
-        List<PsiStatement> allReturnStatementsWithinTypeCheckCodeFragment = statementExtractor.getReturnStatements(typeCheckCodeFragment);
+        List<PsiStatement> allReturnStatementsWithinTypeCheckCodeFragment = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
         List<PsiReturnStatement> returnStatementsHavingExpressionWithinTypeCheckCodeFragment = new ArrayList<>();
         for (PsiStatement statement : allReturnStatementsWithinTypeCheckCodeFragment) {
             PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
@@ -439,7 +430,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             return false;
         //get all return statements having an expression within method body
         List<PsiStatement> allReturnStatementsWithinTypeCheckMethod = new ArrayList<>();
-        for (PsiStatement statementInBlock : typeCheckMethod.getBody().getStatements()) {
+        for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
             allReturnStatementsWithinTypeCheckMethod.addAll(statementExtractor.getReturnStatements(statementInBlock));
         }
         List<PsiReturnStatement> returnStatementsHavingExpressionWithinTypeCheckMethod = new ArrayList<PsiReturnStatement>();
@@ -452,7 +443,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
         returnStatementsHavingExpressionOutsideTypeCheckMethod.addAll(returnStatementsHavingExpressionWithinTypeCheckMethod);
         returnStatementsHavingExpressionOutsideTypeCheckMethod.removeAll(returnStatementsHavingExpressionWithinTypeCheckCodeFragment);
         for (PsiReturnStatement returnStatement : returnStatementsHavingExpressionOutsideTypeCheckMethod) {
-            if (returnStatement.getTextOffset() > typeCheckCodeFragment.getTextOffset() + typeCheckCodeFragment.getTextLength())
+            if (returnStatement.getTextOffset() > getTypeCheckCodeFragment().getTextOffset() + getTypeCheckCodeFragment().getTextLength())
                 return true;
         }
         return false;
@@ -668,24 +659,24 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public PsiType getTypeCheckMethodReturnType() {
-        return typeCheckMethod.getReturnType();
+        return getTypeCheckMethod().getReturnType();
     }
 
     public PsiParameter[] getTypeCheckMethodParameters() {
-        return typeCheckMethod.getParameterList().getParameters();
+        return getTypeCheckMethod().getParameterList().getParameters();
     }
 
     private Map<PsiReturnStatement, PsiVariable> getTypeCheckMethodReturnedVariableMap() {
         Map<PsiReturnStatement, PsiVariable> map = new LinkedHashMap<PsiReturnStatement, PsiVariable>();
         StatementExtractor statementExtractor = new StatementExtractor();
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
-        List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
+        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
+        List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(getTypeCheckMethod().getBody());
         for (PsiStatement statement : typeCheckCodeFragmentReturnStatements) {
             PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
             if (returnStatement.getReturnValue() instanceof PsiReferenceExpression) {
                 PsiReferenceExpression returnExpression = (PsiReferenceExpression) returnStatement.getReturnValue();
-                PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                 for (PsiVariable parameter : parameters) {
                     if (parameter.equals(returnExpression.resolve())) {
                         map.put(returnStatement, parameter);
@@ -764,18 +755,18 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
     public PsiVariable getTypeCheckMethodReturnedVariable() {
         StatementExtractor statementExtractor = new StatementExtractor();
-        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
+        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
         if (!typeCheckCodeFragmentReturnStatements.isEmpty()) {
             PsiReturnStatement firstReturnStatement = (PsiReturnStatement) typeCheckCodeFragmentReturnStatements.get(0);
             if (firstReturnStatement.getReturnValue() instanceof PsiReferenceExpression) {
                 PsiElement resolvedReference = ((PsiReferenceExpression) firstReturnStatement.getReturnValue()).resolve();
-                PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                 for (PsiParameter parameter : parameters) {
                     if (parameter.equals(resolvedReference))
                         return parameter;
                 }
                 List<PsiStatement> variableDeclarationStatements = new ArrayList<>();
-                for (PsiStatement statementInBlock : typeCheckMethod.getBody().getStatements()) {
+                for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
                     variableDeclarationStatements.addAll(statementExtractor.getVariableDeclarationStatements(statementInBlock));
                 }
                 for (PsiStatement statement : variableDeclarationStatements) {
@@ -789,7 +780,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             }
         } else {
             List<PsiStatement> allReturnStatements = new ArrayList<>();
-            for (PsiStatement statementInBlock : typeCheckMethod.getBody().getStatements()) {
+            for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
                 allReturnStatements.addAll(statementExtractor.getReturnStatements(statementInBlock));
             }
             if (!allReturnStatements.isEmpty()) {
@@ -811,14 +802,14 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     public String getTypeVariableSimpleName() {
-        if (typeField != null) {
-            return typeField.getName();
-        } else if (typeLocalVariable != null) {
-            return typeLocalVariable.getName();
-        } else if (foreignTypeField != null) {
-            return foreignTypeField.getName();
-        } else if (typeMethodInvocation != null) {
-            PsiExpression typeMethodInvocationExpression = typeMethodInvocation.getMethodExpression().getQualifierExpression();
+        if (getTypeField() != null) {
+            return getTypeField().getName();
+        } else if (getTypeLocalVariable() != null) {
+            return getTypeLocalVariable().getName();
+        } else if (getForeignTypeField() != null) {
+            return getForeignTypeField().getName();
+        } else if (getTypeMethodInvocation() != null) {
+            PsiExpression typeMethodInvocationExpression = getTypeMethodInvocation().getMethodExpression().getQualifierExpression();
             PsiReferenceExpression invoker = null;
             if (typeMethodInvocationExpression instanceof PsiReferenceExpression) {
                 invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
@@ -826,21 +817,21 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             if (invoker != null) {
                 return invoker.getReferenceName();
             } else {
-                return typeMethodInvocation.resolveMethod().getName();
+                return getTypeMethodInvocation().resolveMethod().getName();
             }
         }
         return getAbstractClassName();
     }
 
     public String getAbstractClassName() {
-        if (typeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-            String typeFieldName = typeField.getName().replaceAll("_", "");
+        if (getTypeField() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+            String typeFieldName = getTypeField().getName().replaceAll("_", "");
             return typeFieldName.substring(0, 1).toUpperCase() + typeFieldName.substring(1, typeFieldName.length());
-        } else if (typeLocalVariable != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-            String typeLocalVariableName = typeLocalVariable.getName().replaceAll("_", "");
+        } else if (getTypeLocalVariable() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+            String typeLocalVariableName = getTypeLocalVariable().getName().replaceAll("_", "");
             return typeLocalVariableName.substring(0, 1).toUpperCase() + typeLocalVariableName.substring(1, typeLocalVariableName.length());
-        } else if (foreignTypeField != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
-            String foreignTypeFieldName = foreignTypeField.getName().replaceAll("_", "");
+        } else if (getForeignTypeField() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
+            String foreignTypeFieldName = getForeignTypeField().getName().replaceAll("_", "");
             return foreignTypeFieldName.substring(0, 1).toUpperCase() + foreignTypeFieldName.substring(1, foreignTypeFieldName.length());
         } else if (existingInheritanceTree != null) {
             DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
@@ -858,23 +849,23 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
     public String getAbstractClassType() {
         String abstractClassType = null;
-        if (typeField != null) {
-            PsiType fieldType = typeField.getType();
+        if (getTypeField() != null) {
+            PsiType fieldType = getTypeField().getType();
             if (fieldType instanceof PsiClassType) {
                 abstractClassType = fieldType.getCanonicalText();
             }
-        } else if (typeLocalVariable != null) {
-            PsiType fieldType = typeLocalVariable.getType();
+        } else if (getTypeLocalVariable() != null) {
+            PsiType fieldType = getTypeLocalVariable().getType();
             if (fieldType instanceof PsiClassType) {
                 abstractClassType = fieldType.getCanonicalText();
             }
-        } else if (foreignTypeField != null) {
-            PsiType fieldType = foreignTypeField.getType();
+        } else if (getForeignTypeField() != null) {
+            PsiType fieldType = getForeignTypeField().getType();
             if (fieldType instanceof PsiClassType) {
                 abstractClassType = fieldType.getCanonicalText();
             }
-        } else if (typeMethodInvocation != null) {
-            PsiExpression typeMethodInvocationExpression = typeMethodInvocation.getMethodExpression().getQualifierExpression();
+        } else if (getTypeMethodInvocation() != null) {
+            PsiExpression typeMethodInvocationExpression = getTypeMethodInvocation().getMethodExpression().getQualifierExpression();
             PsiReferenceExpression invoker = null;
             if (typeMethodInvocationExpression instanceof PsiReferenceExpression) {
                 invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
@@ -885,7 +876,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
         }
 
         if (abstractClassType == null) {
-            PsiCodeBlock typeCheckMethodBody = typeCheckMethod.getBody();
+            PsiCodeBlock typeCheckMethodBody = getTypeCheckMethod().getBody();
             PsiStatement[] statements = typeCheckMethodBody.getStatements();
             if (statements.length > 0 && statements[0] instanceof PsiSwitchStatement) {
                 PsiSwitchStatement switchStatement = (PsiSwitchStatement) statements[0];
@@ -958,7 +949,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                         subclassName = "";
                         StringTokenizer tokenizer = new StringTokenizer(staticFieldName, "_");
                         while (tokenizer.hasMoreTokens()) {
-                            String tempName = tokenizer.nextToken().toLowerCase().toString();
+                            String tempName = tokenizer.nextToken().toLowerCase();
                             subclassName += tempName.subSequence(0, 1).toString().toUpperCase() +
                                     tempName.subSequence(1, tempName.length()).toString();
                         }
@@ -1009,19 +1000,19 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 superTypeSimpleName = (PsiReferenceExpression) expressionOfCastExpression;
             } else if (expressionOfCastExpression instanceof PsiMethodCallExpression) {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expressionOfCastExpression;
-                if (typeFieldGetterMethod != null && typeFieldGetterMethod.equals(methodInvocation.resolveMethod())) {
-                    superTypeSimpleName = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(typeFieldGetterMethod);
+                if (getTypeFieldGetterMethod() != null && getTypeFieldGetterMethod().equals(methodInvocation.resolveMethod())) {
+                    superTypeSimpleName = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(getTypeFieldGetterMethod());
                 }
             }
             if (superTypeSimpleName != null) {
-                if (typeField != null) {
-                    if (typeField.equals(superTypeSimpleName.resolve()))
+                if (getTypeField() != null) {
+                    if (getTypeField().equals(superTypeSimpleName.resolve()))
                         return castExpression.getType();
-                } else if (typeLocalVariable != null) {
-                    if (typeLocalVariable.equals(superTypeSimpleName.resolve()))
+                } else if (getTypeLocalVariable() != null) {
+                    if (getTypeLocalVariable().equals(superTypeSimpleName.resolve()))
                         return castExpression.getType();
-                } else if (typeMethodInvocation != null) {
-                    PsiExpression typeMethodInvocationExpression = typeMethodInvocation.getMethodExpression().getQualifierExpression();
+                } else if (getTypeMethodInvocation() != null) {
+                    PsiExpression typeMethodInvocationExpression = getTypeMethodInvocation().getMethodExpression().getQualifierExpression();
                     PsiReferenceExpression invoker = null;
                     if (typeMethodInvocationExpression instanceof PsiReferenceExpression) {
                         invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
@@ -1108,7 +1099,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 subclassNames.add((String) leaf.getUserObject());
                 leaf = leaf.getNextLeaf();
             }
-            PsiCodeBlock typeCheckMethodBody = typeCheckMethod.getBody();
+            PsiCodeBlock typeCheckMethodBody = getTypeCheckMethod().getBody();
             PsiStatement[] statements = typeCheckMethodBody.getStatements();
             if (statements.length > 0 && statements[0] instanceof PsiSwitchStatement) {
                 PsiSwitchStatement switchStatement = (PsiSwitchStatement) statements[0];
@@ -1135,7 +1126,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
     public boolean typeCheckCodeFragmentContainsReturnStatement() {
         StatementExtractor statementExtractor = new StatementExtractor();
-        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(typeCheckCodeFragment);
+        List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
         return !typeCheckCodeFragmentReturnStatements.isEmpty();
     }
 
@@ -1173,9 +1164,9 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
         if (o instanceof TypeCheckElimination) {
             TypeCheckElimination typeCheckElimination = (TypeCheckElimination) o;
-            return this.typeCheckClass.equals(typeCheckElimination.typeCheckClass) &&
-                    this.typeCheckMethod.equals(typeCheckElimination.typeCheckMethod) &&
-                    this.typeCheckCodeFragment.equals(typeCheckElimination.typeCheckCodeFragment);
+            return getTypeCheckClass().equals(typeCheckElimination.getTypeCheckClass()) &&
+                    getTypeCheckMethod().equals(typeCheckElimination.getTypeCheckMethod()) &&
+                    getTypeCheckCodeFragment().equals(typeCheckElimination.getTypeCheckCodeFragment());
         }
         return false;
     }
@@ -1183,16 +1174,16 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;
-            result = 37 * result + typeCheckClass.hashCode();
-            result = 37 * result + typeCheckMethod.hashCode();
-            result = 37 * result + typeCheckCodeFragment.hashCode();
+            result = 37 * result + getTypeCheckClass().hashCode();
+            result = 37 * result + getTypeCheckMethod().hashCode();
+            result = 37 * result + getTypeCheckCodeFragment().hashCode();
             hashCode = result;
         }
         return hashCode;
     }
 
     public String toString() {
-        return PsiUtils.calculateSignature(typeCheckMethod);
+        return PsiUtils.calculateSignature(getTypeCheckMethod());
     }
 
     public int getGroupSizeAtClassLevel() {
@@ -1201,14 +1192,6 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
 
     public void setGroupSizeAtClassLevel(int groupSizeAtClassLevel) {
         this.groupSizeAtClassLevel = groupSizeAtClassLevel;
-    }
-
-    public Integer getUserRate() {
-        return userRate;
-    }
-
-    public void setUserRate(Integer userRate) {
-        this.userRate = userRate;
     }
 
     public int compareTo(TypeCheckElimination other) {

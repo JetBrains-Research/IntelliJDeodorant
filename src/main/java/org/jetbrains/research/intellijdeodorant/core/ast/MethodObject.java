@@ -15,6 +15,8 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class MethodObject implements AbstractMethodDeclaration {
 
     private TypeObject returnType;
@@ -25,7 +27,7 @@ public class MethodObject implements AbstractMethodDeclaration {
     private final ConstructorObject constructorObject;
     private boolean testAnnotation;
     private volatile int hashCode = 0;
-    private final PsiMethod psiMethod;
+    private final SmartPsiElementPointer<PsiElement> psiMethod;
 
     public MethodObject(PsiMethod psiMethod, ConstructorObject co) {
         this.constructorObject = co;
@@ -34,11 +36,11 @@ public class MethodObject implements AbstractMethodDeclaration {
         this._synchronized = false;
         this._native = false;
         this.testAnnotation = false;
-        this.psiMethod = psiMethod;
+        this.psiMethod = toPointer(psiMethod);
     }
 
     private PsiMethod getPsiMethod() {
-        return this.psiMethod;
+        return (PsiMethod) this.psiMethod.getElement();
     }
 
     public void setReturnType(TypeObject returnType) {
@@ -731,12 +733,12 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean containsFieldAccessOfEnclosingClass() {
         //check for field access like SegmentedTimeline.this.segmentsIncluded
-        if (psiMethod.getBody() == null) {
+        if (getPsiMethod().getBody() == null) {
             return false;
         }
 
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(psiMethod.getBody().getStatements());
+        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(getPsiMethod().getBody().getStatements());
         for (PsiExpression expression : fieldAccesses) {
             PsiReferenceExpression fieldReference = (PsiReferenceExpression) expression;
             Collection<PsiElement> psiElements = PsiTreeUtil.findChildrenOfType(fieldReference, PsiThisExpression.class);
