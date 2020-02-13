@@ -9,7 +9,7 @@ import java.util.Set;
 
 class ReachingAliasSet {
 
-    private List<LinkedHashSet<PsiVariable>> aliasSets;
+    private final List<LinkedHashSet<PsiVariable>> aliasSets;
 
     ReachingAliasSet() {
         this.aliasSets = new ArrayList<>();

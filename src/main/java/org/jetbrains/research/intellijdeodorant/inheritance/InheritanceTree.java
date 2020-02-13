@@ -69,7 +69,7 @@ public class InheritanceTree {
     }
 
     public TreeMap<Integer, Set<String>> getLeavesByLevel() {
-        TreeMap<Integer, Set<String>> levelMap = new TreeMap<Integer, Set<String>>();
+        TreeMap<Integer, Set<String>> levelMap = new TreeMap<>();
         Enumeration e = rootNode.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
@@ -78,7 +78,7 @@ public class InheritanceTree {
                 if (levelMap.containsKey(level)) {
                     levelMap.get(level).add((String) node.getUserObject());
                 } else {
-                    Set<String> leaves = new LinkedHashSet<String>();
+                    Set<String> leaves = new LinkedHashSet<>();
                     leaves.add((String) node.getUserObject());
                     levelMap.put(level, leaves);
                 }

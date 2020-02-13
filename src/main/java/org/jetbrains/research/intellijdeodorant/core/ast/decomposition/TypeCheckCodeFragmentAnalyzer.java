@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
@@ -15,14 +14,14 @@ import java.util.stream.Collectors;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class TypeCheckCodeFragmentAnalyzer {
-    private TypeCheckElimination typeCheckElimination;
-    private SmartPsiElementPointer<PsiElement> typeDeclaration;
-    private SmartPsiElementPointer<PsiElement> typeCheckMethod;
-    private PsiField[] fields;
-    private PsiMethod[] methods;
-    private Map<PsiVariable, Integer> typeVariableCounterMap;
-    private Map<PsiMethodCallExpression, Integer> typeMethodInvocationCounterMap;
-    private Map<PsiExpression, IfStatementExpressionAnalyzer> complexExpressionMap;
+    private final TypeCheckElimination typeCheckElimination;
+    private final SmartPsiElementPointer<PsiElement> typeDeclaration;
+    private final SmartPsiElementPointer<PsiElement> typeCheckMethod;
+    private final PsiField[] fields;
+    private final PsiMethod[] methods;
+    private final Map<PsiVariable, Integer> typeVariableCounterMap;
+    private final Map<PsiMethodCallExpression, Integer> typeMethodInvocationCounterMap;
+    private final Map<PsiExpression, IfStatementExpressionAnalyzer> complexExpressionMap;
 
     public TypeCheckCodeFragmentAnalyzer(TypeCheckElimination typeCheckElimination,
                                          PsiClass typeDeclaration,
@@ -128,7 +127,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                     PsiReferenceExpression referenceExpression = ((PsiReferenceExpression) typeCheckExpression);
                     if (referenceExpression.resolve() instanceof PsiVariable) {
                         PsiVariable variable = (PsiVariable) referenceExpression.resolve();
-                        if (variable instanceof PsiField && variable.hasModifier(JvmModifier.STATIC)) {
+                        if (variable instanceof PsiField && variable.hasModifierProperty(PsiModifier.STATIC)) {
                             ArrayList<PsiField> staticTypes = new ArrayList<>();
                             staticTypes.add((PsiField) variable);
                             typeCheckElimination.addStaticType(typeCheckExpression, staticTypes);
@@ -180,7 +179,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             PsiElement leftOperandNameBinding = leftOperandName.resolve();
                             if (leftOperandNameBinding instanceof PsiVariable) {
                                 PsiVariable leftOperandNameVariableBinding = (PsiVariable) leftOperandNameBinding;
-                                if (leftOperandNameVariableBinding instanceof PsiField && leftOperandNameVariableBinding.hasModifier(JvmModifier.STATIC))
+                                if (leftOperandNameVariableBinding instanceof PsiField && leftOperandNameVariableBinding.hasModifierProperty(PsiModifier.STATIC))
                                     staticFieldName = leftOperandName;
                             }
                         }
@@ -189,7 +188,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             PsiElement rightOperandNameBinding = rightOperandName.resolve();
                             if (rightOperandNameBinding instanceof PsiVariable) {
                                 PsiVariable rightOperandNameVariableBinding = (PsiVariable) rightOperandNameBinding;
-                                if (rightOperandNameVariableBinding instanceof PsiField && rightOperandNameVariableBinding.hasModifier(JvmModifier.STATIC))
+                                if (rightOperandNameVariableBinding instanceof PsiField && rightOperandNameVariableBinding.hasModifierProperty(PsiModifier.STATIC))
                                     staticFieldName = rightOperandName;
                             }
                         }

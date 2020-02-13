@@ -6,13 +6,13 @@ import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import java.util.*;
 
 public class PDG extends Graph {
-    private CFG cfg;
-    private PDGMethodEntryNode entryNode;
-    private Map<CFGBranchNode, Set<CFGNode>> nestingMap;
-    private Set<VariableDeclarationObject> variableDeclarationsInMethod;
-    private Set<FieldObject> fieldsAccessedInMethod;
-    private Map<PDGNode, Set<BasicBlock>> dominatedBlockMap;
-    private PsiFile psiFile;
+    private final CFG cfg;
+    private final PDGMethodEntryNode entryNode;
+    private final Map<CFGBranchNode, Set<CFGNode>> nestingMap;
+    private final Set<VariableDeclarationObject> variableDeclarationsInMethod;
+    private final Set<FieldObject> fieldsAccessedInMethod;
+    private final Map<PDGNode, Set<BasicBlock>> dominatedBlockMap;
+    private final PsiFile psiFile;
 
     public PDG(CFG cfg, PsiFile psiFile, Set<FieldObject> accessedFields) {
         this.cfg = cfg;

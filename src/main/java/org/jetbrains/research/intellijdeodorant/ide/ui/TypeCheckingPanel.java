@@ -53,12 +53,10 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         };
 
         if (refactoring instanceof ReplaceTypeCodeWithStateStrategy) {
-            TransactionGuard.getInstance().submitTransactionAndWait(() -> {
-                new ReplaceTypeCodeWithStateStrategyDialog(
-                        (ReplaceTypeCodeWithStateStrategy) refactoring,
-                        applyRefactoring
-                ).show();
-            });
+            TransactionGuard.getInstance().submitTransactionAndWait(() -> new ReplaceTypeCodeWithStateStrategyDialog(
+                    (ReplaceTypeCodeWithStateStrategy) refactoring,
+                    applyRefactoring
+            ).show());
         } else {
             applyRefactoring.run();
         }

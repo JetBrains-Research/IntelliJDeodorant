@@ -6,15 +6,15 @@ import java.util.ArrayList;
 
 public class Cluster {
 
-    private ArrayList<Entity> entities;
+    private final ArrayList<Entity> entities;
     private int hashCode;
 
     public Cluster() {
-        entities = new ArrayList<Entity>();
+        entities = new ArrayList<>();
     }
 
     public Cluster(ArrayList<Entity> entities) {
-        this.entities = new ArrayList<Entity>(entities);
+        this.entities = new ArrayList<>(entities);
     }
 
     public void addEntity(Entity entity) {
@@ -50,11 +50,12 @@ public class Cluster {
     }
 
     public String toString() {
-        String s = "{";
+        StringBuilder s = new StringBuilder("{");
 
         for (Entity entity : entities) {
-            s += entity + ", ";
+            s.append(entity).append(", ");
         }
-        return s += "}";
+        s.append("}");
+        return s.toString();
     }
 }

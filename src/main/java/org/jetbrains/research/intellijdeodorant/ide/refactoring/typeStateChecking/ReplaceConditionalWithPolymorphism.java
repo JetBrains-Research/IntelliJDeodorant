@@ -13,10 +13,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 
 public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring {
-    private PsiVariable returnedVariable;
-    private Set<PsiClassType> thrownExceptions;
+    private final PsiVariable returnedVariable;
+    private final Set<PsiClassType> thrownExceptions;
     private PsiVariable typeVariable;
-    private PsiMethodCallExpression typeMethodInvocation;
+    private final PsiMethodCallExpression typeMethodInvocation;
 
     public ReplaceConditionalWithPolymorphism(PsiFile sourceFile,
                                               Project project,
@@ -221,7 +221,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                     }
                     if (sourceTypeRequiredForExtraction()) {
                         String parameterName = sourceTypeDeclaration.getName();
-                        parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
+                        parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
                         superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(parameterName, null));
                     }
                     if (returnedVariable != null) {
@@ -370,7 +370,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
         if (sourceTypeRequiredForExtraction()) {
             String parameterName = sourceTypeDeclaration.getName();
-            parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
+            parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
             PsiType parameterType = PsiTypesUtil.getClassType(sourceTypeDeclaration);
             abstractMethodParameters.add(elementFactory.createParameter(parameterName, parameterType));
         }

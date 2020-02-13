@@ -11,10 +11,10 @@ public class CFG extends Graph {
     private static final int JOIN_TOP_LIST = 1;
     private static final int PLACE_NEW_LIST_SECOND_FROM_TOP = 2;
     private static final int JOIN_SECOND_FROM_TOP_LIST = 3;
-    private AbstractMethodDeclaration method;
-    private Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
-    private Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
-    private Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
+    private final AbstractMethodDeclaration method;
+    private final Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
+    private final Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
+    private final Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
     private BasicBlockCFG basicBlockCFG;
 
     public CFG(AbstractMethodDeclaration method) {

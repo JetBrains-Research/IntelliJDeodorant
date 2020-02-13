@@ -1,8 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
-import com.intellij.psi.PsiElement;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
@@ -21,7 +19,7 @@ public abstract class AbstractVariable {
         this.isField = (psiVariable instanceof PsiField);
         this.isParameter = (psiVariable instanceof PsiParameter)
                 && (psiVariable.getParent() instanceof PsiParameterList);
-        this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
+        this.isStatic = psiVariable.hasModifierProperty(PsiModifier.STATIC);
     }
 
     AbstractVariable(PsiElement origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {

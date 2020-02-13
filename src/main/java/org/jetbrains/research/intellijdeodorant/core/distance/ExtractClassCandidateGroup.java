@@ -4,9 +4,9 @@ import java.util.*;
 
 public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandidateGroup> {
 
-    private String source;
-    private ArrayList<ExtractClassCandidateRefactoring> candidates;
-    private ArrayList<ExtractedConcept> extractedConcepts;
+    private final String source;
+    private final ArrayList<ExtractClassCandidateRefactoring> candidates;
+    private final ArrayList<ExtractedConcept> extractedConcepts;
 
     public ExtractClassCandidateGroup(String source) {
         this.source = source;

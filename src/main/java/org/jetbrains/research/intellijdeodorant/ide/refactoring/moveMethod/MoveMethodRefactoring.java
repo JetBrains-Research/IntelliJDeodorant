@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringVisitor;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.getHumanReadableName;
@@ -109,19 +110,20 @@ public class MoveMethodRefactoring implements Refactoring {
 
         MoveMethodRefactoring that = (MoveMethodRefactoring) o;
 
-        return method.equals(that.method) && targetClass.equals(that.targetClass);
+        return Objects.equals(method.getElement(), that.method.getElement())
+                && Objects.equals(targetClass.getElement(), that.targetClass.getElement());
     }
 
     public boolean methodEquals(@NotNull MoveMethodRefactoring that) {
         if (this == that) return true;
 
-        return method.equals(that.method);
+        return Objects.equals(method.getElement(), that.method.getElement());
     }
 
     @Override
     public int hashCode() {
-        int result = method.hashCode();
-        result = 31 * result + targetClass.hashCode();
+        int result = method.getElement().hashCode();
+        result = 31 * result + targetClass.getElement().hashCode();
         return result;
     }
 

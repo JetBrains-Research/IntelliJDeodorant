@@ -4,7 +4,7 @@ import java.util.*;
 
 public class AdjacencyList {
 
-    private Map<Node, LinkedHashSet<Edge>> adjacencies = new HashMap<Node, LinkedHashSet<Edge>>();
+    private Map<Node, LinkedHashSet<Edge>> adjacencies = new HashMap<>();
 
     public void addEdge(Node source, Node target, int weight) {
         LinkedHashSet<Edge> list;
@@ -21,7 +21,7 @@ public class AdjacencyList {
         if (adjacencies.containsKey(source))
             return adjacencies.get(source);
         else
-            return new LinkedHashSet<Edge>();
+            return new LinkedHashSet<>();
     }
 
     public void reverseEdge(Edge e) {
@@ -48,7 +48,7 @@ public class AdjacencyList {
     }
 
     public Collection<Edge> getAllEdges() {
-        ArrayList<Edge> edges = new ArrayList<Edge>();
+        ArrayList<Edge> edges = new ArrayList<>();
         for (LinkedHashSet<Edge> e : adjacencies.values()) {
             edges.addAll(e);
         }

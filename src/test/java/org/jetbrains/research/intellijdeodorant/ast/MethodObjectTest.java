@@ -25,7 +25,7 @@ public class MethodObjectTest extends LightJavaCodeInsightFixtureTestCase {
         myFixture.configureByFile(PATH_TO_TEST_DATA + classFileName);
 
         class Visitor extends PsiRecursiveElementVisitor {
-            private List<PsiMethod> psiMethods = new ArrayList<PsiMethod>();
+            private List<PsiMethod> psiMethods = new ArrayList<>();
 
             @Override
             public void visitElement(PsiElement element) {

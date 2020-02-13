@@ -12,11 +12,11 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isPrimitiv
 
 public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     private CFGNode cfgNode;
-    Set<AbstractVariable> declaredVariables;
-    protected Set<AbstractVariable> definedVariables;
-    protected Set<AbstractVariable> usedVariables;
-    Set<CreationObject> createdTypes;
-    Set<String> thrownExceptionTypes;
+    final Set<AbstractVariable> declaredVariables;
+    protected final Set<AbstractVariable> definedVariables;
+    protected final Set<AbstractVariable> usedVariables;
+    final Set<CreationObject> createdTypes;
+    final Set<String> thrownExceptionTypes;
     private Set<VariableDeclarationObject> variableDeclarationsInMethod;
     private Set<FieldObject> fieldsAccessedInMethod;
     private Set<AbstractVariable> originalDefinedVariables;
@@ -161,25 +161,25 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return false;
     }
 
-    public Set<AbstractVariable> incomingDataDependencesFromNodesDeclaringOrDefiningVariables() {
-        Set<AbstractVariable> dataDependences = new LinkedHashSet<>();
+    public Set<AbstractVariable> incomingDataDependenciesFromNodesDeclaringOrDefiningVariables() {
+        Set<AbstractVariable> dataDependencies = new LinkedHashSet<>();
         for (GraphEdge edge : incomingEdges) {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGDataDependence) {
                 PDGDataDependence dataDependence = (PDGDataDependence) dependence;
                 PDGNode srcNode = (PDGNode) dependence.src;
                 if (srcNode.declaresLocalVariable(dataDependence.getData()) || srcNode.definesLocalVariable(dataDependence.getData())) {
-                    dataDependences.add(dataDependence.getData());
+                    dataDependencies.add(dataDependence.getData());
                 }
             } else if (dependence instanceof PDGOutputDependence) {
                 PDGOutputDependence outputDependence = (PDGOutputDependence) dependence;
                 PDGNode srcNode = (PDGNode) dependence.src;
                 if (srcNode.declaresLocalVariable(outputDependence.getData()) || srcNode.definesLocalVariable(outputDependence.getData())) {
-                    dataDependences.add(outputDependence.getData());
+                    dataDependencies.add(outputDependence.getData());
                 }
             }
         }
-        return dataDependences;
+        return dataDependencies;
     }
 
     boolean declaresLocalVariable(AbstractVariable variable) {

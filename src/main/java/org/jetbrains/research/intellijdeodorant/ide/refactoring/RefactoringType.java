@@ -34,7 +34,7 @@ abstract public class RefactoringType {
     public abstract AbstractCandidateRefactoringGroup newAbstractCandidateRefactoringGroup(Object candidateRefactoringGroup);
 
     public abstract static class AbstractCandidateRefactoring implements Refactoring {
-        protected Object candidateRefactoring;
+        protected final Object candidateRefactoring;
 
         public AbstractCandidateRefactoring(Object candidateRefactoring) {
             this.candidateRefactoring = candidateRefactoring;
@@ -50,8 +50,8 @@ abstract public class RefactoringType {
     }
 
     public abstract static class AbstractCandidateRefactoringGroup {
-        private List<AbstractCandidateRefactoring> candidates = new ArrayList<>();
-        private Object candidateRefactoringGroup;
+        private final List<AbstractCandidateRefactoring> candidates = new ArrayList<>();
+        private final Object candidateRefactoringGroup;
 
         public AbstractCandidateRefactoringGroup(RefactoringType refactoringType, Object candidateRefactoringGroup) {
             this.candidateRefactoringGroup = candidateRefactoringGroup;

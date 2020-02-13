@@ -3,7 +3,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 import java.util.*;
 
 public class PDGSliceUnionCollection {
-    private Map<BasicBlock, PDGSliceUnion> sliceUnionMap;
+    private final Map<BasicBlock, PDGSliceUnion> sliceUnionMap;
 
     public PDGSliceUnionCollection(PDG pdg, PlainVariable localVariableCriterion) {
         this.sliceUnionMap = new LinkedHashMap<>();

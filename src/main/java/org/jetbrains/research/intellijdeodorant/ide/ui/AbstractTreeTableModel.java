@@ -11,9 +11,9 @@ import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
 public abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
-    private String[] columnNames;
+    private final String[] columnNames;
     protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
-    private RefactoringType refactoringType;
+    private final RefactoringType refactoringType;
 
     public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups,
                                   String[] columnNames, RefactoringType refactoringType) {
@@ -63,7 +63,6 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public void setTree(JTree tree) {
-        "".hashCode();
     }
 
     @Override

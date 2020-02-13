@@ -15,6 +15,7 @@ import org.jetbrains.research.intellijdeodorant.core.distance.ExtractClassCandid
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -91,10 +92,10 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
 
             if (i == 0) {
                 expectedFields = Arrays.asList("a", "b", "c");
-                expectedMethods = Arrays.asList("fun1");
+                expectedMethods = Collections.singletonList("fun1");
             } else {
                 expectedFields = Arrays.asList("d", "e");
-                expectedMethods = Arrays.asList("fun2");
+                expectedMethods = Collections.singletonList("fun2");
             }
 
             compareExtractClassCandidateRefactoringContains(group, i, expectedFields, expectedMethods);
@@ -113,22 +114,22 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
 
             if (i == 0) {
                 expectedFields = Arrays.asList("aa", "ab", "ac", "ad", "ae", "af", "ag");
-                expectedMethods = Arrays.asList("fun1");
+                expectedMethods = Collections.singletonList("fun1");
             } else if (i == 1) {
                 expectedFields = Arrays.asList("ba", "bb", "bc", "bd", "be", "bf");
-                expectedMethods = Arrays.asList("fun2");
+                expectedMethods = Collections.singletonList("fun2");
             } else if (i == 2) {
                 expectedFields = Arrays.asList("ca", "cb", "cc", "cd", "ce");
-                expectedMethods = Arrays.asList("fun3");
+                expectedMethods = Collections.singletonList("fun3");
             } else if (i == 3) {
                 expectedFields = Arrays.asList("da", "db", "dc", "dd");
-                expectedMethods = Arrays.asList("fun4");
+                expectedMethods = Collections.singletonList("fun4");
             } else if (i == 4) {
                 expectedFields = Arrays.asList("ea", "eb", "ec");
-                expectedMethods = Arrays.asList("fun5");
+                expectedMethods = Collections.singletonList("fun5");
             } else {
                 expectedFields = Arrays.asList("fa", "fb");
-                expectedMethods = Arrays.asList("fun6");
+                expectedMethods = Collections.singletonList("fun6");
             }
 
             compareExtractClassCandidateRefactoringContains(group, i, expectedFields, expectedMethods);

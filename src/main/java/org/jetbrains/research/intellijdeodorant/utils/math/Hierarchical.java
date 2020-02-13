@@ -9,22 +9,22 @@ import static org.jetbrains.research.intellijdeodorant.utils.math.DoubleArray.*;
 
 public class Hierarchical extends Clustering {
 
-    private HashSet<Cluster> clusterSet;
+    private final HashSet<Cluster> clusterSet;
 
     public Hierarchical(double[][] distanceMatrix) {
         this.distanceMatrix = distanceMatrix;
-        this.clusterSet = new HashSet<Cluster>();
+        this.clusterSet = new HashSet<>();
     }
 
     public HashSet<Cluster> clustering(ArrayList<Entity> entities) {
-        ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+        ArrayList<Cluster> clusters = new ArrayList<>();
         for (Entity entity : entities) {
             Cluster cluster = new Cluster();
             cluster.addEntity(entity);
             clusters.add(cluster);
         }
         while (clusters.size() > 2) {
-            HashSet<Cluster> clustersNotPresentable = new HashSet<Cluster>();
+            HashSet<Cluster> clustersNotPresentable = new HashSet<>();
             double minVal = 2.0;
             int minRow = 0;
             int minCol = 1;

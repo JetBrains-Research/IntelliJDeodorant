@@ -14,12 +14,12 @@ import java.util.*;
 
 public class ExtractClassCandidateRefactoring extends CandidateRefactoring implements Comparable<ExtractClassCandidateRefactoring> {
 
-    private MySystem system;
-    private MyClass sourceClass;
-    private List<Entity> extractedEntities;
-    private Map<MyMethod, Boolean> leaveDelegate;
-    private String targetClassName;
-    private GodClassVisualizationData visualizationData;
+    private final MySystem system;
+    private final MyClass sourceClass;
+    private final List<Entity> extractedEntities;
+    private final Map<MyMethod, Boolean> leaveDelegate;
+    private final String targetClassName;
+    private final GodClassVisualizationData visualizationData;
     private List<String> topics;
 
     public ExtractClassCandidateRefactoring(MySystem system, MyClass sourceClass, ArrayList<Entity> extractedEntities) {

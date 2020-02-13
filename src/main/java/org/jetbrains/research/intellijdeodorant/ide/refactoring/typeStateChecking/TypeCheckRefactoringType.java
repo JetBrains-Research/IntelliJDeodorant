@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 public class TypeCheckRefactoringType extends RefactoringType {
-    private AnalysisScope scope;
+    private final AnalysisScope scope;
 
     public TypeCheckRefactoringType(Project project) {
         scope = new AnalysisScope(project);
@@ -48,7 +48,7 @@ public class TypeCheckRefactoringType extends RefactoringType {
     }
 
     public class AbstractTypeCheckCandidateRefactoring extends AbstractCandidateRefactoring {
-        private PsiClass sourceClass;
+        private final PsiClass sourceClass;
 
         public AbstractTypeCheckCandidateRefactoring(TypeCheckElimination candidateRefactoring) {
             super(candidateRefactoring);
@@ -109,7 +109,7 @@ public class TypeCheckRefactoringType extends RefactoringType {
     }
 
     public class AbstractTypeCheckRefactoring extends AbstractRefactoring {
-        private PolymorphismRefactoring refactoring;
+        private final PolymorphismRefactoring refactoring;
 
         public AbstractTypeCheckRefactoring(TypeCheckElimination typeCheckElimination) {
             PsiClass sourceTypeDeclaration = typeCheckElimination.getTypeCheckClass();

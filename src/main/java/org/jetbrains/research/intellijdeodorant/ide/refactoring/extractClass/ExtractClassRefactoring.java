@@ -30,33 +30,33 @@ public class ExtractClassRefactoring {
     private static final String GETTER_PREFIX = "get";
     private static final String SETTER_PREFIX = "set";
     private static final String ACCESSOR_SUFFIX = "2";
-    private PsiJavaFile sourceFile;
-    private PsiClass sourceTypeDeclaration;
-    private Map<PsiMethod, Set<PlainVariable>> additionalArgumentsAddedToExtractedMethods;
-    private Map<PsiMethod, Set<PsiParameter>> additionalParametersAddedToExtractedMethods;
-    private Set<PsiMethod> sourceMethodBindingsChangedWithPublicModifier;
-    private Set<PsiField> sourceFieldBindingsWithCreatedSetterMethod;
-    private Set<PsiField> sourceFieldBindingsWithCreatedGetterMethod;
-    private Map<PsiMethod, Set<PsiMethodCallExpression>> oldMethodInvocationsWithinExtractedMethods;
+    private final PsiJavaFile sourceFile;
+    private final PsiClass sourceTypeDeclaration;
+    private final Map<PsiMethod, Set<PlainVariable>> additionalArgumentsAddedToExtractedMethods;
+    private final Map<PsiMethod, Set<PsiParameter>> additionalParametersAddedToExtractedMethods;
+    private final Set<PsiMethod> sourceMethodBindingsChangedWithPublicModifier;
+    private final Set<PsiField> sourceFieldBindingsWithCreatedSetterMethod;
+    private final Set<PsiField> sourceFieldBindingsWithCreatedGetterMethod;
+    private final Map<PsiMethod, Set<PsiMethodCallExpression>> oldMethodInvocationsWithinExtractedMethods;
     private Map<PsiMethod, Set<PsiMethodCallExpression>> newMethodInvocationsWithinExtractedMethods;
     private Map<PsiMethod, PsiMethod> oldToNewExtractedMethodDeclarationMap;
-    private Set<PsiField> extractedFieldFragments;
-    private Set<PsiMethod> extractedMethods;
-    private Set<PsiMethod> delegateMethods;
-    private String defaultExtractedTypeName;
+    private final Set<PsiField> extractedFieldFragments;
+    private final Set<PsiMethod> extractedMethods;
+    private final Set<PsiMethod> delegateMethods;
+    private final String defaultExtractedTypeName;
     private String extractedTypeName;
     //this map holds for each constructor the assignment statements that initialize final extracted fields
-    private Map<PsiMethod, Map<PsiField, PsiAssignmentExpression>> constructorFinalFieldAssignmentMap;
+    private final Map<PsiMethod, Map<PsiField, PsiAssignmentExpression>> constructorFinalFieldAssignmentMap;
     //this map holds the parameters that should be passed in each constructor of the extracted class
-    private Map<PsiMethod, Set<PsiParameter>> extractedClassConstructorParameterMap;
-    private Set<PsiField> extractedFieldsWithThisExpressionInTheirInitializer;
+    private final Map<PsiMethod, Set<PsiParameter>> extractedClassConstructorParameterMap;
+    private final Set<PsiField> extractedFieldsWithThisExpressionInTheirInitializer;
 
-    private PsiElementFactory factory;
-    private PsiFileFactory fileFactory;
-    private Project project;
-    private PsiManager psiManager;
-    private JavaCodeStyleManager javaCodeStyleManager;
-    private CodeStyleManager codeStyleManager;
+    private final PsiElementFactory factory;
+    private final PsiFileFactory fileFactory;
+    private final Project project;
+    private final PsiManager psiManager;
+    private final JavaCodeStyleManager javaCodeStyleManager;
+    private final CodeStyleManager codeStyleManager;
 
     /*
     We create each of the new methods inside 'sandbox' file - a full copy of the source file, in order to correctly
@@ -64,9 +64,9 @@ public class ExtractClassRefactoring {
 
     Then we add copies of the sandboxed methods to the extracted class.
      */
-    private Map<PsiMethod, PsiMethod> sourceToSandboxMethodMap;
-    private Map<PsiField, PsiField> sandboxToSourceFieldMap;
-    private Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
+    private final Map<PsiMethod, PsiMethod> sourceToSandboxMethodMap;
+    private final Map<PsiField, PsiField> sandboxToSourceFieldMap;
+    private final Map<PsiMethod, PsiMethod> sandboxToExtractedMethodMap;
 
     public ExtractClassRefactoring(PsiJavaFile sourceFile, PsiClass sourceTypeDeclaration,
                                    Set<PsiField> extractedFieldFragments, Set<PsiMethod> extractedMethods, Set<PsiMethod> delegateMethods, String defaultExtractedTypeName) {
@@ -2241,16 +2241,16 @@ public class ExtractClassRefactoring {
     }
 
     /**
-     * This method both modifies a source class and collect info for the extracted one. Howewer, we cannot change source class
+     * This method both modifies a source class and collect info for the extracted one. However, we cannot change source class
      * before creating a new one, so here we make corresponding actions to the source class only if `modifyType` == SOURCE.
      */
     private void createExtractedTypeFieldReferenceInSourceClass(ModifyType modifyType) {
         String modifiedExtractedTypeName = extractedTypeName.substring(0, 1).toLowerCase() + extractedTypeName.substring(1);
 
-        PsiExpression initiliazer = null;
+        PsiExpression initializer = null;
 
         if (constructorFinalFieldAssignmentMap.isEmpty()) {
-            initiliazer = factory.createExpressionFromText("new " + extractedTypeName + "()", null);
+            initializer = factory.createExpressionFromText("new " + extractedTypeName + "()", null);
         } else {
             ExpressionExtractor expressionExtractor = new ExpressionExtractor();
 
@@ -2309,7 +2309,7 @@ public class ExtractClassRefactoring {
                 }
 
                 if (modifyType == ModifyType.SOURCE) {
-                    PsiStatement assigmentStatement = factory.createStatementFromText(extractedTypeFieldAccessText + " = new " + constructorCall.getText() + ";", null);
+                    PsiStatement assignmentStatement = factory.createStatementFromText(extractedTypeFieldAccessText + " = new " + constructorCall.getText() + ";", null);
 
                     if (!insertAfterStatements.isEmpty()) {
                         PsiStatement lastStatement = insertAfterStatements.get(0);
@@ -2322,9 +2322,9 @@ public class ExtractClassRefactoring {
                             }
                         }
 
-                        constructor.getBody().addAfter(assigmentStatement, lastStatement);
+                        constructor.getBody().addAfter(assignmentStatement, lastStatement);
                     } else {
-                        constructor.getBody().addAfter(assigmentStatement, constructor.getBody().getLBrace());
+                        constructor.getBody().addAfter(assignmentStatement, constructor.getBody().getLBrace());
                     }
                 }
 
@@ -2336,7 +2336,7 @@ public class ExtractClassRefactoring {
 
         if (modifyType == ModifyType.SOURCE) {
             PsiField extractedReferenceFieldDeclaration = factory.createField(modifiedExtractedTypeName, factory.createTypeFromText(extractedTypeName, null));
-            extractedReferenceFieldDeclaration.setInitializer(initiliazer);
+            extractedReferenceFieldDeclaration.setInitializer(initializer);
             extractedReferenceFieldDeclaration.getModifierList().setModifierProperty(PsiModifier.PRIVATE, true);
             PsiClass serializableTypeBinding = implementsSerializableInterface(sourceTypeDeclaration);
             if (serializableTypeBinding != null && !existsNonTransientExtractedFieldFragment()) {
@@ -2624,7 +2624,7 @@ public class ExtractClassRefactoring {
 
                             PsiElement rightHandSide = assignment.getRExpression();
 
-                            boolean deleteAssigmentStatement = false;
+                            boolean deleteAssignmentStatement = false;
 
                             List<PsiExpression> arrayAccesses = expressionExtractor.getArrayAccesses(leftHandSide);
                             for (PsiField fieldFragment : fieldFragments) {
@@ -2652,7 +2652,7 @@ public class ExtractClassRefactoring {
                                                     }
 
                                                     if (handleType == HandleType.MODIFY) {
-                                                        deleteAssigmentStatement = true;
+                                                        deleteAssignmentStatement = true;
                                                     }
                                                 }
                                             } else {
@@ -2756,7 +2756,7 @@ public class ExtractClassRefactoring {
                                     }
                                 }
 
-                                //Moved down here from the original place because rightHandSide could invalidate when replacing assigment with setter.
+                                //Moved down here from the original place because rightHandSide could invalidate when replacing assignment with setter.
                                 List<PsiExpression> accessedVariables;
 
                                 if (!rightHandSide.isValid()) {
@@ -2803,7 +2803,7 @@ public class ExtractClassRefactoring {
                                     }
                                 }
 
-                                if (deleteAssigmentStatement) {
+                                if (deleteAssignmentStatement) {
                                     assignment.getParent().delete();
                                 }
                             }

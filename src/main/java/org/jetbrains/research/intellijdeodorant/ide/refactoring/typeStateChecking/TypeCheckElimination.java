@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
-    private Map<PsiExpression, ArrayList<PsiStatement>> typeCheckMap;
-    private ArrayList<PsiStatement> defaultCaseStatements;
-    private Map<PsiExpression, List<PsiField>> staticFieldMap;
-    private Map<PsiExpression, List<PsiType>> subclassTypeMap;
+    private final Map<PsiExpression, ArrayList<PsiStatement>> typeCheckMap;
+    private final ArrayList<PsiStatement> defaultCaseStatements;
+    private final Map<PsiExpression, List<PsiField>> staticFieldMap;
+    private final Map<PsiExpression, List<PsiType>> subclassTypeMap;
     private SmartPsiElementPointer<PsiElement> typeField;
     private SmartPsiElementPointer<PsiElement> typeFieldGetterMethod;
     private SmartPsiElementPointer<PsiElement> typeFieldSetterMethod;
@@ -28,26 +28,26 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private CompositeStatementObject typeCheckCompositeStatement;
     private SmartPsiElementPointer<PsiElement> typeCheckMethod;
     private SmartPsiElementPointer<PsiElement> typeCheckClass;
-    private LinkedHashSet<PsiField> additionalStaticFields;
-    private LinkedHashSet<PsiField> accessedFields;
-    private LinkedHashSet<PsiField> assignedFields;
-    private LinkedHashMap<PsiField, PsiMethod> superAccessedFieldMap;
-    private LinkedHashMap<PsiField, PsiMethod> superAccessedFieldBindingMap;
-    private LinkedHashMap<PsiField, PsiMethod> superAssignedFieldMap;
-    private LinkedHashMap<PsiField, PsiMethod> superAssignedFieldBindingMap;
-    private LinkedHashSet<PsiParameter> accessedParameters;
-    private LinkedHashSet<PsiParameter> assignedParameters;
-    private LinkedHashSet<PsiVariable> accessedLocalVariables;
-    private LinkedHashSet<PsiVariable> assignedLocalVariables;
-    private LinkedHashSet<PsiMethod> accessedMethods;
-    private LinkedHashSet<PsiMethod> superAccessedMethods;
+    private final LinkedHashSet<PsiField> additionalStaticFields;
+    private final LinkedHashSet<PsiField> accessedFields;
+    private final LinkedHashSet<PsiField> assignedFields;
+    private final LinkedHashMap<PsiField, PsiMethod> superAccessedFieldMap;
+    private final LinkedHashMap<PsiField, PsiMethod> superAccessedFieldBindingMap;
+    private final LinkedHashMap<PsiField, PsiMethod> superAssignedFieldMap;
+    private final LinkedHashMap<PsiField, PsiMethod> superAssignedFieldBindingMap;
+    private final LinkedHashSet<PsiParameter> accessedParameters;
+    private final LinkedHashSet<PsiParameter> assignedParameters;
+    private final LinkedHashSet<PsiVariable> accessedLocalVariables;
+    private final LinkedHashSet<PsiVariable> assignedLocalVariables;
+    private final LinkedHashSet<PsiMethod> accessedMethods;
+    private final LinkedHashSet<PsiMethod> superAccessedMethods;
     private SmartPsiElementPointer<PsiElement> typeLocalVariable;
     private SmartPsiElementPointer<PsiExpression> typeMethodInvocation;
     private SmartPsiElementPointer<PsiElement> foreignTypeField;
     private InheritanceTree existingInheritanceTree;
     private InheritanceTree inheritanceTreeMatchingWithStaticTypes;
-    private Map<PsiElement, String> staticFieldSubclassTypeMap;
-    private Map<PsiExpression, DefaultMutableTreeNode> remainingIfStatementExpressionMap;
+    private final Map<PsiElement, String> staticFieldSubclassTypeMap;
+    private final Map<PsiExpression, DefaultMutableTreeNode> remainingIfStatementExpressionMap;
     private String abstractMethodName;
     private volatile int hashCode = 0;
     private int groupSizeAtClassLevel;
@@ -251,8 +251,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
         for (PsiExpression expression : typeCheckMap.keySet()) {
             List<PsiField> simpleNameGroup = staticFieldMap.get(expression);
             if (simpleNameGroup != null) {
-                for (PsiField simpleName : simpleNameGroup)
-                    staticFields.add(simpleName);
+                staticFields.addAll(simpleNameGroup);
             }
         }
         return staticFields;
@@ -433,14 +432,13 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
         for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
             allReturnStatementsWithinTypeCheckMethod.addAll(statementExtractor.getReturnStatements(statementInBlock));
         }
-        List<PsiReturnStatement> returnStatementsHavingExpressionWithinTypeCheckMethod = new ArrayList<PsiReturnStatement>();
+        List<PsiReturnStatement> returnStatementsHavingExpressionWithinTypeCheckMethod = new ArrayList<>();
         for (PsiStatement statement : allReturnStatementsWithinTypeCheckMethod) {
             PsiReturnStatement returnStatement = (PsiReturnStatement) statement;
             if (returnStatement.getReturnValue() != null)
                 returnStatementsHavingExpressionWithinTypeCheckMethod.add(returnStatement);
         }
-        List<PsiReturnStatement> returnStatementsHavingExpressionOutsideTypeCheckMethod = new ArrayList<>();
-        returnStatementsHavingExpressionOutsideTypeCheckMethod.addAll(returnStatementsHavingExpressionWithinTypeCheckMethod);
+        List<PsiReturnStatement> returnStatementsHavingExpressionOutsideTypeCheckMethod = new ArrayList<>(returnStatementsHavingExpressionWithinTypeCheckMethod);
         returnStatementsHavingExpressionOutsideTypeCheckMethod.removeAll(returnStatementsHavingExpressionWithinTypeCheckCodeFragment);
         for (PsiReturnStatement returnStatement : returnStatementsHavingExpressionOutsideTypeCheckMethod) {
             if (returnStatement.getTextOffset() > getTypeCheckCodeFragment().getTextOffset() + getTypeCheckCodeFragment().getTextLength())
@@ -667,7 +665,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     }
 
     private Map<PsiReturnStatement, PsiVariable> getTypeCheckMethodReturnedVariableMap() {
-        Map<PsiReturnStatement, PsiVariable> map = new LinkedHashMap<PsiReturnStatement, PsiVariable>();
+        Map<PsiReturnStatement, PsiVariable> map = new LinkedHashMap<>();
         StatementExtractor statementExtractor = new StatementExtractor();
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
@@ -826,13 +824,13 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     public String getAbstractClassName() {
         if (getTypeField() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
             String typeFieldName = getTypeField().getName().replaceAll("_", "");
-            return typeFieldName.substring(0, 1).toUpperCase() + typeFieldName.substring(1, typeFieldName.length());
+            return typeFieldName.substring(0, 1).toUpperCase() + typeFieldName.substring(1);
         } else if (getTypeLocalVariable() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
             String typeLocalVariableName = getTypeLocalVariable().getName().replaceAll("_", "");
-            return typeLocalVariableName.substring(0, 1).toUpperCase() + typeLocalVariableName.substring(1, typeLocalVariableName.length());
+            return typeLocalVariableName.substring(0, 1).toUpperCase() + typeLocalVariableName.substring(1);
         } else if (getForeignTypeField() != null && existingInheritanceTree == null && inheritanceTreeMatchingWithStaticTypes == null) {
             String foreignTypeFieldName = getForeignTypeField().getName().replaceAll("_", "");
-            return foreignTypeFieldName.substring(0, 1).toUpperCase() + foreignTypeFieldName.substring(1, foreignTypeFieldName.length());
+            return foreignTypeFieldName.substring(0, 1).toUpperCase() + foreignTypeFieldName.substring(1);
         } else if (existingInheritanceTree != null) {
             DefaultMutableTreeNode root = existingInheritanceTree.getRootNode();
             return (String) root.getUserObject();
@@ -840,7 +838,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             DefaultMutableTreeNode root = inheritanceTreeMatchingWithStaticTypes.getRootNode();
             String rootClassName = (String) root.getUserObject();
             if (rootClassName.contains("."))
-                return rootClassName.substring(rootClassName.lastIndexOf(".") + 1, rootClassName.length());
+                return rootClassName.substring(rootClassName.lastIndexOf(".") + 1);
             else
                 return rootClassName;
         }
@@ -941,17 +939,16 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 for (PsiField simpleName : simpleNameGroup) {
                     String staticFieldName = simpleName.getName();
                     PsiType castingType = getCastingType(typeCheckMap.get(expression));
-                    String subclassName = null;
+                    StringBuilder subclassName;
                     if (!staticFieldName.contains("_")) {
-                        subclassName = staticFieldName.substring(0, 1).toUpperCase() +
-                                staticFieldName.substring(1, staticFieldName.length()).toLowerCase();
+                        subclassName = new StringBuilder(staticFieldName.substring(0, 1).toUpperCase() +
+                                staticFieldName.substring(1).toLowerCase());
                     } else {
-                        subclassName = "";
+                        subclassName = new StringBuilder();
                         StringTokenizer tokenizer = new StringTokenizer(staticFieldName, "_");
                         while (tokenizer.hasMoreTokens()) {
                             String tempName = tokenizer.nextToken().toLowerCase();
-                            subclassName += tempName.subSequence(0, 1).toString().toUpperCase() +
-                                    tempName.subSequence(1, tempName.length()).toString();
+                            subclassName.append(tempName.subSequence(0, 1).toString().toUpperCase()).append(tempName.subSequence(1, tempName.length()).toString());
                         }
                     }
                     if (inheritanceTreeMatchingWithStaticTypes != null) {
@@ -961,7 +958,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                         DefaultMutableTreeNode leaf = root.getFirstLeaf();
                         while (leaf != null) {
                             String childClassName = (String) leaf.getUserObject();
-                            if (childClassName.endsWith(subclassName)) {
+                            if (childClassName.endsWith(subclassName.toString())) {
                                 subclassNames.add(childClassName);
                                 break;
                             } else if (castingType != null && castingType.getCanonicalText().equals(childClassName)) {
@@ -973,7 +970,7 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                     } else if (castingType != null) {
                         subclassNames.add(castingType.getCanonicalText());
                     } else {
-                        subclassNames.add(subclassName);
+                        subclassNames.add(subclassName.toString());
                     }
                 }
             }

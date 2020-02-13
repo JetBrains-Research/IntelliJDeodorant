@@ -17,20 +17,20 @@ public class ASTSlice {
     @NotNull
     private SmartPsiElementPointer<PsiElement> variableCriterionDeclarationStatement;
     @NotNull
-    private SmartPsiElementPointer<PsiElement> extractedMethodInvocationInsertionStatement;
+    private final SmartPsiElementPointer<PsiElement> extractedMethodInvocationInsertionStatement;
     private SmartPsiElementPointer<PsiElement> localVariableCriterion;
-    private Set<PDGNode> sliceNodes;
-    private Set<SmartPsiElementPointer<PsiElement>> sliceStatements;
-    private Set<SmartPsiElementPointer<PsiElement>> removableStatements;
-    private Set<SmartPsiElementPointer<PsiElement>> duplicatedStatements;
-    private Set<SmartPsiElementPointer<PsiElement>> passedParameters;
+    private final Set<PDGNode> sliceNodes;
+    private final Set<SmartPsiElementPointer<PsiElement>> sliceStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> removableStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> duplicatedStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> passedParameters;
 
     private String extractedMethodName;
-    private boolean declarationOfVariableCriterionBelongsToSliceNodes;
-    private boolean declarationOfVariableCriterionBelongsToRemovableNodes;
-    private BasicBlock boundaryBlock;
-    private boolean isObjectSlice;
-    private int methodSize;
+    private final boolean declarationOfVariableCriterionBelongsToSliceNodes;
+    private final boolean declarationOfVariableCriterionBelongsToRemovableNodes;
+    private final BasicBlock boundaryBlock;
+    private final boolean isObjectSlice;
+    private final int methodSize;
 
     public ASTSlice(PDGSlice pdgSlice) {
         this.sourceMethodDeclaration = toPointer(pdgSlice.getMethod().getMethodDeclaration());

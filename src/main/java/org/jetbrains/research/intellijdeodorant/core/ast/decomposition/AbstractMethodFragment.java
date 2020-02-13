@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import com.intellij.psi.util.PsiUtil;
@@ -113,12 +112,12 @@ public abstract class AbstractMethodFragment {
                             if (variableInstruction instanceof PsiSuperExpression) {
                                 SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
                                 superFieldInstruction.setSimpleName(resolvedReference);
-                                if ((psiField.hasModifier(JvmModifier.STATIC)))
+                                if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
                                 FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName, psiField);
-                                if ((psiField.hasModifier(JvmModifier.STATIC)))
+                                if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
@@ -278,7 +277,7 @@ public abstract class AbstractMethodFragment {
                     if (qualifierExpression == null) {
                         PsiMethod resolvedMethod = resolveMethod(methodInvocation);
                         if (resolvedMethod != null && resolvedMethod.getContainingClass() != null) {
-                            boolean isStatic = resolvedMethod.hasModifier(JvmModifier.STATIC);
+                            boolean isStatic = resolvedMethod.hasModifierProperty(PsiModifier.STATIC);
 
                             if (originClassName == null || originClassName.equals("")) {
                                 originClassName = resolvedMethod.getContainingClass().getQualifiedName();
@@ -306,7 +305,7 @@ public abstract class AbstractMethodFragment {
                         }
                     }
                 } else {
-                    boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
+                    boolean isMethodStatic = resolveMethod.hasModifierProperty(PsiModifier.STATIC);
                     if (resolveMethod.getContainingClass() != null) {
                         if (originClassName == null || originClassName.equals("")) {
                             originClassName = resolveMethod.getContainingClass().getQualifiedName();
@@ -450,16 +449,16 @@ public abstract class AbstractMethodFragment {
                         fieldType.setArrayDimension(fieldType.getArrayDimension());
                         FieldObject fieldObject = new FieldObject(fieldType, psiField.getName(), psiField);
                         fieldObject.setClassName(anonymousClassObject.getName());
-                        if ((psiField.hasModifier(JvmModifier.PUBLIC)))
+                        if (psiField.hasModifierProperty(PsiModifier.PUBLIC))
                             fieldObject.setAccess(Access.PUBLIC);
-                        else if (psiField.hasModifier(JvmModifier.PROTECTED))
+                        else if (psiField.hasModifierProperty(PsiModifier.PROTECTED))
                             fieldObject.setAccess(Access.PROTECTED);
-                        else if (psiField.hasModifier(JvmModifier.PRIVATE))
+                        else if (psiField.hasModifierProperty(PsiModifier.PRIVATE))
                             fieldObject.setAccess(Access.PRIVATE);
                         else
                             fieldObject.setAccess(Access.NONE);
 
-                        if (psiField.hasModifier(JvmModifier.STATIC))
+                        if (psiField.hasModifierProperty(PsiModifier.STATIC))
                             fieldObject.setStatic(true);
 
                         anonymousClassObject.addField(fieldObject);
@@ -471,11 +470,11 @@ public abstract class AbstractMethodFragment {
                         constructorObject.setName(psiMethod.getName());
                         constructorObject.setClassName(anonymousClassObject.getName());
 
-                        if ((psiMethod.hasModifier(JvmModifier.PUBLIC)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.PUBLIC))
                             constructorObject.setAccess(Access.PUBLIC);
-                        else if ((psiMethod.hasModifier(JvmModifier.PROTECTED)))
+                        else if (psiMethod.hasModifierProperty(PsiModifier.PROTECTED))
                             constructorObject.setAccess(Access.PROTECTED);
-                        else if ((psiMethod.hasModifier(JvmModifier.PRIVATE)))
+                        else if (psiMethod.hasModifierProperty(PsiModifier.PRIVATE))
                             constructorObject.setAccess(Access.PRIVATE);
                         else
                             constructorObject.setAccess(Access.NONE);
@@ -514,13 +513,13 @@ public abstract class AbstractMethodFragment {
                         }
                         methodObject.setReturnType(returnTypeObject);
 
-                        if ((psiMethod.hasModifier(JvmModifier.ABSTRACT)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.ABSTRACT))
                             methodObject.setAbstract(true);
-                        if ((psiMethod.hasModifier(JvmModifier.STATIC)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.STATIC))
                             methodObject.setStatic(true);
-                        if ((psiMethod.hasModifier(JvmModifier.SYNCHRONIZED)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.SYNCHRONIZED))
                             methodObject.setSynchronized(true);
-                        if ((psiMethod.hasModifier(JvmModifier.NATIVE)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.NATIVE))
                             methodObject.setNative(true);
 
                         anonymousClassObject.addMethod(methodObject);

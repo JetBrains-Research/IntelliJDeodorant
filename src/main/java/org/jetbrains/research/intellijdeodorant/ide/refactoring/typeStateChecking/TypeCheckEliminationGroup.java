@@ -6,7 +6,7 @@ import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 import java.util.*;
 
 public class TypeCheckEliminationGroup implements Comparable<TypeCheckEliminationGroup> {
-    private List<TypeCheckElimination> candidates;
+    private final List<TypeCheckElimination> candidates;
     private int groupSizeAtSystemLevel;
     private double averageGroupSizeAtClassLevel;
     private double averageNumberOfStatementsInGroup;
@@ -51,7 +51,7 @@ public class TypeCheckEliminationGroup implements Comparable<TypeCheckEliminatio
     public Set<String> getConstantVariables() {
         TypeCheckElimination elimination = (TypeCheckElimination) candidates.toArray()[0];
         if (elimination.getExistingInheritanceTree() == null && elimination.getInheritanceTreeMatchingWithStaticTypes() == null) {
-            Set<String> constantVariables = new LinkedHashSet<String>();
+            Set<String> constantVariables = new LinkedHashSet<>();
             for (PsiField field : elimination.getStaticFields()) {
                 constantVariables.add(field.getName());
             }

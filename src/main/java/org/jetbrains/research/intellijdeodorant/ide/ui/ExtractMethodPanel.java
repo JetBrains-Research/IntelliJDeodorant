@@ -65,13 +65,13 @@ class ExtractMethodPanel extends JPanel {
     @NotNull
     private final AnalysisScope scope;
     private final ExtractMethodTreeTableModel treeTableModel = new ExtractMethodTreeTableModel();
-    private TreeTable treeTable = new TreeTable(treeTableModel);
+    private final TreeTable treeTable = new TreeTable(treeTableModel);
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
     private final List<ExtractMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
-    private JLabel refreshLabel = new JLabel(
+    private final JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
             SwingConstants.CENTER
     );

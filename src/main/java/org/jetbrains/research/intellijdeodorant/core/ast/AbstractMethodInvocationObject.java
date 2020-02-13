@@ -14,7 +14,7 @@ public abstract class AbstractMethodInvocationObject {
     private final String methodName;
     private final TypeObject returnType;
     private final List<TypeObject> parameterList;
-    private Set<String> thrownExceptions;
+    private final Set<String> thrownExceptions;
     private boolean _static;
     SmartPsiElementPointer<PsiExpression> methodInvocation;
     private volatile int hashCode = 0;

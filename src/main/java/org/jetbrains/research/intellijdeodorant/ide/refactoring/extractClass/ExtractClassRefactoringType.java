@@ -44,7 +44,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
     }
 
     public static class AbstractExtractClassCandidateRefactoring extends AbstractCandidateRefactoring {
-        private PsiClass sourceClass;
+        private final PsiClass sourceClass;
 
         public AbstractExtractClassCandidateRefactoring(ExtractClassCandidateRefactoring candidateRefactoring) {
             super(candidateRefactoring);
@@ -111,7 +111,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
     }
 
     public static class AbstractExtractClassRefactoring extends AbstractRefactoring {
-        private ExtractClassRefactoring refactoring;
+        private final ExtractClassRefactoring refactoring;
 
         public AbstractExtractClassRefactoring(ExtractClassCandidateRefactoring extractClassCandidateRefactoring) {
             this.refactoring = new ExtractClassRefactoring(extractClassCandidateRefactoring.getSourceFile(),

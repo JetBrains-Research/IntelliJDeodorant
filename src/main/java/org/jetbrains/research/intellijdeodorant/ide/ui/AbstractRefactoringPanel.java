@@ -62,22 +62,22 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
     private static final NotificationGroup NOTIFICATION_GROUP =
             new NotificationGroup(IntelliJDeodorantBundle.message("intellijdeodorant"), NotificationDisplayType.STICKY_BALLOON, true);
-    private String detectIndicatorStatusTextKey;
+    private final String detectIndicatorStatusTextKey;
     @NotNull
     protected final AnalysisScope scope;
-    private AbstractTreeTableModel model;
+    private final AbstractTreeTableModel model;
     private final TreeTable treeTable;
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
     private final JButton exportButton = new JButton();
     private JScrollPane scrollPane = new JBScrollPane();
-    private JLabel refreshLabel = new JLabel(
+    private final JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
             SwingConstants.CENTER
     );
-    private RefactoringType refactoringType;
+    private final RefactoringType refactoringType;
     private static Notification errorNotification;
-    private int refactorDepth;
+    private final int refactorDepth;
 
     public AbstractRefactoringPanel(@NotNull AnalysisScope scope,
                                     String detectIndicatorStatusTextKey,
@@ -198,12 +198,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      */
     private void registerPsiModificationListener() {
         MessageBus projectMessageBus = scope.getProject().getMessageBus();
-        projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, new PsiModificationTracker.Listener() {
-            @Override
-            public void modificationCountChanged() {
-                ApplicationManager.getApplication().invokeLater(() -> showRefreshingProposal());
-            }
-        });
+        projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, () -> ApplicationManager.getApplication().invokeLater(this::showRefreshingProposal));
     }
 
     /**

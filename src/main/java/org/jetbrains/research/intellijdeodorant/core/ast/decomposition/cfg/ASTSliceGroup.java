@@ -5,10 +5,9 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
 
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
-    private LinkedHashSet<ASTSlice> candidates;
+    private final LinkedHashSet<ASTSlice> candidates;
     private double averageNumberOfExtractedStatementsInGroup = 0.0;
     private double averageNumberOfDuplicatedStatementsInGroup = 0.0;
     private double averageDuplicationRatioInGroup = 0.0;

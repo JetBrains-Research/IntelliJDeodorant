@@ -4,8 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Graph {
-    protected Set<GraphNode> nodes;
-    protected Set<GraphEdge> edges;
+    protected final Set<GraphNode> nodes;
+    protected final Set<GraphEdge> edges;
 
     Graph() {
         this.nodes = new LinkedHashSet<>();

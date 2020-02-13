@@ -31,13 +31,13 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
     private static final int MAIN_PANEL_VERTICAL_GAP = 5;
 
-    private ExtractClassRefactoring refactoring;
+    private final ExtractClassRefactoring refactoring;
     @Nullable
-    private PsiPackage parentPackage;
-    private List<String> javaLangClassNames;
+    private final PsiPackage parentPackage;
+    private final List<String> javaLangClassNames;
     private JPanel mainPanel;
-    private JTextField extractedClassNameField = new JTextField();
-    private JButton restoreButton = new JButton();
+    private final JTextField extractedClassNameField = new JTextField();
+    private final JButton restoreButton = new JButton();
 
     public GodClassUserInputDialog(ExtractClassRefactoring refactoring) {
         super(refactoring.getSourceFile().getProject(), true);
@@ -111,9 +111,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
         restoreButton.setText(RESTORE_DEFAULT);
 
-        restoreButton.addActionListener(e -> {
-            extractedClassNameField.setText(refactoring.getDefaultExtractedTypeName());
-        });
+        restoreButton.addActionListener(e -> extractedClassNameField.setText(refactoring.getDefaultExtractedTypeName()));
 
         handleInputChanged(extractedClassNameField);
     }
@@ -173,7 +171,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
     protected void doAction() {
         closeOKAction();
         refactoring.setExtractedTypeName(extractedClassNameField.getText());
-        WriteCommandAction.runWriteCommandAction(refactoring.getProject(), () -> refactoring.apply());
+        WriteCommandAction.runWriteCommandAction(refactoring.getProject(), refactoring::apply);
     }
 
     @Override

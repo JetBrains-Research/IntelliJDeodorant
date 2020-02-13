@@ -75,8 +75,8 @@ public class GodClassTreeTableModel extends AbstractTreeTableModel {
     }
 
     private static class ExtractedConceptAndChildren {
-        private ExtractedConcept extractedConcept;
-        private List<AbstractExtractClassCandidateRefactoring> children;
+        private final ExtractedConcept extractedConcept;
+        private final List<AbstractExtractClassCandidateRefactoring> children;
 
         private ExtractedConceptAndChildren(ExtractedConcept extractedConcept) {
             this.extractedConcept = extractedConcept;

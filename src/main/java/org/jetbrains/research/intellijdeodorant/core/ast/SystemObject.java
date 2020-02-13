@@ -241,7 +241,7 @@ public class SystemObject {
                                                     ArrayList<TypeCheckElimination> typeCheckEliminations = inheritanceTreeMap.get(tree.getRootNode().getUserObject());
                                                     typeCheckEliminations.add(elimination);
                                                 } else {
-                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
                                                     typeCheckEliminations.add(elimination);
                                                     inheritanceTreeMap.put((String) tree.getRootNode().getUserObject(), typeCheckEliminations);
                                                 }
@@ -254,7 +254,7 @@ public class SystemObject {
                                                     ArrayList<TypeCheckElimination> typeCheckEliminations = inheritanceTreeMap.get(tree2.getRootNode().getUserObject());
                                                     typeCheckEliminations.add(elimination);
                                                 } else {
-                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
                                                     typeCheckEliminations.add(elimination);
                                                     inheritanceTreeMap.put((String) tree2.getRootNode().getUserObject(), typeCheckEliminations);
                                                 }
@@ -271,7 +271,7 @@ public class SystemObject {
                                 ArrayList<TypeCheckElimination> rank = staticFieldRankMap.get(size);
                                 rank.add(elimination);
                             } else {
-                                ArrayList<TypeCheckElimination> rank = new ArrayList<TypeCheckElimination>();
+                                ArrayList<TypeCheckElimination> rank = new ArrayList<>();
                                 rank.add(elimination);
                                 staticFieldRankMap.put(size, rank);
                             }
@@ -367,7 +367,7 @@ public class SystemObject {
                     }
                 }
             }
-            ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+            ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
             for (TypeCheckElimination elimination : affectedEliminations) {
                 if (!elimination.isTypeCheckMethodStateSetter())
                     typeCheckEliminations.add(elimination);
@@ -502,7 +502,7 @@ public class SystemObject {
         if (tree != null) {
             DefaultMutableTreeNode rootNode = tree.getRootNode();
             DefaultMutableTreeNode leaf = rootNode.getFirstLeaf();
-            List<String> inheritanceHierarchySubclassNames = new ArrayList<String>();
+            List<String> inheritanceHierarchySubclassNames = new ArrayList<>();
             while (leaf != null) {
                 inheritanceHierarchySubclassNames.add((String) leaf.getUserObject());
                 leaf = leaf.getNextLeaf();
@@ -634,7 +634,7 @@ public class SystemObject {
                 ArrayList<TypeCheckElimination> tempTypeCheckEliminations = typeDeclarationMap.get(bindingKey);
                 tempTypeCheckEliminations.add(elimination);
             } else {
-                ArrayList<TypeCheckElimination> tempTypeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                ArrayList<TypeCheckElimination> tempTypeCheckEliminations = new ArrayList<>();
                 tempTypeCheckEliminations.add(elimination);
                 typeDeclarationMap.put(bindingKey, tempTypeCheckEliminations);
             }

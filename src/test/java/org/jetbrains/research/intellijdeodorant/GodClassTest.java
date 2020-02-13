@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-
 /**
  * To add a test with the name `TestName`, directory `TestName` should be created in `src/test/resources/testdata/ide/refactoring/godclass/`
  * and three directories should be put inside: `initial`, `expected` and `actual`

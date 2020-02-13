@@ -9,15 +9,15 @@ import java.util.*;
 
 public class GodClassVisualizationData implements VisualizationData {
     //the MethodObject keys correspond to the methods suggested to be extracted in a new class
-    private Map<MethodObject, Map<MethodInvocationObject, Integer>> internalMethodInvocationMap;
-    private Map<MethodObject, Map<MethodInvocationObject, Integer>> externalMethodInvocationMap;
-    private Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldReadMap;
-    private Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldWriteMap;
-    private Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldReadMap;
-    private Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldWriteMap;
-    private Set<MethodObject> extractedMethods;
-    private Set<FieldObject> extractedFields;
-    private ClassObject sourceClass;
+    private final Map<MethodObject, Map<MethodInvocationObject, Integer>> internalMethodInvocationMap;
+    private final Map<MethodObject, Map<MethodInvocationObject, Integer>> externalMethodInvocationMap;
+    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldReadMap;
+    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldWriteMap;
+    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldReadMap;
+    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldWriteMap;
+    private final Set<MethodObject> extractedMethods;
+    private final Set<FieldObject> extractedFields;
+    private final ClassObject sourceClass;
 
     public GodClassVisualizationData(ClassObject sourceClass, Set<MethodObject> extractedMethods, Set<FieldObject> extractedFields) {
         this.sourceClass = sourceClass;
@@ -69,7 +69,7 @@ public class GodClassVisualizationData implements VisualizationData {
             //replace getter method calls in Source class with field accesses in Extracted class
             Map<MethodInvocationObject, Integer> methodInvocationMap = externalMethodInvocationMap.get(method);
             if (methodInvocationMap != null) {
-                Set<MethodInvocationObject> invocationsToBeRemoved = new LinkedHashSet<MethodInvocationObject>();
+                Set<MethodInvocationObject> invocationsToBeRemoved = new LinkedHashSet<>();
                 for (MethodInvocationObject invocation : methodInvocationMap.keySet()) {
                     int count = methodInvocationMap.get(invocation);
                     MethodObject methodDeclaration = sourceClass.getMethod(invocation);
@@ -201,22 +201,20 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("--FIELD READS FROM EXTRACTED METHODS TO EXTRACTED FIELDS--").append("\n");
-        sb.append(fieldAccessMapToString(getInternalFieldReadMap()));
-        sb.append("--FIELD WRITES FROM EXTRACTED METHODS TO EXTRACTED FIELDS--").append("\n");
-        sb.append(fieldAccessMapToString(getInternalFieldWriteMap()));
-        sb.append("--METHOD CALLS BETWEEN EXTRACTED METHODS--").append("\n");
-        sb.append(methodCallMapToString(getInternalMethodInvocationMap()));
-        sb.append("\n");
-        sb.append("--FIELD READS FROM EXTRACTED METHODS TO SOURCE CLASS FIELDS--").append("\n");
-        sb.append(fieldAccessMapToString(getExternalFieldReadMap()));
-        sb.append("--FIELD WRITES FROM EXTRACTED METHODS TO SOURCE CLASS FIELDS--").append("\n");
-        sb.append(fieldAccessMapToString(getExternalFieldWriteMap()));
-        sb.append("--METHOD CALLS FROM EXTRACTED METHODS TO SOURCE CLASS METHODS--").append("\n");
-        sb.append(methodCallMapToString(getExternalMethodInvocationMap()));
 
-        return sb.toString();
+        return "--FIELD READS FROM EXTRACTED METHODS TO EXTRACTED FIELDS--" + "\n" +
+                fieldAccessMapToString(getInternalFieldReadMap()) +
+                "--FIELD WRITES FROM EXTRACTED METHODS TO EXTRACTED FIELDS--" + "\n" +
+                fieldAccessMapToString(getInternalFieldWriteMap()) +
+                "--METHOD CALLS BETWEEN EXTRACTED METHODS--" + "\n" +
+                methodCallMapToString(getInternalMethodInvocationMap()) +
+                "\n" +
+                "--FIELD READS FROM EXTRACTED METHODS TO SOURCE CLASS FIELDS--" + "\n" +
+                fieldAccessMapToString(getExternalFieldReadMap()) +
+                "--FIELD WRITES FROM EXTRACTED METHODS TO SOURCE CLASS FIELDS--" + "\n" +
+                fieldAccessMapToString(getExternalFieldWriteMap()) +
+                "--METHOD CALLS FROM EXTRACTED METHODS TO SOURCE CLASS METHODS--" + "\n" +
+                methodCallMapToString(getExternalMethodInvocationMap());
     }
 
     private String methodCallMapToString(Map<MethodObject, Map<MethodInvocationObject, Integer>> map) {

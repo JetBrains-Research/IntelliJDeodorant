@@ -64,7 +64,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
             fieldName = "SWITCH_CASE_TEST";
         }
 
-        assertTrue(fieldName + "'s entity set does not contain given method.", entitySet.size() == 2);
+        assertEquals(fieldName + "'s entity set does not contain given method.", 2, entitySet.size());
     }
 
     public void testSimpleTest() {

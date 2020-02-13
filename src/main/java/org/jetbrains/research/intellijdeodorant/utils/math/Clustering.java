@@ -12,12 +12,10 @@ public abstract class Clustering {
     protected double[][] distanceMatrix;
 
     public static Clustering getInstance(int type, double[][] distanceMatrix) {
-        switch (type) {
-            case 0:
-                return new Hierarchical(distanceMatrix);
-            default:
-                return null;
+        if (type == 0) {
+            return new Hierarchical(distanceMatrix);
         }
+        return null;
     }
 
     public abstract HashSet<Cluster> clustering(ArrayList<Entity> entities);

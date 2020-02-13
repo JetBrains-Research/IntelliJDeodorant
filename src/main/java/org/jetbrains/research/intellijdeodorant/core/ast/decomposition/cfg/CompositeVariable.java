@@ -53,7 +53,7 @@ public class CompositeVariable extends AbstractVariable {
     }
 
     public boolean containsPlainVariable(PlainVariable variable) {
-        if (getOrigin().equals(variable.origin))
+        if (getOrigin().equals(variable.getOrigin()))
             return true;
         return rightPart.containsPlainVariable(variable);
     }
@@ -91,7 +91,7 @@ public class CompositeVariable extends AbstractVariable {
         }
         if (o instanceof CompositeVariable) {
             CompositeVariable composite = (CompositeVariable) o;
-            return getOrigin().equals(composite.origin)
+            return getOrigin().equals(composite.getOrigin())
                     && this.rightPart.equals(composite.rightPart);
         }
         return false;

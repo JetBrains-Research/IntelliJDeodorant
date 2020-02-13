@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 public class PDGControlDependence extends PDGDependence {
-    private boolean trueControlDependence;
+    private final boolean trueControlDependence;
     private volatile int hashCode = 0;
 
     PDGControlDependence(PDGNode src, PDGNode dst, boolean trueControlDependence) {

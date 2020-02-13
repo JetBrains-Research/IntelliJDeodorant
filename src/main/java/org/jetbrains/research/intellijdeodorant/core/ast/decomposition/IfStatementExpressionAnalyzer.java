@@ -8,21 +8,21 @@ import java.util.*;
 
 public class IfStatementExpressionAnalyzer {
     //parent nodes are CONDITIONAL_AND (&&), CONDITIONAL_OR (||) infix operators, while leaf nodes are expressions
-    private DefaultMutableTreeNode root;
-    private PsiExpression completeExpression;
+    private final DefaultMutableTreeNode root;
+    private final PsiExpression completeExpression;
     //contains the expressions corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, PsiExpression> typeVariableExpressionMap;
+    private final Map<PsiReferenceExpression, PsiExpression> typeVariableExpressionMap;
     //contains the static fields corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, ArrayList<PsiReferenceExpression>> typeVariableStaticFieldMap;
+    private final Map<PsiReferenceExpression, ArrayList<PsiReferenceExpression>> typeVariableStaticFieldMap;
     //contains the subclass types corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, ArrayList<PsiType>> typeVariableSubclassMap;
+    private final Map<PsiReferenceExpression, ArrayList<PsiType>> typeVariableSubclassMap;
 
     //contains the expressions corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, PsiExpression> typeMethodInvocationExpressionMap;
+    private final Map<PsiMethodCallExpression, PsiExpression> typeMethodInvocationExpressionMap;
     //contains the static fields corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, ArrayList<PsiReferenceExpression>> typeMethodInvocationStaticFieldMap;
+    private final Map<PsiMethodCallExpression, ArrayList<PsiReferenceExpression>> typeMethodInvocationStaticFieldMap;
     //contains the subclass types corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, ArrayList<PsiType>> typeMethodInvocationSubclassMap;
+    private final Map<PsiMethodCallExpression, ArrayList<PsiType>> typeMethodInvocationSubclassMap;
 
     public IfStatementExpressionAnalyzer(PsiExpression completeExpression) {
         this.root = new DefaultMutableTreeNode();
@@ -93,7 +93,7 @@ public class IfStatementExpressionAnalyzer {
     }
 
     public Set<PsiMethodCallExpression> getTargetMethodInvocations() {
-        Set<PsiMethodCallExpression> targetMethodInvocations = new LinkedHashSet<PsiMethodCallExpression>();
+        Set<PsiMethodCallExpression> targetMethodInvocations = new LinkedHashSet<>();
         for (PsiMethodCallExpression targetMethodInvocation : typeMethodInvocationExpressionMap.keySet()) {
             if (typeMethodInvocationStaticFieldMap.containsKey(targetMethodInvocation) ||
                     typeMethodInvocationSubclassMap.containsKey(targetMethodInvocation))
@@ -213,11 +213,10 @@ public class IfStatementExpressionAnalyzer {
                     } else {
                         newRoot = sibling;
                     }
-                    break;
                 } else {
                     newRoot = null;
-                    break;
                 }
+                break;
             }
             leaf = leaf.getNextLeaf();
         }

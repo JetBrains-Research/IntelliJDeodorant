@@ -11,7 +11,7 @@ public class FieldInstructionObject {
     private final TypeObject type;
     private final String name;
     private boolean _static;
-    private SmartPsiElementPointer<PsiElement> element;
+    private final SmartPsiElementPointer<PsiElement> element;
     private volatile int hashCode = 0;
 
     public FieldInstructionObject(String ownerClass, TypeObject type, String name, PsiField element) {

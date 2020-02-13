@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TypeCheckCodeFragmentAnalyzer;
@@ -34,9 +33,9 @@ public class ClassObject extends ClassDeclarationObject {
         this.constructorList = new ArrayList<>();
         this.interfaceList = new ArrayList<>();
         this.enumConstantDeclarationList = new ArrayList<>();
-        this._abstract = psiClass.hasModifier(JvmModifier.ABSTRACT);
+        this._abstract = psiClass.hasModifierProperty(PsiModifier.ABSTRACT);
         this._interface = psiClass.isInterface();
-        this._static = psiClass.hasModifier(JvmModifier.STATIC);
+        this._static = psiClass.hasModifierProperty(PsiModifier.STATIC);
         this._enum = psiClass.isEnum();
         this.access = Access.NONE;
         this.typeDeclaration = toPointer(psiClass);

@@ -211,12 +211,12 @@ public class DoubleArray {
      *
      * @param i Value to be searched for.
      * @param I array to be searched
-     * @return true if found. fales if not.
+     * @return true if found, false if not.
      */
     private static boolean into(int i, int[] I) {
         boolean in = false;
-        for (int j = 0; j < I.length; j++) {
-            in = in || (i == I[j]);
+        for (int value : I) {
+            in = in || (i == value);
         }
         return in;
     }
