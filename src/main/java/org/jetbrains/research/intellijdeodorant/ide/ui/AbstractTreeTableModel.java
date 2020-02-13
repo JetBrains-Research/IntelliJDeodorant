@@ -11,16 +11,15 @@ import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
 public abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
-    private int numberOfColumns;
     private String[] columnNames;
     protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
     private RefactoringType refactoringType;
 
-    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
+    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups,
+                                  String[] columnNames, RefactoringType refactoringType) {
         super(new DefaultMutableTreeNode("root"));
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         this.columnNames = columnNames;
-        this.numberOfColumns = columnNames.length;
         this.refactoringType = refactoringType;
     }
 
@@ -34,7 +33,7 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public int getColumnCount() {
-        return numberOfColumns;
+        return columnNames.length;
     }
 
     @Override

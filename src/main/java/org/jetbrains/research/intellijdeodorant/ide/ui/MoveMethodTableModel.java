@@ -86,13 +86,6 @@ class MoveMethodTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    List<MoveMethodRefactoring> pullSelectable() {
-        return virtualRows.stream()
-                .filter(i -> isActive[i])
-                .map(refactorings::get)
-                .collect(Collectors.toList());
-    }
-
     List<MoveMethodRefactoring> pullSelected() {
         return virtualRows.stream()
                 .filter(i -> isSelected[i] && isActive[i])

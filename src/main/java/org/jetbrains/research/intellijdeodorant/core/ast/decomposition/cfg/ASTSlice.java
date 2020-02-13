@@ -266,8 +266,7 @@ public class ASTSlice {
 
     public String toString() {
         return getSourceTypeDeclaration().getQualifiedName() + "::" +
-                getSourceMethodDeclaration().getName() + "." +
-                getLocalVariableCriterion().getName();
+                getSourceMethodDeclaration().getName();
     }
 
     public int getNumberOfSliceStatements() {

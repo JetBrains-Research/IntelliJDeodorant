@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
-    private Set<ASTSlice> candidates;
+    private LinkedHashSet<ASTSlice> candidates;
     private double averageNumberOfExtractedStatementsInGroup = 0.0;
     private double averageNumberOfDuplicatedStatementsInGroup = 0.0;
     private double averageDuplicationRatioInGroup = 0.0;
@@ -19,7 +19,7 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
     }
 
     public void addCandidate(ASTSlice slice) {
-        Set<ASTSlice> slicesToBeRemoved = new LinkedHashSet<>();
+        LinkedHashSet<ASTSlice> slicesToBeRemoved = new LinkedHashSet<>();
         for (ASTSlice previousSlice : candidates) {
             if (previousSlice.getNumberOfSliceStatements() == slice.getNumberOfSliceStatements()
                     && previousSlice.getNumberOfDuplicatedStatements() == slice.getNumberOfDuplicatedStatements()) {
@@ -30,7 +30,7 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
         this.candidates.add(slice);
     }
 
-    public Set<ASTSlice> getCandidates() {
+    public LinkedHashSet<ASTSlice> getCandidates() {
         return candidates;
     }
 
@@ -108,5 +108,11 @@ public class ASTSliceGroup implements Comparable<ASTSliceGroup> {
                 other.getSourceMethodDeclaration().getName() + nameSeparator +
                 other.getLocalVariableCriterion().getName();
         return group1.compareTo(group2);
+    }
+
+    @Override
+    public String toString() {
+        PsiMethod psiMethod = candidates.iterator().next().getSourceMethodDeclaration();
+        return psiMethod.getContainingClass() == null ? "" : psiMethod.getContainingClass().getQualifiedName() + "::" + psiMethod.getName();
     }
 }

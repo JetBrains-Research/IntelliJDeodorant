@@ -33,6 +33,7 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
+import com.intellij.ui.treeStructure.treetable.TreeTableTree;
 import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -310,12 +311,19 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * Highlights refactoring-specific code fragment.
      */
     private void highlightCode() {
-        TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
+        TreeTableTree treeTableTree = treeTable.getTree();
+        TreePath selectedPath = treeTableTree.getSelectionModel().getSelectionPath();
         if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
             Object o = selectedPath.getLastPathComponent();
             if (refactoringType.instanceOfCandidateRefactoring(o)) {
                 AbstractCandidateRefactoring refactoring = (AbstractCandidateRefactoring) o;
                 refactoring.highlightCode();
+            } else {
+                if (treeTableTree.isExpanded(selectedPath)) {
+                    treeTableTree.collapsePath(selectedPath);
+                } else {
+                    treeTableTree.expandPath(selectedPath);
+                }
             }
         }
     }

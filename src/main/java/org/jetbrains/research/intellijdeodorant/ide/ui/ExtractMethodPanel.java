@@ -24,7 +24,8 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.treeStructure.Tree;
+import com.intellij.ui.treeStructure.treetable.TreeTable;
+import com.intellij.ui.treeStructure.treetable.TreeTableTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -40,13 +41,14 @@ import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.EnterKeyListene
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 
 import javax.swing.*;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
+import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.runAfterCompilationCheck;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isChild;
 
 /**
@@ -62,7 +64,8 @@ class ExtractMethodPanel extends JPanel {
 
     @NotNull
     private final AnalysisScope scope;
-    private final JTree jTree = new Tree();
+    private final ExtractMethodTreeTableModel treeTableModel = new ExtractMethodTreeTableModel();
+    private TreeTable treeTable = new TreeTable(treeTableModel);
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
     private final List<ExtractMethodRefactoring> refactorings = new ArrayList<>();
@@ -90,14 +93,15 @@ class ExtractMethodPanel extends JPanel {
      * @return result panel.
      */
     private JScrollPane createTablePanel() {
-        jTree.setCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
-        jTree.addMouseListener((DoubleClickListener) this::openMethodDefinition);
-        jTree.addKeyListener((EnterKeyListener) this::openMethodDefinition);
-        jTree.addTreeSelectionListener((ElementSelectionListener) this::enableRefactorButtonIfAnySelected);
-        jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        treeTable.setRootVisible(false);
+        treeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        treeTable.addMouseListener((DoubleClickListener) this::openMethodDefinition);
+        treeTable.addKeyListener((EnterKeyListener) this::openMethodDefinition);
+        treeTable.getTree().addTreeSelectionListener((ElementSelectionListener) this::enableRefactorButtonIfAnySelected);
         refreshLabel.setForeground(JBColor.GRAY);
-        scrollPane = ScrollPaneFactory.createScrollPane(jTree);
+        scrollPane = ScrollPaneFactory.createScrollPane(treeTable);
         scrollPane.setViewportView(refreshLabel);
+        scrollPane.setVisible(true);
         return scrollPane;
     }
 
@@ -146,10 +150,12 @@ class ExtractMethodPanel extends JPanel {
      * Preforms selected refactoring.
      */
     private void refactorSelected() {
-        Object[] selectedPath = jTree.getAnchorSelectionPath().getPath();
-        if (selectedPath.length == 3) {
-            ASTSlice computationSlice = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
-            TransactionGuard.getInstance().submitTransactionAndWait((doExtract(computationSlice)));
+        TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
+        if (selectedPath != null) {
+            Object o = selectedPath.getLastPathComponent();
+            if (o instanceof ASTSlice) {
+                TransactionGuard.getInstance().submitTransactionAndWait(doExtract((ASTSlice) o));
+            }
         }
         exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
     }
@@ -166,8 +172,9 @@ class ExtractMethodPanel extends JPanel {
      */
     private void enableRefactorButtonIfAnySelected() {
         boolean isAnySuggestionSelected = false;
-        if (jTree.getSelectionPath() != null && jTree.getSelectionPath().getPath().length == 3) {
-            Object o = jTree.getSelectionPath().getPath()[2];
+        TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
+        if (selectedPath != null) {
+            Object o = selectedPath.getLastPathComponent();
             if (o instanceof ASTSlice) {
                 isAnySuggestionSelected = true;
             }
@@ -185,6 +192,7 @@ class ExtractMethodPanel extends JPanel {
         }
         refactorings.clear();
         doRefactorButton.setEnabled(false);
+        exportButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -205,27 +213,41 @@ class ExtractMethodPanel extends JPanel {
                             .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
-                    exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
-                    ExtractMethodTableModel model = new ExtractMethodTableModel(new ArrayList<>(candidates));
-                    jTree.setModel(model);
-                    scrollPane.setViewportView(jTree);
-                    scrollPane.setVisible(true);
+                    treeTableModel.setCandidateRefactoringGroups(new ArrayList<>(candidates));
+                    ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
             }
         };
+        runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
+    }
 
-        AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
+    /**
+     * Shows treeTable with available refactorings.
+     */
+    private void showRefactoringsTable() {
+        treeTableModel.reload();
+        treeTable.setRootVisible(false);
+        scrollPane.setViewportView(treeTable);
+        scrollPane.setVisible(true);
+        exportButton.setEnabled(!treeTableModel.getCandidateRefactoringGroups().isEmpty());
     }
 
     /**
      * Opens the definition of appropriate method for the selected suggestion by double-clicking or Enter key pressing.
      */
     private void openMethodDefinition() {
-        if (jTree.getAnchorSelectionPath().getPath().length == 3) {
-            Object o = jTree.getAnchorSelectionPath().getPath()[2];
+        TreeTableTree treeTableTree = treeTable.getTree();
+        TreePath selectedPath = treeTableTree.getSelectionModel().getSelectionPath();
+        if (selectedPath != null) {
+            Object o = selectedPath.getLastPathComponent();
             if (o instanceof ASTSlice) {
-                ASTSlice selectedRow = (ASTSlice) jTree.getAnchorSelectionPath().getPath()[2];
-                openDefinition(selectedRow.getSourceMethodDeclaration(), scope, selectedRow);
+                openDefinition(((ASTSlice) o).getSourceMethodDeclaration(), scope, (ASTSlice) o);
+            } else if (o instanceof ASTSliceGroup) {
+                if (treeTableTree.isExpanded(selectedPath)) {
+                    treeTableTree.collapsePath(selectedPath);
+                } else {
+                    treeTableTree.expandPath(selectedPath);
+                }
             }
         }
     }
@@ -263,7 +285,7 @@ class ExtractMethodPanel extends JPanel {
             processor.testTargetClass(slice.getSourceTypeDeclaration());
 
             try {
-                processor.setShowErrorDialogs(false);
+                processor.setShowErrorDialogs(true);
                 processor.prepare();
             } catch (PrepareFailedException e) {
                 e.printStackTrace();
@@ -298,7 +320,6 @@ class ExtractMethodPanel extends JPanel {
                         Editor editor = FileEditorManager.getInstance(sourceMethod.getProject()).getSelectedTextEditor();
                         if (editor != null) {
                             TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
-                            ;
                             editor.getMarkupModel().removeAllHighlighters();
                             statements.forEach(statement ->
                                     editor.getMarkupModel().addRangeHighlighter(statement.getElement().getTextRange().getStartOffset(),
