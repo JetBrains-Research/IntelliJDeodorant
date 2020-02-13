@@ -1,7 +1,7 @@
 <idea-plugin>
     <name>IntelliJDeodorant</name>
     <version>1.0</version>
-    <vendor email="zarina.kurbatova@gmail.com">Zarina Kurbatova</vendor>
+    <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
     <description><![CDATA[An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
         <p>Currently, the plugin supports following code smells:
