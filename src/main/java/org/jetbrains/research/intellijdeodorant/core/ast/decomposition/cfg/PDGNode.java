@@ -276,25 +276,29 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
-            PsiVariable vDStatement = (PsiVariable) ((PsiDeclarationStatement) statement).getDeclaredElements()[0];
-            if (!isPrimitive(vDStatement.getType())) {
-                PsiExpression initializer = vDStatement.getInitializer();
-                PsiElement initializerSimpleName = null;
-                if (initializer != null) {
-                    if (initializer instanceof PsiReferenceExpression) {
-                        initializerSimpleName = ((PsiReferenceExpression) initializer).resolve();
-                    }
-                    if (initializerSimpleName != null) {
-                        PsiVariable initializerVariableDeclaration = null;
-                        for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                            PsiVariable declaration = declarationObject.getVariableDeclaration();
-                            if (declaration.equals((initializerSimpleName))) {
-                                initializerVariableDeclaration = declaration;
-                                break;
-                            }
+            PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) statement;
+            PsiElement declaredElement = declarationStatement.getDeclaredElements()[0];
+            if (declaredElement instanceof PsiVariable) {
+                PsiVariable declaredVariable = (PsiVariable) declaredElement;
+                if (!isPrimitive(declaredVariable.getType())) {
+                    PsiExpression initializer = declaredVariable.getInitializer();
+                    PsiElement initializerSimpleName = null;
+                    if (initializer != null) {
+                        if (initializer instanceof PsiReferenceExpression) {
+                            initializerSimpleName = ((PsiReferenceExpression) initializer).resolve();
                         }
-                        if (initializerVariableDeclaration != null) {
-                            reachingAliasSet.insertAlias(vDStatement, initializerVariableDeclaration);
+                        if (initializerSimpleName != null) {
+                            PsiVariable initializerVariableDeclaration = null;
+                            for (VariableDeclarationObject declarationObject : variableDeclarations) {
+                                PsiVariable declaration = declarationObject.getVariableDeclaration();
+                                if (declaration.equals((initializerSimpleName))) {
+                                    initializerVariableDeclaration = declaration;
+                                    break;
+                                }
+                            }
+                            if (initializerVariableDeclaration != null) {
+                                reachingAliasSet.insertAlias(declaredVariable, initializerVariableDeclaration);
+                            }
                         }
                     }
                 }
