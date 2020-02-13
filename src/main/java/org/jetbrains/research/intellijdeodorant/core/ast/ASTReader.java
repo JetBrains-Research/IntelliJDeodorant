@@ -3,6 +3,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.*;
 
+import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -75,7 +76,7 @@ public class ASTReader {
     }
 
     private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        List<CommentObject> fieldDeclarationComments = new ArrayList<>();
+        SmartList<CommentObject> fieldDeclarationComments = new SmartList<>();
         int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
         int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
         for (CommentObject comment : classObject.commentList) {

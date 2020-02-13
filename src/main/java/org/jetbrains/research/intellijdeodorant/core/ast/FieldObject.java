@@ -3,8 +3,8 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.SmartPsiElementPointer;
+import com.intellij.util.SmartList;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
@@ -15,7 +15,7 @@ public class FieldObject extends VariableDeclarationObject {
 
     private final String name;
     private final TypeObject type;
-    private final List<CommentObject> commentList;
+    private final SmartList<CommentObject> commentList;
     private boolean _static;
     private Access access;
     private String className;
@@ -27,7 +27,7 @@ public class FieldObject extends VariableDeclarationObject {
         this.name = fieldName;
         this._static = false;
         this.access = Access.NONE;
-        this.commentList = new ArrayList<>();
+        this.commentList = new SmartList<>();
         this.psiField = toPointer(field);
     }
 

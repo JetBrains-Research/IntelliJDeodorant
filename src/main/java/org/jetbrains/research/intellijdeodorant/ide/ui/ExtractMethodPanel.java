@@ -26,6 +26,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableTree;
+import com.intellij.util.SmartList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -262,7 +263,7 @@ class ExtractMethodPanel extends JPanel {
         return () -> {
             Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
             Set<PDGNode> nodes = slice.getSliceNodes();
-            ArrayList<PsiStatement> statementsToExtract = new ArrayList<>();
+            SmartList<PsiStatement> statementsToExtract = new SmartList<>();
 
             for (PDGNode pdgNode : nodes) {
                 boolean isNotChild = true;

@@ -32,7 +32,10 @@ public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
 
     @Nullable
     private final PsiPackage parentPackage;
-    private final List<String> javaLangClassNames;
+    private final List<String> javaLangClassNames = new ArrayList<>(Arrays.asList(
+            "Boolean", "Byte", "Character", "Class", "Double", "Enum", "Error", "Exception",
+            "Float", "Integer", "Long", "Math", "Number", "Object", "Package", "Process",
+            "Runtime", "Short", "String", "StringBuffer", "StringBuilder", "System", "Thread", "Void"));
     private final Runnable applyRefactoringCallback;
     private JPanel mainPanel;
     private final JButton restoreButton = new JButton();
@@ -42,32 +45,6 @@ public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
         super(refactoring.getProject(), true);
 
         this.refactoring = refactoring;
-        this.javaLangClassNames = new ArrayList<>();
-        this.javaLangClassNames.add("Boolean");
-        this.javaLangClassNames.add("Byte");
-        this.javaLangClassNames.add("Character");
-        this.javaLangClassNames.add("Class");
-        this.javaLangClassNames.add("Double");
-        this.javaLangClassNames.add("Enum");
-        this.javaLangClassNames.add("Error");
-        this.javaLangClassNames.add("Exception");
-        this.javaLangClassNames.add("Float");
-        this.javaLangClassNames.add("Integer");
-        this.javaLangClassNames.add("Long");
-        this.javaLangClassNames.add("Math");
-        this.javaLangClassNames.add("Number");
-        this.javaLangClassNames.add("Object");
-        this.javaLangClassNames.add("Package");
-        this.javaLangClassNames.add("Process");
-        this.javaLangClassNames.add("Runtime");
-        this.javaLangClassNames.add("Short");
-        this.javaLangClassNames.add("String");
-        this.javaLangClassNames.add("StringBuffer");
-        this.javaLangClassNames.add("StringBuilder");
-        this.javaLangClassNames.add("System");
-        this.javaLangClassNames.add("Thread");
-        this.javaLangClassNames.add("Void");
-
         String packageName = PsiUtil.getPackageName(refactoring.getSourceTypeDeclaration());
         parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
         this.applyRefactoringCallback = applyRefactoringCallback;

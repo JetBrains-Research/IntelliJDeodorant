@@ -5,6 +5,7 @@ import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
@@ -78,7 +79,7 @@ public class DistanceMatrix {
     }
 
     private List<MoveMethodCandidateRefactoring> identifyConceptualBindings(MyMethod method, Set<String> targetClasses) {
-        List<MoveMethodCandidateRefactoring> candidateRefactoringList = new ArrayList<>();
+        SmartList<MoveMethodCandidateRefactoring> candidateRefactoringList = new SmartList<>();
         MethodObject methodObject = method.getMethodObject();
         String sourceClass = method.getClassOrigin();
         for (String targetClass : targetClasses) {
