@@ -112,7 +112,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                     PsiMethodCallExpression switchStatementExpressionMethodInvocation = (PsiMethodCallExpression) switchStatementExpressionName;
                     PsiExpression invoker = switchStatementExpressionMethodInvocation.getMethodExpression().getQualifierExpression();
                     PsiMethod switchStatementExpressionMethodBinding = (PsiMethod) switchStatementExpressionMethodInvocation.getMethodExpression().resolve();
-                    if (!switchStatementExpressionMethodBinding.getContainingClass().equals(getTypeDeclaration()) && //TODO probably causes NPE
+                    PsiClass psiClass = switchStatementExpressionMethodBinding == null ? null : switchStatementExpressionMethodBinding.getContainingClass();
+                    if (psiClass != null && !psiClass.equals(getTypeDeclaration()) &&
                             invoker != null && !(invoker instanceof PsiThisExpression)) {
                         typeCheckElimination.setTypeMethodInvocation(switchStatementExpressionMethodInvocation);
                     }
@@ -379,7 +380,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                 for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
                     IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
                     for (PsiMethodCallExpression analyzerTypeMethodInvocation : analyzer.getTargetMethodInvocations()) {
-                        if (analyzerTypeMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+                        PsiMethod resolvedMethod = analyzerTypeMethodInvocation.resolveMethod();
+                        if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                             if (typeMethodInvocationCounterMap.get(typeMethodInvocation) == typeCheckExpressions.size()) {
                                 typeCheckElimination.addRemainingIfStatementExpression(analyzer.getCompleteExpression(),
                                         analyzer.getRemainingExpression(analyzer.getTypeMethodInvocationExpression(analyzerTypeMethodInvocation)));
@@ -400,8 +402,9 @@ public class TypeCheckCodeFragmentAnalyzer {
                 }
                 PsiExpression invoker = typeMethodInvocation.getMethodExpression().getQualifierExpression();
                 PsiMethod typeMethodInvocationBinding = typeMethodInvocation.resolveMethod();
-                if (!getTypeDeclaration().equals(typeMethodInvocationBinding.getContainingClass()) &&
-                        invoker != null && !(invoker instanceof PsiThisExpression)) {
+                if (typeMethodInvocationBinding != null && invoker != null
+                        && !getTypeDeclaration().equals(typeMethodInvocationBinding.getContainingClass())
+                        && !(invoker instanceof PsiThisExpression)) {
                     typeCheckElimination.setTypeMethodInvocation(typeMethodInvocation);
                 }
             }
@@ -455,21 +458,23 @@ public class TypeCheckCodeFragmentAnalyzer {
                 for (PsiExpression expression : methodInvocations) {
                     if (expression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                        PsiMethod methodBinding = methodInvocation.resolveMethod();
+                        PsiMethod resolvedMethod = methodInvocation.resolveMethod();
+                        if (resolvedMethod == null) continue;
                         PsiExpression invoker = methodInvocation.getMethodExpression().getQualifierExpression();
-                        if (methodBinding != null && getTypeDeclaration().equals(methodBinding.getContainingClass())) {
+                        if (getTypeDeclaration().equals(resolvedMethod.getContainingClass())) {
                             for (PsiMethod method : methods) {
-                                if (method.equals(methodBinding)) {
+                                if (method.equals(resolvedMethod)) {
                                     typeCheckElimination.addAccessedMethod(method);
                                 }
                             }
                         } else if (invoker == null || invoker instanceof PsiThisExpression) {
+                            PsiClass psiClass = resolvedMethod.getContainingClass();
                             PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
-                            while (superclassTypeBinding != null && !superclassTypeBinding.equals(methodBinding.getContainingClass())) {
+                            while (superclassTypeBinding != null && !superclassTypeBinding.equals(psiClass)) {
                                 superclassTypeBinding = superclassTypeBinding.getSuperClass();
                             }
-                            if (methodBinding.getContainingClass().equals(superclassTypeBinding))
-                                typeCheckElimination.addSuperAccessedMethod(methodBinding);
+                            if (psiClass != null && psiClass.equals(superclassTypeBinding))
+                                typeCheckElimination.addSuperAccessedMethod(resolvedMethod);
                         }
                     }
                 }
@@ -675,21 +680,22 @@ public class TypeCheckCodeFragmentAnalyzer {
                     for (PsiExpression expression : methodInvocations) {
                         if (expression instanceof PsiMethodCallExpression) {
                             PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                            PsiMethod methodBinding = methodInvocation.resolveMethod();
+                            PsiMethod resolvedMethod = methodInvocation.resolveMethod();
                             PsiExpression invoker = methodInvocation.getMethodExpression().getQualifierExpression();
-                            if (methodBinding != null && getTypeDeclaration().equals(methodBinding.getContainingClass())) {
+                            if (resolvedMethod == null) continue;
+                            if (getTypeDeclaration().equals(resolvedMethod.getContainingClass())) {
                                 for (PsiMethod method : methods) {
-                                    if (method.equals(methodBinding)) {
+                                    if (method.equals(resolvedMethod)) {
                                         typeCheckElimination.addAccessedMethod(method);
                                     }
                                 }
                             } else if (invoker == null || (invoker instanceof PsiThisExpression)) {
                                 PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
-                                while (superclassTypeBinding != null && !superclassTypeBinding.equals(methodBinding.getContainingClass())) {
+                                while (superclassTypeBinding != null && !superclassTypeBinding.equals(resolvedMethod.getContainingClass())) {
                                     superclassTypeBinding = superclassTypeBinding.getContainingClass();
                                 }
-                                if (methodBinding.getContainingClass().equals(superclassTypeBinding))
-                                    typeCheckElimination.addSuperAccessedMethod(methodBinding);
+                                if (resolvedMethod.getContainingClass().equals(superclassTypeBinding))
+                                    typeCheckElimination.addSuperAccessedMethod(resolvedMethod);
                             }
                         }
                     }
@@ -939,7 +945,8 @@ public class TypeCheckCodeFragmentAnalyzer {
         for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
             IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
             for (PsiMethodCallExpression analyzerTypeMethodInvocation : analyzer.getTargetMethodInvocations()) {
-                if (analyzerTypeMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+                PsiMethod resolvedMethod = analyzerTypeMethodInvocation.resolveMethod();
+                if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                     List<PsiReferenceExpression> staticFields = analyzer.getTypeMethodInvocationStaticField(analyzerTypeMethodInvocation);
                     if (staticFields != null && staticFields.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
@@ -969,7 +976,8 @@ public class TypeCheckCodeFragmentAnalyzer {
 
     private PsiMethodCallExpression containsTypeMethodInvocationKey(PsiMethodCallExpression methodInvocation) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationCounterMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(methodInvocation.resolveMethod()))
+            PsiMethod resolvedMethod = keyMethodInvocation.resolveMethod();
+            if (resolvedMethod != null && resolvedMethod.equals(methodInvocation.resolveMethod()))
                 return keyMethodInvocation;
         }
         return null;
