@@ -167,7 +167,7 @@ public class StatementExtractor {
                 statementList.add(returnStatement);
         } else if (statement instanceof PsiSynchronizedStatement) {
             PsiSynchronizedStatement synchronizedStatement = (PsiSynchronizedStatement) statement;
-            statementList.addAll(getStatements(synchronizedStatement));
+            statementList.addAll(getStatements(synchronizedStatement.getBody()));
         } else if (statement instanceof PsiThrowStatement) {
             PsiThrowStatement throwStatement = (PsiThrowStatement) statement;
         } else if (statement instanceof PsiTryStatement) {
