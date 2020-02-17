@@ -28,6 +28,7 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -219,7 +220,7 @@ class MoveMethodPanel extends JPanel {
         AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, project, projectInfo);
     }
 
-    private void onDoubleClick() {
+    private void onDoubleClick(InputEvent e) {
         final int selectedRow = table.getSelectedRow() == -1 ? -1 : table.convertRowIndexToModel(table.getSelectedRow());
         final int selectedColumn = table.getSelectedColumn();
         if (selectedRow == -1 || selectedColumn == -1 || selectedColumn == SELECTION_COLUMN_INDEX) {

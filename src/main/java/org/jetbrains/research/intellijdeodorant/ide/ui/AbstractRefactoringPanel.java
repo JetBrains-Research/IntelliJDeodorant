@@ -51,6 +51,9 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -305,21 +308,32 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     /**
      * Highlights refactoring-specific code fragment.
      */
-    private void highlightCode() {
+    private void highlightCode(InputEvent e) {
         TreeTableTree treeTableTree = treeTable.getTree();
         TreePath selectedPath = treeTableTree.getSelectionModel().getSelectionPath();
-        if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
+        if (selectedPath != null) {
             Object o = selectedPath.getLastPathComponent();
             if (refactoringType.instanceOfCandidateRefactoring(o)) {
                 AbstractCandidateRefactoring refactoring = (AbstractCandidateRefactoring) o;
                 refactoring.highlightCode();
             } else {
-                if (treeTableTree.isExpanded(selectedPath)) {
-                    treeTableTree.collapsePath(selectedPath);
-                } else {
-                    treeTableTree.expandPath(selectedPath);
-                }
+                expandOrCollapsePath(e, treeTableTree, selectedPath);
             }
+        }
+    }
+
+    /**
+     * Collapse if the selected path is extended, otherwise expand.
+     */
+    public static void expandOrCollapsePath(InputEvent e, TreeTableTree treeTableTree, TreePath selectedPath) {
+        if (e instanceof KeyEvent) {
+            if (treeTableTree.isExpanded(selectedPath)) {
+                treeTableTree.collapsePath(selectedPath);
+            } else {
+                treeTableTree.expandPath(selectedPath);
+            }
+        } else if (e instanceof MouseEvent) {
+            treeTableTree.expandPath(selectedPath);
         }
     }
 

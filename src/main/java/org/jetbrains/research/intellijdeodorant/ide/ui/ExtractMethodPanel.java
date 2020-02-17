@@ -44,11 +44,13 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
+import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.expandOrCollapsePath;
 import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.runAfterCompilationCheck;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isChild;
 
@@ -236,7 +238,7 @@ class ExtractMethodPanel extends JPanel {
     /**
      * Opens the definition of appropriate method for the selected suggestion by double-clicking or Enter key pressing.
      */
-    private void openMethodDefinition() {
+    private void openMethodDefinition(InputEvent e) {
         TreeTableTree treeTableTree = treeTable.getTree();
         TreePath selectedPath = treeTableTree.getSelectionModel().getSelectionPath();
         if (selectedPath != null) {
@@ -244,11 +246,7 @@ class ExtractMethodPanel extends JPanel {
             if (o instanceof ASTSlice) {
                 openDefinition(((ASTSlice) o).getSourceMethodDeclaration(), scope, (ASTSlice) o);
             } else if (o instanceof ASTSliceGroup) {
-                if (treeTableTree.isExpanded(selectedPath)) {
-                    treeTableTree.collapsePath(selectedPath);
-                } else {
-                    treeTableTree.expandPath(selectedPath);
-                }
+                expandOrCollapsePath(e, treeTableTree, selectedPath);
             }
         }
     }
