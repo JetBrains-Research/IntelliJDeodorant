@@ -287,13 +287,13 @@ class ExtractMethodPanel extends JPanel {
 
             try {
                 processor.setShowErrorDialogs(true);
-                processor.prepare();
+                if (processor.prepare()) {
+                    ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
+                            slice.getSourceMethodDeclaration().getContainingFile(), true);
+                }
             } catch (PrepareFailedException e) {
                 e.printStackTrace();
             }
-
-            ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
-                    slice.getSourceMethodDeclaration().getContainingFile(), true);
         };
     }
 
