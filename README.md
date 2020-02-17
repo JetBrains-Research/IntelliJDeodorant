@@ -19,7 +19,7 @@ The original tool supports five code smells, namely **Feature Envy**, **Type/Sta
 - [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
 
 ## Installation
-Supported IntelliJ IDEA version: 2019.3
+Supported IntelliJ IDEA version: 2019.3.3
 
 1. Clone this repository
 2. Build IntelliJDeodorant.jar using ```./gradlew jar``` 
@@ -29,4 +29,4 @@ Supported IntelliJ IDEA version: 2019.3
 
 ## Usage
 
-The ```JDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of the panel contains a ```Refresh``` button allows detecting corresponding code smell in the whole project and table with results. To apply any refactoring, you must check the corresponding checkbox in the leftmost column of the table and click the ```Refactor``` button.
+The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of the panel contains a ```Refresh``` button allows detecting corresponding code smell in the whole project and table with results. To apply any refactoring, you must select suggestion in the table and click the ```Refactor``` button.
