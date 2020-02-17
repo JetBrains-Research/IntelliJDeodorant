@@ -82,7 +82,7 @@ public class MoveMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns class in which method is placed in this refactoring
+     * Returns class in which method is placed in this refactoring.
      */
     public @NotNull
     Optional<PsiClass> getOptionalTargetClass() {
@@ -90,7 +90,7 @@ public class MoveMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns class in which method is placed in this refactoring
+     * Returns class in which method is placed in this refactoring.
      */
     public @NotNull
     PsiClass getTargetClass() {
@@ -122,8 +122,8 @@ public class MoveMethodRefactoring implements Refactoring {
 
     @Override
     public int hashCode() {
-        int result = method.getElement().hashCode();
-        result = 31 * result + targetClass.getElement().hashCode();
+        int result = Objects.hashCode(method.getElement());
+        result = 31 * result + Objects.hashCode(targetClass.getElement());
         return result;
     }
 
