@@ -34,7 +34,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSl
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PDGNode;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
-import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodCandidateGroup;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.MyExtractMethodProcessor;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.ElementSelectionListener;
@@ -47,8 +47,8 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
 import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.expandOrCollapsePath;
 import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.runAfterCompilationCheck;
@@ -71,7 +71,6 @@ class ExtractMethodPanel extends JPanel {
     private final TreeTable treeTable = new TreeTable(treeTableModel);
     private final JButton doRefactorButton = new JButton();
     private final JButton refreshButton = new JButton();
-    private final List<ExtractMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
     private final JLabel refreshLabel = new JLabel(
@@ -141,12 +140,12 @@ class ExtractMethodPanel extends JPanel {
      *
      * @return list of available refactorings suggestions.
      */
-    private List<ExtractMethodRefactoring> getAvailableRefactoringSuggestions() {
-        return refactorings.stream()
-                .filter(extractMethodRefactoring -> extractMethodRefactoring.getCandidates()
+    private List<ExtractMethodCandidateGroup> getAvailableRefactoringSuggestions() {
+        return treeTableModel.getCandidateRefactoringGroups().stream()
+                .filter(extractMethodCandidateGroup -> extractMethodCandidateGroup.getCandidates()
                         .stream()
                         .allMatch(ASTSlice::areSliceStatementsValid))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -160,14 +159,6 @@ class ExtractMethodPanel extends JPanel {
                 TransactionGuard.getInstance().submitTransactionAndWait(doExtract((ASTSlice) o));
             }
         }
-        exportButton.setEnabled(isAnyRefactoringSuggestionAvailable());
-    }
-
-    private boolean isAnyRefactoringSuggestionAvailable() {
-        return refactorings.stream()
-                .anyMatch(extractMethodRefactoring -> extractMethodRefactoring.getCandidates()
-                        .stream()
-                        .anyMatch(ASTSlice::areSliceStatementsValid));
     }
 
     /**
@@ -193,7 +184,6 @@ class ExtractMethodPanel extends JPanel {
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
         }
-        refactorings.clear();
         doRefactorButton.setEnabled(false);
         exportButton.setEnabled(false);
         scrollPane.setVisible(false);
@@ -212,11 +202,15 @@ class ExtractMethodPanel extends JPanel {
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
                     Set<ASTSliceGroup> candidates = getExtractMethodRefactoringOpportunities(projectInfo, indicator);
-                    final List<ExtractMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
-                            .map(ExtractMethodRefactoring::new).collect(Collectors.toList());
-                    refactorings.clear();
-                    refactorings.addAll(new ArrayList<>(references));
-                    treeTableModel.setCandidateRefactoringGroups(new ArrayList<>(candidates));
+                    final List<ExtractMethodCandidateGroup> extractMethodCandidateGroups = candidates.stream().filter(Objects::nonNull)
+                            .map(sliceGroup ->
+                                    sliceGroup.getCandidates().stream()
+                                            .filter(c -> canBeExtracted(c))
+                                            .collect(toSet()))
+                            .filter(set -> !set.isEmpty())
+                            .map(ExtractMethodCandidateGroup::new)
+                            .collect(toList());
+                    treeTableModel.setCandidateRefactoringGroups(extractMethodCandidateGroups);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
             }
@@ -245,10 +239,54 @@ class ExtractMethodPanel extends JPanel {
             Object o = selectedPath.getLastPathComponent();
             if (o instanceof ASTSlice) {
                 openDefinition(((ASTSlice) o).getSourceMethodDeclaration(), scope, (ASTSlice) o);
-            } else if (o instanceof ASTSliceGroup) {
+            } else if (o instanceof ExtractMethodCandidateGroup) {
                 expandOrCollapsePath(e, treeTableTree, selectedPath);
             }
         }
+    }
+
+    /**
+     * Checks that the slice can be extracted into a separate method without compilation errors.
+     */
+    private boolean canBeExtracted(ASTSlice slice) {
+        SmartList<PsiStatement> statementsToExtract = getStatementsToExtract(slice);
+
+        MyExtractMethodProcessor processor = new MyExtractMethodProcessor(scope.getProject(),
+                null, statementsToExtract.toArray(new PsiElement[0]), slice.getLocalVariableCriterion().getType(),
+                IntelliJDeodorantBundle.message(EXTRACT_METHOD_REFACTORING_NAME), "", HelpID.EXTRACT_METHOD,
+                slice.getSourceTypeDeclaration(), slice.getLocalVariableCriterion());
+
+        processor.setOutputVariable();
+
+        try {
+            processor.setShowErrorDialogs(false);
+            return processor.prepare();
+
+        } catch (PrepareFailedException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Collects statements that can be extracted into a separate method.
+     */
+    public SmartList<PsiStatement> getStatementsToExtract(ASTSlice slice) {
+        Set<PDGNode> nodes = slice.getSliceNodes();
+        SmartList<PsiStatement> statementsToExtract = new SmartList<>();
+
+        for (PDGNode pdgNode : nodes) {
+            boolean isNotChild = true;
+            for (PDGNode node : nodes) {
+                if (isChild(node.getASTStatement(), pdgNode.getASTStatement())) {
+                    isNotChild = false;
+                }
+            }
+            if (isNotChild) {
+                statementsToExtract.add(pdgNode.getASTStatement());
+            }
+        }
+        return statementsToExtract;
     }
 
     /**
@@ -259,34 +297,20 @@ class ExtractMethodPanel extends JPanel {
      */
     private Runnable doExtract(ASTSlice slice) {
         return () -> {
-            Editor editor = FileEditorManager.getInstance(scope.getProject()).getSelectedTextEditor();
-            Set<PDGNode> nodes = slice.getSliceNodes();
-            SmartList<PsiStatement> statementsToExtract = new SmartList<>();
+            Editor editor = FileEditorManager.getInstance(slice.getSourceMethodDeclaration().getProject()).getSelectedTextEditor();
+            SmartList<PsiStatement> statementsToExtract = getStatementsToExtract(slice);
 
-            for (PDGNode pdgNode : nodes) {
-                boolean isNotChild = true;
-                for (PDGNode node : nodes) {
-                    if (isChild(node.getASTStatement(), pdgNode.getASTStatement())) {
-                        isNotChild = false;
-                    }
-                }
-                if (isNotChild) {
-                    statementsToExtract.add(pdgNode.getASTStatement());
-                }
-            }
-
-            MyExtractMethodProcessor processor = new MyExtractMethodProcessor(scope.getProject(),
+            MyExtractMethodProcessor processor = new MyExtractMethodProcessor(slice.getSourceMethodDeclaration().getProject(),
                     editor, statementsToExtract.toArray(new PsiElement[0]), slice.getLocalVariableCriterion().getType(),
-                    IntelliJDeodorantBundle.message(EXTRACT_METHOD_REFACTORING_NAME), "", HelpID.EXTRACT_METHOD,
+                    "", "", HelpID.EXTRACT_METHOD,
                     slice.getSourceTypeDeclaration(), slice.getLocalVariableCriterion());
 
             processor.setOutputVariable();
-            processor.testTargetClass(slice.getSourceTypeDeclaration());
 
             try {
                 processor.setShowErrorDialogs(true);
                 if (processor.prepare()) {
-                    ExtractMethodHandler.invokeOnElements(scope.getProject(), processor,
+                    ExtractMethodHandler.invokeOnElements(slice.getSourceMethodDeclaration().getProject(), processor,
                             slice.getSourceMethodDeclaration().getContainingFile(), true);
                 }
             } catch (PrepareFailedException e) {

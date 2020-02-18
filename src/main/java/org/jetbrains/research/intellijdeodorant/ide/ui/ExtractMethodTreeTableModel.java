@@ -5,7 +5,7 @@ import com.intellij.psi.PsiVariable;
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSlice;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodCandidateGroup;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExtractMethodTreeTableModel extends DefaultTreeModel implements TreeTableModel {
-    protected List<ASTSliceGroup> candidateRefactoringGroups = new ArrayList<>();
+    protected List<ExtractMethodCandidateGroup> candidateRefactoringGroups = new ArrayList<>();
     private final String[] columnNames = new String[]{
             IntelliJDeodorantBundle.message("long.method.panel.source.method"),
             IntelliJDeodorantBundle.message("long.method.panel.variable.criterion"),
@@ -26,12 +26,12 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
         super(new DefaultMutableTreeNode(null));
     }
 
-    public void setCandidateRefactoringGroups(List<ASTSliceGroup> candidateRefactoringGroups) {
+    public void setCandidateRefactoringGroups(List<ExtractMethodCandidateGroup> candidateRefactoringGroups) {
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         reload();
     }
 
-    public List<ASTSliceGroup> getCandidateRefactoringGroups() {
+    public List<ExtractMethodCandidateGroup> getCandidateRefactoringGroups() {
         return candidateRefactoringGroups;
     }
 
@@ -75,17 +75,16 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
                 default:
                     return "";
             }
-        } else if (o instanceof ASTSliceGroup) {
-            ASTSliceGroup entry = (ASTSliceGroup) o;
-            if (entry.getSourceMethodDeclaration() == null) return "";
+        } else if (o instanceof ExtractMethodCandidateGroup) {
+            ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) o;
             switch (index) {
                 case 0:
-                    PsiClass psiClass = entry.getSourceMethodDeclaration().getContainingClass();
+                    PsiClass psiClass = group.getMethod().getContainingClass();
                     String declaringClassName = psiClass == null ? "" : psiClass.getQualifiedName();
-                    String methodName = entry.getSourceMethodDeclaration().getName();
+                    String methodName = group.getMethod().getName();
                     return declaringClassName + "::" + methodName;
                 case 1:
-                    PsiVariable firstCandidate = entry.getCandidates().iterator().next().getLocalVariableCriterion();
+                    PsiVariable firstCandidate = group.getCandidates().iterator().next().getLocalVariableCriterion();
                     return firstCandidate == null ? "" : firstCandidate.getName();
                 default:
                     return "";
@@ -96,8 +95,8 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof ASTSliceGroup) {
-            ASTSliceGroup group = (ASTSliceGroup) parent;
+        if (parent instanceof ExtractMethodCandidateGroup) {
+            ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) parent;
             return group.getCandidates().size();
         } else if (parent instanceof ASTSlice) {
             return 0;
@@ -108,10 +107,10 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof ASTSliceGroup) {
-            ASTSliceGroup group = (ASTSliceGroup) parent;
-            ArrayList<ASTSlice> s = new ArrayList<>(group.getCandidates());
-            return s.get(index);
+        if (parent instanceof ExtractMethodCandidateGroup) {
+            ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) parent;
+            ArrayList<ASTSlice> slices = new ArrayList<>(group.getCandidates());
+            return slices.get(index);
         } else {
             return candidateRefactoringGroups.get(index);
         }
