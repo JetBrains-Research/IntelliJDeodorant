@@ -1,11 +1,13 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
+import org.jetbrains.annotations.NotNull;
+
 class Flow extends GraphEdge {
     private boolean loopbackFlow = false;
     private boolean trueControlFlow = false;
     private boolean falseControlFlow = false;
 
-    Flow(CFGNode src, CFGNode dst) {
+    Flow(@NotNull CFGNode src, @NotNull CFGNode dst) {
         super(src, dst);
         src.addOutgoingEdge(this);
         dst.addIncomingEdge(this);

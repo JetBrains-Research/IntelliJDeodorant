@@ -349,6 +349,8 @@ public class CFG extends Graph {
                         else
                             previousStatement = null;
                     }
+                } else {
+                    previousStatement = null;
                 }
                 j++;
             }
@@ -418,12 +420,14 @@ public class CFG extends Graph {
             CFGSwitchCaseNode switchCase = (CFGSwitchCaseNode) currentNode;
             if (previousNodesContainBreakOrReturn(previousNodes, composite)) {
                 CFGBranchSwitchNode switchNode = getMostRecentSwitchNode();
-                Flow flow = new Flow(switchNode, currentNode);
-                if (switchCase.isDefault())
-                    flow.setFalseControlFlow(true);
-                else
-                    flow.setTrueControlFlow(true);
-                edges.add(flow);
+                if (switchNode != null) {
+                    Flow flow = new Flow(switchNode, currentNode);
+                    if (switchCase.isDefault())
+                        flow.setFalseControlFlow(true);
+                    else
+                        flow.setTrueControlFlow(true);
+                    edges.add(flow);
+                }
             } else
                 createTopDownFlow(previousNodes, currentNode);
         } else
