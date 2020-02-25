@@ -182,9 +182,9 @@ class MoveMethodPanel extends JPanel {
     }
 
     private void refreshPanel() {
-        disableAllButtons();
         refactorings.clear();
         model.clearTable();
+        disableAllButtons();
         infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
         scrollPane.setVisible(false);
         calculateRefactorings();

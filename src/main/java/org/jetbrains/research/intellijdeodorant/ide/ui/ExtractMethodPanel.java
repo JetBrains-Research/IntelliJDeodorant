@@ -186,6 +186,7 @@ class ExtractMethodPanel extends JPanel {
         }
         doRefactorButton.setEnabled(false);
         exportButton.setEnabled(false);
+        refreshButton.setEnabled(false);
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -227,6 +228,7 @@ class ExtractMethodPanel extends JPanel {
         scrollPane.setViewportView(treeTable);
         scrollPane.setVisible(true);
         exportButton.setEnabled(!treeTableModel.getCandidateRefactoringGroups().isEmpty());
+        refreshButton.setEnabled(true);
     }
 
     /**

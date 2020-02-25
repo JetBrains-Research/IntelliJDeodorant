@@ -155,6 +155,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         scrollPane.setVisible(true);
         model.reload();
         exportButton.setEnabled(!model.getCandidateRefactoringGroups().isEmpty());
+        refreshButton.setEnabled(true);
         scrollPane.setViewportView(treeTable);
     }
 
@@ -177,6 +178,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private void showEmptyPanel() {
         removeSelection();
         exportButton.setEnabled(false);
+        refreshButton.setEnabled(false);
         scrollPane.setVisible(false);
     }
 
