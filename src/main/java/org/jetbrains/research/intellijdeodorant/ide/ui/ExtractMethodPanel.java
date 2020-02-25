@@ -96,6 +96,7 @@ class ExtractMethodPanel extends JPanel {
      */
     private JScrollPane createTablePanel() {
         treeTable.setRootVisible(false);
+        treeTable.getColumnModel().getColumn(0).setPreferredWidth(800);
         treeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         treeTable.addMouseListener((DoubleClickListener) this::openMethodDefinition);
         treeTable.addKeyListener((EnterKeyListener) this::openMethodDefinition);
