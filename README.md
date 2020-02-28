@@ -7,16 +7,13 @@ An IntelliJ IDEA plugin that detects code smells and recommends appropriate refa
 
 Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
 
-The original tool supports five code smells, namely **Feature Envy**, **Type/State Checking**, **Long Method**, **God Class** and **Duplicated Code**. 
+The tool supports several code smells, namely **Feature Envy**, **Type/State Checking**, **Long Method** and **God Class**.
 
-*Work in progress. The check mark indicates that the code smell is supported by IntelliJDeodorant.*
-
-- [x] Feature Envy problems can be resolved by appropriate Move Method refactorings.
-- [x] Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.
-- [x] State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.
-- [x] Long Method problems can be resolved by appropriate Extract Method refactorings.
-- [x] God Class problems can be resolved by appropriate Extract Class refactorings.
-- [ ] Duplicated Code problems can be resolved by appropriate Extract Clone refactorings.
+- Feature Envy problems can be resolved by appropriate Move Method refactorings.
+- Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings.
+- State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings.
+- Long Method problems can be resolved by appropriate Extract Method refactorings.
+- God Class problems can be resolved by appropriate Extract Class refactorings.
 
 ## Installation
 Supported IntelliJ IDEA version: 2019.3.3
@@ -30,3 +27,7 @@ Supported IntelliJ IDEA version: 2019.3.3
 ## Usage
 
 The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of the panel contains a ```Refresh``` button allows detecting corresponding code smell in the whole project and table with results. To apply any refactoring, you must select suggestion in the table and click the ```Refactor``` button.
+
+<p align="center">
+  <img src="https://s3-eu-west-1.amazonaws.com/public-resources.ml-labs.aws.intellij.net/static/intellij-deodorant/long-method.gif" width="90%"/>
+</p>
