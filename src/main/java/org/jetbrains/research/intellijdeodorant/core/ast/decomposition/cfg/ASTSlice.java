@@ -286,8 +286,9 @@ public class ASTSlice {
      */
     public boolean areSliceStatementsValid() {
         for (SmartPsiElementPointer<PsiElement> psiElementSmartPsiElementPointer : this.getSliceStatements()) {
-            if (psiElementSmartPsiElementPointer.getElement() instanceof PsiStatement
-                    && !psiElementSmartPsiElementPointer.getElement().isValid()) {
+            if (psiElementSmartPsiElementPointer.getElement() == null ||
+                    psiElementSmartPsiElementPointer.getElement() instanceof PsiStatement
+                            && !psiElementSmartPsiElementPointer.getElement().isValid()) {
                 return false;
             }
         }

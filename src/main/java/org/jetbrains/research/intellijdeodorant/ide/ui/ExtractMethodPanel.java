@@ -96,6 +96,7 @@ class ExtractMethodPanel extends JPanel {
      */
     private JScrollPane createTablePanel() {
         treeTable.setRootVisible(false);
+        treeTable.setTreeCellRenderer(new ExtractMethodCandidatesTreeCellRenderer());
         treeTable.getColumnModel().getColumn(0).setPreferredWidth(800);
         treeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         treeTable.addMouseListener((DoubleClickListener) this::openMethodDefinition);
@@ -119,7 +120,7 @@ class ExtractMethodPanel extends JPanel {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
-        doRefactorButton.setEnabled(false);
+        doRefactorButton.setEnabled(true);
         doRefactorButton.addActionListener(e -> refactorSelected());
         buttonPanel.add(doRefactorButton);
 
@@ -171,7 +172,10 @@ class ExtractMethodPanel extends JPanel {
         if (selectedPath != null) {
             Object o = selectedPath.getLastPathComponent();
             if (o instanceof ASTSlice) {
-                isAnySuggestionSelected = true;
+                ASTSlice slice = (ASTSlice) o;
+                if (slice.areSliceStatementsValid()) {
+                    isAnySuggestionSelected = true;
+                }
             }
         }
         doRefactorButton.setEnabled(isAnySuggestionSelected);
@@ -347,10 +351,12 @@ class ExtractMethodPanel extends JPanel {
                         if (editor != null) {
                             TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
                             editor.getMarkupModel().removeAllHighlighters();
-                            statements.forEach(statement ->
-                                    editor.getMarkupModel().addRangeHighlighter(statement.getElement().getTextRange().getStartOffset(),
-                                            statement.getElement().getTextRange().getEndOffset(), HighlighterLayer.SELECTION,
-                                            attributes, HighlighterTargetArea.EXACT_RANGE));
+                            statements.stream()
+                                    .filter(statement -> statement.getElement() != null)
+                                    .forEach(statement ->
+                                            editor.getMarkupModel().addRangeHighlighter(statement.getElement().getTextRange().getStartOffset(),
+                                                    statement.getElement().getTextRange().getEndOffset(), HighlighterLayer.SELECTION,
+                                                    attributes, HighlighterTargetArea.EXACT_RANGE));
                         }
                     }
                 }
