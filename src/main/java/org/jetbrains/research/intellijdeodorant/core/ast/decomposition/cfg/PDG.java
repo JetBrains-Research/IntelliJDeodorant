@@ -585,6 +585,7 @@ public class PDG extends Graph {
                 CFGNode srcCFGNode = (CFGNode) flow.src;
                 CFGNode dstCFGNode = (CFGNode) flow.dst;
                 PDGNode dstPDGNode = dstCFGNode.getPDGNode();
+                if (dstPDGNode == null) continue;
                 ReachingAliasSet reachingAliasSetCopy = reachingAliasSet.copy();
                 dstPDGNode.applyReachingAliasSet(reachingAliasSetCopy);
                 dstPDGNode.updateReachingAliasSet(reachingAliasSetCopy);
