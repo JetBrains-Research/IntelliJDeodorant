@@ -2,7 +2,7 @@
 [![JB Research](https://jb.gg/badges/research-flat-square.svg)](https://research.jetbrains.org/)
 [![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
 
-An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. All of the suggested refactorings can be carried out automatically from within the plugin.
+An IntelliJ IDEA plugin that detects code smells in Java code and recommends appropriate refactorings to resolve them. All of the suggested refactorings can be carried out automatically from within the plugin.
 
 Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
 
