@@ -1,10 +1,10 @@
-<idea-plugin>
+<idea-plugin url="https://github.com/JetBrains-Research/IntelliJDeodorant">
     <name>IntelliJDeodorant</name>
-    <version>1.0</version>
+    <version>2019.3-1.0</version>
     <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
-    <description><![CDATA[An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
-        <p>Currently, the plugin supports following code smells:
+    <description><![CDATA[An IntelliJ IDEA plugin that detects code smells in Java code and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
+        <p>The plugin supports following code smells:
             <ul>
                <li>Feature Envy problems can be resolved by appropriate Move Method refactorings</li>
                <li>Long Method problems can be resolved by appropriate Extract Method refactorings</li>
