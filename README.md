@@ -8,6 +8,11 @@ An IntelliJ IDEA plugin that detects code smells in Java code and recommends app
 
 Based on [JDeodorant](https://github.com/tsantalis/JDeodorant) Eclipse plugin.
 
+<p align="center">
+  <img src="https://s3-eu-west-1.amazonaws.com/public-resources.ml-labs.aws.intellij.net/static/intellij-deodorant/long-method.gif" width="90%"/>
+</p>
+
+## Supported code smells
 The tool supports several code smells, namely Feature Envy, Type/State Checking, Long Method, and God Class.
 
 - **Feature Envy** occurs when a method uses attributes/methods of another class more than those of the enclosing class. The tool can detect such methods and suggest moving them to a more related class, i.e. perform a **Move Method** refactoring.
@@ -32,10 +37,8 @@ Supported IntelliJ IDEA version: 2019.3.3
 Done! The plugin is ready.
 
 ## Getting started
-The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of this window contains a ```Refresh``` button that allows to search for the necessary code smell in the entire project and the table with the results of the search. To apply any refactoring, simply select a suggestion in the table and click the ```Refactor``` button. The whole process is demonstrated in the GIF below.
-<p align="center">
-  <img src="https://s3-eu-west-1.amazonaws.com/public-resources.ml-labs.aws.intellij.net/static/intellij-deodorant/long-method.gif" width="90%"/>
-</p>
+The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of this window contains a ```Refresh``` button that allows to search for the necessary code smell in the entire project and the table with the results of the search. To apply any refactoring, simply select a suggestion in the table and click the ```Refactor``` button.
 
 ## Contacts
-If you have any questions about the plugin or want to report any bugs, feel free to contact us using [Gitter](https://gitter.im/intellijdeodorant/community?utm_source=share-link&utm_medium=link&utm_campaign=share-link) or [GitHub Issues](https://github.com/JetBrains-Research/IntelliJDeodorant/issues). If you want to contribute, please create pull requests.
+If you have any questions about the plugin or want to report any bugs, feel free to contact us using [Gitter](https://gitter.im/intellijdeodorant/community?utm_source=share-link&utm_medium=link&utm_campaign=share-link) or [GitHub Issues](https://github.com/JetBrains-Research/IntelliJDeodorant/issues).  
+If you want to contribute, please create pull requests.
