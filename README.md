@@ -1,4 +1,5 @@
-# IntelliJDeodorant
+<h1> <img align="left" width="50" height="50" src="https://s3-eu-west-1.amazonaws.com/public-resources.ml-labs.aws.intellij.net/static/intellij-deodorant/icon.svg" alt="IntelliJDeodorant Icon"> IntelliJDeodorant </h1>
+
 [![JB Research](https://jb.gg/badges/research-flat-square.svg)](https://research.jetbrains.org/)
 [![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
 [![Gitter](https://badges.gitter.im/intellijdeodorant/community.svg)](https://gitter.im/intellijdeodorant/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
