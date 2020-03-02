@@ -1,6 +1,7 @@
 # IntelliJDeodorant
 [![JB Research](https://jb.gg/badges/research-flat-square.svg)](https://research.jetbrains.org/)
 [![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
+[![Gitter](https://badges.gitter.im/intellijdeodorant/community.svg)](https://gitter.im/intellijdeodorant/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 An IntelliJ IDEA plugin that detects code smells in Java code and recommends appropriate refactorings to resolve them. All of the suggested refactorings can be carried out automatically from within the plugin.
 
@@ -36,4 +37,4 @@ The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab o
 </p>
 
 ## Contacts
-If you have any questions about the plugin or want to report any bugs, feel free to contact us using [GitHub Issues](https://github.com/JetBrains-Research/IntelliJDeodorant/issues). If you want to contribute, please create pull requests.
+If you have any questions about the plugin or want to report any bugs, feel free to contact us using [Gitter](https://gitter.im/intellijdeodorant/community?utm_source=share-link&utm_medium=link&utm_campaign=share-link) or [GitHub Issues](https://github.com/JetBrains-Research/IntelliJDeodorant/issues). If you want to contribute, please create pull requests.
