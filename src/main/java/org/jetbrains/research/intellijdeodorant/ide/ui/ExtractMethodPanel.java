@@ -113,12 +113,13 @@ class ExtractMethodPanel extends JPanel {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
-        doRefactorButton.setEnabled(true);
         doRefactorButton.addActionListener(e -> refactorSelected());
+        doRefactorButton.setEnabled(false);
         buttonPanel.add(doRefactorButton);
 
         refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
         refreshButton.addActionListener(l -> refreshPanel());
+        refreshButton.setEnabled(true);
         buttonPanel.add(refreshButton);
 
         exportButton.setText(IntelliJDeodorantBundle.message("export"));
