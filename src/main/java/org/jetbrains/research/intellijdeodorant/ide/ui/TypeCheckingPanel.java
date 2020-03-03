@@ -17,7 +17,6 @@ import java.util.Collections;
  * Panel for Type-State Checking refactorings.
  */
 class TypeCheckingPanel extends AbstractRefactoringPanel {
-    private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "type.state.checking.identification.indicator";
     private static final String[] COLUMN_NAMES = new String[]{
             IntelliJDeodorantBundle.message("type.state.checking.panel.column.method"),
             IntelliJDeodorantBundle.message("type.state.checking.panel.column.refactoring.type"),
@@ -29,7 +28,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
 
     TypeCheckingPanel(@NotNull AnalysisScope scope) {
         super(scope,
-                DETECT_INDICATOR_STATUS_TEXT_KEY,
+                "type.state.checking.identification.indicator",
                 new TypeCheckRefactoringType(scope.getProject()),
                 new TypeCheckingTreeTableModel(
                         Collections.emptyList(),

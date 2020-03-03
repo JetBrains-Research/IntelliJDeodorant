@@ -22,24 +22,24 @@ public class ExtractMethodCandidatesTreeCellRenderer implements TreeCellRenderer
             ASTSlice slice = (ASTSlice) value;
             label.setText(slice.toString());
             if (!slice.areSliceStatementsValid()) {
-                disableNotValidSuggestion(label);
+                disableInvalidSuggestion(label);
             }
         } else if (value instanceof ExtractMethodCandidateGroup) {
             ExtractMethodCandidateGroup slice = (ExtractMethodCandidateGroup) value;
             label.setText(slice.toString());
             if (slice.getCandidates().stream().noneMatch(ASTSlice::areSliceStatementsValid)) {
-                disableNotValidSuggestion(label);
+                disableInvalidSuggestion(label);
             }
         }
         return label;
     }
 
     /**
-     * Disables not valid suggestions (i.e. already extracted statements).
+     * Disables invalid suggestion (i.e. already extracted statements).
      *
      * @param label the label to be displayed on tree.
      */
-    private void disableNotValidSuggestion(JLabel label) {
+    private void disableInvalidSuggestion(JLabel label) {
         label.setEnabled(false);
         label.setBackground(JBColor.gray);
         label.setOpaque(true);

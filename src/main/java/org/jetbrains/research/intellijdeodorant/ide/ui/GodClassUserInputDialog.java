@@ -24,14 +24,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
-    private static final String TITLE = IntelliJDeodorantBundle.message("god.class.dialog.title");
-    private static final String RESTORE_DEFAULT = IntelliJDeodorantBundle.message("god.class.dialog.restore.default");
-    private static final String CLASS_NAME_NOT_VALID = IntelliJDeodorantBundle.message("god.class.dialog.class.name.not.valid");
-    private static final String CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG = IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists.javalang");
-    private static final String CLASS_NAME_ALREADY_EXISTS_KEY = "god.class.dialog.class.name.already.exists";
-
     private static final int MAIN_PANEL_VERTICAL_GAP = 5;
-
     private final ExtractClassRefactoring refactoring;
     @Nullable
     private final PsiPackage parentPackage;
@@ -52,7 +45,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
 
         initialiseControls();
-        setTitle(TITLE);
+        setTitle(IntelliJDeodorantBundle.message("god.class.dialog.title"));
         init();
     }
 
@@ -88,7 +81,7 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             }
         });
 
-        restoreButton.setText(RESTORE_DEFAULT);
+        restoreButton.setText(IntelliJDeodorantBundle.message("god.class.dialog.restore.default"));
 
         restoreButton.addActionListener(e -> extractedClassNameField.setText(refactoring.getDefaultExtractedTypeName()));
 
@@ -128,15 +121,15 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         String classNamePattern = "[a-zA-Z_][a-zA-Z0-9_]*";
         if (!Pattern.matches(classNamePattern, className)) {
             mayApplyRefactoring(false);
-            setMessage(CLASS_NAME_NOT_VALID);
+            setMessage(IntelliJDeodorantBundle.message("god.class.dialog.class.name.not.valid"));
             return;
         } else if (parentPackage != null && parentPackage.containsClassNamed(className)) {
             mayApplyRefactoring(false);
-            setMessage(IntelliJDeodorantBundle.message(CLASS_NAME_ALREADY_EXISTS_KEY, parentPackage.getName()));
+            setMessage(IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists", parentPackage.getName()));
             return;
         } else if (javaLangClassNames.contains(className)) {
             mayApplyRefactoring(false);
-            setMessage(CLASS_NAME_ALREADY_EXISTS_IN_JAVA_LANG);
+            setMessage(IntelliJDeodorantBundle.message("god.class.dialog.class.name.already.exists.javalang"));
             return;
         } else {
             refactoring.setExtractedTypeName(className);

@@ -21,10 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 class MoveMethodTableModel extends AbstractTableModel {
-    private static final String METHOD_COLUMN_TITLE_KEY = "method.column.title";
-    private static final String MOVE_TO_COLUMN_TITLE_KEY = "move.to.column.title";
-    private static final String DEPENDENCIES_COLUMN_TITLE_KEY = "dependencies.column.title";
-
     static final int SELECTION_COLUMN_INDEX = 0;
     private static final int ENTITY_COLUMN_INDEX = 1;
     private static final int MOVE_TO_COLUMN_INDEX = 2;
@@ -104,11 +100,11 @@ class MoveMethodTableModel extends AbstractTableModel {
             case SELECTION_COLUMN_INDEX:
                 return "";
             case ENTITY_COLUMN_INDEX:
-                return IntelliJDeodorantBundle.message(METHOD_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("method.column.title");
             case MOVE_TO_COLUMN_INDEX:
-                return IntelliJDeodorantBundle.message(MOVE_TO_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("move.to.column.title");
             case ACCESSED_MEMBERS_COUNT_INDEX:
-                return IntelliJDeodorantBundle.message(DEPENDENCIES_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("dependencies.column.title");
         }
         throw new IndexOutOfBoundsException("Unexpected column index: " + column);
     }

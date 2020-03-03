@@ -58,13 +58,6 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isChild;
  * Panel for Extract Method refactoring.
  */
 class ExtractMethodPanel extends JPanel {
-    private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
-    private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "long.method.detect.indicator.status";
-    private static final String EXTRACT_METHOD_REFACTORING_NAME = "extract.method.refactoring.name";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
-    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
-
     @NotNull
     private final AnalysisScope scope;
     private final ExtractMethodTreeTableModel treeTableModel = new ExtractMethodTreeTableModel();
@@ -74,7 +67,7 @@ class ExtractMethodPanel extends JPanel {
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
     private final JLabel refreshLabel = new JLabel(
-            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+            IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
 
@@ -119,16 +112,16 @@ class ExtractMethodPanel extends JPanel {
         final JPanel buttonPanel = new JBPanel<JBPanel<JBPanel>>();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
+        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.setEnabled(true);
         doRefactorButton.addActionListener(e -> refactorSelected());
         buttonPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
+        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonPanel.add(refreshButton);
 
-        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.setText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(e -> ExportResultsUtil.export(getAvailableRefactoringSuggestions(), panel));
         exportButton.setEnabled(false);
         buttonPanel.add(exportButton);
@@ -203,7 +196,7 @@ class ExtractMethodPanel extends JPanel {
         ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
-                IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
+                IntelliJDeodorantBundle.message("long.method.detect.indicator.status"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
@@ -260,7 +253,7 @@ class ExtractMethodPanel extends JPanel {
 
         MyExtractMethodProcessor processor = new MyExtractMethodProcessor(scope.getProject(),
                 null, statementsToExtract.toArray(new PsiElement[0]), slice.getLocalVariableCriterion().getType(),
-                IntelliJDeodorantBundle.message(EXTRACT_METHOD_REFACTORING_NAME), "", HelpID.EXTRACT_METHOD,
+                IntelliJDeodorantBundle.message("extract.method.refactoring.name"), "", HelpID.EXTRACT_METHOD,
                 slice.getSourceTypeDeclaration(), slice.getLocalVariableCriterion());
 
         processor.setOutputVariable();

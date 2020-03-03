@@ -14,8 +14,6 @@ import java.util.Collections;
  * Panel for God Class Checking refactorings.
  */
 public class GodClassPanel extends AbstractRefactoringPanel {
-    private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "god.class.identification.indicator";
-
     private static final String[] COLUMN_NAMES = new String[]{IntelliJDeodorantBundle.message("god.class.panel.source.class"),
             IntelliJDeodorantBundle.message("god.class.panel.extractable.concept"),
             IntelliJDeodorantBundle.message("god.class.panel.source.extracted.members")};
@@ -24,7 +22,7 @@ public class GodClassPanel extends AbstractRefactoringPanel {
 
     public GodClassPanel(@NotNull AnalysisScope scope) {
         super(scope,
-                DETECT_INDICATOR_STATUS_TEXT_KEY,
+                "god.class.identification.indicator",
                 new ExtractClassRefactoringType(),
                 new GodClassTreeTableModel(Collections.emptyList(), COLUMN_NAMES),
                 REFACTOR_DEPTH);

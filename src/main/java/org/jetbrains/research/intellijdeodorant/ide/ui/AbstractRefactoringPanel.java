@@ -58,10 +58,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRefactoringPanel extends JPanel {
-    private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
-    private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
-    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
     private static final NotificationGroup NOTIFICATION_GROUP =
             new NotificationGroup(IntelliJDeodorantBundle.message("intellijdeodorant"), NotificationDisplayType.STICKY_BALLOON, true);
     private final String detectIndicatorStatusTextKey;
@@ -74,7 +70,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private final JButton exportButton = new JButton();
     private JScrollPane scrollPane = new JBScrollPane();
     private final JLabel refreshLabel = new JLabel(
-            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+            IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
     private final RefactoringType refactoringType;
@@ -215,16 +211,16 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         final JPanel buttonPanel = new JBPanel<JBPanel<JBPanel>>();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
+        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.setEnabled(false);
         doRefactorButton.addActionListener(l -> refactorSelected());
         buttonPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
+        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonPanel.add(refreshButton);
 
-        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.setText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(l -> exportResults());
         buttonPanel.add(exportButton);
 

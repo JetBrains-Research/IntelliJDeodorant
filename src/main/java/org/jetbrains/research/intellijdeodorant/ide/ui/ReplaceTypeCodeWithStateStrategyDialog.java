@@ -18,14 +18,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
-    private static final String TYPE_NAME_NOT_VALID =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.invalid");
-    private static final String TYPE_NAME_EXISTS_IN_PACKAGE =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.package");
-    private static final String TYPE_NAME_EXISTS_IN_JAVA_LANG =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.javalang");
-    private static final String NAME_ALREADY_CHOSEN =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.chosen");
     private final ReplaceTypeCodeWithStateStrategy refactoring;
     private final Map<JTextField, PsiField> textMap = new HashMap<>();
     private final Map<JTextField, String> defaultNamingMap = new HashMap<>();
@@ -145,13 +137,13 @@ public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
         for (JTextField textField : textMap.keySet()) {
             String text = textField.getText();
             if (!Pattern.matches(classNamePattern, textField.getText())) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_NOT_VALID, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.invalid"), textField));
             } else if (parentPackage != null && parentPackage.containsClassNamed(text)) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_PACKAGE, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.package"), textField));
             } else if (javaLangClassNames.contains(text)) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_JAVA_LANG, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.javalang"), textField));
             } else if (encounteredNames.contains(text)) {
-                validationInfoList.add(new ValidationInfo(NAME_ALREADY_CHOSEN, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.chosen"), textField));
             } else {
                 refactoring.setTypeNameForNamedConstant(textMap.get(textField), textField.getText());
             }

@@ -40,15 +40,6 @@ import static org.jetbrains.research.intellijdeodorant.ide.ui.MoveMethodTableMod
  * Panel for Move Method refactoring.
  */
 class MoveMethodPanel extends JPanel {
-    private static final String SELECT_ALL_BUTTON_TEXT_KEY = "select.all.button";
-    private static final String DESELECT_ALL_BUTTON_TEXT_KEY = "deselect.all.button";
-    private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
-    private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String DETECT_INDICATOR_STATUS_TEXT_KEY = "feature.envy.detect.indicator.status";
-    private static final String TOTAL_LABEL_TEXT_KEY = "total.label";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
-    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
-
     @NotNull
     private final AnalysisScope scope;
     @NotNull
@@ -64,7 +55,7 @@ class MoveMethodPanel extends JPanel {
     private JScrollPane scrollPane = new JBScrollPane();
     private final JButton exportButton = new JButton();
     private final JLabel refreshLabel = new JLabel(
-            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+            IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
 
@@ -109,30 +100,30 @@ class MoveMethodPanel extends JPanel {
         final JPanel buttonsPanel = new JBPanel<JBPanel<JBPanel>>();
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
+        infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
         infoLabel.setPreferredSize(new Dimension(80, 30));
         buttonsPanel.add(infoLabel);
 
-        selectAllButton.setText(IntelliJDeodorantBundle.message(SELECT_ALL_BUTTON_TEXT_KEY));
+        selectAllButton.setText(IntelliJDeodorantBundle.message("select.all.button"));
         selectAllButton.addActionListener(e -> model.selectAll());
         selectAllButton.setEnabled(false);
         buttonsPanel.add(selectAllButton);
 
-        deselectAllButton.setText(IntelliJDeodorantBundle.message(DESELECT_ALL_BUTTON_TEXT_KEY));
+        deselectAllButton.setText(IntelliJDeodorantBundle.message("deselect.all.button"));
         deselectAllButton.addActionListener(e -> model.deselectAll());
         deselectAllButton.setEnabled(false);
         buttonsPanel.add(deselectAllButton);
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
+        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.addActionListener(e -> refactorSelected());
         doRefactorButton.setEnabled(false);
         buttonsPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
+        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
         refreshButton.addActionListener(l -> refreshPanel());
         buttonsPanel.add(refreshButton);
 
-        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.setText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(e -> ExportResultsUtil.export(getValidRefactoringsSuggestions(), this));
         exportButton.setEnabled(false);
         buttonsPanel.add(exportButton);
@@ -185,7 +176,7 @@ class MoveMethodPanel extends JPanel {
         refactorings.clear();
         model.clearTable();
         disableAllButtons();
-        infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
+        infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -194,7 +185,7 @@ class MoveMethodPanel extends JPanel {
         Project project = scope.getProject();
         ProjectInfo projectInfo = new ProjectInfo(project);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message(DETECT_INDICATOR_STATUS_TEXT_KEY), true) {
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("feature.envy.detect.indicator.status"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
@@ -209,7 +200,7 @@ class MoveMethodPanel extends JPanel {
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);
-                    infoLabel.setText(IntelliJDeodorantBundle.message(TOTAL_LABEL_TEXT_KEY) + model.getRowCount());
+                    infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
                     scrollPane.setVisible(true);
                     scrollPane.setViewportView(table);
                     enableButtonsOnConditions();
