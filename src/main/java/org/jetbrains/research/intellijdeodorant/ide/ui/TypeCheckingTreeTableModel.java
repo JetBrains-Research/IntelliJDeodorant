@@ -30,7 +30,7 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
                 case 3:
                     return Double.toString(group.getAverageGroupSizeAtClassLevel());
                 case 4:
-                    return Double.toString(group.getAverageNumberOfStatementsInGroup());
+                    return String.format("%.2f", group.getAverageNumberOfStatementsInGroup());
             }
         }
 
@@ -48,7 +48,7 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
                 case 3:
                     return Integer.toString(typeCheckElimination.getGroupSizeAtClassLevel());
                 case 4:
-                    return Double.toString(typeCheckElimination.getAverageNumberOfStatements());
+                    return String.format("%.2f", typeCheckElimination.getAverageNumberOfStatements());
             }
         }
         return "";

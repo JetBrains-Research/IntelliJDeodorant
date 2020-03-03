@@ -17,7 +17,7 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     protected List<ExtractMethodCandidateGroup> candidateRefactoringGroups = new ArrayList<>();
     private final String[] columnNames = new String[]{
             IntelliJDeodorantBundle.message("long.method.panel.source.method"),
-            IntelliJDeodorantBundle.message("long.method.panel.variable.criterion"),
+            IntelliJDeodorantBundle.message("long.method.panel.variable.name"),
             IntelliJDeodorantBundle.message("long.method.panel.block.based.region"),
             IntelliJDeodorantBundle.message("long.method.panel.duplicated.extracted")
     };
