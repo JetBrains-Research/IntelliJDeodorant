@@ -3,16 +3,17 @@
     <version>2019.3-1.0</version>
     <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
-    <description><![CDATA[An IntelliJ IDEA plugin that detects code smells in Java code and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
-        <p>The plugin supports following code smells:
+    <description><![CDATA[Detects code smells in Java code and recommends appropriate refactorings to resolve them.
+        <p>Supports following code smells:
             <ul>
-               <li>Feature Envy problems can be resolved by appropriate Move Method refactorings</li>
-               <li>Long Method problems can be resolved by appropriate Extract Method refactorings</li>
-               <li>Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings</li>
-               <li>State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings</li>
-               <li>God Class problems can be resolved by appropriate Extract Class refactorings</li>
+               <li>Feature Envy problems can be resolved by Move Method refactorings</li>
+               <li>Long Method problems can be resolved by Extract Method refactorings</li>
+               <li>Type Checking problems can be resolved by Replace Conditional with Polymorphism refactorings</li>
+               <li>State Checking problems can be resolved by Replace Type code with State/Strategy refactorings</li>
+               <li>God Class problems can be resolved by Extract Class refactorings</li>
             </ul>
         </p>
+        Based on tsantalis/JDeodorant.
          ]]>
     </description>
 
