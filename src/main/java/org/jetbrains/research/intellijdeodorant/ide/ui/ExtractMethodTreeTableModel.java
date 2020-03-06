@@ -7,7 +7,7 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSlice;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodCandidateGroup;
 
-import javax.swing.*;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.ArrayList;
@@ -17,9 +17,7 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     protected List<ExtractMethodCandidateGroup> candidateRefactoringGroups = new ArrayList<>();
     private final String[] columnNames = new String[]{
             IntelliJDeodorantBundle.message("long.method.panel.source.method"),
-            IntelliJDeodorantBundle.message("long.method.panel.variable.name"),
-            IntelliJDeodorantBundle.message("long.method.panel.block.based.region"),
-            IntelliJDeodorantBundle.message("long.method.panel.duplicated.extracted")
+            IntelliJDeodorantBundle.message("long.method.panel.variable.name")
     };
 
     public ExtractMethodTreeTableModel() {
@@ -54,6 +52,8 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     public Class getColumnClass(int column) {
         if (column == 0) {
             return TreeTableModel.class;
+        } else if (column == 1) {
+            return ExtractMethodCandidateGroup.class;
         }
         return String.class;
     }
@@ -62,19 +62,11 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     public Object getValueAt(Object o, int index) {
         if (o instanceof ASTSlice) {
             ASTSlice entry = (ASTSlice) o;
-            if (entry.getLocalVariableCriterion() == null) return "";
-            switch (index) {
-                case 1:
-                    return entry.getLocalVariableCriterion().getName();
-                case 2:
-                    return "B" + entry.getBoundaryBlock().getId();
-                case 3:
-                    int numberOfSliceStatements = entry.getNumberOfSliceStatements();
-                    int numberOfDuplicatedStatements = entry.getNumberOfDuplicatedStatements();
-                    return numberOfDuplicatedStatements + "/" + numberOfSliceStatements;
-                default:
-                    return "";
+            PsiVariable variable = entry.getLocalVariableCriterion();
+            if (index == 1) {
+                return variable == null ? "" : variable.getName();
             }
+            return "";
         } else if (o instanceof ExtractMethodCandidateGroup) {
             ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) o;
             switch (index) {

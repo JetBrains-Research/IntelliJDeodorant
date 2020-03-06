@@ -55,8 +55,8 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     public String getDescription() {
         Optional<PsiMethod> method = getOptionalMethod();
         return method.map(psiMethod ->
-                String.join(DELIMITER, getHumanReadableName(psiMethod.getContainingClass()),
-                        getHumanReadableName(psiMethod), candidates.iterator().next().getLocalVariableCriterion().getName())).orElse("");
+                String.join(DELIMITER, getHumanReadableName(psiMethod),
+                        candidates.iterator().next().getLocalVariableCriterion().getName())).orElse("");
     }
 
     @NotNull
