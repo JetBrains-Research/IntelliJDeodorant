@@ -93,7 +93,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         setupGUI();
     }
 
-    public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable, Project project, ProjectInfo projectInfo) {
+    public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable,
+                                                Project project, ProjectInfo projectInfo) {
         final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("project.compiling.indicator.text"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -105,7 +106,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Runs task only if there are no compilation errors in the project.
+     * Compiles the project and runs the task only if there are no compilation errors.
      */
     private static void runAfterCompilationCheck(ProjectInfo projectInfo, Task task) {
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -121,6 +122,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                     if (errors == 0 && !aborted) {
                         ProgressManager.getInstance().run(task);
                     } else {
+                        task.onCancel();
                         AbstractRefactoringPanel.showCompilationErrorNotification(project);
                     }
                 };
@@ -166,6 +168,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         scrollPane.setVisible(true);
         exportButton.setEnabled(false);
         scrollPane.setViewportView(refreshLabel);
+        refreshButton.setEnabled(true);
     }
 
     /**
@@ -296,6 +299,11 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                     model.setCandidateRefactoringGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
+            }
+
+            @Override
+            public void onCancel() {
+                showRefreshingProposal();
             }
         };
 

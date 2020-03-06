@@ -48,8 +48,6 @@ class MoveMethodPanel extends JPanel {
     private final JButton selectAllButton = new JButton();
     private final JButton deselectAllButton = new JButton();
     private final JButton doRefactorButton = new JButton();
-    private final JLabel infoLabel = new JLabel();
-    private final JLabel info = new JLabel();
     private final JButton refreshButton = new JButton();
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
@@ -100,10 +98,6 @@ class MoveMethodPanel extends JPanel {
         final JPanel buttonsPanel = new JBPanel<JBPanel<JBPanel>>();
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
-        infoLabel.setPreferredSize(new Dimension(80, 30));
-        buttonsPanel.add(infoLabel);
-
         selectAllButton.setText(IntelliJDeodorantBundle.message("select.all.button"));
         selectAllButton.addActionListener(e -> model.selectAll());
         selectAllButton.setEnabled(false);
@@ -130,8 +124,6 @@ class MoveMethodPanel extends JPanel {
         panel.add(buttonsPanel, BorderLayout.EAST);
 
         model.addTableModelListener(l -> enableButtonsOnConditions());
-
-        panel.add(info, BorderLayout.WEST);
         return panel;
     }
 
@@ -176,7 +168,6 @@ class MoveMethodPanel extends JPanel {
         refactorings.clear();
         model.clearTable();
         disableAllButtons();
-        infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
         scrollPane.setVisible(false);
         calculateRefactorings();
     }
@@ -200,15 +191,25 @@ class MoveMethodPanel extends JPanel {
                     refactorings.clear();
                     refactorings.addAll(new ArrayList<>(references));
                     model.updateTable(refactorings);
-                    infoLabel.setText(IntelliJDeodorantBundle.message("total.label") + model.getRowCount());
                     scrollPane.setVisible(true);
                     scrollPane.setViewportView(table);
                     enableButtonsOnConditions();
                 });
             }
+
+            @Override
+            public void onCancel() {
+                showEmptyPanel();
+            }
         };
 
         AbstractRefactoringPanel.runAfterCompilationCheck(backgroundable, project, projectInfo);
+    }
+
+    private void showEmptyPanel() {
+        scrollPane.setVisible(true);
+        scrollPane.setViewportView(refreshLabel);
+        refreshButton.setEnabled(true);
     }
 
     private void onDoubleClick(InputEvent e) {

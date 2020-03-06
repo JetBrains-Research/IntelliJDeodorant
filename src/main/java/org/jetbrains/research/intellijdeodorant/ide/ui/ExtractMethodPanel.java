@@ -145,7 +145,7 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Preforms selected refactoring.
+     * Preforms the selected refactoring.
      */
     private void refactorSelected() {
         TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
@@ -158,7 +158,7 @@ class ExtractMethodPanel extends JPanel {
     }
 
     /**
-     * Enable Refactor button only if any suggestion is selected.
+     * Enables Refactor button only if any suggestion is selected.
      */
     private void enableRefactorButtonIfAnySelected() {
         boolean isAnySuggestionSelected = false;
@@ -214,8 +214,19 @@ class ExtractMethodPanel extends JPanel {
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
             }
+
+            @Override
+            public void onCancel() {
+                showEmptyPanel();
+            }
         };
         runAfterCompilationCheck(backgroundable, scope.getProject(), projectInfo);
+    }
+
+    private void showEmptyPanel() {
+        scrollPane.setVisible(true);
+        scrollPane.setViewportView(refreshLabel);
+        refreshButton.setEnabled(true);
     }
 
     /**
