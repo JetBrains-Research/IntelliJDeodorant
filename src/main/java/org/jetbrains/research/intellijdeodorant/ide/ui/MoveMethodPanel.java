@@ -109,7 +109,7 @@ class MoveMethodPanel extends JPanel {
         buttonsPanel.add(deselectAllButton);
 
         doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
-        doRefactorButton.addActionListener(e -> refactorSelected());
+        doRefactorButton.addActionListener(e -> doRefactor());
         doRefactorButton.setEnabled(false);
         buttonsPanel.add(doRefactorButton);
 
@@ -151,16 +151,13 @@ class MoveMethodPanel extends JPanel {
         exportButton.setEnabled(false);
     }
 
-    private void refactorSelected() {
+    private void doRefactor() {
         disableAllButtons();
         table.setEnabled(false);
-
         final Set<MoveMethodRefactoring> selectedRefactorings = new HashSet<>(model.pullSelected());
-
-        Set<MoveMethodRefactoring> appliedRefactorings = RefactoringsApplier.moveRefactoring(new ArrayList<>(selectedRefactorings), scope);
-        model.setAppliedRefactorings(new HashSet<>(appliedRefactorings));
+        RefactoringsApplier.moveRefactoring(new ArrayList<>(selectedRefactorings));
+        model.updateRows();
         table.setEnabled(true);
-
         enableButtonsOnConditions();
     }
 
