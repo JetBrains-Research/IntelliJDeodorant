@@ -125,8 +125,9 @@ public class MySystem {
             ListIterator<MethodObject> methodIt = co.getMethodIterator();
             while (methodIt.hasNext()) {
                 MethodObject mo = methodIt.next();
-                if (systemObject.containsGetter(mo.generateMethodInvocation()) == null &&
-                        systemObject.containsSetter(mo.generateMethodInvocation()) == null && systemObject.containsCollectionAdder(mo.generateMethodInvocation()) == null) {
+                if (systemObject.containsGetter(mo.generateMethodInvocation()) == null
+                        && systemObject.containsSetter(mo.generateMethodInvocation()) == null
+                        && systemObject.containsCollectionAdder(mo.generateMethodInvocation()) == null) {
                     MethodInvocationObject delegation = systemObject.containsDelegate(mo.generateMethodInvocation());
                     if (delegation == null || systemObject.getClassObject(delegation.getOriginClassName()) == null) {
                         MyMethod myMethod = new MyMethod(mo.getClassName(), mo.getName(),

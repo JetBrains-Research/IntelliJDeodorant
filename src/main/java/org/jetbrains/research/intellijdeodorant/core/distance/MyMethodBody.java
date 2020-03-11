@@ -1,14 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.*;
+
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.StatementObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractExpression;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.CompositeStatementObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 
 class MyMethodBody {
 

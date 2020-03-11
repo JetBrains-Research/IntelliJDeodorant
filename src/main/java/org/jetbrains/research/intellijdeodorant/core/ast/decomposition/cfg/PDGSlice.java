@@ -11,9 +11,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class PDGSlice extends Graph {
-    private PDG pdg;
-    private AbstractMethodDeclaration method;
-    private BasicBlock boundaryBlock;
+    private final PDG pdg;
+    private final AbstractMethodDeclaration method;
+    private final BasicBlock boundaryBlock;
     private PDGNode nodeCriterion;
     private AbstractVariable localVariableCriterion;
     private Set<PDGNode> sliceNodes;
@@ -21,9 +21,9 @@ public class PDGSlice extends Graph {
     private Set<AbstractVariable> passedParameters;
     private Set<PDGNode> indispensableNodes;
     private Set<PDGNode> removableNodes;
-    private Set<AbstractVariable> returnedVariablesInOriginalMethod;
-    private PsiFile psiFile;
-    private int methodSize;
+    private final Set<AbstractVariable> returnedVariablesInOriginalMethod;
+    private final PsiFile psiFile;
+    private final int methodSize;
 
     PDGSlice(PDG pdg, BasicBlock boundaryBlock) {
         super();
@@ -292,7 +292,7 @@ public class PDGSlice extends Graph {
         return false;
     }
 
-    private boolean nodeCritetionIsDeclarationOfVariableCriterion() {
+    private boolean nodeCriterionIsDeclarationOfVariableCriterion() {
         return nodeCriterion.declaresLocalVariable(localVariableCriterion);
     }
 

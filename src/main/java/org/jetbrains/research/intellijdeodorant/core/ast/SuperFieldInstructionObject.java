@@ -1,6 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class SuperFieldInstructionObject {
 
@@ -8,7 +11,7 @@ public class SuperFieldInstructionObject {
     private final TypeObject type;
     private final String name;
     private boolean _static;
-    private ASTInformation simpleName;
+    private SmartPsiElementPointer<PsiElement> simpleName;
     private volatile int hashCode = 0;
 
     public SuperFieldInstructionObject(String ownerClass, TypeObject type, String name) {
@@ -39,11 +42,11 @@ public class SuperFieldInstructionObject {
     }
 
     public void setSimpleName(PsiElement simpleName) {
-        this.simpleName = ASTInformationGenerator.generateASTInformation(simpleName);
+        this.simpleName = toPointer(simpleName);
     }
 
     public PsiElement getSimpleName() {
-        return this.simpleName.recoverASTNode();
+        return this.simpleName.getElement();
     }
 
     public boolean equals(Object o) {

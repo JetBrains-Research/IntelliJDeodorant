@@ -1,12 +1,16 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiVariable;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ParameterObject extends VariableDeclarationObject {
     private final TypeObject type;
     private final String name;
     private final boolean varargs;
-    private ASTInformation singleVariableDeclaration;
+    private SmartPsiElementPointer<PsiElement> singleVariableDeclaration;
     private volatile int hashCode = 0;
 
     public ParameterObject(TypeObject type, String name, boolean varargs) {
@@ -28,11 +32,11 @@ public class ParameterObject extends VariableDeclarationObject {
     }
 
     public void setSingleVariableDeclaration(PsiVariable singleVariableDeclaration) {
-        this.singleVariableDeclaration = ASTInformationGenerator.generateASTInformation(singleVariableDeclaration);
+        this.singleVariableDeclaration = toPointer(singleVariableDeclaration);
     }
 
     public PsiVariable getSingleVariableDeclaration() {
-        return (PsiVariable) this.singleVariableDeclaration.recoverASTNode();
+        return (PsiVariable) this.singleVariableDeclaration.getElement();
     }
 
     public boolean equals(Object o) {

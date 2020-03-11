@@ -149,7 +149,7 @@ class AnonymousFeedback {
 
     /**
      * Creates the body of the GitHub issue. It will contain information about the system, error report information
-     * provided by the user and the full stack trace. Everything is formatted using markdown.
+     * provided by the user, and the full stack trace. Everything is formatted using markdown.
      *
      * @param errorReportInformation details provided by {@link ErrorReportInformation}
      * @return a markdown string representing the GitHub issue body.

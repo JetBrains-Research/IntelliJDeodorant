@@ -1,9 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
-
 import com.intellij.psi.util.PsiUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
@@ -12,9 +10,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
-import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
-import static org.jetbrains.research.intellijdeodorant.core.ast.ASTReader.getExaminedProject;
-import static java.util.stream.Collectors.toList;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.resolveMethod;
 
 public abstract class AbstractMethodFragment {
@@ -117,12 +112,12 @@ public abstract class AbstractMethodFragment {
                             if (variableInstruction instanceof PsiSuperExpression) {
                                 SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
                                 superFieldInstruction.setSimpleName(resolvedReference);
-                                if ((psiField.hasModifier(JvmModifier.STATIC)))
+                                if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
                                 FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName, psiField);
-                                if ((psiField.hasModifier(JvmModifier.STATIC)))
+                                if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
@@ -271,36 +266,50 @@ public abstract class AbstractMethodFragment {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
                 PsiMethod resolveMethod = methodInvocation.resolveMethod();
                 String originClassName = "";
+
+                if (resolveMethod != null && resolveMethod.getContainingClass() != null) {
+                    originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                }
+
                 if (resolveMethod == null || methodInvocation.getMethodExpression().getQualifierExpression() != null) {
-                    PsiMethodCallExpression methodExpression = getFirstMethodCallInAChain(methodInvocation);
-                    String methodName = methodExpression.getMethodExpression().getReferenceName();
-                    PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodExpression);
+                    PsiReferenceExpression qualifierExpression = getFirstQualifierInAChain(methodInvocation);
 
                     if (qualifierExpression == null) {
                         PsiMethod resolvedMethod = resolveMethod(methodInvocation);
                         if (resolvedMethod != null && resolvedMethod.getContainingClass() != null) {
-                            boolean isStatic = resolvedMethod.hasModifier(JvmModifier.STATIC);
-                            originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+                            boolean isStatic = resolvedMethod.hasModifierProperty(PsiModifier.STATIC);
+
+                            if (originClassName == null || originClassName.equals("")) {
+                                originClassName = resolvedMethod.getContainingClass().getQualifiedName();
+                            }
+
                             processMethodInvocation(methodInvocation, originClassName, isStatic);
                         }
                     } else {
-                        PsiElement resolvedElement = qualifierExpression.resolve();
-                        if (resolvedElement instanceof PsiParameter
-                                && resolvedElement.getParent() instanceof PsiParameterList) {
-                            PsiType resolvedQualifierType = ((PsiParameter) resolvedElement).getType();
-                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
-                        } else if (resolvedElement instanceof PsiField) {
-                            PsiType resolvedQualifierType = ((PsiField) resolvedElement).getType();
-                            originClassName = findClassBySimpleNameAndGetQualifiedName(resolvedQualifierType, methodName);
+                        if (originClassName == null || originClassName.equals("")) {
+                            PsiElement resolvedElement = qualifierExpression.resolve();
+                            if (resolvedElement instanceof PsiVariable) {
+                                PsiType resolvedQualifierType = ((PsiVariable) resolvedElement).getType();
+
+                                if (resolvedQualifierType instanceof PsiClassReferenceType) {
+                                    PsiClass resolvedClass = ((PsiClassReferenceType) resolvedQualifierType).resolve();
+                                    if (resolvedClass != null) {
+                                        originClassName = resolvedClass.getQualifiedName();
+                                    }
+                                }
+                            }
                         }
+
                         if (originClassName != null && !originClassName.equals("")) {
-                            processMethodInvocation(methodExpression, originClassName, false);
+                            processMethodInvocation(methodInvocation, originClassName, false);
                         }
                     }
                 } else {
-                    boolean isMethodStatic = resolveMethod.hasModifier(JvmModifier.STATIC);
+                    boolean isMethodStatic = resolveMethod.hasModifierProperty(PsiModifier.STATIC);
                     if (resolveMethod.getContainingClass() != null) {
-                        originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                        if (originClassName == null || originClassName.equals("")) {
+                            originClassName = resolveMethod.getContainingClass().getQualifiedName();
+                        }
                     }
                     processMethodInvocation(methodInvocation, originClassName, isMethodStatic);
                 }
@@ -324,26 +333,28 @@ public abstract class AbstractMethodFragment {
         return null;
     }
 
-    private String findClassBySimpleNameAndGetQualifiedName(PsiType classReferenceType, String methodName) {
-        String classQualifiedName = "";
-        if (classReferenceType instanceof PsiClassReferenceType) {
-            String classSimpleName = ((PsiClassReferenceType) classReferenceType).getName();
-            List<PsiClass> candidateClasses = getExaminedProject().getClasses().stream()
-                    .filter(psiClass -> classSimpleName.equals(psiClass.getName())).collect(toList());
-            for (PsiClass psiClass : candidateClasses) {
-                if (psiClass.findMethodsByName(methodName, true).length != 0) {
-                    classQualifiedName = psiClass.getQualifiedName();
-                }
-            }
-        }
-        return classQualifiedName;
-    }
-
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
         TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
-        TypeObject returnType = TypeObject.extractTypeObject("UNK");
-        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType);
+
+        String canonicalText = "UNK";
+
+        PsiMethod resolvedMethod = methodInvocation.resolveMethod();
+
+        ArrayList<TypeObject> typeObjects = new ArrayList<>();
+        if (resolvedMethod != null) {
+            for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
+                typeObjects.add(TypeObject.extractTypeObject(parameter.getType().getCanonicalText()));
+            }
+
+            PsiType methodReturnType = resolvedMethod.getReturnType();
+            if (methodReturnType != null) {
+                canonicalText = methodReturnType.getCanonicalText();
+            }
+        }
+        TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
+
+        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType, typeObjects);
         methodInvocationObject.setMethodInvocation(methodInvocation);
         methodInvocationObject.setStatic(isMethodStatic);
         addMethodInvocation(methodInvocationObject);
@@ -364,9 +375,8 @@ public abstract class AbstractMethodFragment {
             if (methodInvocationObject.isStatic())
                 addStaticallyInvokedMethod(methodInvocationObject);
             else {
-                PsiClass sourceClass = getParentOfType(methodInvocation, PsiClass.class);
-                if (sourceClass != null && originClassName != null
-                        && originClassName.equals(sourceClass.getQualifiedName())) {
+                PsiExpression qualifier = methodInvocation.getMethodExpression().getQualifierExpression();
+                if (qualifier == null || qualifier instanceof PsiThisExpression) {
                     addNonDistinctInvokedMethodThroughThisReference(methodInvocationObject);
                 }
             }
@@ -439,16 +449,16 @@ public abstract class AbstractMethodFragment {
                         fieldType.setArrayDimension(fieldType.getArrayDimension());
                         FieldObject fieldObject = new FieldObject(fieldType, psiField.getName(), psiField);
                         fieldObject.setClassName(anonymousClassObject.getName());
-                        if ((psiField.hasModifier(JvmModifier.PUBLIC)))
+                        if (psiField.hasModifierProperty(PsiModifier.PUBLIC))
                             fieldObject.setAccess(Access.PUBLIC);
-                        else if (psiField.hasModifier(JvmModifier.PROTECTED))
+                        else if (psiField.hasModifierProperty(PsiModifier.PROTECTED))
                             fieldObject.setAccess(Access.PROTECTED);
-                        else if (psiField.hasModifier(JvmModifier.PRIVATE))
+                        else if (psiField.hasModifierProperty(PsiModifier.PRIVATE))
                             fieldObject.setAccess(Access.PRIVATE);
                         else
                             fieldObject.setAccess(Access.NONE);
 
-                        if (psiField.hasModifier(JvmModifier.STATIC))
+                        if (psiField.hasModifierProperty(PsiModifier.STATIC))
                             fieldObject.setStatic(true);
 
                         anonymousClassObject.addField(fieldObject);
@@ -460,11 +470,11 @@ public abstract class AbstractMethodFragment {
                         constructorObject.setName(psiMethod.getName());
                         constructorObject.setClassName(anonymousClassObject.getName());
 
-                        if ((psiMethod.hasModifier(JvmModifier.PUBLIC)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.PUBLIC))
                             constructorObject.setAccess(Access.PUBLIC);
-                        else if ((psiMethod.hasModifier(JvmModifier.PROTECTED)))
+                        else if (psiMethod.hasModifierProperty(PsiModifier.PROTECTED))
                             constructorObject.setAccess(Access.PROTECTED);
-                        else if ((psiMethod.hasModifier(JvmModifier.PRIVATE)))
+                        else if (psiMethod.hasModifierProperty(PsiModifier.PRIVATE))
                             constructorObject.setAccess(Access.PRIVATE);
                         else
                             constructorObject.setAccess(Access.NONE);
@@ -503,13 +513,13 @@ public abstract class AbstractMethodFragment {
                         }
                         methodObject.setReturnType(returnTypeObject);
 
-                        if ((psiMethod.hasModifier(JvmModifier.ABSTRACT)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.ABSTRACT))
                             methodObject.setAbstract(true);
-                        if ((psiMethod.hasModifier(JvmModifier.STATIC)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.STATIC))
                             methodObject.setStatic(true);
-                        if ((psiMethod.hasModifier(JvmModifier.SYNCHRONIZED)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.SYNCHRONIZED))
                             methodObject.setSynchronized(true);
-                        if ((psiMethod.hasModifier(JvmModifier.NATIVE)))
+                        if (psiMethod.hasModifierProperty(PsiModifier.NATIVE))
                             methodObject.setNative(true);
 
                         anonymousClassObject.addMethod(methodObject);

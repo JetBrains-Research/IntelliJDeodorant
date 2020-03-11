@@ -5,42 +5,44 @@ import com.sun.istack.NotNull;
 
 import java.util.*;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class ASTSlice {
     @NotNull
-    private final PsiClass sourceTypeDeclaration;
+    private final SmartPsiElementPointer<PsiElement> sourceTypeDeclaration;
     @NotNull
-    private final PsiMethod sourceMethodDeclaration;
+    private final SmartPsiElementPointer<PsiElement> sourceMethodDeclaration;
     @NotNull
-    private final PsiFile psiFile;
+    private final SmartPsiElementPointer<PsiElement> psiFile;
     @NotNull
-    private PsiStatement variableCriterionDeclarationStatement;
+    private SmartPsiElementPointer<PsiElement> variableCriterionDeclarationStatement;
     @NotNull
-    private PsiStatement extractedMethodInvocationInsertionStatement;
-    private PsiVariable localVariableCriterion;
-    private Set<PDGNode> sliceNodes;
-    private Set<PsiStatement> sliceStatements;
-    private Set<PsiStatement> removableStatements;
-    private Set<PsiStatement> duplicatedStatements;
-    private Set<PsiVariable> passedParameters;
+    private final SmartPsiElementPointer<PsiElement> extractedMethodInvocationInsertionStatement;
+    private SmartPsiElementPointer<PsiElement> localVariableCriterion;
+    private final Set<PDGNode> sliceNodes;
+    private final Set<SmartPsiElementPointer<PsiElement>> sliceStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> removableStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> duplicatedStatements;
+    private final Set<SmartPsiElementPointer<PsiElement>> passedParameters;
 
     private String extractedMethodName;
-    private boolean declarationOfVariableCriterionBelongsToSliceNodes;
-    private boolean declarationOfVariableCriterionBelongsToRemovableNodes;
-    private BasicBlock boundaryBlock;
-    private boolean isObjectSlice;
-    private int methodSize;
+    private final boolean declarationOfVariableCriterionBelongsToSliceNodes;
+    private final boolean declarationOfVariableCriterionBelongsToRemovableNodes;
+    private final BasicBlock boundaryBlock;
+    private final boolean isObjectSlice;
+    private final int methodSize;
 
     public ASTSlice(PDGSlice pdgSlice) {
-        this.sourceMethodDeclaration = pdgSlice.getMethod().getMethodDeclaration();
-        this.sourceTypeDeclaration = (PsiClass) sourceMethodDeclaration.getParent();
+        this.sourceMethodDeclaration = toPointer(pdgSlice.getMethod().getMethodDeclaration());
+        this.sourceTypeDeclaration = toPointer(sourceMethodDeclaration.getElement().getParent());
         this.sliceNodes = pdgSlice.getSliceNodes();
         this.sliceStatements = new LinkedHashSet<>();
         for (PDGNode node : sliceNodes) {
-            sliceStatements.add(node.getASTStatement());
+            sliceStatements.add(toPointer(node.getASTStatement()));
         }
         this.removableStatements = new LinkedHashSet<>();
         for (PDGNode node : pdgSlice.getRemovableNodes()) {
-            removableStatements.add(node.getASTStatement());
+            removableStatements.add(toPointer(node.getASTStatement()));
         }
         this.duplicatedStatements = new LinkedHashSet<>(sliceStatements);
         this.duplicatedStatements.removeAll(removableStatements);
@@ -48,8 +50,8 @@ public class ASTSlice {
         AbstractVariable criterion = pdgSlice.getLocalVariableCriterion();
         for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
             if (variableDeclaration.equals(criterion.getOrigin())) {
-                this.localVariableCriterion = variableDeclaration;
-                this.extractedMethodName = Objects.requireNonNull(localVariableCriterion.getNameIdentifier()).getText();
+                this.localVariableCriterion = toPointer(variableDeclaration);
+                this.extractedMethodName = Objects.requireNonNull(((PsiVariable) localVariableCriterion.getElement()).getNameIdentifier()).getText();
                 break;
             }
         }
@@ -57,34 +59,34 @@ public class ASTSlice {
         for (AbstractVariable variable : pdgSlice.getPassedParameters()) {
             for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
                 if (variableDeclaration.equals(variable.getOrigin())) {
-                    passedParameters.add(variableDeclaration);
+                    passedParameters.add(toPointer(variableDeclaration));
                     break;
                 }
             }
         }
         PDGNode declarationOfVariableCriterionNode = pdgSlice.getDeclarationOfVariableCriterion();
         if (declarationOfVariableCriterionNode != null)
-            this.variableCriterionDeclarationStatement = declarationOfVariableCriterionNode.getASTStatement();
-        this.extractedMethodInvocationInsertionStatement = pdgSlice.getExtractedMethodInvocationInsertionNode().getASTStatement();
+            this.variableCriterionDeclarationStatement = toPointer(declarationOfVariableCriterionNode.getASTStatement());
+        this.extractedMethodInvocationInsertionStatement = toPointer(pdgSlice.getExtractedMethodInvocationInsertionNode().getASTStatement());
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgSlice.declarationOfVariableCriterionBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgSlice.declarationOfVariableCriterionBelongsToRemovableNodes();
-        this.psiFile = pdgSlice.getIFile();
+        this.psiFile = toPointer(pdgSlice.getIFile());
         this.boundaryBlock = pdgSlice.getBoundaryBlock();
         this.isObjectSlice = false;
         this.methodSize = pdgSlice.getMethodSize();
     }
 
     public ASTSlice(PDGSliceUnion pdgSliceUnion) {
-        this.sourceMethodDeclaration = pdgSliceUnion.getMethod().getMethodDeclaration();
-        this.sourceTypeDeclaration = (PsiClass) sourceMethodDeclaration.getParent();
+        this.sourceMethodDeclaration = toPointer(pdgSliceUnion.getMethod().getMethodDeclaration());
+        this.sourceTypeDeclaration = toPointer(sourceMethodDeclaration.getElement().getParent());
         this.sliceNodes = pdgSliceUnion.getSliceNodes();
         this.sliceStatements = new LinkedHashSet<>();
         for (PDGNode node : sliceNodes) {
-            sliceStatements.add(node.getASTStatement());
+            sliceStatements.add(toPointer(node.getASTStatement()));
         }
         this.removableStatements = new LinkedHashSet<>();
         for (PDGNode node : pdgSliceUnion.getRemovableNodes()) {
-            removableStatements.add(node.getASTStatement());
+            removableStatements.add(toPointer(node.getASTStatement()));
         }
         this.duplicatedStatements = new LinkedHashSet<>(sliceStatements);
         this.duplicatedStatements.removeAll(removableStatements);
@@ -92,8 +94,8 @@ public class ASTSlice {
         AbstractVariable criterion = pdgSliceUnion.getLocalVariableCriterion();
         for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
             if (variableDeclaration.equals(criterion.getOrigin())) {
-                this.localVariableCriterion = variableDeclaration;
-                this.extractedMethodName = Objects.requireNonNull(localVariableCriterion.getNameIdentifier()).getText();
+                this.localVariableCriterion = toPointer(variableDeclaration);
+                this.extractedMethodName = Objects.requireNonNull(((PsiVariable) localVariableCriterion.getElement()).getNameIdentifier()).getText();
                 break;
             }
         }
@@ -101,34 +103,34 @@ public class ASTSlice {
         for (AbstractVariable variable : pdgSliceUnion.getPassedParameters()) {
             for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
                 if (variableDeclaration.equals(variable.getOrigin())) {
-                    passedParameters.add(variableDeclaration);
+                    passedParameters.add(toPointer(variableDeclaration));
                     break;
                 }
             }
         }
         PDGNode declarationOfVariableCriterionNode = pdgSliceUnion.getDeclarationOfVariableCriterion();
         if (declarationOfVariableCriterionNode != null)
-            this.variableCriterionDeclarationStatement = declarationOfVariableCriterionNode.getASTStatement();
-        this.extractedMethodInvocationInsertionStatement = pdgSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement();
+            this.variableCriterionDeclarationStatement = toPointer(declarationOfVariableCriterionNode.getASTStatement());
+        this.extractedMethodInvocationInsertionStatement = toPointer(pdgSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement());
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgSliceUnion.declarationOfVariableCriterionBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgSliceUnion.declarationOfVariableCriterionBelongsToRemovableNodes();
-        this.psiFile = pdgSliceUnion.getIFile();
+        this.psiFile = toPointer(pdgSliceUnion.getIFile());
         this.boundaryBlock = pdgSliceUnion.getBoundaryBlock();
         this.isObjectSlice = false;
         this.methodSize = pdgSliceUnion.getMethodSize();
     }
 
     public ASTSlice(PDGObjectSliceUnion pdgObjectSliceUnion) {
-        this.sourceMethodDeclaration = pdgObjectSliceUnion.getMethod().getMethodDeclaration();
-        this.sourceTypeDeclaration = (PsiClass) sourceMethodDeclaration.getParent();
+        this.sourceMethodDeclaration = toPointer(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
+        this.sourceTypeDeclaration = toPointer(sourceMethodDeclaration.getElement().getParent());
         this.sliceNodes = pdgObjectSliceUnion.getSliceNodes();
         this.sliceStatements = new LinkedHashSet<>();
         for (PDGNode node : sliceNodes) {
-            sliceStatements.add(node.getASTStatement());
+            sliceStatements.add(toPointer(node.getASTStatement()));
         }
         this.removableStatements = new LinkedHashSet<>();
         for (PDGNode node : pdgObjectSliceUnion.getRemovableNodes()) {
-            removableStatements.add(node.getASTStatement());
+            removableStatements.add(toPointer(node.getASTStatement()));
         }
         this.duplicatedStatements = new LinkedHashSet<>(sliceStatements);
         this.duplicatedStatements.removeAll(removableStatements);
@@ -136,8 +138,8 @@ public class ASTSlice {
         AbstractVariable criterion = pdgObjectSliceUnion.getObjectReference();
         for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
             if (variableDeclaration.equals(criterion.getOrigin())) {
-                this.localVariableCriterion = variableDeclaration;
-                this.extractedMethodName = Objects.requireNonNull(localVariableCriterion.getNameIdentifier()).getText();
+                this.localVariableCriterion = toPointer(variableDeclaration);
+                this.extractedMethodName = Objects.requireNonNull(((PsiVariable) localVariableCriterion.getElement()).getNameIdentifier()).getText();
                 break;
             }
         }
@@ -145,18 +147,18 @@ public class ASTSlice {
         for (AbstractVariable variable : pdgObjectSliceUnion.getPassedParameters()) {
             for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
                 if (variableDeclaration.equals(variable.getOrigin())) {
-                    passedParameters.add(variableDeclaration);
+                    passedParameters.add(toPointer(variableDeclaration));
                     break;
                 }
             }
         }
         PDGNode declarationOfObjectReferenceNode = pdgObjectSliceUnion.getDeclarationOfObjectReference();
         if (declarationOfObjectReferenceNode != null)
-            this.variableCriterionDeclarationStatement = declarationOfObjectReferenceNode.getASTStatement();
-        this.extractedMethodInvocationInsertionStatement = pdgObjectSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement();
+            this.variableCriterionDeclarationStatement = toPointer(declarationOfObjectReferenceNode.getASTStatement());
+        this.extractedMethodInvocationInsertionStatement = toPointer(pdgObjectSliceUnion.getExtractedMethodInvocationInsertionNode().getASTStatement());
         this.declarationOfVariableCriterionBelongsToSliceNodes = pdgObjectSliceUnion.declarationOfObjectReferenceBelongsToSliceNodes();
         this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgObjectSliceUnion.declarationOfObjectReferenceBelongsToRemovableNodes();
-        this.psiFile = pdgObjectSliceUnion.getIFile();
+        this.psiFile = toPointer(pdgObjectSliceUnion.getIFile());
         this.boundaryBlock = pdgObjectSliceUnion.getBoundaryBlock();
         this.isObjectSlice = true;
         this.methodSize = pdgObjectSliceUnion.getMethodSize();
@@ -187,18 +189,18 @@ public class ASTSlice {
     }
 
     public PsiClass getSourceTypeDeclaration() {
-        return sourceTypeDeclaration;
+        return (PsiClass) sourceTypeDeclaration.getElement();
     }
 
     public PsiMethod getSourceMethodDeclaration() {
-        return sourceMethodDeclaration;
+        return (PsiMethod) sourceMethodDeclaration.getElement();
     }
 
     public PsiVariable getLocalVariableCriterion() {
-        return localVariableCriterion;
+        return (PsiVariable) localVariableCriterion.getElement();
     }
 
-    public Set<PsiVariable> getPassedParameters() {
+    public Set<SmartPsiElementPointer<PsiElement>> getPassedParameters() {
         return passedParameters;
     }
 
@@ -206,20 +208,20 @@ public class ASTSlice {
         return sliceNodes;
     }
 
-    public Set<PsiStatement> getSliceStatements() {
+    public Set<SmartPsiElementPointer<PsiElement>> getSliceStatements() {
         return sliceStatements;
     }
 
-    private Set<PsiStatement> getRemovableStatements() {
+    private Set<SmartPsiElementPointer<PsiElement>> getRemovableStatements() {
         return removableStatements;
     }
 
     private PsiStatement getVariableCriterionDeclarationStatement() {
-        return variableCriterionDeclarationStatement;
+        return variableCriterionDeclarationStatement == null ? null : (PsiStatement) variableCriterionDeclarationStatement.getElement();
     }
 
     private PsiStatement getExtractedMethodInvocationInsertionStatement() {
-        return extractedMethodInvocationInsertionStatement;
+        return (PsiStatement) extractedMethodInvocationInsertionStatement.getElement();
     }
 
     public String getExtractedMethodName() {
@@ -239,7 +241,7 @@ public class ASTSlice {
     }
 
     public PsiFile getPsiFile() {
-        return psiFile;
+        return (PsiFile) psiFile.getElement();
     }
 
     public BasicBlock getBoundaryBlock() {
@@ -264,8 +266,7 @@ public class ASTSlice {
 
     public String toString() {
         return getSourceTypeDeclaration().getQualifiedName() + "::" +
-                getSourceMethodDeclaration().getName() + "." +
-                getLocalVariableCriterion().getName();
+                getSourceMethodDeclaration().getName();
     }
 
     public int getNumberOfSliceStatements() {
@@ -284,13 +285,10 @@ public class ASTSlice {
      * @return true if all {@link PsiStatement} are valid, false otherwise.
      */
     public boolean areSliceStatementsValid() {
-        Set<PsiStatement> setOfSliceStatements = this.getSliceStatements();
-        if (setOfSliceStatements.isEmpty()) {
-            return false;
-        }
-        Iterator<PsiStatement> iterator = setOfSliceStatements.iterator();
-        while (iterator.hasNext()) {
-            if (!iterator.next().isValid()) {
+        for (SmartPsiElementPointer<PsiElement> psiElementSmartPsiElementPointer : this.getSliceStatements()) {
+            if (psiElementSmartPsiElementPointer.getElement() == null ||
+                    psiElementSmartPsiElementPointer.getElement() instanceof PsiStatement
+                            && !psiElementSmartPsiElementPointer.getElement().isValid()) {
                 return false;
             }
         }

@@ -11,12 +11,17 @@ import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Collects information about project: files, classes, and methods.
+ */
 public class ProjectInfo {
     private final List<PsiJavaFile> psiFiles;
     private final List<PsiClass> psiClasses;
     private final List<PsiMethod> psiMethods;
+    private final Project project;
 
     public ProjectInfo(Project project) {
+        this.project = project;
         this.psiFiles = PsiUtils.extractFiles(project);
         this.psiClasses = psiFiles.stream()
                 .flatMap(psiFile -> PsiUtils.extractClasses(psiFile).stream())
@@ -61,5 +66,9 @@ public class ProjectInfo {
 
     public List<PsiJavaFile> getPsiFiles() {
         return psiFiles;
+    }
+
+    public Project getProject() {
+        return project;
     }
 }

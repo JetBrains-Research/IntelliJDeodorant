@@ -6,19 +6,18 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtracto
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * StatementObject represents the following AST Statement subclasses:
- * 1.	ExpressionStatement
- * 2.	VariableDeclarationStatement
- * 3.	ConstructorInvocation
- * 4.	SuperConstructorInvocation
- * 5.	ReturnStatement
- * 6.	AssertStatement
- * 7.	BreakStatement
- * 8.	ContinueStatement
- * 9.	SwitchCase
- * 10.	EmptyStatement
- * 11.	ThrowStatement
+/**
+ * The class represents the following types of {@link PsiStatement}:
+ * {@link PsiExpressionStatement}
+ * {@link PsiDeclarationStatement}
+ * {@link PsiConstructorCall}
+ * {@link PsiReturnStatement}
+ * {@link PsiAssertStatement}
+ * {@link PsiBreakStatement}
+ * {@link PsiContinueStatement}
+ * {@link PsiSwitchStatement}
+ * {@link PsiEmptyStatement}
+ * {@link PsiThrowStatement}
  */
 
 public class StatementObject extends AbstractStatement {

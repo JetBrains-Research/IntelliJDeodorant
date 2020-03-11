@@ -1,8 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.util;
 
-import java.util.*;
-
 import com.intellij.psi.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ExpressionExtractor {
 
@@ -15,10 +17,23 @@ public class ExpressionExtractor {
     }
 
     // returns a List of Variable objects
+    public List<PsiExpression> getVariableInstructions(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfVariable();
+        return getExpressions(statement);
+    }
+
+    // returns a List of Variable objects
     public List<PsiExpression> getVariableInstructions(PsiExpression expression) {
         instanceChecker = new InstanceOfVariable();
         return getExpressions(expression);
     }
+
+    // returns a List of Variable objects
+    public List<PsiExpression> getVariableInstructions(PsiExpression[] expression) {
+        instanceChecker = new InstanceOfVariable();
+        return getExpressions(expression);
+    }
+
 
     // returns a List of MethodInvocation and SuperMethodInvocation objects
     public List<PsiExpression> getMethodInvocations(PsiStatement statement) {
@@ -69,10 +84,17 @@ public class ExpressionExtractor {
     }
 
     // returns a List of ClassInstanceCreation objects
-    public List<PsiExpression> getClassInstanceCreations(PsiStatement statement) {
+    public List<PsiExpression> getClassInstanceCreations(PsiElement statement) {
         instanceChecker = new InstanceOfClassInstanceCreation();
         return getExpressions(statement);
     }
+
+    // returns a List of ClassInstanceCreation objects
+    public List<PsiExpression> getClassInstanceCreations(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfClassInstanceCreation();
+        return getExpressions(statement);
+    }
+
 
     // returns a List of ClassInstanceCreation objects
     public List<PsiExpression> getClassInstanceCreations(PsiExpression expression) {
@@ -181,6 +203,12 @@ public class ExpressionExtractor {
     }
 
     // returns a List of PostfixExpression objects
+    public List<PsiExpression> getPostfixExpressions(PsiStatement[] statement) {
+        instanceChecker = new InstanceOfPostfixExpression();
+        return getExpressions(statement);
+    }
+
+    // returns a List of PostfixExpression objects
     public List<PsiExpression> getPostfixExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfPostfixExpression();
         return getExpressions(expression);
@@ -188,6 +216,12 @@ public class ExpressionExtractor {
 
     // returns a List of PrefixExpression objects
     public List<PsiExpression> getPrefixExpressions(PsiStatement statement) {
+        instanceChecker = new InstanceOfPrefixExpression();
+        return getExpressions(statement);
+    }
+
+    // returns a List of PrefixExpression objects
+    public List<PsiExpression> getPrefixExpressions(PsiStatement[] statement) {
         instanceChecker = new InstanceOfPrefixExpression();
         return getExpressions(statement);
     }
@@ -220,6 +254,19 @@ public class ExpressionExtractor {
     public List<PsiExpression> getVariableModifiers(PsiExpression expression) {
         instanceChecker = new InstanceOfVariableModifier();
         return getExpressions(expression);
+    }
+
+    private List<PsiExpression> getExpressions(PsiElement[] elements) {
+        List<PsiExpression> result = new ArrayList<>();
+        for (PsiElement element : elements) {
+            if (element instanceof PsiExpression) {
+                result.addAll(getExpressions((PsiExpression) element));
+            } else {
+                result.addAll(getExpressions(element));
+            }
+        }
+
+        return result;
     }
 
     private List<PsiExpression> getExpressions(PsiElement element) {
@@ -349,6 +396,11 @@ public class ExpressionExtractor {
                     expressionList.addAll(getExpressions(((PsiVariable) psiElement).getInitializer()));
                 }
             }
+        } else if (element instanceof PsiExpressionListStatement) {
+            PsiExpressionListStatement listStatement = (PsiExpressionListStatement) element;
+            for (PsiExpression psiExpression : listStatement.getExpressionList().getExpressions()) {
+                expressionList.addAll(getExpressions(psiExpression));
+            }
         }
         return expressionList;
     }
@@ -357,7 +409,6 @@ public class ExpressionExtractor {
         List<PsiExpression> expressionList = new ArrayList<>();
         if (expression instanceof PsiMethodCallExpression) {
             PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-            expressionList.addAll(getExpressions(methodInvocation.getMethodExpression()));
             expressionList.addAll(getExpressions(methodInvocation.getMethodExpression().getQualifierExpression()));
             PsiExpressionList arguments = methodInvocation.getArgumentList();
             for (PsiExpression argument : arguments.getExpressions())
@@ -384,6 +435,12 @@ public class ExpressionExtractor {
                 for (PsiExpression argument : arguments)
                     expressionList.addAll(getExpressions(argument));
             }
+            if (classInstanceCreation.isArrayCreation()) {
+                PsiExpression[] arrayDimensions = classInstanceCreation.getArrayDimensions();
+                for (PsiExpression arrayDimension: arrayDimensions) {
+                    expressionList.addAll(getExpressions(arrayDimension));
+                }
+            }
             if (instanceChecker.instanceOf(classInstanceCreation))
                 expressionList.add(classInstanceCreation);
             PsiAnonymousClass anonymousClassDeclaration = classInstanceCreation.getAnonymousClass();
@@ -401,9 +458,6 @@ public class ExpressionExtractor {
             PsiBinaryExpression infixExpression = (PsiBinaryExpression) expression;
             expressionList.addAll(getExpressions(infixExpression.getLOperand()));
             expressionList.addAll(getExpressions(infixExpression.getROperand()));
-            PsiExpression[] extendedOperands = infixExpression.getOperands();
-            for (PsiExpression operand : extendedOperands)
-                expressionList.addAll(getExpressions(operand));
             if (instanceChecker.instanceOf(infixExpression))
                 expressionList.add(infixExpression);
         } else if (expression instanceof PsiInstanceOfExpression) {

@@ -1,11 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TypeCheckCodeFragmentAnalyzer;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckElimination;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.ListIterator;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ClassObject extends ClassDeclarationObject {
 
@@ -18,10 +22,10 @@ public class ClassObject extends ClassDeclarationObject {
     private boolean _static;
     private boolean _enum;
     private Access access;
-    private ASTInformation typeDeclaration;
+    private SmartPsiElementPointer<PsiElement> typeDeclaration;
     private final String psiType;
-    private final PsiFile psiFile;
-    private final PsiClass psiClass;
+    private final SmartPsiElementPointer<PsiElement> psiFile;
+    private final SmartPsiElementPointer<PsiElement> psiClass;
 
     public ClassObject(PsiClass psiClass) {
         this.psiType = psiClass.getQualifiedName();
@@ -29,22 +33,22 @@ public class ClassObject extends ClassDeclarationObject {
         this.constructorList = new ArrayList<>();
         this.interfaceList = new ArrayList<>();
         this.enumConstantDeclarationList = new ArrayList<>();
-        this._abstract = psiClass.hasModifier(JvmModifier.ABSTRACT);
+        this._abstract = psiClass.hasModifierProperty(PsiModifier.ABSTRACT);
         this._interface = psiClass.isInterface();
-        this._static = psiClass.hasModifier(JvmModifier.STATIC);
+        this._static = psiClass.hasModifierProperty(PsiModifier.STATIC);
         this._enum = psiClass.isEnum();
         this.access = Access.NONE;
-        this.typeDeclaration = ASTInformationGenerator.generateASTInformation(psiClass);
-        this.psiFile = psiClass.getContainingFile();
-        this.psiClass = psiClass;
+        this.typeDeclaration = toPointer(psiClass);
+        this.psiFile = toPointer(psiClass.getContainingFile());
+        this.psiClass = toPointer(psiClass);
     }
 
     public void setAbstractTypeDeclaration(PsiDeclarationStatement typeDeclaration) {
-        this.typeDeclaration = ASTInformationGenerator.generateASTInformation(typeDeclaration);
+        this.typeDeclaration = toPointer(typeDeclaration);
     }
 
-    public ASTInformation getAbstractTypeDeclaration() {
-        return typeDeclaration;
+    public PsiElement getAbstractTypeDeclaration() {
+        return typeDeclaration.getElement();
     }
 
     public ClassObject getClassObject() {
@@ -55,8 +59,8 @@ public class ClassObject extends ClassDeclarationObject {
         return psiType;
     }
 
-    public PsiFile getPsiFile() {
-        return psiFile;
+    public PsiJavaFile getPsiFile() {
+        return (PsiJavaFile) psiFile.getElement();
     }
 
     private boolean isFriend(String className) {
@@ -116,6 +120,36 @@ public class ClassObject extends ClassDeclarationObject {
         if (type.getClassType().equals(className))
             return true;
         return type.getGenericType() != null && type.getGenericType().contains(className);
+    }
+
+    public List<TypeCheckElimination> generateTypeCheckEliminations() {
+        List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
+        if (!_enum) {
+            for (MethodObject methodObject : methodList) {
+                MethodBodyObject methodBodyObject = methodObject.getMethodBody();
+                if (methodBodyObject != null) {
+                    List<TypeCheckElimination> list = methodBodyObject.generateTypeCheckEliminations();
+                    for (TypeCheckElimination typeCheckElimination : list) {
+                        if (!typeCheckElimination.allTypeCheckBranchesAreEmpty()) {
+                            TypeCheckCodeFragmentAnalyzer analyzer = new TypeCheckCodeFragmentAnalyzer(
+                                    typeCheckElimination,
+                                    (PsiClass) getAbstractTypeDeclaration(),
+                                    methodObject.getMethodDeclaration()
+                            );
+                            boolean hasTypeLocalVariableFieldOrMethod = typeCheckElimination.getTypeField() != null
+                                    || typeCheckElimination.getTypeLocalVariable() != null
+                                    || typeCheckElimination.getTypeMethodInvocation() != null;
+                            if (hasTypeLocalVariableFieldOrMethod
+                                    && typeCheckElimination.allTypeCheckingsContainStaticFieldOrSubclassType()
+                                    && typeCheckElimination.isApplicable()) {
+                                typeCheckEliminations.add(typeCheckElimination);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return typeCheckEliminations;
     }
 
     public void setAccess(Access access) {
@@ -252,6 +286,6 @@ public class ClassObject extends ClassDeclarationObject {
     }
 
     public PsiClass getPsiClass() {
-        return psiClass;
+        return (PsiClass) psiClass.getElement();
     }
 }

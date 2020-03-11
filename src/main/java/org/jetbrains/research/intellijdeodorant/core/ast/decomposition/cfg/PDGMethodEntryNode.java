@@ -6,7 +6,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.ParameterObject;
 import java.util.ListIterator;
 
 public class PDGMethodEntryNode extends PDGNode {
-    private AbstractMethodDeclaration method;
+    private final AbstractMethodDeclaration method;
 
     PDGMethodEntryNode(AbstractMethodDeclaration method) {
         super();

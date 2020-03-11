@@ -1,13 +1,11 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
-import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiParameterList;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public abstract class AbstractVariable {
-    final PsiVariable origin;
+    final SmartPsiElementPointer<PsiElement> origin; //Could be either PsiVariable or PsiClass in order to represent "this" element, that in Eclipse is instance of IVariableBinding, but not in IDEA.
     final String name;
     final String type;
     final boolean isField;
@@ -15,17 +13,17 @@ public abstract class AbstractVariable {
     final boolean isStatic;
 
     AbstractVariable(PsiVariable psiVariable) {
-        this.origin = psiVariable;
+        this.origin = toPointer(psiVariable);
         this.name = psiVariable.getName();
         this.type = psiVariable.getType().getCanonicalText();
         this.isField = (psiVariable instanceof PsiField);
         this.isParameter = (psiVariable instanceof PsiParameter)
                 && (psiVariable.getParent() instanceof PsiParameterList);
-        this.isStatic = psiVariable.hasModifier(JvmModifier.STATIC);
+        this.isStatic = psiVariable.hasModifierProperty(PsiModifier.STATIC);
     }
 
-    AbstractVariable(PsiVariable origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
-        this.origin = origin;
+    AbstractVariable(PsiElement origin, String name, String type, boolean isField, boolean isParameter, boolean isStatic) {
+        this.origin = toPointer(origin);
         this.name = name;
         this.type = type;
         this.isField = isField;
@@ -33,8 +31,8 @@ public abstract class AbstractVariable {
         this.isStatic = isStatic;
     }
 
-    public PsiVariable getOrigin() {
-        return origin;
+    public PsiElement getOrigin() {
+        return origin.getElement();
     }
 
     public String getName() {

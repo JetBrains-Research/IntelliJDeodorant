@@ -29,7 +29,7 @@ public class PsiUtils {
         final String methodName = method.getName();
         final StringBuilder out = new StringBuilder(50);
         out.append(className);
-        out.append('.');
+        out.append("::");
         out.append(methodName);
         out.append('(');
         final PsiParameterList parameterList = method.getParameterList();
@@ -93,7 +93,7 @@ public class PsiUtils {
         PsiClass[] psiClasses = psiFile.getClasses();
         for (PsiClass psiClass : psiClasses) {
             allClasses.add(psiClass);
-            allClasses.addAll(Arrays.asList(psiClass.getAllInnerClasses()));
+            allClasses.addAll(Arrays.asList(psiClass.getInnerClasses()));
         }
         return allClasses;
     }
@@ -176,4 +176,13 @@ public class PsiUtils {
         }
         return null;
     }
+
+    public static SmartPsiElementPointer<PsiElement> toPointer(@NotNull PsiElement psiElement) {
+        return SmartPointerManager.createPointer(psiElement);
+    }
+
+    public static SmartPsiElementPointer<PsiExpression> toPointer(@NotNull PsiExpression psiElement) {
+        return SmartPointerManager.createPointer(psiElement);
+    }
+
 }

@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 class BasicBlockCFG {
-    private List<BasicBlock> basicBlocks;
-    private Map<BasicBlock, Set<BasicBlock>> forwardReachableBlocks;
+    private final List<BasicBlock> basicBlocks;
+    private final Map<BasicBlock, Set<BasicBlock>> forwardReachableBlocks;
 
     BasicBlockCFG(CFG cfg) {
         this.basicBlocks = new ArrayList<>();

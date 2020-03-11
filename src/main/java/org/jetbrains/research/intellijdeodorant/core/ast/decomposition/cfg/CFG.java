@@ -11,10 +11,10 @@ public class CFG extends Graph {
     private static final int JOIN_TOP_LIST = 1;
     private static final int PLACE_NEW_LIST_SECOND_FROM_TOP = 2;
     private static final int JOIN_SECOND_FROM_TOP_LIST = 3;
-    private AbstractMethodDeclaration method;
-    private Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
-    private Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
-    private Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
+    private final AbstractMethodDeclaration method;
+    private final Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
+    private final Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
+    private final Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
     private BasicBlockCFG basicBlockCFG;
 
     public CFG(AbstractMethodDeclaration method) {
@@ -54,14 +54,18 @@ public class CFG extends Graph {
             findBlockNodeControlParent(tryNode);
             directlyNestedNodesInBlocks.put(tryNode, new ArrayList<>());
             AbstractStatement firstStatement = composite.getStatements().get(0);
-            composite = (CompositeStatementObject) firstStatement;
+            if (firstStatement instanceof CompositeStatementObject) {
+                composite = (CompositeStatementObject) firstStatement;
+            }
         } else if (composite instanceof SynchronizedStatementObject) {
             CFGSynchronizedNode synchronizedNode = new CFGSynchronizedNode(composite);
             directlyNestedNodeInBlock(synchronizedNode);
             findBlockNodeControlParent(synchronizedNode);
             directlyNestedNodesInBlocks.put(synchronizedNode, new ArrayList<>());
             AbstractStatement firstStatement = composite.getStatements().get(0);
-            composite = (CompositeStatementObject) firstStatement;
+            if (firstStatement instanceof CompositeStatementObject) {
+                composite = (CompositeStatementObject) firstStatement;
+            }
         }
         int i = 0;
         for (AbstractStatement abstractStatement : composite.getStatements()) {
@@ -345,6 +349,8 @@ public class CFG extends Graph {
                         else
                             previousStatement = null;
                     }
+                } else {
+                    previousStatement = null;
                 }
                 j++;
             }
@@ -414,12 +420,14 @@ public class CFG extends Graph {
             CFGSwitchCaseNode switchCase = (CFGSwitchCaseNode) currentNode;
             if (previousNodesContainBreakOrReturn(previousNodes, composite)) {
                 CFGBranchSwitchNode switchNode = getMostRecentSwitchNode();
-                Flow flow = new Flow(switchNode, currentNode);
-                if (switchCase.isDefault())
-                    flow.setFalseControlFlow(true);
-                else
-                    flow.setTrueControlFlow(true);
-                edges.add(flow);
+                if (switchNode != null) {
+                    Flow flow = new Flow(switchNode, currentNode);
+                    if (switchCase.isDefault())
+                        flow.setFalseControlFlow(true);
+                    else
+                        flow.setTrueControlFlow(true);
+                    edges.add(flow);
+                }
             } else
                 createTopDownFlow(previousNodes, currentNode);
         } else
@@ -477,7 +485,8 @@ public class CFG extends Graph {
 
     private void directlyNestedNodeInBlock(CFGNode node) {
         for (CFGBlockNode blockNode : directlyNestedNodesInBlocks.keySet()) {
-            if (directlyNestedNode(node, (CompositeStatementObject) blockNode.getStatement())) {
+            if (blockNode.getStatement() instanceof CompositeStatementObject
+                    && directlyNestedNode(node, (CompositeStatementObject) blockNode.getStatement())) {
                 List<CFGNode> directlyNestedNodes = directlyNestedNodesInBlocks.get(blockNode);
                 directlyNestedNodes.add(node);
                 break;

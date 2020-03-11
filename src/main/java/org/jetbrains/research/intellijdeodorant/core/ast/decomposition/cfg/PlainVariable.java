@@ -1,5 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiVariable;
 
 public class PlainVariable extends AbstractVariable {
@@ -9,7 +11,7 @@ public class PlainVariable extends AbstractVariable {
         super(variable);
     }
 
-    public PlainVariable(PsiVariable origin, String variableName, String variableType, boolean isField,
+    public PlainVariable(PsiElement origin, String variableName, String variableType, boolean isField,
                          boolean isParameter, boolean isStatic) {
         super(origin, variableName, variableType, isField, isParameter, isStatic);
     }
@@ -36,6 +38,9 @@ public class PlainVariable extends AbstractVariable {
         if (o instanceof PlainVariable) {
             PlainVariable plain = (PlainVariable) o;
             return this.getOrigin().equals(plain.getOrigin());
+        }
+        if (o instanceof String) {
+            return o.equals("this") && this.getOrigin() instanceof PsiClass;
         }
         return false;
     }

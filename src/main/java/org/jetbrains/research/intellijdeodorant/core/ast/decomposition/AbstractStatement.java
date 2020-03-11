@@ -1,12 +1,13 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import java.util.List;
-
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiStatement;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformationGenerator;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import java.util.List;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 /**
  * Represents a PsiStatement (the equivalent of Statement from Eclipse AST).
@@ -16,17 +17,17 @@ import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformationGenerator
  */
 public abstract class AbstractStatement extends AbstractMethodFragment {
 
-    private final ASTInformation statement;
+    private final SmartPsiElementPointer<PsiElement> statement;
     private final StatementType type;
 
     AbstractStatement(PsiElement statement, StatementType type, AbstractMethodFragment parent) {
         super(parent);
         this.type = type;
-        this.statement = ASTInformationGenerator.generateASTInformation(statement);
+        this.statement = toPointer(statement);
     }
 
     public PsiElement getStatement() {
-        PsiElement element = this.statement.recoverASTNode();
+        PsiElement element = this.statement.getElement();
         if (element instanceof PsiStatement || element instanceof PsiCodeBlock) {
             return element;
         } else {

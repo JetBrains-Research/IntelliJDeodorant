@@ -2,16 +2,14 @@ package org.jetbrains.research.intellijdeodorant;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.PsiVariable;
-import org.jetbrains.research.intellijdeodorant.ide.ui.SettingsPanel;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.*;
-import org.jetbrains.research.intellijdeodorant.core.distance.DistanceMatrix;
-import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
-import org.jetbrains.research.intellijdeodorant.core.distance.MySystem;
-import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.core.distance.*;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckEliminationGroup;
+import org.jetbrains.research.intellijdeodorant.ide.ui.SettingsPanel;
 
 import java.util.*;
 
@@ -36,6 +34,40 @@ public class JDeodorantFacade {
         return moveMethodCandidateList;
     }
 
+    public static TreeSet<ExtractClassCandidateGroup> getExtractClassRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+        new ASTReader(project, indicator);
+        SystemObject systemObject = ASTReader.getSystemObject();
+        if (systemObject != null) {
+            Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
+            Set<String> classNamesToBeExamined = new LinkedHashSet<>();
+            for (ClassObject classObject : classObjectsToBeExamined) {
+                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
+                    classNamesToBeExamined.add(classObject.getName());
+            }
+            MySystem system = new MySystem(systemObject, true);
+            DistanceMatrix distanceMatrix = new DistanceMatrix(system);
+
+            List<ExtractClassCandidateRefactoring> extractClassCandidateList = new ArrayList<>(distanceMatrix.getExtractClassCandidateRefactorings(classNamesToBeExamined, indicator));
+
+            HashMap<String, ExtractClassCandidateGroup> groupedBySourceClassMap = new HashMap<>();
+            for (ExtractClassCandidateRefactoring candidate : extractClassCandidateList) {
+                if (groupedBySourceClassMap.containsKey(candidate.getSourceEntity())) {
+                    groupedBySourceClassMap.get(candidate.getSourceEntity()).addCandidate(candidate);
+                } else {
+                    ExtractClassCandidateGroup group = new ExtractClassCandidateGroup(candidate.getSourceEntity());
+                    group.addCandidate(candidate);
+                    groupedBySourceClassMap.put(candidate.getSourceEntity(), group);
+                }
+            }
+            for (String sourceClass : groupedBySourceClassMap.keySet()) {
+                groupedBySourceClassMap.get(sourceClass).groupConcepts();
+            }
+            return new TreeSet<>(groupedBySourceClassMap.values());
+        } else {
+            return new TreeSet<>();
+        }
+    }
+
     public static Set<ASTSliceGroup> getExtractMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
         new ASTReader(project, indicator);
 
@@ -43,6 +75,7 @@ public class JDeodorantFacade {
         Set<ASTSliceGroup> extractedSliceGroups = new TreeSet<>();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = SettingsPanel.getClassesToFindRefactorings(systemObject);
+
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
@@ -123,5 +156,18 @@ public class JDeodorantFacade {
                 }
             }
         }
+    }
+
+    public static Set<TypeCheckEliminationGroup> getTypeCheckEliminationRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+        new ASTReader(project, indicator);
+        SystemObject systemObject = ASTReader.getSystemObject();
+
+        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
+        for (ClassObject classObject : systemObject.getClassObjects()) {
+            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+                classObjectsToBeExamined.add(classObject);
+            }
+        }
+        return new TreeSet<>(systemObject.generateTypeCheckEliminations(classObjectsToBeExamined, indicator));
     }
 }

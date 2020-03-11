@@ -1,9 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.psi.*;
 
+import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -37,19 +37,19 @@ public class ASTReader {
         if (psiClass.isInterface()) {
             classObject.setInterface(true);
         }
-        if ((psiClass.hasModifier(JvmModifier.ABSTRACT)))
+        if (psiClass.hasModifierProperty(PsiModifier.ABSTRACT))
             classObject.setAbstract(true);
 
-        if ((psiClass.hasModifier(JvmModifier.PUBLIC)))
+        if (psiClass.hasModifierProperty(PsiModifier.PUBLIC))
             classObject.setAccess(Access.PUBLIC);
-        else if ((psiClass.hasModifier(JvmModifier.PROTECTED)))
+        else if (psiClass.hasModifierProperty(PsiModifier.PROTECTED))
             classObject.setAccess(Access.PROTECTED);
-        else if ((psiClass.hasModifier(JvmModifier.PRIVATE)))
+        else if (psiClass.hasModifierProperty(PsiModifier.PRIVATE))
             classObject.setAccess(Access.PRIVATE);
         else
             classObject.setAccess(Access.NONE);
 
-        if ((psiClass.hasModifier(JvmModifier.STATIC)))
+        if (psiClass.hasModifierProperty(PsiModifier.STATIC))
             classObject.setStatic(true);
         if (psiClass.getSuperClass() != null) {
             String superclassType = psiClass.getSuperClass().getQualifiedName();
@@ -76,7 +76,7 @@ public class ASTReader {
     }
 
     private static void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        List<CommentObject> fieldDeclarationComments = new ArrayList<>();
+        SmartList<CommentObject> fieldDeclarationComments = new SmartList<>();
         int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
         int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
         for (CommentObject comment : classObject.commentList) {
@@ -93,15 +93,15 @@ public class ASTReader {
         fieldObject.setClassName(classObject.getName());
         fieldObject.addComments(fieldDeclarationComments);
 
-        if (fieldDeclaration.hasModifier(JvmModifier.PUBLIC))
+        if (fieldDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             fieldObject.setAccess(Access.PUBLIC);
-        else if (fieldDeclaration.hasModifier(JvmModifier.PROTECTED))
+        else if (fieldDeclaration.hasModifierProperty(PsiModifier.PROTECTED))
             fieldObject.setAccess(Access.PROTECTED);
-        else if (fieldDeclaration.hasModifier(JvmModifier.PRIVATE))
+        else if (fieldDeclaration.hasModifierProperty(PsiModifier.PRIVATE))
             fieldObject.setAccess(Access.PRIVATE);
         else
             fieldObject.setAccess(Access.NONE);
-        if (fieldDeclaration.hasModifier(JvmModifier.STATIC))
+        if (fieldDeclaration.hasModifierProperty(PsiModifier.STATIC))
             fieldObject.setStatic(true);
 
         classObject.addField(fieldObject);
@@ -124,11 +124,11 @@ public class ASTReader {
             }
         }
 
-        if (methodDeclaration.hasModifier(JvmModifier.PUBLIC))
+        if (methodDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             constructorObject.setAccess(Access.PUBLIC);
-        else if (methodDeclaration.hasModifier(JvmModifier.PROTECTED))
+        else if (methodDeclaration.hasModifierProperty(PsiModifier.PROTECTED))
             constructorObject.setAccess(Access.PROTECTED);
-        else if (methodDeclaration.hasModifier(JvmModifier.PRIVATE))
+        else if (methodDeclaration.hasModifierProperty(PsiModifier.PRIVATE))
             constructorObject.setAccess(Access.PRIVATE);
         else
             constructorObject.setAccess(Access.NONE);
@@ -180,13 +180,13 @@ public class ASTReader {
             String qualifiedName = returnType != null ? returnType.getCanonicalText() : null;
             TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
             methodObject.setReturnType(typeObject);
-            if (methodDeclaration.hasModifier(JvmModifier.ABSTRACT))
+            if (methodDeclaration.hasModifierProperty(PsiModifier.ABSTRACT))
                 methodObject.setAbstract(true);
-            if (methodDeclaration.hasModifier(JvmModifier.STATIC))
+            if (methodDeclaration.hasModifierProperty(PsiModifier.STATIC))
                 methodObject.setStatic(true);
-            if (methodDeclaration.hasModifier(JvmModifier.SYNCHRONIZED))
+            if (methodDeclaration.hasModifierProperty(PsiModifier.SYNCHRONIZED))
                 methodObject.setSynchronized(true);
-            if (methodDeclaration.hasModifier(JvmModifier.NATIVE))
+            if (methodDeclaration.hasModifierProperty(PsiModifier.NATIVE))
                 methodObject.setNative(true);
 
             classObject.addMethod(methodObject);

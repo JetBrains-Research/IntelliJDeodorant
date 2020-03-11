@@ -4,6 +4,8 @@ import com.intellij.psi.PsiSuperExpression;
 
 import java.util.List;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class SuperMethodInvocationObject extends AbstractMethodInvocationObject {
 
     public SuperMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
@@ -15,10 +17,10 @@ public class SuperMethodInvocationObject extends AbstractMethodInvocationObject 
     }
 
     public void setSuperMethodInvocation(PsiSuperExpression superMethodInvocation) {
-        this.methodInvocation = ASTInformationGenerator.generateASTInformation(superMethodInvocation);
+        this.methodInvocation = toPointer(superMethodInvocation);
     }
 
     public PsiSuperExpression getSuperMethodInvocation() {
-        return (PsiSuperExpression) this.methodInvocation.recoverASTNode();
+        return (PsiSuperExpression) this.methodInvocation.getElement();
     }
 }

@@ -1,5 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.SmartPsiElementPointer;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,9 +14,9 @@ public abstract class AbstractMethodInvocationObject {
     private final String methodName;
     private final TypeObject returnType;
     private final List<TypeObject> parameterList;
-    private Set<String> thrownExceptions;
+    private final Set<String> thrownExceptions;
     private boolean _static;
-    ASTInformation methodInvocation;
+    SmartPsiElementPointer<PsiExpression> methodInvocation;
     private volatile int hashCode = 0;
 
     AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
@@ -30,6 +33,7 @@ public abstract class AbstractMethodInvocationObject {
         this.methodName = methodName;
         this.returnType = returnType;
         this.parameterList = parameterList;
+        this.thrownExceptions = new LinkedHashSet<>();
         this._static = false;
     }
 
