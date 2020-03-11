@@ -57,7 +57,7 @@ public class IntelliJDeodorantCounterCollector {
     public void typeStateCheckingRefactoringApplied(Project project, Double averageNumberOfStatementsPerCase) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
                 .addData("average_number_of_statements_per_case", averageNumberOfStatementsPerCase);
-        IntelliJDeodorantLogger.log(group, "type.state.checking.applied", data);
+        IntelliJDeodorantLogger.log(group, "replace.conditional.type.applied", data);
     }
 
     public static IntelliJDeodorantCounterCollector getInstance() {

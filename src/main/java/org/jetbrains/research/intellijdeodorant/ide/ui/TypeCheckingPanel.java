@@ -43,7 +43,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
 
     @Override
     protected void logFound(Project project, Integer total) {
-        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "type.state.checking", total);
+        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "replace.conditional.type", total);
     }
 
     @Override
