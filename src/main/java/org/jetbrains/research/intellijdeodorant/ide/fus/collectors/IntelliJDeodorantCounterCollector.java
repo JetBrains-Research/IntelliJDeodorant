@@ -9,7 +9,14 @@ import org.jetbrains.research.intellijdeodorant.ide.fus.IntelliJDeodorantLogger;
 import java.util.concurrent.TimeUnit;
 
 public class IntelliJDeodorantCounterCollector {
-    private IntelliJDeodorantCounterCollector() {}
+    private IntelliJDeodorantCounterCollector() {
+        JobScheduler.getScheduler().scheduleWithFixedDelay(
+                IntelliJDeodorantCounterCollector::trackRegistered,
+                LOG_INITIAL_DELAY_MIN.longValue(),
+                LOG_DELAY_MIN.longValue(),
+                TimeUnit.MINUTES
+        );
+    }
 
     private static IntelliJDeodorantCounterCollector instance;
 
@@ -33,12 +40,6 @@ public class IntelliJDeodorantCounterCollector {
     public static IntelliJDeodorantCounterCollector getInstance() {
         if (instance == null) {
             instance = new IntelliJDeodorantCounterCollector();
-            JobScheduler.getScheduler().scheduleWithFixedDelay(
-                    IntelliJDeodorantCounterCollector::trackRegistered,
-                    LOG_INITIAL_DELAY_MIN.longValue(),
-                    LOG_DELAY_MIN.longValue(),
-                    TimeUnit.MINUTES
-            );
         }
         return instance;
     }
