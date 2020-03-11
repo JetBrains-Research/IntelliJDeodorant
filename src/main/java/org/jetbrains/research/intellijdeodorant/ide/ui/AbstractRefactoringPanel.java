@@ -93,6 +93,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         setupGUI();
     }
 
+    protected void logFound(Project project, Integer total) {}
+
     public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable,
                                                 Project project, ProjectInfo projectInfo) {
         final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("project.compiling.indicator.text"), true) {
@@ -283,9 +285,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * Calculates suggestions for whole project.
      */
     private void calculateRefactorings() {
-        ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
+        Project project = scope.getProject();
+        ProjectInfo projectInfo = new ProjectInfo(project);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
                 IntelliJDeodorantBundle.message(detectIndicatorStatusTextKey), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -296,6 +299,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                         showCompilationErrorNotification(getProject());
                         candidates = new ArrayList<>();
                     }
+                    logFound(project, candidates.size());
                     model.setCandidateRefactoringGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });

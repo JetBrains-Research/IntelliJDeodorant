@@ -20,6 +20,7 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.JDeodorantFacade;
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsApplier;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
@@ -191,6 +192,7 @@ class MoveMethodPanel extends JPanel {
                     scrollPane.setVisible(true);
                     scrollPane.setViewportView(table);
                     enableButtonsOnConditions();
+                    IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "move.method", references.size());
                 });
             }
 

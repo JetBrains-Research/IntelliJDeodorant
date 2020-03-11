@@ -18,6 +18,9 @@
     </description>
 
     <extensions defaultExtensionNs="com.intellij">
+        <statistic.eventLog.eventLoggerProvider
+                implementation="org.jetbrains.research.intellijdeodorant.ide.fus.IntelliJDeodorantLoggerProvider"/>
+
         <toolWindow id="IntelliJDeodorant" secondary="true" anchor="bottom"
                     factoryClass="org.jetbrains.research.intellijdeodorant.ide.ui.RefactoringsToolWindowFactory"/>
 

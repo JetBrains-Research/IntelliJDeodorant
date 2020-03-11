@@ -2,8 +2,10 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
@@ -29,11 +31,19 @@ public class GodClassPanel extends AbstractRefactoringPanel {
     }
 
     @Override
+    protected void logFound(Project project, Integer total) {
+        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "god.class", total);
+    }
+
+    @Override
     protected void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
         AbstractExtractClassRefactoring abstractRefactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
 
+        Project project = scope.getProject();
+        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(project, "god.class");
+
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
-            removeHighlighters(scope.getProject());
+            removeHighlighters(project);
             showRefreshingProposal();
             GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
             dialog.show();

@@ -5,6 +5,7 @@ import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.psi.*;
 import com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 
@@ -59,6 +60,7 @@ public class RefactoringsApplier {
         }
         MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(method, available);
         dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(method));
+        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(method.getProject(), "move.method");
         TransactionGuard.getInstance().submitTransactionAndWait(dialog::show);
     }
 

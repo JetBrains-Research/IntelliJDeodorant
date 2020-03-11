@@ -13,6 +13,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiStatement;
@@ -34,6 +35,7 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSl
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.ASTSliceGroup;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PDGNode;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.ExtractMethodCandidateGroup;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractMethod.MyExtractMethodProcessor;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
@@ -194,9 +196,10 @@ class ExtractMethodPanel extends JPanel {
      * Calculates suggestions for whole project.
      */
     private void calculateRefactorings() {
-        ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
+        Project project = scope.getProject();
+        ProjectInfo projectInfo = new ProjectInfo(project);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
                 IntelliJDeodorantBundle.message("long.method.detect.indicator.status"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -212,6 +215,7 @@ class ExtractMethodPanel extends JPanel {
                             .collect(toList());
                     treeTableModel.setCandidateRefactoringGroups(extractMethodCandidateGroups);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
+                    IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "extract.method", extractMethodCandidateGroups.size());
                 });
             }
 
@@ -324,6 +328,9 @@ class ExtractMethodPanel extends JPanel {
                 if (processor.prepare()) {
                     ExtractMethodHandler.invokeOnElements(slice.getSourceMethodDeclaration().getProject(), processor,
                             slice.getSourceMethodDeclaration().getContainingFile(), true);
+                    if (editor != null) {
+                        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(editor.getProject(), "extract.method");
+                    }
                 }
             } catch (PrepareFailedException e) {
                 e.printStackTrace();

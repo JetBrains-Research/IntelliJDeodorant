@@ -3,8 +3,10 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateChecking.TypeCheckRefactoringType.AbstractTypeCheckRefactoring;
@@ -40,13 +42,21 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
     }
 
     @Override
+    protected void logFound(Project project, Integer total) {
+        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "type.check", total);
+    }
+
+    @Override
     protected void doRefactor(AbstractCandidateRefactoring candidateRefactoring) {
         AbstractTypeCheckRefactoring abstractRefactoring =
                 (AbstractTypeCheckRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
         PolymorphismRefactoring refactoring = abstractRefactoring.getRefactoring();
 
+        Project project = scope.getProject();
+        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(project, "type.check");
+
         Runnable applyRefactoring = () -> {
-            removeHighlighters(scope.getProject());
+            removeHighlighters(project);
             showRefreshingProposal();
             WriteCommandAction.runWriteCommandAction(scope.getProject(), refactoring::apply);
         };
