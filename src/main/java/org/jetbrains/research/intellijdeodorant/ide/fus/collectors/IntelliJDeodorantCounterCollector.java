@@ -36,27 +36,27 @@ public class IntelliJDeodorantCounterCollector {
 
     public void extractMethodRefactoringApplied(Project project, Integer extractedStatementsCount) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("extracted.statements.count", extractedStatementsCount);
+                .addData("extracted_statements_count", extractedStatementsCount);
         IntelliJDeodorantLogger.log(group, "extract.method.applied", data);
     }
 
     public void moveMethodRefactoringApplied(Project project, Integer sourceAccessedMembers, Integer targetAccessedMembers) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("source.accessed.members", sourceAccessedMembers)
-                .addData("target.accessed.members", targetAccessedMembers);
+                .addData("source_accessed_members", sourceAccessedMembers)
+                .addData("target_accessed_members", targetAccessedMembers);
         IntelliJDeodorantLogger.log(group, "move.method.applied", data);
     }
 
     public void extractClassRefactoringApplied(Project project, Integer extractedFieldsCount, Integer extractedMethodsCount) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("extracted.fields.count", extractedFieldsCount)
-                .addData("extracted.methods.count", extractedMethodsCount);
+                .addData("extracted_fields_count", extractedFieldsCount)
+                .addData("extracted_methods_count", extractedMethodsCount);
         IntelliJDeodorantLogger.log(group, "extract.class.applied", data);
     }
 
     public void typeStateCheckingRefactoringApplied(Project project, Double averageNumberOfStatementsPerCase) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("average.number.of.statements.per.case", averageNumberOfStatementsPerCase);
+                .addData("average_number_of_statements_per_case", averageNumberOfStatementsPerCase);
         IntelliJDeodorantLogger.log(group, "type.state.checking.applied", data);
     }
 
