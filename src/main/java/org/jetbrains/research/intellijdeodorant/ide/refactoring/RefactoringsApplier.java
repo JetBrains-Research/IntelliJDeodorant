@@ -29,7 +29,7 @@ public class RefactoringsApplier {
                 final PsiClass target = refactoring.getKey();
                 refactoring.getValue().forEach(r -> {
                     if (canMoveInstanceMethod(r.getMethod(), target)) {
-                        moveInstanceMethod(r.getMethod(), target);
+                        moveInstanceMethod(r, target);
                     }
                 });
             }
@@ -53,14 +53,16 @@ public class RefactoringsApplier {
         );
     }
 
-    private static void moveInstanceMethod(@NotNull PsiMethod method, PsiClass target) {
-        PsiVariable[] available = getAvailableVariables(method, target);
+    private static void moveInstanceMethod(@NotNull MoveMethodRefactoring refactoring, PsiClass target) {
+        PsiMethod methodToMove = refactoring.getMethod();
+        PsiVariable[] available = getAvailableVariables(methodToMove, target);
         if (available.length == 0) {
             throw new IllegalStateException("Cannot move instance method");
         }
-        MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(method, available);
-        dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(method));
-        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(method.getProject(), "move.method");
+        MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(methodToMove, available);
+        dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(methodToMove));
+        IntelliJDeodorantCounterCollector.getInstance().moveMethodRefactoringApplied(methodToMove.getProject(),
+                refactoring.getSourceAccessedMembers(), refactoring.getTargetAccessedMembers());
         TransactionGuard.getInstance().submitTransactionAndWait(dialog::show);
     }
 

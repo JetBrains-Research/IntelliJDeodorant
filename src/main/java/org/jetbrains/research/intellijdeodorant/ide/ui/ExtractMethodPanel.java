@@ -329,7 +329,8 @@ class ExtractMethodPanel extends JPanel {
                     ExtractMethodHandler.invokeOnElements(slice.getSourceMethodDeclaration().getProject(), processor,
                             slice.getSourceMethodDeclaration().getContainingFile(), true);
                     if (editor != null) {
-                        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(editor.getProject(), "extract.method");
+                        IntelliJDeodorantCounterCollector.getInstance().extractMethodRefactoringApplied(editor.getProject(),
+                                statementsToExtract.size());
                     }
                 }
             } catch (PrepareFailedException e) {

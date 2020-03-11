@@ -28,12 +28,39 @@ public class IntelliJDeodorantCounterCollector {
     public void refactoringFound(Project project, String name, Integer total) {
         if (total <= 0) return;
 
-        FeatureUsageData data = new FeatureUsageData().addProject(project).addData("name", name).addData("total", total);
+        FeatureUsageData data = new FeatureUsageData().addProject(project)
+                .addData("name", name)
+                .addData("total", total);
         IntelliJDeodorantLogger.log(group, "refactoring.found", data);
     }
 
-    public void refactoringApplied(Project project, String name) {
-        FeatureUsageData data = new FeatureUsageData().addProject(project).addData("name", name);
+    public void extractMethodRefactoringApplied(Project project, Integer extractedStatementsCount) {
+        FeatureUsageData data = new FeatureUsageData().addProject(project)
+                .addData("name", "extract.method")
+                .addData("extracted.statements.count", extractedStatementsCount);
+        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+    }
+
+    public void moveMethodRefactoringApplied(Project project, Integer sourceAccessedMembers, Integer targetAccessedMembers) {
+        FeatureUsageData data = new FeatureUsageData().addProject(project)
+                .addData("name", "move.method")
+                .addData("source.accessed.members", sourceAccessedMembers)
+                .addData("target.accessed.members", targetAccessedMembers);
+        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+    }
+
+    public void extractClassRefactoringApplied(Project project, Integer extractedFieldsCount, Integer extractedMethodsCount) {
+        FeatureUsageData data = new FeatureUsageData().addProject(project)
+                .addData("name", "extract.class")
+                .addData("extracted.fields.count", extractedFieldsCount)
+                .addData("extracted.methods.count", extractedMethodsCount);
+        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+    }
+
+    public void typeStateCheckingRefactoringApplied(Project project, Double averageNumberOfStatementsPerCase) {
+        FeatureUsageData data = new FeatureUsageData().addProject(project)
+                .addData("name", "type.state.checking")
+                .addData("average.number.of.statements.per.case", averageNumberOfStatementsPerCase);
         IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
     }
 

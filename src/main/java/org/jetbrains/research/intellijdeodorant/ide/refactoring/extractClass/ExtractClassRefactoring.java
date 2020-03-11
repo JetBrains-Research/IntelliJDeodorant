@@ -3096,4 +3096,12 @@ public class ExtractClassRefactoring {
     public Project getProject() {
         return project;
     }
+
+    public int getExtractedFieldFragmentsCount() {
+        return extractedFieldFragments.size();
+    }
+
+    public int getExtractedMethodsCount() {
+        return extractedMethods.size();
+    }
 }

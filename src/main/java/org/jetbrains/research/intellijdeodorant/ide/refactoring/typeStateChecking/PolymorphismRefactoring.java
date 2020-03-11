@@ -555,4 +555,8 @@ public abstract class PolymorphismRefactoring {
     public PsiFile getSourceFile() {
         return sourceFile;
     }
+
+    public TypeCheckElimination getTypeCheckElimination() {
+        return typeCheckElimination;
+    }
 }

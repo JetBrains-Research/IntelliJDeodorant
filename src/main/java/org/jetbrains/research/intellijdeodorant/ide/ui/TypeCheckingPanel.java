@@ -43,7 +43,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
 
     @Override
     protected void logFound(Project project, Integer total) {
-        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "type.check", total);
+        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "type.state.checking", total);
     }
 
     @Override
@@ -53,7 +53,8 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         PolymorphismRefactoring refactoring = abstractRefactoring.getRefactoring();
 
         Project project = scope.getProject();
-        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(project, "type.check");
+        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
+                refactoring.getTypeCheckElimination().getAverageNumberOfStatements());
 
         Runnable applyRefactoring = () -> {
             removeHighlighters(project);

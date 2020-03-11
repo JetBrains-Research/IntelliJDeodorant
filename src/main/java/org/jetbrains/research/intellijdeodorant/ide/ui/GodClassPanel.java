@@ -32,7 +32,7 @@ public class GodClassPanel extends AbstractRefactoringPanel {
 
     @Override
     protected void logFound(Project project, Integer total) {
-        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "god.class", total);
+        IntelliJDeodorantCounterCollector.getInstance().refactoringFound(project, "extract.class", total);
     }
 
     @Override
@@ -40,7 +40,9 @@ public class GodClassPanel extends AbstractRefactoringPanel {
         AbstractExtractClassRefactoring abstractRefactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
 
         Project project = scope.getProject();
-        IntelliJDeodorantCounterCollector.getInstance().refactoringApplied(project, "god.class");
+        IntelliJDeodorantCounterCollector.getInstance().extractClassRefactoringApplied(project,
+                abstractRefactoring.getRefactoring().getExtractedFieldFragmentsCount(),
+                abstractRefactoring.getRefactoring().getExtractedMethodsCount());
 
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
             removeHighlighters(project);
