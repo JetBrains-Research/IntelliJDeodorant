@@ -36,32 +36,28 @@ public class IntelliJDeodorantCounterCollector {
 
     public void extractMethodRefactoringApplied(Project project, Integer extractedStatementsCount) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("name", "extract.method")
                 .addData("extracted.statements.count", extractedStatementsCount);
-        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+        IntelliJDeodorantLogger.log(group, "extract.method.applied", data);
     }
 
     public void moveMethodRefactoringApplied(Project project, Integer sourceAccessedMembers, Integer targetAccessedMembers) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("name", "move.method")
                 .addData("source.accessed.members", sourceAccessedMembers)
                 .addData("target.accessed.members", targetAccessedMembers);
-        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+        IntelliJDeodorantLogger.log(group, "move.method.applied", data);
     }
 
     public void extractClassRefactoringApplied(Project project, Integer extractedFieldsCount, Integer extractedMethodsCount) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("name", "extract.class")
                 .addData("extracted.fields.count", extractedFieldsCount)
                 .addData("extracted.methods.count", extractedMethodsCount);
-        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+        IntelliJDeodorantLogger.log(group, "extract.class.applied", data);
     }
 
     public void typeStateCheckingRefactoringApplied(Project project, Double averageNumberOfStatementsPerCase) {
         FeatureUsageData data = new FeatureUsageData().addProject(project)
-                .addData("name", "type.state.checking")
                 .addData("average.number.of.statements.per.case", averageNumberOfStatementsPerCase);
-        IntelliJDeodorantLogger.log(group, "refactoring.applied", data);
+        IntelliJDeodorantLogger.log(group, "type.state.checking.applied", data);
     }
 
     public static IntelliJDeodorantCounterCollector getInstance() {
