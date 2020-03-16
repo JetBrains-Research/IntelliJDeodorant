@@ -30,6 +30,11 @@ public class RefactoringsApplier {
                 refactoring.getValue().forEach(r -> {
                     if (canMoveInstanceMethod(r.getMethod(), target)) {
                         moveInstanceMethod(r, target);
+                        if (!r.getOptionalMethod().isPresent()) {
+                            IntelliJDeodorantCounterCollector.getInstance().moveMethodRefactoringApplied(target.getProject(),
+                                    r.getSourceAccessedMembers(), r.getTargetAccessedMembers(),
+                                    r.getMethodLength(), r.getMethodParametersCount());
+                        }
                     }
                 });
             }
@@ -61,8 +66,6 @@ public class RefactoringsApplier {
         }
         MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(methodToMove, available);
         dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(methodToMove));
-        IntelliJDeodorantCounterCollector.getInstance().moveMethodRefactoringApplied(methodToMove.getProject(),
-                refactoring.getSourceAccessedMembers(), refactoring.getTargetAccessedMembers());
         TransactionGuard.getInstance().submitTransactionAndWait(dialog::show);
     }
 

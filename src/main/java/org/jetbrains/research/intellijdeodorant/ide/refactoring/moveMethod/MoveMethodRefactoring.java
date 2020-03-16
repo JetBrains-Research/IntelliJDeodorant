@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.getHumanReadableName;
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.getNumberOfLinesInMethod;
 
 /**
  * Representation of a refactoring, which moves method to a target class.
@@ -26,6 +27,8 @@ public class MoveMethodRefactoring implements Refactoring {
     String qualifiedMethodName;
     private final int sourceAccessedMembers;
     private final int targetAccessedMembers;
+    private final int methodLength;
+    private final int methodParametersCount;
 
     /**
      * Creates refactoring.
@@ -50,6 +53,8 @@ public class MoveMethodRefactoring implements Refactoring {
         this.qualifiedMethodName = getHumanReadableName(this.method.getElement());
         this.sourceAccessedMembers = sourceAccessedMembers;
         this.targetAccessedMembers = targetAccessedMembers;
+        this.methodLength = getNumberOfLinesInMethod(method);
+        this.methodParametersCount = method.getParameterList().getParametersCount();
     }
 
     /**
@@ -158,5 +163,13 @@ public class MoveMethodRefactoring implements Refactoring {
 
     public int getTargetAccessedMembers() {
         return targetAccessedMembers;
+    }
+
+    public int getMethodLength() {
+        return methodLength;
+    }
+
+    public int getMethodParametersCount() {
+        return methodParametersCount;
     }
 }

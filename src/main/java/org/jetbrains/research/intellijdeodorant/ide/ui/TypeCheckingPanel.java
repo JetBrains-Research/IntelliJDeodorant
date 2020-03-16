@@ -53,8 +53,6 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         PolymorphismRefactoring refactoring = abstractRefactoring.getRefactoring();
 
         Project project = scope.getProject();
-        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
-                refactoring.getTypeCheckElimination().getAverageNumberOfStatements());
 
         Runnable applyRefactoring = () -> {
             removeHighlighters(project);

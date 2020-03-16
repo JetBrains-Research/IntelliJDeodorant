@@ -6,6 +6,7 @@ import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocTag;
 import com.intellij.psi.util.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -52,6 +53,10 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         } else if (typeCheckElimination.getTypeLocalVariable() != null || typeCheckElimination.getTypeMethodInvocation() != null) {
             modifyTypeCheckMethod();
         }
+
+        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
+                typeCheckElimination.getTotalCaseStatementsCount(),
+                typeCheckElimination.getAverageNumberOfStatements());
     }
 
     private void checkInitialConditions() {

@@ -5,7 +5,7 @@ import com.sun.istack.NotNull;
 
 import java.util.*;
 
-import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.*;
 
 public class ASTSlice {
     @NotNull
@@ -30,51 +30,9 @@ public class ASTSlice {
     private final boolean declarationOfVariableCriterionBelongsToRemovableNodes;
     private final BasicBlock boundaryBlock;
     private final boolean isObjectSlice;
-    private final int methodSize;
-
-    public ASTSlice(PDGSlice pdgSlice) {
-        this.sourceMethodDeclaration = toPointer(pdgSlice.getMethod().getMethodDeclaration());
-        this.sourceTypeDeclaration = toPointer(sourceMethodDeclaration.getElement().getParent());
-        this.sliceNodes = pdgSlice.getSliceNodes();
-        this.sliceStatements = new LinkedHashSet<>();
-        for (PDGNode node : sliceNodes) {
-            sliceStatements.add(toPointer(node.getASTStatement()));
-        }
-        this.removableStatements = new LinkedHashSet<>();
-        for (PDGNode node : pdgSlice.getRemovableNodes()) {
-            removableStatements.add(toPointer(node.getASTStatement()));
-        }
-        this.duplicatedStatements = new LinkedHashSet<>(sliceStatements);
-        this.duplicatedStatements.removeAll(removableStatements);
-        Set<PsiVariable> variableDeclarationsAndAccessedFields = pdgSlice.getVariableDeclarationsAndAccessedFieldsInMethod();
-        AbstractVariable criterion = pdgSlice.getLocalVariableCriterion();
-        for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
-            if (variableDeclaration.equals(criterion.getOrigin())) {
-                this.localVariableCriterion = toPointer(variableDeclaration);
-                this.extractedMethodName = Objects.requireNonNull(((PsiVariable) localVariableCriterion.getElement()).getNameIdentifier()).getText();
-                break;
-            }
-        }
-        this.passedParameters = new LinkedHashSet<>();
-        for (AbstractVariable variable : pdgSlice.getPassedParameters()) {
-            for (PsiVariable variableDeclaration : variableDeclarationsAndAccessedFields) {
-                if (variableDeclaration.equals(variable.getOrigin())) {
-                    passedParameters.add(toPointer(variableDeclaration));
-                    break;
-                }
-            }
-        }
-        PDGNode declarationOfVariableCriterionNode = pdgSlice.getDeclarationOfVariableCriterion();
-        if (declarationOfVariableCriterionNode != null)
-            this.variableCriterionDeclarationStatement = toPointer(declarationOfVariableCriterionNode.getASTStatement());
-        this.extractedMethodInvocationInsertionStatement = toPointer(pdgSlice.getExtractedMethodInvocationInsertionNode().getASTStatement());
-        this.declarationOfVariableCriterionBelongsToSliceNodes = pdgSlice.declarationOfVariableCriterionBelongsToSliceNodes();
-        this.declarationOfVariableCriterionBelongsToRemovableNodes = pdgSlice.declarationOfVariableCriterionBelongsToRemovableNodes();
-        this.psiFile = toPointer(pdgSlice.getIFile());
-        this.boundaryBlock = pdgSlice.getBoundaryBlock();
-        this.isObjectSlice = false;
-        this.methodSize = pdgSlice.getMethodSize();
-    }
+    private final int originalMethodLinesCount;
+    private final int originalMethodStatementsCount;
+    private final int originalMethodParametersCount;
 
     public ASTSlice(PDGSliceUnion pdgSliceUnion) {
         this.sourceMethodDeclaration = toPointer(pdgSliceUnion.getMethod().getMethodDeclaration());
@@ -117,7 +75,9 @@ public class ASTSlice {
         this.psiFile = toPointer(pdgSliceUnion.getIFile());
         this.boundaryBlock = pdgSliceUnion.getBoundaryBlock();
         this.isObjectSlice = false;
-        this.methodSize = pdgSliceUnion.getMethodSize();
+        this.originalMethodLinesCount = getNumberOfLinesInMethod(pdgSliceUnion.getMethod().getMethodDeclaration());
+        this.originalMethodStatementsCount = getMethodStatementCount(pdgSliceUnion.getMethod().getMethodDeclaration());
+        this.originalMethodParametersCount = pdgSliceUnion.getMethod().getMethodDeclaration().getParameterList().getParametersCount();
     }
 
     public ASTSlice(PDGObjectSliceUnion pdgObjectSliceUnion) {
@@ -161,7 +121,9 @@ public class ASTSlice {
         this.psiFile = toPointer(pdgObjectSliceUnion.getIFile());
         this.boundaryBlock = pdgObjectSliceUnion.getBoundaryBlock();
         this.isObjectSlice = true;
-        this.methodSize = pdgObjectSliceUnion.getMethodSize();
+        this.originalMethodLinesCount = getNumberOfLinesInMethod(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
+        this.originalMethodStatementsCount = getMethodStatementCount(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
+        this.originalMethodParametersCount = pdgObjectSliceUnion.getMethod().getMethodDeclaration().getParameterList().getParametersCount();
     }
 
     public boolean isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement() {
@@ -252,8 +214,16 @@ public class ASTSlice {
         return isObjectSlice;
     }
 
-    public int getMethodSize() {
-        return methodSize;
+    public int getOriginalMethodLinesCount() {
+        return originalMethodLinesCount;
+    }
+
+    public int getOriginalMethodStatementsCount() {
+        return originalMethodStatementsCount;
+    }
+
+    public int getOriginalMethodParametersCount() {
+        return originalMethodParametersCount;
     }
 
     public String sliceToString() {

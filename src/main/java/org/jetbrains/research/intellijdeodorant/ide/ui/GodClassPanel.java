@@ -40,15 +40,14 @@ public class GodClassPanel extends AbstractRefactoringPanel {
         AbstractExtractClassRefactoring abstractRefactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
 
         Project project = scope.getProject();
-        IntelliJDeodorantCounterCollector.getInstance().extractClassRefactoringApplied(project,
-                abstractRefactoring.getRefactoring().getExtractedFieldFragmentsCount(),
-                abstractRefactoring.getRefactoring().getExtractedMethodsCount());
 
         TransactionGuard.getInstance().submitTransactionAndWait(() -> {
             removeHighlighters(project);
-            showRefreshingProposal();
             GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
             dialog.show();
+            if (dialog.isOK()) {
+                showRefreshingProposal();
+            }
         });
     }
 }
