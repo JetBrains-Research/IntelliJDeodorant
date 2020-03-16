@@ -1226,17 +1226,17 @@ public class ExtractClassRefactoring {
             PsiReferenceExpression newAssignedVariable = null;
             PsiExpression setterQualifier = null;
             if (newOperand instanceof PsiReferenceExpression) {
-                PsiElement newOperandResolved = ((PsiReferenceExpression) newOperand).resolve();
-                if (newOperandResolved instanceof PsiField) {
-                    newAssignedVariable = (PsiReferenceExpression) newOperand;
-                } else if (newOperand instanceof PsiVariable) {
-                    newAssignedVariable = (PsiReferenceExpression) newOperand;
+                PsiReferenceExpression newOperandReference = (PsiReferenceExpression) newOperand;
+                PsiElement newOperandResolved = newOperandReference.resolve();
+                if (newOperandResolved instanceof PsiField || newOperand instanceof PsiVariable) {
+                    newAssignedVariable = newOperandReference;
                 }
-                setterQualifier = ((PsiReferenceExpression) newOperand).getQualifierExpression();
+
+                setterQualifier = newOperandReference.getQualifierExpression();
             } else if (newOperand instanceof PsiArrayAccessExpression) {
                 PsiArrayAccessExpression arrayAccessExpression = (PsiArrayAccessExpression) newOperand;
                 newAssignedVariable = (PsiReferenceExpression) arrayAccessExpression.getArrayExpression();
-                setterQualifier = ((PsiReferenceExpression) newOperand).getQualifierExpression();
+                setterQualifier = newAssignedVariable.getQualifierExpression();
             }
 
             removeRedundantThisQualifierFromExpression(setterQualifier);
