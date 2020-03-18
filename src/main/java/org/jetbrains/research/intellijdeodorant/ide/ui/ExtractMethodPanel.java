@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.*;
 import static org.jetbrains.research.intellijdeodorant.JDeodorantFacade.getExtractMethodRefactoringOpportunities;
 import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.expandOrCollapsePath;
 import static org.jetbrains.research.intellijdeodorant.ide.ui.AbstractRefactoringPanel.runAfterCompilationCheck;
-import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isChild;
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.*;
 
 /**
  * Panel for Extract Method refactoring.
@@ -328,9 +328,9 @@ class ExtractMethodPanel extends JPanel {
                 if (processor.prepare()) {
                     ExtractMethodHandler.invokeOnElements(slice.getSourceMethodDeclaration().getProject(), processor,
                             slice.getSourceMethodDeclaration().getContainingFile(), true);
-                    if (editor != null) {
+                    if (editor != null && processor.getExtractedMethod() != null) {
                         IntelliJDeodorantCounterCollector.getInstance().extractMethodRefactoringApplied(editor.getProject(),
-                                statementsToExtract.size());
+                                slice, processor.getExtractedMethod());
                     }
                 }
             } catch (PrepareFailedException e) {

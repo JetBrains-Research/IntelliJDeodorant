@@ -13,6 +13,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
 
 import javax.swing.*;
@@ -144,6 +145,11 @@ public class GodClassUserInputDialog extends RefactoringDialog {
         closeOKAction();
         refactoring.setExtractedTypeName(extractedClassNameField.getText());
         WriteCommandAction.runWriteCommandAction(refactoring.getProject(), refactoring::apply);
+        IntelliJDeodorantCounterCollector.getInstance().extractClassRefactoringApplied(refactoring.getProject(),
+                refactoring.getExtractedFieldFragmentsCount(),
+                refactoring.getExtractedMethodsCount(),
+                refactoring.getSourceClass().getFields().length,
+                refactoring.getSourceClass().getMethods().length);
     }
 
     @Override

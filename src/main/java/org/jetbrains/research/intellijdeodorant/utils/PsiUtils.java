@@ -2,9 +2,11 @@ package org.jetbrains.research.intellijdeodorant.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.infos.MethodCandidateInfo;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.openapi.editor.Document;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -183,6 +185,26 @@ public class PsiUtils {
 
     public static SmartPsiElementPointer<PsiExpression> toPointer(@NotNull PsiExpression psiElement) {
         return SmartPointerManager.createPointer(psiElement);
+    }
+
+    public static int getNumberOfLinesInMethod(PsiMethod psiMethod) {
+        final Document document = PsiDocumentManager.getInstance(psiMethod.getProject()).getDocument(psiMethod.getContainingFile());
+        assert document != null;
+        final PsiIdentifier methodNameIdentifier = psiMethod.getNameIdentifier();
+        int start;
+        final TextRange range = psiMethod.getTextRange();
+        if (methodNameIdentifier != null) {
+            start = document.getLineNumber(methodNameIdentifier.getTextOffset());
+        } else {
+            start = document.getLineNumber(range.getStartOffset());
+        }
+        final int end = document.getLineNumber(range.getEndOffset());
+        return end - start;
+    }
+
+    public static int getMethodStatementCount(PsiMethod psiMethod) {
+        PsiCodeBlock codeBlock = psiMethod.getBody();
+        return codeBlock == null ? 0 : codeBlock.getStatementCount();
     }
 
 }

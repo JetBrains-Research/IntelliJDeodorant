@@ -52,7 +52,6 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private volatile int hashCode = 0;
     private int groupSizeAtClassLevel;
     private double averageNumberOfStatements;
-    private Integer userRate;
 
     public TypeCheckElimination() {
         this.typeCheckMap = new LinkedHashMap<>();
@@ -1210,5 +1209,9 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             return 1;
 
         return refactoringName1.compareTo(refactoringName2);
+    }
+
+    public int getTotalCaseStatementsCount() {
+        return typeCheckMap.size();
     }
 }

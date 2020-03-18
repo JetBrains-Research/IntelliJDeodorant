@@ -7,6 +7,7 @@ import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.psi.util.PsiUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -37,6 +38,9 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
     public void apply() {
         modifyInheritanceHierarchy();
         modifyClient();
+        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
+                typeCheckElimination.getTotalCaseStatementsCount(),
+                typeCheckElimination.getAverageNumberOfStatements());
     }
 
     private void modifyClient() {
