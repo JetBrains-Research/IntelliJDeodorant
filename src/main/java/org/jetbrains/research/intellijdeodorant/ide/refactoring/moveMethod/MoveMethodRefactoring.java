@@ -143,7 +143,9 @@ public class MoveMethodRefactoring implements Refactoring {
     @NotNull
     @Override
     public String getDescription() {
-        return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
+        return getHumanReadableName(method.getElement()) + DELIMITER +
+                getHumanReadableName(targetClass.getElement()) + DELIMITER +
+                getSourceAccessedMembers() + "/" + getTargetAccessedMembers();
     }
 
     @NotNull

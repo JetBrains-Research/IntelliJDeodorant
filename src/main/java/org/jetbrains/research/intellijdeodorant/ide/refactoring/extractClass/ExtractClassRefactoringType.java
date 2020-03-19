@@ -89,7 +89,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
         @NotNull
         @Override
         public String getExportDefaultFilename() {
-            return "God-Class-Refactoring";
+            return "God-Class";
         }
     }
 

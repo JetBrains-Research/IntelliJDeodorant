@@ -54,9 +54,19 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     @Override
     public String getDescription() {
         Optional<PsiMethod> method = getOptionalMethod();
-        return method.map(psiMethod ->
-                String.join(DELIMITER, getHumanReadableName(psiMethod),
-                        candidates.iterator().next().getLocalVariableCriterion().getName())).orElse("");
+        if (!method.isPresent()) return "";
+        String methodName = getHumanReadableName(method.get());
+        StringBuilder sb = new StringBuilder();
+        Iterator<ASTSlice> candidatesIterator = candidates.iterator();
+        for (int i = 0; i < candidates.size(); i++) {
+            ASTSlice slice = candidatesIterator.next();
+            sb.append(methodName).append(DELIMITER);
+            sb.append(slice.getLocalVariableCriterion().getName()).append(DELIMITER);
+            sb.append("B").append(slice.getBoundaryBlock().getId()).append(DELIMITER);
+            sb.append(slice.getNumberOfDuplicatedStatements()).append("/").append(slice.getNumberOfSliceStatements());
+            sb.append('\n');
+        }
+        return sb.toString();
     }
 
     @NotNull

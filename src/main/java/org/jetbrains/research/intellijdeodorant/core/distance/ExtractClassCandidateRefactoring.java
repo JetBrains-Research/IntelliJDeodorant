@@ -12,6 +12,8 @@ import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
 
+import static org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring.DELIMITER;
+
 public class ExtractClassCandidateRefactoring extends CandidateRefactoring implements Comparable<ExtractClassCandidateRefactoring> {
 
     private final MySystem system;
@@ -234,7 +236,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     public String toString() {
-        return sourceClass.toString() + "\t" + extractedEntities.toString();
+        return sourceClass.toString() + DELIMITER + extractedEntities.toString();
     }
 
     public String getAnnotationText() {
