@@ -56,7 +56,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeVariableStaticField(PsiReferenceExpression typeVariable, PsiReferenceExpression staticField) {
         for (PsiReferenceExpression keySimpleName : typeVariableStaticFieldMap.keySet()) {
-            if (keySimpleName.resolve().equals(typeVariable.resolve())) {
+            PsiElement resolvedElement = keySimpleName.resolve();
+            if (resolvedElement != null && resolvedElement.equals(typeVariable.resolve())) {
                 ArrayList<PsiReferenceExpression> staticFields = typeVariableStaticFieldMap.get(keySimpleName);
                 staticFields.add(staticField);
                 return;
@@ -73,7 +74,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeVariableSubclass(PsiReferenceExpression typeVariable, PsiType subclass) {
         for (PsiReferenceExpression keySimpleName : typeVariableSubclassMap.keySet()) {
-            if (keySimpleName.resolve().equals(typeVariable.resolve())) {
+            PsiElement resolvedElement = keySimpleName.resolve();
+            if (resolvedElement != null && resolvedElement.equals(typeVariable.resolve())) {
                 ArrayList<PsiType> subclasses = typeVariableSubclassMap.get(keySimpleName);
                 subclasses.add(subclass);
                 return;
@@ -108,7 +110,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeMethodInvocationStaticField(PsiMethodCallExpression typeMethodInvocation, PsiReferenceExpression staticField) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationStaticFieldMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+            PsiMethod resolvedMethod = keyMethodInvocation.resolveMethod();
+            if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                 ArrayList<PsiReferenceExpression> staticFields = typeMethodInvocationStaticFieldMap.get(keyMethodInvocation);
                 staticFields.add(staticField);
                 return;
@@ -125,7 +128,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeMethodInvocationSubclass(PsiMethodCallExpression typeMethodInvocation, PsiType subclass) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationSubclassMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+            PsiMethod resolveMethod = keyMethodInvocation.resolveMethod();
+            if (resolveMethod != null && resolveMethod.equals(typeMethodInvocation.resolveMethod())) {
                 ArrayList<PsiType> subclasses = typeMethodInvocationSubclassMap.get(keyMethodInvocation);
                 subclasses.add(subclass);
                 return;
