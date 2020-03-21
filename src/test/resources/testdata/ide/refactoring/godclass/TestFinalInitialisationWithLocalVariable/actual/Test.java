@@ -1,4 +1,4 @@
-package TestFinalInitialisationWithConstructorParameters.actual;
+package TestFinalInitialisationWithLocalVariable.actual;
 
 public class Test {
     private TestProduct testProduct;
@@ -7,11 +7,12 @@ public class Test {
     private int c;
 
     public Test(int init) {
-        this.testProduct = new TestProduct(init);
+        int local = init;
+        this.testProduct = new TestProduct(local);
+
         a = 5;
         b = 5;
         c = 5;
-        testProduct.setE(5);
     }
 
     public void fun1() {

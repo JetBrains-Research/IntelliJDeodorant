@@ -2270,12 +2270,12 @@ public class ExtractClassRefactoring {
                     List<PsiExpression> variableInstructions = expressionExtractor.getVariableInstructions(fieldAssignment.getRExpression());
                     for (PsiExpression expression : variableInstructions) {
                         PsiReferenceExpression variable = (PsiReferenceExpression) expression;
-                        constructorCall.getArgumentList().add(variable);
                         boolean foundInOriginalConstructorParameters = false;
                         PsiParameter[] originalConstructorParameters = constructor.getParameterList().getParameters();
                         for (PsiParameter originalConstructorParameter : originalConstructorParameters) {
                             if (originalConstructorParameter.equals(variable.resolve())) {
                                 if (!extractedClassConstructorParameters.contains(originalConstructorParameter)) {
+                                    constructorCall.getArgumentList().add(variable);
                                     extractedClassConstructorParameters.add(originalConstructorParameter);
                                     foundInOriginalConstructorParameters = true;
                                     break;
@@ -2288,10 +2288,12 @@ public class ExtractClassRefactoring {
                                 PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
                                 PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
                                 for (PsiElement fragment : fragments) {
-                                    if (fragment.equals(variable.resolve())) {
-                                        if (extractedClassConstructorParameters.stream().noneMatch(param -> param.getType().equals(((PsiField) fragment).getType()))) {
+                                    if (fragment instanceof PsiVariable && fragment.equals(variable.resolve())) {
+                                        PsiVariable fragmentVariable = (PsiVariable) fragment;
+                                        if (extractedClassConstructorParameters.stream().noneMatch(param -> param.getName().equals(fragmentVariable.getName()))) {
                                             constructorCall.getArgumentList().add(variable);
-                                            extractedClassConstructorParameters.add((PsiParameter) fragment);
+                                            PsiParameter fragmentParameter = factory.createParameter(fragmentVariable.getName(), fragmentVariable.getType());
+                                            extractedClassConstructorParameters.add(fragmentParameter);
                                             if (!insertAfterStatements.contains(variableDeclarationStatement)) {
                                                 insertAfterStatements.add(variableDeclarationStatement);
                                             }
@@ -2328,9 +2330,7 @@ public class ExtractClassRefactoring {
                     }
                 }
 
-                if (modifyType == ModifyType.EXTRACTED) {
-                    extractedClassConstructorParameterMap.put(constructor, extractedClassConstructorParameters);
-                }
+                extractedClassConstructorParameterMap.put(constructor, extractedClassConstructorParameters);
             }
         }
 

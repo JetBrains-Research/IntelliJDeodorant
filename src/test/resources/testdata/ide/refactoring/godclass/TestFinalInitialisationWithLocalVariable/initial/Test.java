@@ -5,7 +5,7 @@ public class Test {
     private int b;
     private int c;
     private final int d;
-    private int e;
+    private final int e;
 
     public Test(int init) {
         int local = init;
@@ -14,7 +14,7 @@ public class Test {
         b = 5;
         c = 5;
         d = local;
-        e = 5;
+        e = local;
     }
 
     public void fun1() {
