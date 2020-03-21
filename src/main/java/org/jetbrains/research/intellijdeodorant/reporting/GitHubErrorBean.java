@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.reporting;
 import com.intellij.openapi.diagnostic.Attachment;
 import com.intellij.util.ExceptionUtil;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import java.util.List;
  * Collects information about thrown exception.
  */
 class GitHubErrorBean {
-    
     private String myExceptionHash;
     private final String stackTrace;
     private final String lastAction;
@@ -26,8 +24,7 @@ class GitHubErrorBean {
         this.lastAction = lastAction;
         if (throwable != null) {
             setMessage(throwable.getMessage());
-            long hashCode = Integer.toUnsignedLong(Arrays.hashCode(throwable.getStackTrace()));
-            myExceptionHash = Long.toHexString(hashCode);
+            myExceptionHash = Integer.toHexString(stackTrace.hashCode());
         }
     }
 
