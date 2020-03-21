@@ -144,6 +144,15 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestFinalInitialisationWithLocalVariable");
     }
 
+    public void testFinalInitialisationWithField() {
+        /*
+        BUG IN ORIGINAL PLUGIN.
+
+        It does not pass as a parameter a final field used as an initializer to another final field.
+         */
+        //runTest("TestFinalInitialisationWithField");
+    }
+
     public void testSOEN_StackedBarRenderer3D() {
         /*
         TEST ACTUALLY GIVES A WRONG RESULT:
