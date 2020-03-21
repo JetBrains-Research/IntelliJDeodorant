@@ -136,6 +136,33 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestSOEN_Jar");
     }
 
+    public void testFinalInitialisationWithConstructorParameters() {
+        runTest("TestFinalInitialisationWithConstructorParameters");
+    }
+
+    public void testFinalInitialisationWithLocalVariable() {
+        runTest("TestFinalInitialisationWithLocalVariable");
+    }
+
+    public void testFinalInitialisationWithField() {
+        /*
+        BUG IN ORIGINAL PLUGIN.
+
+        It does not pass as a parameter a final field used as an initializer to another final field.
+         */
+        //runTest("TestFinalInitialisationWithField");
+    }
+
+    public void testFinalInitialisationWithStaticFunctionCall() {
+        /*
+        BUG IN ORIGINAL PLUGIN.
+
+        It does not support initialising extracted a final field with a static function call.
+         */
+
+        //runTest("TestFinalInitialisationWithStaticFunctionCall");
+    }
+
     public void testSOEN_StackedBarRenderer3D() {
         /*
         TEST ACTUALLY GIVES A WRONG RESULT:
