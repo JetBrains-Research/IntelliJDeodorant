@@ -33,6 +33,7 @@ public class ASTSlice {
     private final int originalMethodLinesCount;
     private final int originalMethodStatementsCount;
     private final int originalMethodParametersCount;
+    private final String qualifiedMethodName;
 
     public ASTSlice(PDGSliceUnion pdgSliceUnion) {
         this.sourceMethodDeclaration = toPointer(pdgSliceUnion.getMethod().getMethodDeclaration());
@@ -78,6 +79,7 @@ public class ASTSlice {
         this.originalMethodLinesCount = getNumberOfLinesInMethod(pdgSliceUnion.getMethod().getMethodDeclaration());
         this.originalMethodStatementsCount = getMethodStatementCount(pdgSliceUnion.getMethod().getMethodDeclaration());
         this.originalMethodParametersCount = pdgSliceUnion.getMethod().getMethodDeclaration().getParameterList().getParametersCount();
+        this.qualifiedMethodName = getHumanReadableName(pdgSliceUnion.getMethod().getMethodDeclaration());
     }
 
     public ASTSlice(PDGObjectSliceUnion pdgObjectSliceUnion) {
@@ -124,6 +126,7 @@ public class ASTSlice {
         this.originalMethodLinesCount = getNumberOfLinesInMethod(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
         this.originalMethodStatementsCount = getMethodStatementCount(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
         this.originalMethodParametersCount = pdgObjectSliceUnion.getMethod().getMethodDeclaration().getParameterList().getParametersCount();
+        this.qualifiedMethodName = getHumanReadableName(pdgObjectSliceUnion.getMethod().getMethodDeclaration());
     }
 
     public boolean isVariableCriterionDeclarationStatementIsDeeperNestedThanExtractedMethodInvocationInsertionStatement() {
@@ -234,9 +237,9 @@ public class ASTSlice {
         return sb.toString();
     }
 
+    @Override
     public String toString() {
-        return getSourceTypeDeclaration().getQualifiedName() + "::" +
-                getSourceMethodDeclaration().getName();
+        return qualifiedMethodName;
     }
 
     public int getNumberOfSliceStatements() {

@@ -17,6 +17,7 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     SmartPsiElementPointer<PsiElement> method;
     private @NotNull
     Set<ASTSlice> candidates;
+    private final String qualifiedMethodName;
 
     /**
      * Creates refactoring instance.
@@ -26,6 +27,7 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     public ExtractMethodCandidateGroup(Set<ASTSlice> slices) {
         this.method = toPointer(slices.iterator().next().getSourceMethodDeclaration());
         this.candidates = slices;
+        this.qualifiedMethodName = getHumanReadableName(method.getElement());
     }
 
     /**
@@ -77,8 +79,6 @@ public class ExtractMethodCandidateGroup implements Refactoring {
 
     @Override
     public String toString() {
-        PsiMethod psiMethod = getMethod();
-        return psiMethod.getContainingClass() == null ? "" :
-                psiMethod.getContainingClass().getQualifiedName() + "::" + psiMethod.getName();
+        return qualifiedMethodName;
     }
 }
