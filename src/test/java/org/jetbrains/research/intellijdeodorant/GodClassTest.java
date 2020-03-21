@@ -136,6 +136,14 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestSOEN_Jar");
     }
 
+    public void testFinalInitialisationWithConstructorParameters() {
+        runTest("TestFinalInitialisationWithConstructorParameters");
+    }
+
+    public void testFinalInitialisationWithLocalVariable() {
+        runTest("TestFinalInitialisationWithLocalVariable");
+    }
+
     public void testSOEN_StackedBarRenderer3D() {
         /*
         TEST ACTUALLY GIVES A WRONG RESULT:
