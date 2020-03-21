@@ -10,7 +10,7 @@ public class Test {
     }
 
     public Test() {
-        this.testProduct = new TestProduct();
+        this.testProduct = new TestProduct(this);
         a = 5;
         b = 5;
         c = 5;
