@@ -3,6 +3,7 @@ package org.jetbrains.research.intellijdeodorant.utils;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.infos.MethodCandidateInfo;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -72,9 +73,9 @@ public class PsiUtils {
         final List<PsiJavaFile> javaFiles = new ArrayList<>();
 
         ProjectFileIndex.SERVICE.getInstance(project).iterateContent(
-                file -> {
+                (VirtualFile file) -> {
                     PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                    if (psiFile != null && !psiFile.isDirectory()
+                    if (psiFile instanceof PsiJavaFile && !psiFile.isDirectory()
                             && FILE_TYPE_NAME.equals(psiFile.getFileType().getName())) {
                         javaFiles.add((PsiJavaFile) psiFile);
                     }

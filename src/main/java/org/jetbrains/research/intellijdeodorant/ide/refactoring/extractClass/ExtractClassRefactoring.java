@@ -10,7 +10,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.FileContentUtil;
+import com.intellij.util.FileContentUtilCore;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -787,7 +787,7 @@ public class ExtractClassRefactoring {
         extractedClassFile.add(extractedClass);
 
         extractedClassFile = (PsiJavaFile) sourceFile.getContainingDirectory().add(extractedClassFile);
-        FileContentUtil.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
+        FileContentUtilCore.reparseFiles(extractedClassFile.getContainingDirectory().getVirtualFile());
 
         return extractedClassFile;
     }

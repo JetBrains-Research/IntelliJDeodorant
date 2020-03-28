@@ -1,7 +1,7 @@
 <idea-plugin url="https://github.com/JetBrains-Research/IntelliJDeodorant">
     <name>IntelliJDeodorant</name>
-    <version>2019.4-1.0</version>
-    <vendor url="https://research.jetbrains.org/">JetBrains-Research</vendor>
+    <version>2019.3-1.2</version>
+    <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
     <description><![CDATA[Detects code smells in Java code and recommends appropriate refactorings to resolve them.
         <p>Supports following code smells:
@@ -13,9 +13,11 @@
                <li>God Class problems can be resolved by Extract Class refactorings.</li>
             </ul>
         </p>
-        Based on tsantalis/JDeodorant.
+        <br/>Based on tsantalis/JDeodorant.
          ]]>
     </description>
+
+    <depends>com.intellij.modules.java</depends>
 
     <idea-version since-build="192.7142.36"/>
 

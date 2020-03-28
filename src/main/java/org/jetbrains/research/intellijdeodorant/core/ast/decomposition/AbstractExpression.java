@@ -3,6 +3,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.SmartPsiElementPointer;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 
 import java.util.List;
@@ -13,13 +14,13 @@ public class AbstractExpression extends AbstractMethodFragment {
 
     private final SmartPsiElementPointer<PsiExpression> expression;
 
-    public AbstractExpression(PsiExpression expression) {
+    public AbstractExpression(@NotNull PsiExpression expression) {
         super(null);
         this.expression = toPointer(expression);
         processExpression(expression);
     }
 
-    public AbstractExpression(PsiExpression expression, AbstractMethodFragment parent) {
+    public AbstractExpression(@NotNull PsiExpression expression, AbstractMethodFragment parent) {
         super(parent);
         this.expression = toPointer(expression);
         processExpression(expression);
