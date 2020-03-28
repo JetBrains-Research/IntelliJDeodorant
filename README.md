@@ -3,6 +3,7 @@
 [![JB Research](https://jb.gg/badges/research-flat-square.svg)](https://research.jetbrains.org/)
 [![CircleCI](https://img.shields.io/circleci/build/github/JetBrains-Research/IntelliJDeodorant.svg?style=flat-square)](https://circleci.com/gh/JetBrains-Research/IntelliJDeodorant)
 [![Gitter](https://badges.gitter.im/intellijdeodorant/community.svg)](https://gitter.im/intellijdeodorant/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/14016-intellijdeodorant.svg?style=flat-square)](https://plugins.jetbrains.com/plugin/14016-intellijdeodorant)
 
 An IntelliJ IDEA plugin that detects code smells in Java code and recommends appropriate refactorings to resolve them. All of the suggested refactorings can be carried out automatically from within the plugin.
 
@@ -24,17 +25,6 @@ The tool supports several code smells, namely Feature Envy, Type/State Checking,
 - **Long Method**, as the name suggests, occurs when a method is too long and can be divided into several. For such methods, the tool identifies blocks of code that are responsible for calculating a variable and suggests extracting it into a separate method, i.e. perform an **Extract Method** refactoring.
 
 - **God Class** is a name given to a large and complex class that contains too many components. The tool identifies sets of attributes and methods in a class that could be moved into a separate class to simplify the understanding of the code, i.e. an **Extract Class** refactoring can be performed.
-
-## How to get
-Supported IntelliJ IDEA version: 2019.3.3
-
-1. Clone this repository.
-2. Build IntelliJDeodorant.jar using ```./gradlew jar```.
-3. Go to ```Settings -> Plugins -> Install plugin from disk```.
-4. Select IntelliJDeodorant.jar.
-5. Restart IntelliJ IDEA.
-
-Done! The plugin is ready.
 
 ## Getting started
 The ```IntelliJDeodorant``` tool window will appear in IntelliJ IDEA. Each tab of this window contains a ```Refresh``` button that allows to search for the necessary code smell in the entire project and the table with the results of the search. To apply any refactoring, simply select a suggestion in the table and click the ```Refactor``` button.
