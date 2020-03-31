@@ -233,7 +233,7 @@ public class CFG extends Graph {
             flow.setLoopbackFlow(true);
             edges.add(flow);
         }
-        if (previousNodes.size() > 1) {
+        if (previousNodes.size() > 1 && !unjoinedConditionalNodes.empty()) {
             List<CFGBranchConditionalNode> conditionalNodes = unjoinedConditionalNodes.pop();
             for (CFGBranchConditionalNode conditionalNode : conditionalNodes) {
                 conditionalNode.setJoinNode(currentNode);
@@ -580,26 +580,28 @@ public class CFG extends Graph {
     }
 
     private void handleAction(CFGBranchConditionalNode currentNode, int action) {
-        if (action == JOIN_TOP_LIST && !unjoinedConditionalNodes.empty()) {
-            List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.peek();
-            topList.add(currentNode);
-        } else if (action == JOIN_SECOND_FROM_TOP_LIST) {
-            if (unjoinedConditionalNodes.size() > 1) {
-                List<CFGBranchConditionalNode> list = unjoinedConditionalNodes.elementAt(unjoinedConditionalNodes.size() - 2);
-                list.add(currentNode);
-            } else {
+        if (!unjoinedConditionalNodes.empty()) {
+            if (action == JOIN_TOP_LIST) {
+                List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.peek();
+                topList.add(currentNode);
+            } else if (action == JOIN_SECOND_FROM_TOP_LIST) {
+                if (unjoinedConditionalNodes.size() > 1) {
+                    List<CFGBranchConditionalNode> list = unjoinedConditionalNodes.elementAt(unjoinedConditionalNodes.size() - 2);
+                    list.add(currentNode);
+                } else {
+                    List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
+                    List<CFGBranchConditionalNode> list = new ArrayList<>();
+                    list.add(currentNode);
+                    unjoinedConditionalNodes.push(list);
+                    unjoinedConditionalNodes.push(topList);
+                }
+            } else if (action == PLACE_NEW_LIST_SECOND_FROM_TOP) {
                 List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
                 List<CFGBranchConditionalNode> list = new ArrayList<>();
                 list.add(currentNode);
                 unjoinedConditionalNodes.push(list);
                 unjoinedConditionalNodes.push(topList);
             }
-        } else if (action == PLACE_NEW_LIST_SECOND_FROM_TOP && !unjoinedConditionalNodes.empty()) {
-            List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
-            List<CFGBranchConditionalNode> list = new ArrayList<>();
-            list.add(currentNode);
-            unjoinedConditionalNodes.push(list);
-            unjoinedConditionalNodes.push(topList);
         } else {
             List<CFGBranchConditionalNode> list = new ArrayList<>();
             list.add(currentNode);
@@ -620,7 +622,7 @@ public class CFG extends Graph {
             }
             edges.add(flow);
         }
-        if (previousNodes.size() > 1) {
+        if (previousNodes.size() > 1 && !unjoinedConditionalNodes.empty()) {
             List<CFGBranchConditionalNode> conditionalNodes = unjoinedConditionalNodes.pop();
             for (CFGBranchConditionalNode conditionalNode : conditionalNodes) {
                 conditionalNode.setJoinNode(currentNode);
