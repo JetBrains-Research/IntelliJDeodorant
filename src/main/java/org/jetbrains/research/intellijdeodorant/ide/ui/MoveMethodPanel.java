@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
-import static org.jetbrains.research.intellijdeodorant.ide.ui.MoveMethodTableModel.SELECTION_COLUMN_INDEX;
+import static org.jetbrains.research.intellijdeodorant.ide.ui.MoveMethodTableModel.*;
 
 /**
  * Panel for Move Method refactoring.
@@ -214,10 +214,9 @@ class MoveMethodPanel extends JPanel {
     private void onDoubleClick(InputEvent e) {
         final int selectedRow = table.getSelectedRow() == -1 ? -1 : table.convertRowIndexToModel(table.getSelectedRow());
         final int selectedColumn = table.getSelectedColumn();
-        if (selectedRow == -1 || selectedColumn == -1 || selectedColumn == SELECTION_COLUMN_INDEX) {
-            return;
+        if (selectedRow != -1 && (selectedColumn == ENTITY_COLUMN_INDEX || selectedColumn == MOVE_TO_COLUMN_INDEX)) {
+            openDefinition(model.getUnitAt(selectedRow, selectedColumn).orElse(null), scope);
         }
-        openDefinition(model.getUnitAt(selectedRow, selectedColumn).orElse(null), scope);
     }
 
     private static void openDefinition(@Nullable PsiMember unit, AnalysisScope scope) {

@@ -21,8 +21,8 @@ import java.util.stream.IntStream;
 
 class MoveMethodTableModel extends AbstractTableModel {
     static final int SELECTION_COLUMN_INDEX = 0;
-    private static final int ENTITY_COLUMN_INDEX = 1;
-    private static final int MOVE_TO_COLUMN_INDEX = 2;
+    static final int ENTITY_COLUMN_INDEX = 1;
+    static final int MOVE_TO_COLUMN_INDEX = 2;
     private static final int ACCESSED_MEMBERS_COUNT_INDEX = 3;
     private static final int COLUMNS_COUNT = 4;
 
