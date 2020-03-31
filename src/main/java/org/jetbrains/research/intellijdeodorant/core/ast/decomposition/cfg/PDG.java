@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 import com.intellij.psi.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 
 import java.util.*;
@@ -632,7 +633,7 @@ public class PDG extends Graph {
     }
 
     private void antiDependenceSearch(PDGNode initialNode, AbstractVariable variableInstruction,
-                                      PDGNode currentNode, Set<PDGNode> visitedNodes, CFGBranchNode loop) {
+                                      @NotNull PDGNode currentNode, Set<PDGNode> visitedNodes, CFGBranchNode loop) {
         if (visitedNodes.contains(currentNode))
             return;
         else
@@ -649,11 +650,14 @@ public class PDG extends Graph {
                     loop = (CFGBranchDoLoopNode) srcCFGNode;
             }
             PDGNode dstPDGNode = dstCFGNode.getPDGNode();
-            if (dstPDGNode.definesLocalVariable(variableInstruction)) {
-                PDGAntiDependence antiDependence = new PDGAntiDependence(initialNode, dstPDGNode, variableInstruction, loop);
-                edges.add(antiDependence);
-            } else
-                antiDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
+            if (dstPDGNode != null) {
+                if (dstPDGNode.definesLocalVariable(variableInstruction)) {
+                    PDGAntiDependence antiDependence = new PDGAntiDependence(initialNode, dstPDGNode, variableInstruction, loop);
+                    edges.add(antiDependence);
+                } else {
+                    antiDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
+                }
+            }
         }
     }
 
