@@ -428,8 +428,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             return false;
         //get all return statements having an expression within method body
         List<PsiStatement> allReturnStatementsWithinTypeCheckMethod = new ArrayList<>();
-        for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
-            allReturnStatementsWithinTypeCheckMethod.addAll(statementExtractor.getReturnStatements(statementInBlock));
+        PsiCodeBlock psiCodeBlock = getTypeCheckMethod().getBody();
+        if (psiCodeBlock != null) {
+            for (PsiStatement statementInBlock : psiCodeBlock.getStatements()) {
+                allReturnStatementsWithinTypeCheckMethod.addAll(statementExtractor.getReturnStatements(statementInBlock));
+            }
         }
         List<PsiReturnStatement> returnStatementsHavingExpressionWithinTypeCheckMethod = new ArrayList<>();
         for (PsiStatement statement : allReturnStatementsWithinTypeCheckMethod) {
@@ -666,7 +669,6 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
     private Map<PsiReturnStatement, PsiVariable> getTypeCheckMethodReturnedVariableMap() {
         Map<PsiReturnStatement, PsiVariable> map = new LinkedHashMap<>();
         StatementExtractor statementExtractor = new StatementExtractor();
-        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         List<PsiStatement> typeCheckCodeFragmentReturnStatements = statementExtractor.getReturnStatements(getTypeCheckCodeFragment());
         List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(getTypeCheckMethod().getBody());
         for (PsiStatement statement : typeCheckCodeFragmentReturnStatements) {
@@ -763,8 +765,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                         return parameter;
                 }
                 List<PsiStatement> variableDeclarationStatements = new ArrayList<>();
-                for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
-                    variableDeclarationStatements.addAll(statementExtractor.getVariableDeclarationStatements(statementInBlock));
+                if (getTypeCheckMethod().getBody() != null) {
+                    PsiStatement[] psiStatements = getTypeCheckMethod().getBody().getStatements();
+                    for (PsiStatement statementInBlock : psiStatements) {
+                        variableDeclarationStatements.addAll(statementExtractor.getVariableDeclarationStatements(statementInBlock));
+                    }
                 }
                 for (PsiStatement statement : variableDeclarationStatements) {
                     PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
@@ -777,8 +782,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             }
         } else {
             List<PsiStatement> allReturnStatements = new ArrayList<>();
-            for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
-                allReturnStatements.addAll(statementExtractor.getReturnStatements(statementInBlock));
+            if (getTypeCheckMethod().getBody() != null) {
+                PsiStatement[] psiStatements = getTypeCheckMethod().getBody().getStatements();
+                for (PsiStatement statementInBlock : psiStatements) {
+                    allReturnStatements.addAll(statementExtractor.getReturnStatements(statementInBlock));
+                }
             }
             if (!allReturnStatements.isEmpty()) {
                 PsiReturnStatement lastReturnStatement = (PsiReturnStatement) allReturnStatements.get(allReturnStatements.size() - 1);
@@ -814,7 +822,9 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             if (invoker != null) {
                 return invoker.getReferenceName();
             } else {
-                return getTypeMethodInvocation().resolveMethod().getName();
+                PsiMethod resolvedMethod = getTypeMethodInvocation().resolveMethod();
+                if (resolvedMethod != null)
+                    return resolvedMethod.getName();
             }
         }
         return getAbstractClassName();
@@ -867,50 +877,55 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
             if (typeMethodInvocationExpression instanceof PsiReferenceExpression) {
                 invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
             }
-            if (invoker != null) {
+            if (invoker != null && invoker.getType() != null) {
                 abstractClassType = invoker.getType().getCanonicalText();
             }
         }
 
         if (abstractClassType == null) {
             PsiCodeBlock typeCheckMethodBody = getTypeCheckMethod().getBody();
-            PsiStatement[] statements = typeCheckMethodBody.getStatements();
-            if (statements.length > 0 && statements[0] instanceof PsiSwitchStatement) {
-                PsiSwitchStatement switchStatement = (PsiSwitchStatement) statements[0];
-                PsiStatement[] statements2 = switchStatement.getBody().getStatements();
-                ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-                List<PsiClass> superclassTypeBindings = new ArrayList<>();
-                for (PsiStatement statement2 : statements2) {
-                    if (!(statement2 instanceof PsiSwitchLabelStatement) && !(statement2 instanceof PsiBreakStatement)) {
-                        List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(statement2);
-                        if (classInstanceCreations.size() == 1) {
-                            PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreations.get(0);
-                            PsiJavaCodeReferenceElement classInstanceCreationType = classInstanceCreation.getClassReference();
-                            PsiElement resolvedReference = classInstanceCreationType.resolve();
-                            if (resolvedReference instanceof PsiClass) {
-                                superclassTypeBindings.add(((PsiClass) resolvedReference).getSuperClass());
+            if (typeCheckMethodBody != null) {
+                PsiStatement[] statements = typeCheckMethodBody.getStatements();
+                if (statements.length > 0 && statements[0] instanceof PsiSwitchStatement) {
+                    PsiSwitchStatement switchStatement = (PsiSwitchStatement) statements[0];
+                    PsiCodeBlock switchStatementBody = switchStatement.getBody();
+                    if (switchStatementBody != null) {
+                        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+                        List<PsiClass> superClasses = new ArrayList<>();
+                        for (PsiStatement psiStatement : switchStatementBody.getStatements()) {
+                            if (!(psiStatement instanceof PsiSwitchLabelStatement) && !(psiStatement instanceof PsiBreakStatement)) {
+                                List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(psiStatement);
+                                if (classInstanceCreations.size() == 1) {
+                                    PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreations.get(0);
+                                    PsiJavaCodeReferenceElement classInstanceCreationType = classInstanceCreation.getClassReference();
+                                    if (classInstanceCreationType != null) {
+                                        PsiElement resolvedReference = classInstanceCreationType.resolve();
+                                        if (resolvedReference instanceof PsiClass)
+                                            superClasses.add(((PsiClass) resolvedReference).getSuperClass());
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                if (superclassTypeBindings.size() > 1) {
-                    for (PsiClass superclassTypeBinding : superclassTypeBindings) {
-                        if ("java.lang.Object".equals(superclassTypeBinding.getQualifiedName()))
-                            return null;
-                    }
-                    if (equalTypeBindings(superclassTypeBindings)) {
-                        abstractClassType = superclassTypeBindings.get(0).getQualifiedName();
-                    } else {
-                        List<PsiClass> superclassTypeBindings2 = new ArrayList<>();
-                        for (PsiClass classTypeBinding : superclassTypeBindings) {
-                            PsiClass superclassTypeBinding = classTypeBinding.getSuperClass();
-                            if (superclassTypeBinding.getQualifiedName().equals("java.lang.Object"))
-                                superclassTypeBindings2.add(classTypeBinding);
-                            else
-                                superclassTypeBindings2.add(superclassTypeBinding);
-                        }
-                        if (equalTypeBindings(superclassTypeBindings2)) {
-                            abstractClassType = superclassTypeBindings.get(0).getQualifiedName();
+                        if (superClasses.size() > 1) {
+                            for (PsiClass psiClass : superClasses) {
+                                if ("java.lang.Object".equals(psiClass.getQualifiedName()))
+                                    return null;
+                            }
+                            if (equalTypeBindings(superClasses)) {
+                                abstractClassType = superClasses.get(0).getQualifiedName();
+                            } else {
+                                List<PsiClass> psiClasses = new ArrayList<>();
+                                for (PsiClass psiClass : superClasses) {
+                                    PsiClass superClass = psiClass.getSuperClass();
+                                    if (superClass != null && "java.lang.Object".equals(superClass.getQualifiedName()))
+                                        psiClasses.add(psiClass);
+                                    else
+                                        psiClasses.add(superClass);
+                                }
+                                if (equalTypeBindings(psiClasses)) {
+                                    abstractClassType = superClasses.get(0).getQualifiedName();
+                                }
+                            }
                         }
                     }
                 }
@@ -947,7 +962,8 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                         StringTokenizer tokenizer = new StringTokenizer(staticFieldName, "_");
                         while (tokenizer.hasMoreTokens()) {
                             String tempName = tokenizer.nextToken().toLowerCase();
-                            subclassName.append(tempName.subSequence(0, 1).toString().toUpperCase()).append(tempName.subSequence(1, tempName.length()).toString());
+                            subclassName.append(tempName.subSequence(0, 1).toString().toUpperCase())
+                                    .append(tempName.subSequence(1, tempName.length()).toString());
                         }
                     }
                     if (inheritanceTreeMatchingWithStaticTypes != null) {
@@ -991,21 +1007,21 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
         for (PsiExpression expression : castExpressions) {
             PsiTypeCastExpression castExpression = (PsiTypeCastExpression) expression;
             PsiExpression expressionOfCastExpression = castExpression.getOperand();
-            PsiReferenceExpression superTypeSimpleName = null;
+            PsiReferenceExpression psiReferenceExpression = null;
             if (expressionOfCastExpression instanceof PsiReferenceExpression) {
-                superTypeSimpleName = (PsiReferenceExpression) expressionOfCastExpression;
+                psiReferenceExpression = (PsiReferenceExpression) expressionOfCastExpression;
             } else if (expressionOfCastExpression instanceof PsiMethodCallExpression) {
                 PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expressionOfCastExpression;
                 if (getTypeFieldGetterMethod() != null && getTypeFieldGetterMethod().equals(methodInvocation.resolveMethod())) {
-                    superTypeSimpleName = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(getTypeFieldGetterMethod());
+                    psiReferenceExpression = (PsiReferenceExpression) MethodDeclarationUtility.isGetter(getTypeFieldGetterMethod());
                 }
             }
-            if (superTypeSimpleName != null) {
+            if (psiReferenceExpression != null) {
                 if (getTypeField() != null) {
-                    if (getTypeField().equals(superTypeSimpleName.resolve()))
+                    if (getTypeField().equals(psiReferenceExpression.resolve()))
                         return castExpression.getType();
                 } else if (getTypeLocalVariable() != null) {
-                    if (getTypeLocalVariable().equals(superTypeSimpleName.resolve()))
+                    if (getTypeLocalVariable().equals(psiReferenceExpression.resolve()))
                         return castExpression.getType();
                 } else if (getTypeMethodInvocation() != null) {
                     PsiExpression typeMethodInvocationExpression = getTypeMethodInvocation().getMethodExpression().getQualifierExpression();
@@ -1013,8 +1029,11 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                     if (typeMethodInvocationExpression instanceof PsiReferenceExpression) {
                         invoker = (PsiReferenceExpression) typeMethodInvocationExpression;
                     }
-                    if (invoker != null && invoker.resolve().equals(superTypeSimpleName.resolve()))
-                        return castExpression.getType();
+                    if (invoker != null) {
+                        PsiElement resolvedElement = invoker.resolve();
+                        if (resolvedElement != null && resolvedElement.equals(psiReferenceExpression.resolve()))
+                            return castExpression.getType();
+                    }
                 }
             }
         }
@@ -1047,11 +1066,13 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 for (PsiExpression expression : methodInvocations) {
                     if (expression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                        PsiMethod methodBinding = methodInvocation.resolveMethod();
-                        PsiClassType[] typeBindings = methodBinding.getThrowsList().getReferencedTypes();
-                        for (PsiClassType typeBinding : typeBindings) {
-                            if (!catchClauseExceptions.contains(typeBinding))
-                                thrownExceptions.add(typeBinding);
+                        PsiMethod resolvedMethod = methodInvocation.resolveMethod();
+                        if (resolvedMethod != null) {
+                            PsiClassType[] referencedTypes = resolvedMethod.getThrowsList().getReferencedTypes();
+                            for (PsiClassType psiClassType : referencedTypes) {
+                                if (!catchClauseExceptions.contains(psiClassType))
+                                    thrownExceptions.add(psiClassType);
+                            }
                         }
                     }
                 }
@@ -1096,25 +1117,30 @@ public class TypeCheckElimination implements Comparable<TypeCheckElimination> {
                 leaf = leaf.getNextLeaf();
             }
             PsiCodeBlock typeCheckMethodBody = getTypeCheckMethod().getBody();
-            PsiStatement[] statements = typeCheckMethodBody.getStatements();
-            if (statements.length > 0 && statements[0] instanceof PsiSwitchStatement) {
+            if (typeCheckMethodBody != null && typeCheckMethodBody.getStatements().length > 0
+                    && typeCheckMethodBody.getStatements()[0] instanceof PsiSwitchStatement) {
+                PsiStatement[] statements = typeCheckMethodBody.getStatements();
                 PsiSwitchStatement switchStatement = (PsiSwitchStatement) statements[0];
-                PsiStatement[] statements2 = switchStatement.getBody().getStatements();
-                ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-                int matchCounter = 0;
-                for (PsiStatement statement2 : statements2) {
-                    if (!(statement2 instanceof PsiSwitchLabelStatement) && !(statement2 instanceof PsiBreakStatement)) {
-                        List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(statement2);
-                        if (classInstanceCreations.size() == 1) {
-                            PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreations.get(0);
-                            String classInstanceCreationType = classInstanceCreation.getClassReference().getQualifiedName();
-                            if (subclassNames.contains(classInstanceCreationType)) {
-                                matchCounter++;
+                PsiCodeBlock switchStatementBody = switchStatement.getBody();
+                if (switchStatementBody != null) {
+                    ExpressionExtractor expressionExtractor = new ExpressionExtractor();
+                    int matchCounter = 0;
+                    for (PsiStatement psiStatement : switchStatementBody.getStatements()) {
+                        if (!(psiStatement instanceof PsiSwitchLabelStatement) && !(psiStatement instanceof PsiBreakStatement)) {
+                            List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(psiStatement);
+                            if (classInstanceCreations.size() == 1) {
+                                PsiNewExpression classInstanceCreation = (PsiNewExpression) classInstanceCreations.get(0);
+                                if (classInstanceCreation.getClassReference() != null) {
+                                    String classInstanceCreationType = classInstanceCreation.getClassReference().getQualifiedName();
+                                    if (subclassNames.contains(classInstanceCreationType)) {
+                                        matchCounter++;
+                                    }
+                                }
                             }
                         }
                     }
+                    return matchCounter == subclassNames.size();
                 }
-                return matchCounter == subclassNames.size();
             }
         }
         return false;
