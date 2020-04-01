@@ -150,9 +150,11 @@ public class CFG extends Graph {
             directlyNestedNodeInBlock(tryNode);
             findBlockNodeControlParent(tryNode);
             directlyNestedNodesInBlocks.put(tryNode, new ArrayList<>());
-            AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            if (firstStatement instanceof CompositeStatementObject) {
-                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (!compositeStatement.getStatements().isEmpty()) {
+                AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
+                if (firstStatement instanceof CompositeStatementObject) {
+                    previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+                }
             }
         } else {
             //if a try node has resources, it is treated as a non-composite node
@@ -165,9 +167,11 @@ public class CFG extends Graph {
             ArrayList<CFGNode> currentNodes = new ArrayList<>();
             currentNodes.add(tryNode);
             previousNodes = currentNodes;
-            AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            if (firstStatement instanceof CompositeStatementObject) {
-                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (!compositeStatement.getStatements().isEmpty()) {
+                AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
+                if (firstStatement instanceof CompositeStatementObject) {
+                    previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+                }
             }
         }
         return previousNodes;
