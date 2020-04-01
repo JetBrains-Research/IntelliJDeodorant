@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains-Research/IntelliJDeodorant">
     <name>IntelliJDeodorant</name>
-    <version>2019.3-1.2</version>
+    <version>2019.3-1.3</version>
     <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
     <description><![CDATA[Detects code smells in Java code and recommends appropriate refactorings to resolve them.
