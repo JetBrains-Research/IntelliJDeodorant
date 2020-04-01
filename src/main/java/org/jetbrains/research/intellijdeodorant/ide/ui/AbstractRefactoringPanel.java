@@ -144,11 +144,11 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     private void removeSelection() {
-        treeTable.getTree().setSelectionPath(null);
+        treeTable.getTree().clearSelection();
     }
 
     /**
-     * Shows treeTable with available refactorings.
+     * Shows the panel with refactoring suggestions.
      */
     private void showRefactoringsTable() {
         removeSelection();
@@ -160,9 +160,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
+     * Clears the panel and shows text that proposes to press the Refresh button to search for refactoring opportunities.
      */
     protected void showRefreshingProposal() {
+        model.candidateRefactoringGroups.clear();
         removeSelection();
         if (errorNotification != null && !errorNotification.isExpired()) {
             errorNotification.expire();
@@ -174,9 +175,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Hides treeTable with refactorings and leaves panel empty
+     * Hides the panel while calculation of refactoring suggestions is in progress.
      */
     private void showEmptyPanel() {
+        model.candidateRefactoringGroups.clear();
         removeSelection();
         exportButton.setEnabled(false);
         refreshButton.setEnabled(false);
