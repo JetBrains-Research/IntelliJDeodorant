@@ -1,10 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.association;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
+import org.jetbrains.research.intellijdeodorant.core.ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +56,10 @@ public class AssociationDetection {
             ListIterator<FieldObject> fieldIt = classObject.getFieldIterator();
             while (fieldIt.hasNext()) {
                 FieldObject fieldObject = fieldIt.next();
-                String type = fieldObject.getType().getClassType();
+                String type = fieldObject.getType().getCanonicalText();
                 //cover also other collections in the future
                 if (acceptableOriginClassNames.contains(type)) {
-                    String genericType = fieldObject.getType().getGenericType();
+                    String genericType = fieldObject.getType().getCanonicalText();
                     if (genericType != null) {
                         for (String className : systemObject.getClassNames()) {
                             if (genericType.contains(className)) {
@@ -80,7 +76,7 @@ public class AssociationDetection {
                     }
                 } else if (systemObject.getClassObject(type) != null) {
                     Association association = new Association(fieldObject, classObject.getName(), type);
-                    if (fieldObject.getType().getArrayDimension() > 0)
+                    if (fieldObject.getType().getArrayDimensions() > 0)
                         association.setContainer(true);
                     if (!associationList.contains(association))
                         associationList.add(association);

@@ -1,8 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.inheritance;
 
+import com.intellij.psi.PsiType;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
 
 import java.util.*;
 
@@ -29,18 +29,17 @@ public class CompleteInheritanceDetection {
         ListIterator<ClassObject> classIterator = system.getClassListIterator();
         while (classIterator.hasNext()) {
             ClassObject classObject = classIterator.next();
-            TypeObject superclassType = classObject.getSuperclass();
+            String superclassType = classObject.getSuperclass();
             if (superclassType != null) {
-                String superclass = superclassType.getClassType();
-                if (system.getClassObject(superclass) != null) {
-                    addSubclassToSuperclass(superclass, classObject.getName());
+                if (system.getClassObject(superclassType) != null) {
+                    addSubclassToSuperclass(superclassType, classObject.getName());
                 }
             }
-            ListIterator<TypeObject> interfaceIterator = classObject.getInterfaceIterator();
+            ListIterator<String> interfaceIterator = classObject.getInterfaceIterator();
             while (interfaceIterator.hasNext()) {
-                TypeObject superInterface = interfaceIterator.next();
-                if (system.getClassObject(superInterface.getClassType()) != null) {
-                    addSubclassToSuperclass(superInterface.getClassType(), classObject.getName());
+                String superInterface = interfaceIterator.next();
+                if (system.getClassObject(superInterface) != null) {
+                    addSubclassToSuperclass(superInterface, classObject.getName());
                 }
             }
         }

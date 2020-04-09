@@ -18,8 +18,7 @@ import java.util.*;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class MethodObject implements AbstractMethodDeclaration {
-
-    private TypeObject returnType;
+    private PsiType returnType;
     private boolean _abstract;
     private boolean _static;
     private boolean _synchronized;
@@ -43,11 +42,11 @@ public class MethodObject implements AbstractMethodDeclaration {
         return (PsiMethod) this.psiMethod.getElement();
     }
 
-    public void setReturnType(TypeObject returnType) {
+    public void setReturnType(PsiType returnType) {
         this.returnType = returnType;
     }
 
-    public TypeObject getReturnType() {
+    public PsiType getReturnType() {
         return returnType;
     }
 
@@ -112,12 +111,12 @@ public class MethodObject implements AbstractMethodDeclaration {
     }
 
     public MethodInvocationObject generateMethodInvocation() {
-        return new MethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className),
+        return new MethodInvocationObject(this.constructorObject.className,
                 this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
     public SuperMethodInvocationObject generateSuperMethodInvocation() {
-        return new SuperMethodInvocationObject(TypeObject.extractTypeObject(this.constructorObject.className),
+        return new SuperMethodInvocationObject(this.constructorObject.className,
                 this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
@@ -302,7 +301,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         String targetClassType = targetClass.getPsiType();
         List<LocalVariableInstructionObject> localVariableInstructions = getLocalVariableInstructions();
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getType().getClassType().equals(targetClass.getName())) {
+            if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getName())) {
                 for (LocalVariableDeclarationObject variableDeclaration : getLocalVariableDeclarations()) {
                     if (variableDeclaration.getVariableDeclaration().equals(localVariableInstruction.getReference().resolve()))
                         return false;
@@ -322,11 +321,11 @@ public class MethodObject implements AbstractMethodDeclaration {
         }
 
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            if (localVariableInstruction.getType().getClassType().equals(targetClass.getPsiClass().getName())) {
+            if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
                 ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
                 while (parameterIterator.hasNext()) {
                     ParameterObject parameter = parameterIterator.next();
-                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimension() == 0)
+                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimensions()== 0)
                         return true;
                 }
             }
@@ -357,14 +356,14 @@ public class MethodObject implements AbstractMethodDeclaration {
 
         List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
         for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            String fieldTypeBinding = fieldInstruction.getType().getClassType();
+            String fieldTypeBinding = fieldInstruction.getType().getCanonicalText();
             if (fieldTypeBinding != null && fieldInstruction.getType() != null &&
-                    fieldInstruction.getType().getClassType() != null && fieldInstruction.getType().getClassType().equals(targetClass.getName())
+                    fieldInstruction.getType().getCanonicalText() != null && fieldInstruction.getType().getCanonicalText().equals(targetClass.getName())
                     || fieldTypeBinding != null && fieldTypeBinding.equals(targetClassType)) {
                 ListIterator<FieldObject> fieldIterator = sourceClass.getFieldIterator();
                 while (fieldIterator.hasNext()) {
                     FieldObject field = fieldIterator.next();
-                    if (fieldInstruction.getName().equals(field.getName()) && field.getType().getArrayDimension() == 0)
+                    if (fieldInstruction.getName().equals(field.getName()) && field.getType().getArrayDimensions() == 0)
                         return true;
                 }
             }
@@ -376,7 +375,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 MethodObject invokedMethod = sourceClass.getMethod(methodInvocation);
                 if (invokedMethod == null) continue;
                 FieldInstructionObject fieldInstruction = invokedMethod.isGetter();
-                if (fieldInstruction != null && fieldInstruction.getType().getClassType().equals(targetClass.getName()))
+                if (fieldInstruction != null && fieldInstruction.getType().getCanonicalText().equals(targetClass.getName()))
                     return true;
                 MethodInvocationObject delegation = invokedMethod.isDelegate();
                 if (delegation != null && delegation.getOriginClassName().equals(targetClass.getName()))
@@ -460,10 +459,6 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public String getClassName() {
         return constructorObject.getClassName();
-    }
-
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return constructorObject.getCommentListIterator();
     }
 
     public ListIterator<ParameterObject> getParameterListIterator() {
@@ -650,7 +645,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.containsSuperFieldAccess();
     }
 
-    public List<TypeObject> getParameterTypeList() {
+    public List<PsiType> getParameterTypeList() {
         return constructorObject.getParameterTypeList();
     }
 
@@ -660,24 +655,24 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean equals(MethodInvocationObject mio) {
         return this.getClassName().equals(mio.getOriginClassName()) && this.getName().equals(mio.getMethodName()) &&
-                this.returnType.equalsClassType(mio.getReturnType()) && equalParameterTypes(this.constructorObject.getParameterTypeList(), mio.getParameterTypeList());
+                this.returnType.equals(mio.getReturnType()) && equalParameterTypes(this.constructorObject.getParameterTypeList(), mio.getParameterTypeList());
     }
 
     public boolean equals(SuperMethodInvocationObject smio) {
         return this.getClassName().equals(smio.getOriginClassName()) && this.getName().equals(smio.getMethodName()) &&
-                this.returnType.equalsClassType(smio.getReturnType()) && equalParameterTypes(this.constructorObject.getParameterTypeList(), smio.getParameterTypeList());
+                this.returnType.equals(smio.getReturnType()) && equalParameterTypes(this.constructorObject.getParameterTypeList(), smio.getParameterTypeList());
     }
 
-    private boolean equalParameterTypes(List<TypeObject> list1, List<TypeObject> list2) {
+    private boolean equalParameterTypes(List<PsiType> list1, List<PsiType> list2) {
         if (list1.size() != list2.size())
             return false;
         for (int i = 0; i < list1.size(); i++) {
-            TypeObject type1 = list1.get(i);
-            TypeObject type2 = list2.get(i);
-            if (!type1.equalsClassType(type2))
+            PsiType type1 = list1.get(i);
+            PsiType type2 = list2.get(i);
+            if (!type1.equals(type2))
                 return false;
             //array dimension comparison is skipped if at least one of the class types is a type parameter name, such as E, K, N, T, V, S, U
-            if (type1.getArrayDimension() != type2.getArrayDimension() && type1.getClassType().length() != 1 && type2.getClassType().length() != 1)
+            if (type1.getArrayDimensions() != type2.getArrayDimensions() && type1.getCanonicalText().length() != 1 && type2.getCanonicalText().length() != 1)
                 return false;
         }
         return true;

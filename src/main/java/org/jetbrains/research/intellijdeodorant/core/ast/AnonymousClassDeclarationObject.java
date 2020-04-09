@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.intellij.psi.PsiAnonymousClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
@@ -30,7 +31,7 @@ public class AnonymousClassDeclarationObject extends ClassDeclarationObject {
         this.classObject = classObject;
     }
 
-    public TypeObject getSuperclass() {
+    public String getSuperclass() {
         return null;
     }
 

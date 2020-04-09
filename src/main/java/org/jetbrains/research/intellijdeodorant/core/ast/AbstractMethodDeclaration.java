@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiType;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -23,8 +25,6 @@ public interface AbstractMethodDeclaration {
     MethodBodyObject getMethodBody();
 
     String getClassName();
-
-    ListIterator<CommentObject> getCommentListIterator();
 
     ListIterator<ParameterObject> getParameterListIterator();
 
@@ -120,7 +120,7 @@ public interface AbstractMethodDeclaration {
 
     boolean containsSuperFieldAccess();
 
-    List<TypeObject> getParameterTypeList();
+    List<PsiType> getParameterTypeList();
 
     List<String> getParameterList();
 

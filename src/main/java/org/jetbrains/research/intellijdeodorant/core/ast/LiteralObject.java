@@ -9,7 +9,7 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class LiteralObject {
     private LiteralType literalType;
     private String value;
-    private TypeObject type;
+    private String type;
     private SmartPsiElementPointer<PsiExpression> literal;
     private volatile int hashCode = 0;
 
@@ -20,35 +20,35 @@ public class LiteralObject {
             if (JavaTokenType.STRING_LITERAL.equals(literalExpressionType)) {
                 literalType = LiteralType.STRING;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.NULL_KEYWORD.equals(literalExpressionType)) {
                 literalType = LiteralType.NULL;
                 value = "null";
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.INTEGER_LITERAL.equals(literalExpressionType)) {
                 literalType = LiteralType.NUMBER;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.FLOAT_KEYWORD.equals(literalExpressionType)) {
                 literalType = LiteralType.NUMBER;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.DOUBLE_COLON.equals(literalExpressionType)) {
                 literalType = LiteralType.NUMBER;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.TRUE_KEYWORD.equals(literalExpressionType)) {
                 literalType = LiteralType.BOOLEAN;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.FALSE_KEYWORD.equals(literalExpressionType)) {
                 literalType = LiteralType.BOOLEAN;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             } else if (JavaTokenType.CHARACTER_LITERAL.equals(literalExpressionType)) {
                 literalType = LiteralType.CHARACTER;
                 value = literalExpression.getCanonicalText();
-                type = TypeObject.extractTypeObject(literalExpressionType.toString());
+                type = literalExpressionType.toString();
             }
             this.literal = toPointer(expression);
         }
@@ -62,7 +62,7 @@ public class LiteralObject {
         return value;
     }
 
-    public TypeObject getType() {
+    public String getType() {
         return type;
     }
 

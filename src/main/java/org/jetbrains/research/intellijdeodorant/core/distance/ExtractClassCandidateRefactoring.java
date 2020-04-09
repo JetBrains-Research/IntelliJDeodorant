@@ -1,13 +1,9 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.GodClassVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
 import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
@@ -150,9 +146,9 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     private boolean isReadObject(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
         return methodObject.getName().equals("readObject") && parameterTypeList.size() == 1
-                && parameterTypeList.get(0).getClassType().equals("java.io.ObjectInputStream");
+                && parameterTypeList.get(0).getCanonicalText().equals("java.io.ObjectInputStream");
     }
 
     private boolean isWriteObject(MyMethod method) {
@@ -160,38 +156,38 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     }
 
     private boolean isWriteObject(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
         return methodObject.getName().equals("writeObject") && parameterTypeList.size() == 1
-                && parameterTypeList.get(0).getClassType().equals("java.io.ObjectOutputStream");
+                && parameterTypeList.get(0).getCanonicalText().equals("java.io.ObjectOutputStream");
     }
 
     private boolean isEquals(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("equals") && methodObject.getReturnType().getClassType().equals("boolean") &&
-                parameterTypeList.size() == 1 && parameterTypeList.get(0).getClassType().equals("java.lang.Object");
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
+        return methodObject.getName().equals("equals") && methodObject.getReturnType().getCanonicalText().equals("boolean") &&
+                parameterTypeList.size() == 1 && parameterTypeList.get(0).getCanonicalText().equals("java.lang.Object");
     }
 
     private boolean isHashCode(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("hashCode") && methodObject.getReturnType().getClassType().equals("int")
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
+        return methodObject.getName().equals("hashCode") && methodObject.getReturnType().getCanonicalText().equals("int")
                 && parameterTypeList.size() == 0;
     }
 
     private boolean isToString(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("toString") && methodObject.getReturnType().getClassType().equals("java.lang.String")
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
+        return methodObject.getName().equals("toString") && methodObject.getReturnType().getCanonicalText().equals("java.lang.String")
                 && parameterTypeList.size() == 0;
     }
 
     private boolean isClone(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("clone") && methodObject.getReturnType().getClassType().equals("java.lang.Object")
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
+        return methodObject.getName().equals("clone") && methodObject.getReturnType().getCanonicalText().equals("java.lang.Object")
                 && parameterTypeList.size() == 0;
     }
 
     private boolean isCompareTo(MethodObject methodObject) {
-        List<TypeObject> parameterTypeList = methodObject.getParameterTypeList();
-        return methodObject.getName().equals("compareTo") && methodObject.getReturnType().getClassType().equals("int")
+        List<PsiType> parameterTypeList = methodObject.getParameterTypeList();
+        return methodObject.getName().equals("compareTo") && methodObject.getReturnType().getCanonicalText().equals("int")
                 && parameterTypeList.size() == 1;
     }
 

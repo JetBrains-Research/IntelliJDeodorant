@@ -1,12 +1,13 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiNewExpression;
+import com.intellij.psi.PsiType;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ArrayCreationObject extends CreationObject {
 
-    public ArrayCreationObject(TypeObject type) {
+    public ArrayCreationObject(String type) {
         super(type);
     }
 

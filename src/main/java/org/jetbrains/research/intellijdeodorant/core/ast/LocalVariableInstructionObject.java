@@ -1,24 +1,21 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiReferenceExpression;
-import com.intellij.psi.SmartPsiElementPointer;
+import com.intellij.psi.*;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class LocalVariableInstructionObject {
-    private final TypeObject type;
+    private final PsiType type;
     private final String name;
     private SmartPsiElementPointer<PsiExpression> reference;
     private volatile int hashCode = 0;
 
-    public LocalVariableInstructionObject(TypeObject type, String name) {
+    public LocalVariableInstructionObject(PsiType type, String name) {
         this.type = type;
         this.name = name;
     }
 
-    public TypeObject getType() {
+    public PsiType getType() {
         return type;
     }
 

@@ -1,17 +1,18 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 
 public abstract class CreationObject {
-	private final TypeObject type;
+	private final String type;
 	SmartPsiElementPointer<PsiExpression> creation;
 	
-	CreationObject(TypeObject type) {
+	CreationObject(String type) {
 		this.type = type;
 	}
 
-	public TypeObject getType() {
+	public String getType() {
 		return type;
 	}
 }

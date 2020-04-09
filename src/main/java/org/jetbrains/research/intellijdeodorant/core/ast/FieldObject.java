@@ -2,6 +2,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 import com.intellij.util.SmartList;
 
@@ -14,20 +15,18 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class FieldObject extends VariableDeclarationObject {
 
     private final String name;
-    private final TypeObject type;
-    private final SmartList<CommentObject> commentList;
+    private final PsiType type;
     private boolean _static;
     private Access access;
     private String className;
     private final SmartPsiElementPointer<PsiElement> psiField;
     private volatile int hashCode = 0;
 
-    public FieldObject(TypeObject type, String fieldName, PsiField field) {
+    public FieldObject(PsiType type, String fieldName, PsiField field) {
         this.type = type;
         this.name = fieldName;
         this._static = false;
         this.access = Access.NONE;
-        this.commentList = new SmartList<>();
         this.psiField = toPointer(field);
     }
 
@@ -47,20 +46,8 @@ public class FieldObject extends VariableDeclarationObject {
         return name;
     }
 
-    public TypeObject getType() {
+    public PsiType getType() {
         return type;
-    }
-
-    public boolean addComment(CommentObject comment) {
-        return commentList.add(comment);
-    }
-
-    public void addComments(List<CommentObject> comments) {
-        commentList.addAll(comments);
-    }
-
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return commentList.listIterator();
     }
 
     public boolean isStatic() {

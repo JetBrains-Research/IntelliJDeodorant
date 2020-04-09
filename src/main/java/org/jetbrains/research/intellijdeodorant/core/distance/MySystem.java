@@ -28,12 +28,9 @@ public class MySystem {
         for (ClassObject co : classObjects) {
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);
-            TypeObject superclassType = co.getSuperclass();
-            if (superclassType != null) {
-                String superclass = superclassType.getClassType();
+                String superclass = co.getSuperclass();
                 if (systemObject.getClassObject(superclass) != null) {
                     myClass.setSuperclass(superclass);
-                }
             }
 
             ListIterator<FieldObject> fieldIt = co.getFieldIterator();
@@ -97,12 +94,9 @@ public class MySystem {
             ClassObject co = classIterator1.next();
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);
-            TypeObject superclassType = co.getSuperclass();
-            if (superclassType != null) {
-                String superclass = superclassType.getClassType();
+                String superclass = co.getSuperclass();
                 if (systemObject.getClassObject(superclass) != null) {
                     myClass.setSuperclass(superclass);
-                }
             }
 
             ListIterator<FieldObject> fieldIt = co.getFieldIterator();

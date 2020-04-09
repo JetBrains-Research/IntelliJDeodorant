@@ -1,16 +1,17 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiConstructorCall;
+import com.intellij.psi.PsiType;
 
 import java.util.List;
 
 public class ConstructorInvocationObject extends AbstractMethodInvocationObject {
 
-    public ConstructorInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
+    public ConstructorInvocationObject(String originClassType, String methodName, PsiType returnType) {
         super(originClassType, methodName, returnType);
     }
 
-    public ConstructorInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType, List<TypeObject> parameterList) {
+    public ConstructorInvocationObject(String originClassType, String methodName, PsiType returnType, List<PsiType> parameterList) {
         super(originClassType, methodName, returnType, parameterList);
     }
 

@@ -1,25 +1,23 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiVariable;
-import com.intellij.psi.SmartPsiElementPointer;
+import com.intellij.psi.*;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ParameterObject extends VariableDeclarationObject {
-    private final TypeObject type;
+    private final PsiType type;
     private final String name;
     private final boolean varargs;
     private SmartPsiElementPointer<PsiElement> singleVariableDeclaration;
     private volatile int hashCode = 0;
 
-    public ParameterObject(TypeObject type, String name, boolean varargs) {
+    public ParameterObject(PsiType type, String name, boolean varargs) {
         this.type = type;
         this.name = name;
         this.varargs = varargs;
     }
 
-    public TypeObject getType() {
+    public PsiType getType() {
         return type;
     }
 

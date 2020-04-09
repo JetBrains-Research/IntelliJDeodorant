@@ -105,18 +105,17 @@ public abstract class AbstractMethodFragment {
                     PsiField psiField = (PsiField) resolvedReference;
                     if (psiField.getContainingClass() != null) {
                         String originClassName = PsiUtil.getMemberQualifiedName(psiField.getContainingClass());
-                        String fieldType = psiField.getType().getCanonicalText();
-                        TypeObject typeObject = TypeObject.extractTypeObject(fieldType);
+                        PsiType fieldType = psiField.getType();
                         String fieldName = psiField.getName();
                         if (originClassName != null && !originClassName.equals("")) {
                             if (variableInstruction instanceof PsiSuperExpression) {
-                                SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, typeObject, fieldName);
+                                SuperFieldInstructionObject superFieldInstruction = new SuperFieldInstructionObject(originClassName, fieldType, fieldName);
                                 superFieldInstruction.setSimpleName(resolvedReference);
                                 if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
-                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, typeObject, fieldName, psiField);
+                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, fieldType, fieldName, psiField);
                                 if (psiField.hasModifierProperty(PsiModifier.STATIC))
                                     fieldInstruction.setStatic(true);
                                 addFieldInstruction(fieldInstruction);
@@ -156,10 +155,9 @@ public abstract class AbstractMethodFragment {
                 } else if (resolvedReference instanceof PsiVariable) {
                     PsiVariable resolvedVariable = (PsiVariable) resolvedReference;
                     String variableName = resolvedVariable.getName();
-                    String variableType = resolvedVariable.getType().getCanonicalText();
-                    TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
+                    PsiType variableType = resolvedVariable.getType();
                     PlainVariable variable = new PlainVariable(resolvedVariable);
-                    LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(localVariableType, variableName);
+                    LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(variableType, variableName);
                     localVariable.setReference(psiReferenceExpression);
                     addLocalVariableInstruction(localVariable);
                     Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(resolvedVariable, assignments);
@@ -199,10 +197,9 @@ public abstract class AbstractMethodFragment {
             for (PsiElement element : declaredElements) {
                 if (element instanceof PsiLocalVariable) {
                     PsiLocalVariable declaredVariable = (PsiLocalVariable) element;
-                    String variableType = declaredVariable.getType().getCanonicalText();
-                    TypeObject localVariableType = TypeObject.extractTypeObject(variableType);
+                    PsiType variableType = declaredVariable.getType();
                     LocalVariableDeclarationObject localVariable =
-                            new LocalVariableDeclarationObject(localVariableType, declaredVariable.getName());
+                            new LocalVariableDeclarationObject(variableType, declaredVariable.getName());
                     localVariable.setVariableDeclaration(declaredVariable);
                     addLocalVariableDeclaration(localVariable);
                     addDeclaredLocalVariable(new PlainVariable(declaredVariable));
@@ -334,27 +331,18 @@ public abstract class AbstractMethodFragment {
     }
 
     private void processMethodInvocation(PsiMethodCallExpression methodInvocation, String originClassName, boolean isMethodStatic) {
-        TypeObject originClassTypeObject = TypeObject.extractTypeObject(originClassName);
+        if (methodInvocation == null) return;
         String methodInvocationName = methodInvocation.getMethodExpression().getReferenceName();
-
-        String canonicalText = "UNK";
-
         PsiMethod resolvedMethod = methodInvocation.resolveMethod();
-
-        ArrayList<TypeObject> typeObjects = new ArrayList<>();
+        if (resolvedMethod == null) return;
+        ArrayList<PsiType> typeObjects = new ArrayList<>();
         if (resolvedMethod != null) {
             for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
-                typeObjects.add(TypeObject.extractTypeObject(parameter.getType().getCanonicalText()));
-            }
-
-            PsiType methodReturnType = resolvedMethod.getReturnType();
-            if (methodReturnType != null) {
-                canonicalText = methodReturnType.getCanonicalText();
+                typeObjects.add(parameter.getType());
             }
         }
-        TypeObject returnType = TypeObject.extractTypeObject(canonicalText);
 
-        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassTypeObject, methodInvocationName, returnType, typeObjects);
+        MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassName, methodInvocationName, resolvedMethod.getReturnType(), typeObjects);
         methodInvocationObject.setMethodInvocation(methodInvocation);
         methodInvocationObject.setStatic(isMethodStatic);
         addMethodInvocation(methodInvocationObject);
@@ -420,17 +408,12 @@ public abstract class AbstractMethodFragment {
                 PsiJavaCodeReferenceElement referenceElement = classInstanceCreation.getClassOrAnonymousClassReference();
                 PsiClass psiClass = (PsiClass) referenceElement.resolve();
                 if (psiClass == null) continue;
-                TypeObject typeObject = null;
-                if (psiClass.getQualifiedName() != null) {
-                    typeObject = TypeObject.extractTypeObject(psiClass.getQualifiedName());
-                }
-                ClassInstanceCreationObject creationObject = new ClassInstanceCreationObject(typeObject);
+
+                ClassInstanceCreationObject creationObject = new ClassInstanceCreationObject(psiClass.getQualifiedName());
                 creationObject.setClassInstanceCreation(classInstanceCreation);
                 if (psiClass.getTypeParameterList() != null) {
-                    for (PsiTypeParameter parameterType : psiClass.getTypeParameterList().getTypeParameters()) {
-                        String qualifiedParameterName = parameterType.getQualifiedName() == null ? "java.lang.Object" : parameterType.getQualifiedName();
-                        TypeObject parameterTypeObject = TypeObject.extractTypeObject(qualifiedParameterName);
-                        creationObject.addParameter(parameterTypeObject);
+                    for (PsiType parameterType : classInstanceCreation.getTypeArguments()) {
+                        creationObject.addParameter(parameterType);
                     }
                 }
                 PsiAnonymousClass anonymous = classInstanceCreation.getAnonymousClass();
@@ -445,9 +428,7 @@ public abstract class AbstractMethodFragment {
                     PsiMethod[] methods = anonymous.getMethods();
 
                     for (PsiField psiField : fields) {
-                        TypeObject fieldType = TypeObject.extractTypeObject(psiField.getType().getCanonicalText());
-                        fieldType.setArrayDimension(fieldType.getArrayDimension());
-                        FieldObject fieldObject = new FieldObject(fieldType, psiField.getName(), psiField);
+                        FieldObject fieldObject = new FieldObject(psiField.getType(), psiField.getName(), psiField);
                         fieldObject.setClassName(anonymousClassObject.getName());
                         if (psiField.hasModifierProperty(PsiModifier.PUBLIC))
                             fieldObject.setAccess(Access.PUBLIC);
@@ -481,12 +462,7 @@ public abstract class AbstractMethodFragment {
 
                         PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
                         for (PsiParameter parameter : parameters) {
-                            TypeObject parameterType = TypeObject.extractTypeObject(parameter.getType().getCanonicalText());
-                            parameterType.setArrayDimension(parameterType.getArrayDimension());
-                            if (parameter.isVarArgs()) {
-                                parameterType.setArrayDimension(1);
-                            }
-                            ParameterObject parameterObject = new ParameterObject(parameterType, parameter.getName(), parameter.isVarArgs());
+                            ParameterObject parameterObject = new ParameterObject(parameter.getType(), parameter.getName(), parameter.isVarArgs());
                             parameterObject.setSingleVariableDeclaration(parameter);
                             constructorObject.addParameter(parameterObject);
                         }
@@ -507,11 +483,7 @@ public abstract class AbstractMethodFragment {
                             }
                         }
                         PsiType returnType = psiMethod.getReturnType();
-                        TypeObject returnTypeObject = null;
-                        if (returnType != null) {
-                            returnTypeObject = TypeObject.extractTypeObject(returnType.getCanonicalText());
-                        }
-                        methodObject.setReturnType(returnTypeObject);
+                        methodObject.setReturnType(returnType);
 
                         if (psiMethod.hasModifierProperty(PsiModifier.ABSTRACT))
                             methodObject.setAbstract(true);
@@ -562,11 +534,8 @@ public abstract class AbstractMethodFragment {
         for (PsiExpression arrayCreationExpression : arrayCreations) {
             if (!(arrayCreationExpression instanceof PsiNewExpression)) continue;
             PsiNewExpression arrayCreation = (PsiNewExpression) arrayCreationExpression;
-            TypeObject typeObject = null;
-            if (arrayCreation.getType() != null) {
-                typeObject = TypeObject.extractTypeObject(arrayCreation.getType().getCanonicalText());
-            }
-            ArrayCreationObject creationObject = new ArrayCreationObject(typeObject);
+
+            ArrayCreationObject creationObject = new ArrayCreationObject(arrayCreation.getType().getCanonicalText());
             creationObject.setArrayCreation(arrayCreation);
             addCreation(creationObject);
         }

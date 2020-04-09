@@ -52,15 +52,12 @@ public class ASTReader {
         if (psiClass.hasModifierProperty(PsiModifier.STATIC))
             classObject.setStatic(true);
         if (psiClass.getSuperClass() != null) {
-            String superclassType = psiClass.getSuperClass().getQualifiedName();
-            TypeObject typeObject = TypeObject.extractTypeObject(superclassType);
-            classObject.setSuperclass(typeObject);
+            classObject.setSuperclass(psiClass.getSuperClass().getQualifiedName());
         }
 
         PsiClass[] superInterfaceTypes = psiClass.getInterfaces();
         for (PsiClass interfaceType : superInterfaceTypes) {
-            TypeObject typeObject = TypeObject.extractTypeObject(interfaceType.getQualifiedName());
-            classObject.addInterface(typeObject);
+            classObject.addInterface(interfaceType.getQualifiedName());
         }
 
         PsiField[] fieldDeclarations = psiClass.getFields();
@@ -76,22 +73,8 @@ public class ASTReader {
     }
 
     private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        SmartList<CommentObject> fieldDeclarationComments = new SmartList<>();
-        int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
-        int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
-        for (CommentObject comment : classObject.commentList) {
-            int commentStartPosition = comment.getStartPosition();
-            int commentEndPosition = commentStartPosition + comment.getLength();
-            if (fieldDeclarationStartPosition <= commentStartPosition && fieldDeclarationEndPosition >= commentEndPosition) {
-                fieldDeclarationComments.add(comment);
-            }
-        }
-
-        TypeObject typeObject = TypeObject.extractTypeObject(fieldDeclaration.getType().getCanonicalText());
-        typeObject.setArrayDimension(typeObject.getArrayDimension());
-        FieldObject fieldObject = new FieldObject(typeObject, fieldDeclaration.getName(), fieldDeclaration);
+        FieldObject fieldObject = new FieldObject(fieldDeclaration.getType(), fieldDeclaration.getName(), fieldDeclaration);
         fieldObject.setClassName(classObject.getName());
-        fieldObject.addComments(fieldDeclarationComments);
 
         if (fieldDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             fieldObject.setAccess(Access.PUBLIC);
@@ -116,13 +99,6 @@ public class ASTReader {
         constructorObject.setClassName(classObject.getName());
         int methodDeclarationStartPosition = methodDeclaration.getStartOffsetInParent();
         int methodDeclarationEndPosition = methodDeclarationStartPosition + methodDeclaration.getTextLength();
-        for (CommentObject comment : classObject.commentList) {
-            int commentStartPosition = comment.getStartPosition();
-            int commentEndPosition = commentStartPosition + comment.getLength();
-            if (methodDeclarationStartPosition <= commentStartPosition && methodDeclarationEndPosition >= commentEndPosition) {
-                constructorObject.addComment(comment);
-            }
-        }
 
         if (methodDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             constructorObject.setAccess(Access.PUBLIC);
@@ -135,12 +111,7 @@ public class ASTReader {
 
         PsiParameter[] parameters = methodDeclaration.getParameterList().getParameters();
         for (PsiParameter parameter : parameters) {
-            String parameterType = parameter.getType().getCanonicalText();
-            TypeObject typeObject = TypeObject.extractTypeObject(parameterType);
-            if (parameter.isVarArgs()) {
-                typeObject.setArrayDimension(1);
-            }
-            ParameterObject parameterObject = new ParameterObject(typeObject, parameter.getName(), parameter.isVarArgs());
+            ParameterObject parameterObject = new ParameterObject(parameter.getType(), parameter.getName(), parameter.isVarArgs());
             parameterObject.setSingleVariableDeclaration(parameter);
             constructorObject.addParameter(parameterObject);
         }
@@ -156,13 +127,6 @@ public class ASTReader {
             PsiAnonymousClass anonymousClassDeclaration = anonymous.getAnonymousClassDeclaration();
             int anonymousClassDeclarationStartPosition = anonymousClassDeclaration.getStartOffsetInParent();
             int anonymousClassDeclarationEndPosition = anonymousClassDeclarationStartPosition + anonymousClassDeclaration.getTextLength();
-            for (CommentObject comment : constructorObject.commentList) {
-                int commentStartPosition = comment.getStartPosition();
-                int commentEndPosition = commentStartPosition + comment.getLength();
-                if (anonymousClassDeclarationStartPosition <= commentStartPosition && anonymousClassDeclarationEndPosition >= commentEndPosition) {
-                    anonymous.addComment(comment);
-                }
-            }
         }
 
         if (methodDeclaration.isConstructor()) {
@@ -177,9 +141,7 @@ public class ASTReader {
                 }
             }
             PsiType returnType = methodDeclaration.getReturnType();
-            String qualifiedName = returnType != null ? returnType.getCanonicalText() : null;
-            TypeObject typeObject = TypeObject.extractTypeObject(qualifiedName);
-            methodObject.setReturnType(typeObject);
+            methodObject.setReturnType(returnType);
             if (methodDeclaration.hasModifierProperty(PsiModifier.ABSTRACT))
                 methodObject.setAbstract(true);
             if (methodDeclaration.hasModifierProperty(PsiModifier.STATIC))

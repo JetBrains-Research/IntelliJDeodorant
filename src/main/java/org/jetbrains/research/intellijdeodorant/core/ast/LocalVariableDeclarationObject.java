@@ -1,19 +1,20 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
 
 public class LocalVariableDeclarationObject extends VariableDeclarationObject {
-    private final TypeObject type;
+    private final PsiType type;
     private final String name;
     private PsiVariable variableDeclaration;
     private volatile int hashCode = 0;
 
-    public LocalVariableDeclarationObject(TypeObject type, String name) {
+    public LocalVariableDeclarationObject(PsiType type, String name) {
         this.type = type;
         this.name = name;
     }
 
-    public TypeObject getType() {
+    public PsiType getType() {
         return type;
     }
 

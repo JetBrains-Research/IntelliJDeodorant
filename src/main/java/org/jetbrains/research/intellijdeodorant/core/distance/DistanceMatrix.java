@@ -88,7 +88,7 @@ public class DistanceMatrix {
                 ListIterator<ParameterObject> parameterIterator = methodObject.getParameterListIterator();
                 while (parameterIterator.hasNext()) {
                     ParameterObject parameter = parameterIterator.next();
-                    Association association = system.containsAssociationWithMultiplicityBetweenClasses(targetClass, parameter.getType().getClassType());
+                    Association association = system.containsAssociationWithMultiplicityBetweenClasses(targetClass, parameter.getType().getCanonicalText());
                     if (association != null) {
                         List<MethodInvocationObject> methodInvocations = methodObject.getMethodInvocations();
                         for (MethodInvocationObject methodInvocation : methodInvocations) {
@@ -283,7 +283,7 @@ public class DistanceMatrix {
             ClassObject classObject = ASTReader.getSystemObject().getClassObject(key1);
             if (classObject != null && classObject.getSuperclass() != null) {
                 for (String key2 : accessMap.keySet()) {
-                    if (classObject.getSuperclass().getClassType().equals(key2)) {
+                    if (classObject.getSuperclass().equals(key2)) {
                         ArrayList<String> list = accessMap.get(key1);
                         list.addAll(accessMap.get(key2));
                     }

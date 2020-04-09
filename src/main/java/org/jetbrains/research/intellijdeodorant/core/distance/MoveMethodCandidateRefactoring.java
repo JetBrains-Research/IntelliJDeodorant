@@ -3,11 +3,11 @@ package org.jetbrains.research.intellijdeodorant.core.distance;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiType;
 import org.jetbrains.research.intellijdeodorant.core.FeatureEnvyVisualizationData;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.TypeObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 
 import java.util.*;
@@ -83,9 +83,9 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
                 if (targetMethod.getParameterTypeList().equals(sourceMethod.getParameterTypeList())) {
                     return true;
                 } else {
-                    List<TypeObject> sourceParameterTypeListWithoutTargetType = new ArrayList<>();
-                    for (TypeObject type : sourceMethod.getParameterTypeList()) {
-                        if (!type.getClassType().equals(targetClass.getName())) {
+                    List<PsiType> sourceParameterTypeListWithoutTargetType = new ArrayList<>();
+                    for (PsiType type : sourceMethod.getParameterTypeList()) {
+                        if (!type.getCanonicalText().equals(targetClass.getName())) {
                             sourceParameterTypeListWithoutTargetType.add(type);
                         }
                     }

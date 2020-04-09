@@ -1,8 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.SmartPsiElementPointer;
+import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -21,7 +19,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     String name;
     final List<ParameterObject> parameterList;
-    final List<CommentObject> commentList;
     Access access;
     String className;
     private MethodBodyObject methodBody;
@@ -31,7 +28,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public ConstructorObject() {
         this.parameterList = new ArrayList<>();
-        this.commentList = new ArrayList<>();
         this.exceptionsInJavaDocThrows = new LinkedHashSet<>();
         this.access = Access.NONE;
     }
@@ -82,14 +78,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public String getClassName() {
         return this.className;
-    }
-
-    public void addComment(CommentObject comment) {
-        commentList.add(comment);
-    }
-
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return commentList.listIterator();
     }
 
     public void addParameter(ParameterObject parameter) {
@@ -418,8 +406,8 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return false;
     }
 
-    public List<TypeObject> getParameterTypeList() {
-        List<TypeObject> list = new ArrayList<>();
+    public List<PsiType> getParameterTypeList() {
+        List<PsiType> list = new ArrayList<>();
         for (ParameterObject parameterObject : parameterList)
             list.add(parameterObject.getType());
         return list;
@@ -433,24 +421,24 @@ public class ConstructorObject implements AbstractMethodDeclaration {
     }
 
     public boolean equals(ClassInstanceCreationObject creationObject) {
-        return this.className.equals(creationObject.getType().getClassType()) &&
+        return this.className.equals(creationObject.getType()) &&
                 equalParameterTypes(this.getParameterTypeList(), creationObject.getParameterTypeList());
     }
 
     public boolean equals(ConstructorInvocationObject constructorInvocationObject) {
-        return this.className.equals(constructorInvocationObject.getOriginClassType().getClassType()) &&
+        return this.className.equals(constructorInvocationObject.getOriginClassType()) &&
                 equalParameterTypes(this.getParameterTypeList(), constructorInvocationObject.getParameterTypeList());
     }
 
-    private boolean equalParameterTypes(List<TypeObject> list1, List<TypeObject> list2) {
+    private boolean equalParameterTypes(List<PsiType> list1, List<PsiType> list2) {
         if (list1.size() != list2.size())
             return false;
         for (int i = 0; i < list1.size(); i++) {
-            TypeObject type1 = list1.get(i);
-            TypeObject type2 = list2.get(i);
-            if (!type1.equalsClassType(type2))
+            PsiType type1 = list1.get(i);
+            PsiType type2 = list2.get(i);
+            if (!type1.equals(type2))
                 return false;
-            if (type1.getArrayDimension() != type2.getArrayDimension())
+            if (type1.getArrayDimensions() != type2.getArrayDimensions())
                 return false;
         }
         return true;

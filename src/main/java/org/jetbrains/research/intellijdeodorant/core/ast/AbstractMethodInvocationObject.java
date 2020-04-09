@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 
 import java.util.ArrayList;
@@ -10,16 +11,16 @@ import java.util.ListIterator;
 import java.util.Set;
 
 public abstract class AbstractMethodInvocationObject {
-    private final TypeObject originClassType;
+    private final String originClassType;
     private final String methodName;
-    private final TypeObject returnType;
-    private final List<TypeObject> parameterList;
+    private final PsiType returnType;
+    private final List<PsiType> parameterList;
     private final Set<String> thrownExceptions;
     private boolean _static;
     SmartPsiElementPointer<PsiExpression> methodInvocation;
     private volatile int hashCode = 0;
 
-    AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType) {
+    AbstractMethodInvocationObject(String originClassType, String methodName, PsiType returnType) {
         this.originClassType = originClassType;
         this.methodName = methodName;
         this.returnType = returnType;
@@ -28,7 +29,7 @@ public abstract class AbstractMethodInvocationObject {
         this._static = false;
     }
 
-    AbstractMethodInvocationObject(TypeObject originClassType, String methodName, TypeObject returnType, List<TypeObject> parameterList) {
+    AbstractMethodInvocationObject(String originClassType, String methodName, PsiType returnType, List<PsiType> parameterList) {
         this.originClassType = originClassType;
         this.methodName = methodName;
         this.returnType = returnType;
@@ -37,28 +38,20 @@ public abstract class AbstractMethodInvocationObject {
         this._static = false;
     }
 
-    public void addParameter(TypeObject parameterType) {
-        parameterList.add(parameterType);
-    }
-
-    public ListIterator<TypeObject> getParameterListIterator() {
-        return parameterList.listIterator();
-    }
-
-    public List<TypeObject> getParameterTypeList() {
+    public List<PsiType> getParameterTypeList() {
         return this.parameterList;
     }
 
-    public TypeObject getReturnType() {
+    public PsiType getReturnType() {
         return returnType;
     }
 
-    public TypeObject getOriginClassType() {
+    public String getOriginClassType() {
         return this.originClassType;
     }
 
     public String getOriginClassName() {
-        return this.originClassType.getClassType();
+        return this.originClassType;
     }
 
     public String getMethodName() {
@@ -67,7 +60,7 @@ public abstract class AbstractMethodInvocationObject {
 
     public List<String> getParameterList() {
         List<String> list = new ArrayList<>();
-        for (TypeObject typeObject : parameterList)
+        for (PsiType typeObject : parameterList)
             list.add(typeObject.toString());
         return list;
     }
@@ -80,15 +73,12 @@ public abstract class AbstractMethodInvocationObject {
         _static = s;
     }
 
-    public void addThrownException(String type) {
-        thrownExceptions.add(type);
-    }
 
     public Set<String> getThrownExceptions() {
         return this.thrownExceptions;
     }
 
-    public TypeObject getType() {
+    public PsiType getType() {
         return getReturnType();
     }
 
@@ -113,8 +103,8 @@ public abstract class AbstractMethodInvocationObject {
             int result = 17;
             result = 37 * result + originClassType.hashCode();
             result = 37 * result + methodName.hashCode();
-            result = 37 * result + returnType.hashCode();
-            for (TypeObject parameter : parameterList)
+          //  result = 37 * result + returnType.hashCode();
+            for (PsiType parameter : parameterList)
                 result = 37 * result + parameter.hashCode();
             hashCode = result;
         }
@@ -136,16 +126,4 @@ public abstract class AbstractMethodInvocationObject {
         return sb.toString();
     }
 
-    public String getSignature() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(methodName);
-        sb.append("(");
-        if (!parameterList.isEmpty()) {
-            for (int i = 0; i < parameterList.size() - 1; i++)
-                sb.append(parameterList.get(i)).append(", ");
-            sb.append(parameterList.get(parameterList.size() - 1));
-        }
-        sb.append(")");
-        return sb.toString();
-    }
 }

@@ -1,8 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiNewExpression;
+import com.intellij.psi.*;
 import com.intellij.util.SmartList;
 
 import java.util.LinkedHashSet;
@@ -14,10 +12,10 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ClassInstanceCreationObject extends CreationObject {
 
-    private final SmartList<TypeObject> parameterList;
+    private final SmartList<PsiType> parameterList;
     private final Set<String> thrownExceptions;
 
-    public ClassInstanceCreationObject(TypeObject type) {
+    public ClassInstanceCreationObject(String type) {
         super(type);
         this.parameterList = new SmartList<>();
         this.thrownExceptions = new LinkedHashSet<>();
@@ -31,21 +29,17 @@ public class ClassInstanceCreationObject extends CreationObject {
         this.creation = toPointer(creation);
     }
 
-    public void addParameter(TypeObject parameterType) {
+    public void addParameter(PsiType parameterType) {
         parameterList.add(parameterType);
     }
 
-    public ListIterator<TypeObject> getParameterListIterator() {
-        return parameterList.listIterator();
-    }
-
-    public List<TypeObject> getParameterTypeList() {
+    public List<PsiType> getParameterTypeList() {
         return this.parameterList;
     }
 
     public List<String> getParameterList() {
         SmartList<String> list = new SmartList<>();
-        for (TypeObject typeObject : parameterList)
+        for (PsiType typeObject : parameterList)
             list.add(typeObject.toString());
         return list;
     }

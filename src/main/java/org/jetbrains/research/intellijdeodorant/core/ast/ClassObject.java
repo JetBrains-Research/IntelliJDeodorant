@@ -15,8 +15,8 @@ public class ClassObject extends ClassDeclarationObject {
 
     private final List<ConstructorObject> constructorList;
     private final List<EnumConstantDeclarationObject> enumConstantDeclarationList;
-    private TypeObject superclass;
-    private final List<TypeObject> interfaceList;
+    private String superclass;
+    private final List<String> interfaceList;
     private boolean _abstract;
     private boolean _interface;
     private boolean _static;
@@ -63,64 +63,6 @@ public class ClassObject extends ClassDeclarationObject {
         return (PsiJavaFile) psiFile.getElement();
     }
 
-    private boolean isFriend(String className) {
-        if (superclass != null) {
-            if (superclass.getClassType().equals(className))
-                return true;
-        }
-        for (TypeObject interfaceType : interfaceList) {
-            if (interfaceType.getClassType().equals(className))
-                return true;
-        }
-        for (FieldObject field : fieldList) {
-            TypeObject fieldType = field.getType();
-            if (checkFriendship(fieldType, className))
-                return true;
-        }
-        for (ConstructorObject constructor : constructorList) {
-            ListIterator<ParameterObject> parameterIterator = constructor.getParameterListIterator();
-            while (parameterIterator.hasNext()) {
-                ParameterObject parameter = parameterIterator.next();
-                TypeObject parameterType = parameter.getType();
-                if (checkFriendship(parameterType, className))
-                    return true;
-            }
-            for (CreationObject creation : constructor.getCreations()) {
-                TypeObject creationType = creation.getType();
-                if (checkFriendship(creationType, className))
-                    return true;
-            }
-        }
-        for (MethodObject method : methodList) {
-            TypeObject returnType = method.getReturnType();
-            if (checkFriendship(returnType, className))
-                return true;
-            ListIterator<ParameterObject> parameterIterator = method.getParameterListIterator();
-            while (parameterIterator.hasNext()) {
-                ParameterObject parameter = parameterIterator.next();
-                TypeObject parameterType = parameter.getType();
-                if (checkFriendship(parameterType, className))
-                    return true;
-            }
-            for (CreationObject creation : method.getCreations()) {
-                TypeObject creationType = creation.getType();
-                if (checkFriendship(creationType, className))
-                    return true;
-            }
-        }
-        if (superclass != null) {
-            ClassObject superclassObject = ASTReader.getSystemObject().getClassObject(superclass.getClassType());
-            if (superclassObject != null)
-                return superclassObject.isFriend(className);
-        }
-        return false;
-    }
-
-    private boolean checkFriendship(TypeObject type, String className) {
-        if (type.getClassType().equals(className))
-            return true;
-        return type.getGenericType() != null && type.getGenericType().contains(className);
-    }
 
     public List<TypeCheckElimination> generateTypeCheckEliminations() {
         List<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
@@ -160,11 +102,11 @@ public class ClassObject extends ClassDeclarationObject {
         return access;
     }
 
-    public void setSuperclass(TypeObject superclass) {
+    public void setSuperclass(String superclass) {
         this.superclass = superclass;
     }
 
-    public void addInterface(TypeObject i) {
+    public void addInterface(String i) {
         interfaceList.add(i);
     }
 
@@ -180,21 +122,11 @@ public class ClassObject extends ClassDeclarationObject {
         return constructorList.listIterator();
     }
 
-    public ListIterator<TypeObject> getInterfaceIterator() {
+    public ListIterator<String> getInterfaceIterator() {
         return interfaceList.listIterator();
     }
 
-    public ListIterator<TypeObject> getSuperclassIterator() {
-        List<TypeObject> superclassList = new ArrayList<>(interfaceList);
-        superclassList.add(superclass);
-        return superclassList.listIterator();
-    }
-
-    public ListIterator<EnumConstantDeclarationObject> getEnumConstantDeclarationIterator() {
-        return enumConstantDeclarationList.listIterator();
-    }
-
-    public TypeObject getSuperclass() {
+    public String getSuperclass() {
         return superclass;
     }
 
@@ -235,16 +167,6 @@ public class ClassObject extends ClassDeclarationObject {
         while (ci.hasNext()) {
             ConstructorObject co = ci.next();
             if (co.equals(cico))
-                return co;
-        }
-        return null;
-    }
-
-    public ConstructorObject getConstructor(ConstructorInvocationObject cio) {
-        ListIterator<ConstructorObject> ci = getConstructorIterator();
-        while (ci.hasNext()) {
-            ConstructorObject co = ci.next();
-            if (co.equals(cio))
                 return co;
         }
         return null;
