@@ -322,7 +322,7 @@ public class DistanceMatrix {
             }
         }
 
-        indicator.setText("Identification of Extract Class refactoring opportunities");
+        indicator.setText(IntelliJDeodorantBundle.message("god.class.identification.indicator"));
         indicator.setFraction(0.0);
         for (MyClass sourceClass : oldClasses) {
             if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {

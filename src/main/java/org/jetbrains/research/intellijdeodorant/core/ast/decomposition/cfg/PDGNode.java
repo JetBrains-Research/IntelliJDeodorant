@@ -277,9 +277,9 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) statement;
-            PsiElement declaredElement = declarationStatement.getDeclaredElements()[0];
-            if (declaredElement instanceof PsiVariable) {
-                PsiVariable declaredVariable = (PsiVariable) declaredElement;
+            PsiElement[] declaredElements = declarationStatement.getDeclaredElements();
+            if (declaredElements.length > 0 && declaredElements[0] instanceof PsiVariable) {
+                PsiVariable declaredVariable = (PsiVariable) declaredElements[0];
                 if (!isPrimitive(declaredVariable.getType())) {
                     PsiExpression initializer = declaredVariable.getInitializer();
                     PsiElement initializerSimpleName = null;

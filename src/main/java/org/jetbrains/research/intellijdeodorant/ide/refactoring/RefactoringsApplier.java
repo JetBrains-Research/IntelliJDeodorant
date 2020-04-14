@@ -1,7 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.ide.refactoring;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.psi.*;
 import com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +65,7 @@ public class RefactoringsApplier {
         }
         MoveInstanceMethodDialog dialog = new MoveInstanceMethodDialog(methodToMove, available);
         dialog.setTitle("Move Instance Method " + PsiUtils.calculateSignature(methodToMove));
-        TransactionGuard.getInstance().submitTransactionAndWait(dialog::show);
+        ApplicationManager.getApplication().invokeAndWait(dialog::show);
     }
 
     private static PsiVariable[] getAvailableVariables(@NotNull PsiMethod method, @NotNull PsiClass target) {

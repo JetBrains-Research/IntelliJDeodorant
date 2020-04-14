@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.ide.ui;
 import com.intellij.analysis.AnalysisScope;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
@@ -154,7 +153,7 @@ class ExtractMethodPanel extends JPanel {
         if (selectedPath != null) {
             Object o = selectedPath.getLastPathComponent();
             if (o instanceof ASTSlice) {
-                TransactionGuard.getInstance().submitTransactionAndWait(doExtract((ASTSlice) o));
+                ApplicationManager.getApplication().invokeAndWait(doExtract((ASTSlice) o));
             }
         }
     }

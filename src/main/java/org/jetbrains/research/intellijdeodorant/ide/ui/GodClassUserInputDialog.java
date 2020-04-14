@@ -33,7 +33,6 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             "Boolean", "Byte", "Character", "Class", "Double", "Enum", "Error", "Exception",
             "Float", "Integer", "Long", "Math", "Number", "Object", "Package", "Process",
             "Runtime", "Short", "String", "StringBuffer", "StringBuilder", "System", "Thread", "Void"));
-    ;
     private JPanel mainPanel;
     private final JTextField extractedClassNameField = new JTextField();
     private final JButton restoreButton = new JButton();

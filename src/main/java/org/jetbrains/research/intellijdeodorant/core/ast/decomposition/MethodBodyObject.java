@@ -36,55 +36,61 @@ public class MethodBodyObject {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             TypeCheckElimination typeCheckElimination = new TypeCheckElimination();
             typeCheckElimination.setTypeCheckCodeFragment(switchStatement);
-            PsiStatement[] statements = switchStatement.getBody().getStatements();
-            boolean isDefaultCase = false;
-            Set<PsiExpression> switchCaseExpressions = new LinkedHashSet<>();
-            for (PsiStatement statement2 : statements) {
-                if (statement2 instanceof PsiSwitchLabelStatement) {
-                    PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement2;
-                    isDefaultCase = switchCase.isDefaultCase();
-                    if (!isDefaultCase) {
-                        switchCaseExpressions.addAll(Arrays.asList(switchCase.getCaseValues().getExpressions()));
-                    }
-                } else {
-                    if (statement2 instanceof PsiBlockStatement) {
-                        PsiBlockStatement block = (PsiBlockStatement) statement2;
-                        PsiStatement[] statementsInBlock = block.getCodeBlock().getStatements();
-                        for (PsiStatement statementInBlock : statementsInBlock) {
-                            if (!(statementInBlock instanceof PsiBreakStatement)) {
-                                for (PsiExpression expression : switchCaseExpressions) {
-                                    typeCheckElimination.addTypeCheck(expression, statementInBlock);
-                                }
-                                if (isDefaultCase) {
-                                    typeCheckElimination.addDefaultCaseStatement(statementInBlock);
-                                }
+            PsiCodeBlock switchBody = switchStatement.getBody();
+            if (switchBody != null) {
+                PsiStatement[] statements = switchBody.getStatements();
+                boolean isDefaultCase = false;
+                Set<PsiExpression> switchCaseExpressions = new LinkedHashSet<>();
+                for (PsiStatement psiStatement : statements) {
+                    if (psiStatement instanceof PsiSwitchLabelStatement) {
+                        PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) psiStatement;
+                        isDefaultCase = switchCase.isDefaultCase();
+                        if (!isDefaultCase) {
+                            PsiExpressionList expressionList = switchCase.getCaseValues();
+                            if (expressionList != null) {
+                                switchCaseExpressions.addAll(Arrays.asList(expressionList.getExpressions()));
                             }
-                        }
-                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
-                        if (branchingStatements.size() > 0) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                if (!typeCheckElimination.containsTypeCheckExpression(expression)) {
-                                    typeCheckElimination.addEmptyTypeCheck(expression);
-                                }
-                            }
-                            switchCaseExpressions.clear();
                         }
                     } else {
-                        if (!(statement2 instanceof PsiBreakStatement)) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                typeCheckElimination.addTypeCheck(expression, statement2);
+                        if (psiStatement instanceof PsiBlockStatement) {
+                            PsiBlockStatement block = (PsiBlockStatement) psiStatement;
+                            PsiStatement[] statementsInBlock = block.getCodeBlock().getStatements();
+                            for (PsiStatement statementInBlock : statementsInBlock) {
+                                if (!(statementInBlock instanceof PsiBreakStatement)) {
+                                    for (PsiExpression expression : switchCaseExpressions) {
+                                        typeCheckElimination.addTypeCheck(expression, statementInBlock);
+                                    }
+                                    if (isDefaultCase) {
+                                        typeCheckElimination.addDefaultCaseStatement(statementInBlock);
+                                    }
+                                }
                             }
-                            if (isDefaultCase) {
-                                typeCheckElimination.addDefaultCaseStatement(statement2);
+                            List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(psiStatement);
+                            if (branchingStatements.size() > 0) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    if (!typeCheckElimination.containsTypeCheckExpression(expression)) {
+                                        typeCheckElimination.addEmptyTypeCheck(expression);
+                                    }
+                                }
+                                switchCaseExpressions.clear();
                             }
-                        }
-                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
-                        if (statement2 instanceof PsiBreakStatement || statement2 instanceof PsiReturnStatement || branchingStatements.size() > 0) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                if (!typeCheckElimination.containsTypeCheckExpression(expression))
-                                    typeCheckElimination.addEmptyTypeCheck(expression);
+                        } else {
+                            if (!(psiStatement instanceof PsiBreakStatement)) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    typeCheckElimination.addTypeCheck(expression, psiStatement);
+                                }
+                                if (isDefaultCase) {
+                                    typeCheckElimination.addDefaultCaseStatement(psiStatement);
+                                }
                             }
-                            switchCaseExpressions.clear();
+                            List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(psiStatement);
+                            if (psiStatement instanceof PsiBreakStatement || psiStatement instanceof PsiReturnStatement || branchingStatements.size() > 0) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    if (!typeCheckElimination.containsTypeCheckExpression(expression))
+                                        typeCheckElimination.addEmptyTypeCheck(expression);
+                                }
+                                switchCaseExpressions.clear();
+                            }
                         }
                     }
                 }

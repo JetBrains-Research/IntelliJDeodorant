@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
-import com.intellij.openapi.application.TransactionGuard;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -40,8 +40,7 @@ public class GodClassPanel extends AbstractRefactoringPanel {
         AbstractExtractClassRefactoring abstractRefactoring = (AbstractExtractClassRefactoring) getAbstractRefactoringFromAbstractCandidateRefactoring(candidateRefactoring);
 
         Project project = scope.getProject();
-
-        TransactionGuard.getInstance().submitTransactionAndWait(() -> {
+        ApplicationManager.getApplication().invokeAndWait(() -> {
             removeHighlighters(project);
             GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
             dialog.show();

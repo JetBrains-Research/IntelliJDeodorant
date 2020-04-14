@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
-import com.intellij.openapi.application.TransactionGuard;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ class TypeCheckingPanel extends AbstractRefactoringPanel {
         };
 
         if (refactoring instanceof ReplaceTypeCodeWithStateStrategy) {
-            TransactionGuard.getInstance().submitTransactionAndWait(() -> new ReplaceTypeCodeWithStateStrategyDialog(
+            ApplicationManager.getApplication().invokeAndWait(() -> new ReplaceTypeCodeWithStateStrategyDialog(
                     (ReplaceTypeCodeWithStateStrategy) refactoring,
                     applyRefactoring
             ).show());

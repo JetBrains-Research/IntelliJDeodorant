@@ -19,8 +19,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemObject {
-    private static final String TYPE_STATE_CHECKING_INDICATOR_KEY = "type.state.checking.identification.indicator";
-
     private final List<ClassObject> classList;
     //Map that has as key the classname and as value
     //the position of className in the classNameList
@@ -181,7 +179,7 @@ public class SystemObject {
     }
 
     public List<TypeCheckEliminationGroup> generateTypeCheckEliminations(Set<ClassObject> classObjectsToBeExamined, ProgressIndicator indicator) {
-        indicator.setText(IntelliJDeodorantBundle.message(TYPE_STATE_CHECKING_INDICATOR_KEY));
+        indicator.setText(IntelliJDeodorantBundle.message("type.state.checking.identification.indicator"));
         indicator.setFraction(0.0);
         List<TypeCheckElimination> typeCheckEliminationResults = new ArrayList<>();
         List<TypeCheckEliminationGroup> typeCheckEliminationGroups = new ArrayList<>();

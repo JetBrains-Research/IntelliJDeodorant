@@ -528,57 +528,59 @@ public class CFG extends Graph {
         createTopDownFlow(previousNodes, currentNode);
         previousNodes = new ArrayList<>();
         List<AbstractStatement> ifStatementList = compositeStatement.getStatements();
-        AbstractStatement thenClause = ifStatementList.get(0);
-        if (thenClause instanceof StatementObject) {
-            StatementObject thenClauseStatement = (StatementObject) thenClause;
-            CFGNode thenClauseNode = createNonCompositeNode(thenClauseStatement);
-            nodes.add(thenClauseNode);
-            ArrayList<CFGNode> currentNodes = new ArrayList<>();
-            currentNodes.add(currentNode);
-            createTopDownFlow(currentNodes, thenClauseNode);
-            previousNodes.add(thenClauseNode);
-        } else if (thenClause instanceof CompositeStatementObject) {
-            CompositeStatementObject thenClauseCompositeStatement = (CompositeStatementObject) thenClause;
-            ArrayList<CFGNode> currentNodes = new ArrayList<>();
-            currentNodes.add(currentNode);
-            if (thenClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
-                previousNodes.addAll(processIfStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
-            else if (thenClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
-                previousNodes.addAll(processSwitchStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
-            else if (isLoop(thenClauseCompositeStatement))
-                previousNodes.addAll(processLoopStatement(currentNodes, thenClauseCompositeStatement));
-            else if (thenClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
-                previousNodes.addAll(processDoStatement(currentNodes, thenClauseCompositeStatement));
-            else
-                previousNodes.addAll(process(currentNodes, thenClauseCompositeStatement));
-        }
-        if (ifStatementList.size() == 2) {
-            AbstractStatement elseClause = ifStatementList.get(1);
-            if (elseClause instanceof StatementObject) {
-                StatementObject elseClauseStatement = (StatementObject) elseClause;
-                CFGNode elseClauseNode = createNonCompositeNode(elseClauseStatement);
-                nodes.add(elseClauseNode);
+        if (ifStatementList.size() > 0) {
+            AbstractStatement thenClause = ifStatementList.get(0);
+            if (thenClause instanceof StatementObject) {
+                StatementObject thenClauseStatement = (StatementObject) thenClause;
+                CFGNode thenClauseNode = createNonCompositeNode(thenClauseStatement);
+                nodes.add(thenClauseNode);
                 ArrayList<CFGNode> currentNodes = new ArrayList<>();
                 currentNodes.add(currentNode);
-                createTopDownFlow(currentNodes, elseClauseNode);
-                previousNodes.add(elseClauseNode);
-            } else if (elseClause instanceof CompositeStatementObject) {
-                CompositeStatementObject elseClauseCompositeStatement = (CompositeStatementObject) elseClause;
+                createTopDownFlow(currentNodes, thenClauseNode);
+                previousNodes.add(thenClauseNode);
+            } else if (thenClause instanceof CompositeStatementObject) {
+                CompositeStatementObject thenClauseCompositeStatement = (CompositeStatementObject) thenClause;
                 ArrayList<CFGNode> currentNodes = new ArrayList<>();
                 currentNodes.add(currentNode);
-                if (elseClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
-                    previousNodes.addAll(processIfStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
-                else if (elseClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
-                    previousNodes.addAll(processSwitchStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
-                else if (isLoop(elseClauseCompositeStatement))
-                    previousNodes.addAll(processLoopStatement(currentNodes, elseClauseCompositeStatement));
-                else if (elseClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
-                    previousNodes.addAll(processDoStatement(currentNodes, elseClauseCompositeStatement));
+                if (thenClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
+                    previousNodes.addAll(processIfStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
+                else if (thenClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
+                    previousNodes.addAll(processSwitchStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
+                else if (isLoop(thenClauseCompositeStatement))
+                    previousNodes.addAll(processLoopStatement(currentNodes, thenClauseCompositeStatement));
+                else if (thenClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
+                    previousNodes.addAll(processDoStatement(currentNodes, thenClauseCompositeStatement));
                 else
-                    previousNodes.addAll(process(currentNodes, elseClauseCompositeStatement));
+                    previousNodes.addAll(process(currentNodes, thenClauseCompositeStatement));
             }
-        } else {
-            previousNodes.add(currentNode);
+            if (ifStatementList.size() == 2) {
+                AbstractStatement elseClause = ifStatementList.get(1);
+                if (elseClause instanceof StatementObject) {
+                    StatementObject elseClauseStatement = (StatementObject) elseClause;
+                    CFGNode elseClauseNode = createNonCompositeNode(elseClauseStatement);
+                    nodes.add(elseClauseNode);
+                    ArrayList<CFGNode> currentNodes = new ArrayList<>();
+                    currentNodes.add(currentNode);
+                    createTopDownFlow(currentNodes, elseClauseNode);
+                    previousNodes.add(elseClauseNode);
+                } else if (elseClause instanceof CompositeStatementObject) {
+                    CompositeStatementObject elseClauseCompositeStatement = (CompositeStatementObject) elseClause;
+                    ArrayList<CFGNode> currentNodes = new ArrayList<>();
+                    currentNodes.add(currentNode);
+                    if (elseClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
+                        previousNodes.addAll(processIfStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
+                    else if (elseClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
+                        previousNodes.addAll(processSwitchStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
+                    else if (isLoop(elseClauseCompositeStatement))
+                        previousNodes.addAll(processLoopStatement(currentNodes, elseClauseCompositeStatement));
+                    else if (elseClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
+                        previousNodes.addAll(processDoStatement(currentNodes, elseClauseCompositeStatement));
+                    else
+                        previousNodes.addAll(process(currentNodes, elseClauseCompositeStatement));
+                }
+            } else {
+                previousNodes.add(currentNode);
+            }
         }
         return previousNodes;
     }

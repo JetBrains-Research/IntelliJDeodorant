@@ -122,8 +122,10 @@ public class TypeCheckCodeFragmentAnalyzer {
         }
 
         Set<PsiExpression> typeCheckExpressions = typeCheckElimination.getTypeCheckExpressions();
+        typeCheckExpressions.removeIf(Objects::isNull);
         for (PsiExpression typeCheckExpression : typeCheckExpressions) {
-            if (typeCheckExpression.getParent().getParent() instanceof PsiSwitchLabelStatement) {
+            PsiElement parent = typeCheckExpression.getParent();
+            if (parent != null && parent.getParent() instanceof PsiSwitchLabelStatement) {
                 if (typeCheckExpression instanceof PsiReferenceExpression) {
                     PsiReferenceExpression referenceExpression = ((PsiReferenceExpression) typeCheckExpression);
                     if (referenceExpression.resolve() instanceof PsiVariable) {
@@ -199,7 +201,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             } else if (rightOperandExpression instanceof PsiMethodCallExpression) {
                                 typeMethodInvocation = (PsiMethodCallExpression) rightOperandExpression;
                             }
-                        } else if (staticFieldName != null && staticFieldName.equals(rightOperandExpression)) {
+                        } else if (staticFieldName != null) {
                             if (leftOperandExpression instanceof PsiReferenceExpression) {
                                 typeVariableName = (PsiReferenceExpression) leftOperandExpression;
                             } else if (leftOperandExpression instanceof PsiMethodCallExpression) {
@@ -910,9 +912,10 @@ public class TypeCheckCodeFragmentAnalyzer {
         int typeVariableCounter = 0;
         for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
             IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
-            for (PsiReferenceExpression analyzerTypeVariable : analyzer.getTargetVariables()) {
-                if (typeVariable.equals(analyzerTypeVariable.resolve())) {
-                    List<PsiReferenceExpression> staticFields = analyzer.getTypeVariableStaticField(analyzerTypeVariable);
+            Set<PsiReferenceExpression> targetVariablesReferences = analyzer.getTargetVariables();
+            for (PsiReferenceExpression referenceExpression : targetVariablesReferences) {
+                if (typeVariable != null && typeVariable.equals(referenceExpression.resolve())) {
+                    List<PsiReferenceExpression> staticFields = analyzer.getTypeVariableStaticField(referenceExpression);
                     if (staticFields != null && staticFields.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
                         typeVariableCounter++;
@@ -922,7 +925,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                         validTypeCheckExpressions++;
                         typeVariableCounter += staticFields.size();
                     }
-                    List<PsiType> subclasses = analyzer.getTypeVariableSubclass(analyzerTypeVariable);
+                    List<PsiType> subclasses = analyzer.getTypeVariableSubclass(referenceExpression);
                     if (subclasses != null && subclasses.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
                         typeVariableCounter++;

@@ -15,7 +15,6 @@ import java.util.*;
 @SuppressWarnings("restriction")
 public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     private final PsiVariable returnedVariable;
-    private final Set<PsiType> requiredImportDeclarationsBasedOnSignature;
     private final Set<PsiClassType> thrownExceptions;
     private final Map<PsiField, String> staticFieldMap;
     private final Map<PsiField, String> additionalStaticFieldMap;
@@ -27,7 +26,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                             TypeCheckElimination typeCheckElimination) {
         super(sourceFile, project, sourceTypeDeclaration, typeCheckElimination);
         this.returnedVariable = typeCheckElimination.getTypeCheckMethodReturnedVariable();
-        this.requiredImportDeclarationsBasedOnSignature = new LinkedHashSet<>();
         this.thrownExceptions = typeCheckElimination.getThrownExceptions();
         this.staticFieldMap = new LinkedHashMap<>();
         for (PsiField simpleName : typeCheckElimination.getStaticFields()) {
