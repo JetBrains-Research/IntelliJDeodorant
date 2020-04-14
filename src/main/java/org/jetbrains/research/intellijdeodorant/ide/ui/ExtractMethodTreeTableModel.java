@@ -97,7 +97,7 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     public Object getChild(Object parent, int index) {
         if (parent instanceof ExtractMethodCandidateGroup) {
             ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) parent;
-            ArrayList<ASTSlice> slices = new ArrayList<>(group.getCandidates());
+            ArrayList<ASTSlice> slices = group.getCandidates();
             return slices.get(index);
         } else {
             return candidateRefactoringGroups.get(index);
@@ -107,6 +107,16 @@ public class ExtractMethodTreeTableModel extends DefaultTreeModel implements Tre
     @Override
     public boolean isCellEditable(Object node, int column) {
         return false;
+    }
+
+    @Override
+    public int getIndexOfChild(Object parent, Object child) {
+        if (parent instanceof ExtractMethodCandidateGroup && child instanceof ASTSlice) {
+            ExtractMethodCandidateGroup group = (ExtractMethodCandidateGroup) parent;
+            ArrayList<ASTSlice> slices = group.getCandidates();
+            return slices.indexOf(child);
+        }
+        return -1;
     }
 
     @Override

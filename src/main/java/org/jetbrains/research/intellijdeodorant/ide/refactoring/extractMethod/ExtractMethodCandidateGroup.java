@@ -16,7 +16,7 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     private final @NotNull
     SmartPsiElementPointer<PsiElement> method;
     private @NotNull
-    Set<ASTSlice> candidates;
+    final ArrayList<ASTSlice> candidates;
     private final String qualifiedMethodName;
 
     /**
@@ -26,7 +26,7 @@ public class ExtractMethodCandidateGroup implements Refactoring {
      */
     public ExtractMethodCandidateGroup(Set<ASTSlice> slices) {
         this.method = toPointer(slices.iterator().next().getSourceMethodDeclaration());
-        this.candidates = slices;
+        this.candidates = new ArrayList<>(slices);
         this.qualifiedMethodName = getHumanReadableName(method.getElement());
     }
 
@@ -48,7 +48,7 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     }
 
     @NotNull
-    public Set<ASTSlice> getCandidates() {
+    public ArrayList<ASTSlice> getCandidates() {
         return candidates;
     }
 
