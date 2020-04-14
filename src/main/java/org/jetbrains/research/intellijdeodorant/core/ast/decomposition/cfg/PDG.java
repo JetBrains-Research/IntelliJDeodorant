@@ -591,10 +591,7 @@ public class PDG extends Graph {
                 dstPDGNode.applyReachingAliasSet(reachingAliasSetCopy);
                 dstPDGNode.updateReachingAliasSet(reachingAliasSetCopy);
                 if (!(srcCFGNode instanceof CFGBranchDoLoopNode && flow.isTrueControlFlow())) {
-                    if (flow.isLoopbackFlow())
-                        aliasSearch(dstPDGNode, visitedNodes, true, reachingAliasSetCopy);
-                    else
-                        aliasSearch(dstPDGNode, visitedNodes, false, reachingAliasSetCopy);
+                    aliasSearch(dstPDGNode, visitedNodes, flow.isLoopbackFlow(), reachingAliasSetCopy);
                 }
             }
         }
@@ -618,16 +615,18 @@ public class PDG extends Graph {
                     loop = (CFGBranchDoLoopNode) srcCFGNode;
             }
             PDGNode dstPDGNode = dstCFGNode.getPDGNode();
-            if (dstPDGNode.usesLocalVariable(variableInstruction)) {
-                PDGDataDependence dataDependence = new PDGDataDependence(initialNode, dstPDGNode, variableInstruction, loop);
-                edges.add(dataDependence);
-            }
-            if (!dstPDGNode.definesLocalVariable(variableInstruction)) {
-                dataDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
-            } else if (initialNode.declaresLocalVariable(variableInstruction) && !initialNode.equals(dstPDGNode)) {
-                //create def-order data dependence edge
-                PDGDataDependence dataDependence = new PDGDataDependence(initialNode, dstPDGNode, variableInstruction, loop);
-                edges.add(dataDependence);
+            if (dstPDGNode != null) {
+                if (dstPDGNode.usesLocalVariable(variableInstruction)) {
+                    PDGDataDependence dataDependence = new PDGDataDependence(initialNode, dstPDGNode, variableInstruction, loop);
+                    edges.add(dataDependence);
+                }
+                if (!dstPDGNode.definesLocalVariable(variableInstruction)) {
+                    dataDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
+                } else if (initialNode.declaresLocalVariable(variableInstruction) && !initialNode.equals(dstPDGNode)) {
+                    //create def-order data dependence edge
+                    PDGDataDependence dataDependence = new PDGDataDependence(initialNode, dstPDGNode, variableInstruction, loop);
+                    edges.add(dataDependence);
+                }
             }
         }
     }
