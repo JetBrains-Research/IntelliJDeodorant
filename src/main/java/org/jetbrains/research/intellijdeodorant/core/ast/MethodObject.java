@@ -94,10 +94,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         this.testAnnotation = testAnnotation;
     }
 
-    public Set<String> getExceptionsInJavaDocThrows() {
-        return constructorObject.getExceptionsInJavaDocThrows();
-    }
-
     public Access getAccess() {
         return constructorObject.getAccess();
     }
@@ -465,28 +461,12 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getParameterListIterator();
     }
 
-    public ParameterObject getParameter(int position) {
-        return constructorObject.getParameter(position);
-    }
-
     public List<MethodInvocationObject> getMethodInvocations() {
         return constructorObject.getMethodInvocations();
     }
 
-    public List<SuperMethodInvocationObject> getSuperMethodInvocations() {
-        return constructorObject.getSuperMethodInvocations();
-    }
-
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return constructorObject.getConstructorInvocations();
-    }
-
     public List<FieldInstructionObject> getFieldInstructions() {
         return constructorObject.getFieldInstructions();
-    }
-
-    public List<SuperFieldInstructionObject> getSuperFieldInstructions() {
-        return constructorObject.getSuperFieldInstructions();
     }
 
     public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
@@ -497,20 +477,12 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getLocalVariableInstructions();
     }
 
-    public List<CreationObject> getCreations() {
+    private List<CreationObject> getCreations() {
         return constructorObject.getCreations();
     }
 
-    public List<LiteralObject> getLiterals() {
+    private List<LiteralObject> getLiterals() {
         return constructorObject.getLiterals();
-    }
-
-    public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations() {
-        return constructorObject.getAnonymousClassDeclarations();
-    }
-
-    public Set<String> getExceptionsInThrowStatements() {
-        return constructorObject.getExceptionsInThrowStatements();
     }
 
     public boolean containsMethodInvocation(MethodInvocationObject methodInvocation) {
@@ -525,44 +497,16 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.containsSuperMethodInvocation(superMethodInvocation);
     }
 
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughFields() {
-        return constructorObject.getInvokedMethodsThroughFields();
-    }
-
     public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughFields() {
         return constructorObject.getNonDistinctInvokedMethodsThroughFields();
-    }
-
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughParameters() {
-        return constructorObject.getInvokedMethodsThroughParameters();
     }
 
     public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughParameters() {
         return constructorObject.getNonDistinctInvokedMethodsThroughParameters();
     }
 
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughLocalVariables() {
-        return constructorObject.getInvokedMethodsThroughLocalVariables();
-    }
-
-    public Set<MethodInvocationObject> getInvokedMethodsThroughThisReference() {
-        return constructorObject.getInvokedMethodsThroughThisReference();
-    }
-
     public List<MethodInvocationObject> getNonDistinctInvokedMethodsThroughThisReference() {
         return constructorObject.getNonDistinctInvokedMethodsThroughThisReference();
-    }
-
-    public Set<MethodInvocationObject> getInvokedStaticMethods() {
-        return constructorObject.getInvokedStaticMethods();
-    }
-
-    public Set<AbstractVariable> getDefinedFieldsThroughFields() {
-        return constructorObject.getDefinedFieldsThroughFields();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughFields() {
-        return constructorObject.getUsedFieldsThroughFields();
     }
 
     public List<AbstractVariable> getNonDistinctDefinedFieldsThroughFields() {
@@ -573,28 +517,12 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getNonDistinctUsedFieldsThroughFields();
     }
 
-    public Set<AbstractVariable> getDefinedFieldsThroughParameters() {
-        return constructorObject.getDefinedFieldsThroughParameters();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughParameters() {
-        return constructorObject.getUsedFieldsThroughParameters();
-    }
-
     public List<AbstractVariable> getNonDistinctDefinedFieldsThroughParameters() {
         return constructorObject.getNonDistinctDefinedFieldsThroughParameters();
     }
 
     public List<AbstractVariable> getNonDistinctUsedFieldsThroughParameters() {
         return constructorObject.getNonDistinctUsedFieldsThroughParameters();
-    }
-
-    public Set<AbstractVariable> getDefinedFieldsThroughLocalVariables() {
-        return constructorObject.getDefinedFieldsThroughLocalVariables();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughLocalVariables() {
-        return constructorObject.getUsedFieldsThroughLocalVariables();
     }
 
     public Set<PlainVariable> getDefinedFieldsThroughThisReference() {
@@ -605,36 +533,12 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getNonDistinctDefinedFieldsThroughThisReference();
     }
 
-    public Set<PlainVariable> getUsedFieldsThroughThisReference() {
-        return constructorObject.getUsedFieldsThroughThisReference();
-    }
-
     public List<PlainVariable> getNonDistinctUsedFieldsThroughThisReference() {
         return constructorObject.getNonDistinctUsedFieldsThroughThisReference();
     }
 
-    public Set<PlainVariable> getDeclaredLocalVariables() {
-        return constructorObject.getDeclaredLocalVariables();
-    }
-
     public Set<PlainVariable> getDefinedLocalVariables() {
         return constructorObject.getDefinedLocalVariables();
-    }
-
-    public Set<PlainVariable> getUsedLocalVariables() {
-        return constructorObject.getUsedLocalVariables();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> getParametersPassedAsArgumentsInMethodInvocations() {
-        return constructorObject.getParametersPassedAsArgumentsInMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations() {
-        return constructorObject.getParametersPassedAsArgumentsInSuperMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return constructorObject.getParametersPassedAsArgumentsInConstructorInvocations();
     }
 
     public boolean containsSuperMethodInvocation() {
@@ -720,10 +624,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         }
         sb.append(")");
         return sb.toString();
-    }
-
-    public String getSignature() {
-        return constructorObject.getSignature();
     }
 
     public boolean containsFieldAccessOfEnclosingClass() {

@@ -9,7 +9,6 @@ public enum StatementType {
         }
     },
     BREAK,
-    CONSTRUCTOR_INVOCATION,
     CONTINUE,
     DO,
     EMPTY,
@@ -23,13 +22,11 @@ public enum StatementType {
     IF,
     LABELED,
     RETURN,
-    SUPER_CONSTRUCTOR_INVOCATION,
     SWITCH_CASE,
     SWITCH,
     SYNCHRONIZED,
     THROW,
     TRY,
-    TYPE_DECLARATION,
     VARIABLE_DECLARATION,
     WHILE,
     EXPRESSION_LIST;

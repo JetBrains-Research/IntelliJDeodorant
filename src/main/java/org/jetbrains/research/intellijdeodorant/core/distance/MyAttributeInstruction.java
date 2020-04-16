@@ -26,10 +26,6 @@ public class MyAttributeInstruction {
         return classOrigin;
     }
 
-    public void setClassOrigin(String classOrigin) {
-        this.classOrigin = classOrigin;
-    }
-
     public String getClassType() {
         return classType;
     }

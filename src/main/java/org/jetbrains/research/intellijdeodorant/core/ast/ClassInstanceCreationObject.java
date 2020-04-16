@@ -5,7 +5,6 @@ import com.intellij.util.SmartList;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
@@ -55,7 +54,7 @@ public class ClassInstanceCreationObject extends CreationObject {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("new ");
-        sb.append(getType().toString());
+        sb.append(getType());
         sb.append("(");
         if (!parameterList.isEmpty()) {
             for (int i = 0; i < parameterList.size() - 1; i++)

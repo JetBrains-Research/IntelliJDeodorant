@@ -55,9 +55,5 @@ public abstract class AbstractVariable {
         return isStatic;
     }
 
-    protected abstract boolean containsPlainVariable(PlainVariable variable);
-
-    protected abstract boolean startsWithVariable(AbstractVariable variable);
-
     public abstract PlainVariable getInitialVariable();
 }

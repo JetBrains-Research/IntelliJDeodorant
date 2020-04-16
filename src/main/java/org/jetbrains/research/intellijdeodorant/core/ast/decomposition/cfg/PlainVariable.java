@@ -16,17 +16,6 @@ public class PlainVariable extends AbstractVariable {
         super(origin, variableName, variableType, isField, isParameter, isStatic);
     }
 
-    public boolean containsPlainVariable(PlainVariable variable) {
-        return this.getOrigin().equals(variable.getOrigin());
-    }
-
-    public boolean startsWithVariable(AbstractVariable variable) {
-        if (variable instanceof PlainVariable) {
-            return this.equals(variable);
-        }
-        return false;
-    }
-
     public PlainVariable getInitialVariable() {
         return this;
     }

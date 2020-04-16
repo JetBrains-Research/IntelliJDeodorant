@@ -18,28 +18,14 @@ public class MyCompositeStatement extends MyAbstractStatement {
 		this.expressionList = new ArrayList<>();
 	}
 
-	public MyCompositeStatement(List<MyAbstractStatement> statementList) {
-		super(statementList);
-		this.statementList = statementList;
-		this.expressionList = new ArrayList<>();
-	}
-
-	public void addStatement(MyAbstractStatement statement) {
+    public void addStatement(MyAbstractStatement statement) {
 		statementList.add(statement);
 		statement.setParent(this);
 	}
 
-	public ListIterator<MyAbstractStatement> getStatementIterator() {
-		return this.statementList.listIterator();
-	}
-
-	public void addExpression(MyAbstractExpression expression) {
+    public void addExpression(MyAbstractExpression expression) {
 		expressionList.add(expression);
 		expression.setOwner(this);
-	}
-
-	public ListIterator<MyAbstractExpression> getExpressionIterator() {
-		return this.expressionList.listIterator();
 	}
 
     public void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
@@ -182,26 +168,6 @@ public class MyCompositeStatement extends MyAbstractStatement {
     			}
     		}
     	}
-    }
-
-    private void removeAllStatementsExceptFromSiblingStatements(List<MyAbstractStatement> statementsToKeep) {
-    	if(statementList.contains(statementsToKeep.get(0))) {
-    		List<MyAbstractStatement> statementsToRemove = new ArrayList<>();
-			for(MyAbstractStatement statement : statementList) {
-				if(!statementsToKeep.contains(statement))
-					statementsToRemove.add(statement);
-			}
-			statementList.removeAll(statementsToRemove);
-			update();
-		}
-    	else {
-			for(MyAbstractStatement statement : statementList) {
-				if(statement instanceof MyCompositeStatement) {
-					MyCompositeStatement myCompositeStatement = (MyCompositeStatement)statement;
-					myCompositeStatement.removeAllStatementsExceptFromSiblingStatements(statementsToKeep);
-				}
-			}
-		}
     }
 
     public Set<String> getEntitySet() {

@@ -25,10 +25,6 @@ public class ParameterObject extends VariableDeclarationObject {
         return name;
     }
 
-    public boolean isVarargs() {
-        return varargs;
-    }
-
     public void setSingleVariableDeclaration(PsiVariable singleVariableDeclaration) {
         this.singleVariableDeclaration = toPointer(singleVariableDeclaration);
     }

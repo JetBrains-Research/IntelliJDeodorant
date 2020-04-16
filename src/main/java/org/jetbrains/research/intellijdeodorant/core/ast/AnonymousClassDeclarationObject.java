@@ -1,12 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.intellij.psi.PsiAnonymousClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
@@ -33,20 +28,6 @@ public class AnonymousClassDeclarationObject extends ClassDeclarationObject {
 
     public String getSuperclass() {
         return null;
-    }
-
-    protected void accessedFieldFromThisClass(Set<FieldObject> fields, FieldInstructionObject fieldInstruction) {
-        List<FieldObject> allFields = new ArrayList<>(fieldList);
-        if (classObject != null) {
-            //add the fields of the class in which the anonymous class is declared
-            allFields.addAll(classObject.fieldList);
-        }
-        for (FieldObject field : allFields) {
-            if (field.equals(fieldInstruction)) {
-                fields.add(field);
-                break;
-            }
-        }
     }
 
     public String toString() {

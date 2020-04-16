@@ -161,16 +161,6 @@ public class MySystem {
         return classMap.get(className);
     }
 
-    public void addClass(MyClass newClass) {
-        if (!classMap.containsKey(newClass.getName())) {
-            classMap.put(newClass.getName(), newClass);
-        }
-    }
-
-    public void removeClass(MyClass oldClass) {
-        classMap.remove(oldClass.getName());
-    }
-
     public SystemObject getSystemObject() {
         return systemObject;
     }

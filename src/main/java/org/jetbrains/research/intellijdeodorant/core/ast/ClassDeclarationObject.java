@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiType;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.CatchClauseObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TryStatementObject;
 
@@ -174,7 +173,7 @@ public abstract class ClassDeclarationObject {
         } else {
             String superclassType = getSuperclass();
             if (superclassType != null) {
-                ClassObject superclassObject = ASTReader.getSystemObject().getClassObject(superclassType.toString());
+                ClassObject superclassObject = ASTReader.getSystemObject().getClassObject(superclassType);
                 if (superclassObject != null) {
                     return superclassObject.findField(fieldInstruction);
                 }

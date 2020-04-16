@@ -22,32 +22,12 @@ public class SuperFieldInstructionObject {
         this._static = false;
     }
 
-    public String getOwnerClass() {
-        return ownerClass;
-    }
-
-    public PsiType getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isStatic() {
-        return _static;
-    }
-
     public void setStatic(boolean s) {
         _static = s;
     }
 
     public void setSimpleName(PsiElement simpleName) {
         this.simpleName = toPointer(simpleName);
-    }
-
-    public PsiElement getSimpleName() {
-        return this.simpleName.getElement();
     }
 
     public boolean equals(Object o) {

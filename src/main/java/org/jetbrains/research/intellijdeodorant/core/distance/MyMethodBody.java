@@ -4,7 +4,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.*;
 
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
 class MyMethodBody {
 
@@ -42,18 +41,6 @@ class MyMethodBody {
         }
     }
 
-    public MethodBodyObject getMethodBodyObject() {
-        return this.methodBodyObject;
-    }
-
-    public boolean containsAttributeInstruction(MyAttributeInstruction instruction) {
-        return this.compositeStatement.containsAttributeInstruction(instruction);
-    }
-
-    public boolean containsMethodInvocation(MyMethodInvocation invocation) {
-        return this.compositeStatement.containsMethodInvocation(invocation);
-    }
-
     public int getNumberOfAttributeInstructions() {
         return this.compositeStatement.getNumberOfAttributeInstructions();
     }
@@ -78,23 +65,4 @@ class MyMethodBody {
         return this.compositeStatement.getAbstractStatement(statement);
     }
 
-    public void addAttributeInstructionInStatementsOrExpressionsContainingMethodInvocation(MyAttributeInstruction attributeInstruction, MyMethodInvocation methodInvocation) {
-        this.compositeStatement.addAttributeInstructionInStatementsOrExpressionsContainingMethodInvocation(attributeInstruction, methodInvocation);
-    }
-
-    public void insertMethodInvocationBeforeStatement(MyAbstractStatement parentStatement, MyStatement methodInvocation) {
-        this.compositeStatement.insertMethodInvocationBeforeStatement(parentStatement, methodInvocation);
-    }
-
-    public void removeStatement(MyAbstractStatement statementToRemove) {
-        this.compositeStatement.removeStatement(statementToRemove);
-    }
-
-    public void replaceSiblingStatementsWithMethodInvocation(List<MyAbstractStatement> statementsToRemove, MyStatement methodInvocation) {
-        this.compositeStatement.replaceSiblingStatementsWithMethodInvocation(statementsToRemove, methodInvocation);
-    }
-
-    public Set<String> getEntitySet() {
-        return this.compositeStatement.getEntitySet();
-    }
 }

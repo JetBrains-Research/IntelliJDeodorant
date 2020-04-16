@@ -7,7 +7,6 @@ import com.intellij.psi.SmartPsiElementPointer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 public abstract class AbstractMethodInvocationObject {
@@ -76,10 +75,6 @@ public abstract class AbstractMethodInvocationObject {
 
     public Set<String> getThrownExceptions() {
         return this.thrownExceptions;
-    }
-
-    public PsiType getType() {
-        return getReturnType();
     }
 
     public boolean equals(Object o) {

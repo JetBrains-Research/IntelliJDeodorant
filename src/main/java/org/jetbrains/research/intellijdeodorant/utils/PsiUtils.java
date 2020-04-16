@@ -6,7 +6,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.infos.MethodCandidateInfo;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.openapi.editor.Document;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
@@ -62,11 +61,6 @@ public class PsiUtils {
             return getHumanReadableName(field.getContainingClass()) + "." + field.getName();
         }
         return "???";
-    }
-
-    public static PsiClass findClass(String className, Project project) {
-        return JavaPsiFacade.getInstance(project)
-                .findClass(className, GlobalSearchScope.allScope(project));
     }
 
     public static List<PsiJavaFile> extractFiles(Project project) {

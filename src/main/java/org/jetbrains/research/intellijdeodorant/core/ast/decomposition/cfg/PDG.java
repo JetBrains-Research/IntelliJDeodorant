@@ -591,10 +591,7 @@ public class PDG extends Graph {
                 dstPDGNode.applyReachingAliasSet(reachingAliasSetCopy);
                 dstPDGNode.updateReachingAliasSet(reachingAliasSetCopy);
                 if (!(srcCFGNode instanceof CFGBranchDoLoopNode && flow.isTrueControlFlow())) {
-                    if (flow.isLoopbackFlow())
-                        aliasSearch(dstPDGNode, visitedNodes, true, reachingAliasSetCopy);
-                    else
-                        aliasSearch(dstPDGNode, visitedNodes, false, reachingAliasSetCopy);
+                    aliasSearch(dstPDGNode, visitedNodes, flow.isLoopbackFlow(), reachingAliasSetCopy);
                 }
             }
         }

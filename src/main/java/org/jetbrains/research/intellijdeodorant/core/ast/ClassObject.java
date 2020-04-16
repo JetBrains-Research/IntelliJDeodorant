@@ -114,10 +114,6 @@ public class ClassObject extends ClassDeclarationObject {
         constructorList.add(c);
     }
 
-    public boolean addEnumConstantDeclaration(EnumConstantDeclarationObject f) {
-        return enumConstantDeclarationList.add(f);
-    }
-
     private ListIterator<ConstructorObject> getConstructorIterator() {
         return constructorList.listIterator();
     }
@@ -156,20 +152,6 @@ public class ClassObject extends ClassDeclarationObject {
 
     public boolean isEnum() {
         return _enum;
-    }
-
-    public void setEnum(boolean _enum) {
-        this._enum = _enum;
-    }
-
-    public ConstructorObject getConstructor(ClassInstanceCreationObject cico) {
-        ListIterator<ConstructorObject> ci = getConstructorIterator();
-        while (ci.hasNext()) {
-            ConstructorObject co = ci.next();
-            if (co.equals(cico))
-                return co;
-        }
-        return null;
     }
 
     public String toString() {

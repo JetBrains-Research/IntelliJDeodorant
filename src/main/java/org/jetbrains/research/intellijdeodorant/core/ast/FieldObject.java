@@ -4,10 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
-import com.intellij.util.SmartList;
 
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;

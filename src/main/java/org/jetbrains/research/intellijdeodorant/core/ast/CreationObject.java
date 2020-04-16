@@ -1,7 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiType;
 import com.intellij.psi.SmartPsiElementPointer;
 
 public abstract class CreationObject {

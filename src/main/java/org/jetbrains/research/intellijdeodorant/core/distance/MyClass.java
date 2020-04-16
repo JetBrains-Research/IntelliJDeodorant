@@ -61,14 +61,6 @@ public class MyClass {
             methodList.add(method);
     }
 
-    public void removeMethod(MyMethod method) {
-        methodList.remove(method);
-    }
-
-    public void removeAttribute(MyAttribute attribute) {
-        attributeList.remove(attribute);
-    }
-
     public List<MyAttribute> getAttributeList() {
         return attributeList;
     }

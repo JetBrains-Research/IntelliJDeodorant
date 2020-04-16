@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.inheritance;
 
-import com.intellij.psi.PsiType;
 import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 

@@ -6,5 +6,4 @@ public abstract class VariableDeclarationObject {
 
     public abstract PsiVariable getVariableDeclaration();
 
-    public abstract String getName();
 }

@@ -159,10 +159,6 @@ public class MethodBodyObject {
         return compositeStatement.getFieldInstructions();
     }
 
-    public List<SuperFieldInstructionObject> getSuperFieldInstructions() {
-        return compositeStatement.getSuperFieldInstructions();
-    }
-
     public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
         return compositeStatement.getLocalVariableDeclarations();
     }
@@ -173,14 +169,6 @@ public class MethodBodyObject {
 
     public List<MethodInvocationObject> getMethodInvocations() {
         return compositeStatement.getMethodInvocations();
-    }
-
-    public List<SuperMethodInvocationObject> getSuperMethodInvocations() {
-        return compositeStatement.getSuperMethodInvocations();
-    }
-
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return compositeStatement.getConstructorInvocations();
     }
 
     public List<CreationObject> getCreations() {
@@ -195,10 +183,6 @@ public class MethodBodyObject {
         return compositeStatement.getAnonymousClassDeclarations();
     }
 
-    public Set<String> getExceptionsInThrowStatements() {
-        return compositeStatement.getExceptionsInThrowStatements();
-    }
-
     public boolean containsMethodInvocation(MethodInvocationObject methodInvocation) {
         return compositeStatement.containsMethodInvocation(methodInvocation);
     }
@@ -211,14 +195,6 @@ public class MethodBodyObject {
         return compositeStatement.containsSuperMethodInvocation(superMethodInvocation);
     }
 
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughFields() {
-        return compositeStatement.getInvokedMethodsThroughFields();
-    }
-
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughParameters() {
-        return compositeStatement.getInvokedMethodsThroughParameters();
-    }
-
     public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughFields() {
         return compositeStatement.getNonDistinctInvokedMethodsThroughFields();
     }
@@ -227,28 +203,8 @@ public class MethodBodyObject {
         return compositeStatement.getNonDistinctInvokedMethodsThroughParameters();
     }
 
-    public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughLocalVariables() {
-        return compositeStatement.getInvokedMethodsThroughLocalVariables();
-    }
-
-    public Set<MethodInvocationObject> getInvokedMethodsThroughThisReference() {
-        return compositeStatement.getInvokedMethodsThroughThisReference();
-    }
-
     public List<MethodInvocationObject> getNonDistinctInvokedMethodsThroughThisReference() {
         return compositeStatement.getNonDistinctInvokedMethodsThroughThisReference();
-    }
-
-    public Set<MethodInvocationObject> getInvokedStaticMethods() {
-        return compositeStatement.getInvokedStaticMethods();
-    }
-
-    public Set<AbstractVariable> getDefinedFieldsThroughFields() {
-        return compositeStatement.getDefinedFieldsThroughFields();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughFields() {
-        return compositeStatement.getUsedFieldsThroughFields();
     }
 
     public List<AbstractVariable> getNonDistinctDefinedFieldsThroughFields() {
@@ -259,28 +215,12 @@ public class MethodBodyObject {
         return compositeStatement.getNonDistinctUsedFieldsThroughFields();
     }
 
-    public Set<AbstractVariable> getDefinedFieldsThroughParameters() {
-        return compositeStatement.getDefinedFieldsThroughParameters();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughParameters() {
-        return compositeStatement.getUsedFieldsThroughParameters();
-    }
-
     public List<AbstractVariable> getNonDistinctDefinedFieldsThroughParameters() {
         return compositeStatement.getNonDistinctDefinedFieldsThroughParameters();
     }
 
     public List<AbstractVariable> getNonDistinctUsedFieldsThroughParameters() {
         return compositeStatement.getNonDistinctUsedFieldsThroughParameters();
-    }
-
-    public Set<AbstractVariable> getDefinedFieldsThroughLocalVariables() {
-        return compositeStatement.getDefinedFieldsThroughLocalVariables();
-    }
-
-    public Set<AbstractVariable> getUsedFieldsThroughLocalVariables() {
-        return compositeStatement.getUsedFieldsThroughLocalVariables();
     }
 
     public Set<PlainVariable> getDefinedFieldsThroughThisReference() {
@@ -291,36 +231,12 @@ public class MethodBodyObject {
         return compositeStatement.getNonDistinctDefinedFieldsThroughThisReference();
     }
 
-    public Set<PlainVariable> getUsedFieldsThroughThisReference() {
-        return compositeStatement.getUsedFieldsThroughThisReference();
-    }
-
     public List<PlainVariable> getNonDistinctUsedFieldsThroughThisReference() {
         return compositeStatement.getNonDistinctUsedFieldsThroughThisReference();
     }
 
-    public Set<PlainVariable> getDeclaredLocalVariables() {
-        return compositeStatement.getDeclaredLocalVariables();
-    }
-
     public Set<PlainVariable> getDefinedLocalVariables() {
         return compositeStatement.getDefinedLocalVariables();
-    }
-
-    public Set<PlainVariable> getUsedLocalVariables() {
-        return compositeStatement.getUsedLocalVariables();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> getParametersPassedAsArgumentsInMethodInvocations() {
-        return compositeStatement.getParametersPassedAsArgumentsInMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations() {
-        return compositeStatement.getParametersPassedAsArgumentsInSuperMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return compositeStatement.getParametersPassedAsArgumentsInConstructorInvocations();
     }
 
     public boolean containsSuperMethodInvocation() {
@@ -576,7 +492,4 @@ public class MethodBodyObject {
         return compositeStatement.getTryStatements();
     }
 
-    public List<String> stringRepresentation() {
-        return compositeStatement.stringRepresentation();
-    }
 }

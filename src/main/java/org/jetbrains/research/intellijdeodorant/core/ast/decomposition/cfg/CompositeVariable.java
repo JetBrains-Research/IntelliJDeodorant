@@ -52,24 +52,6 @@ public class CompositeVariable extends AbstractVariable {
         return new PlainVariable(origin.getElement(), name, type, isField, isParameter, isStatic);
     }
 
-    public boolean containsPlainVariable(PlainVariable variable) {
-        if (getOrigin().equals(variable.getOrigin()))
-            return true;
-        return rightPart.containsPlainVariable(variable);
-    }
-
-    public boolean startsWithVariable(AbstractVariable variable) {
-        if (variable instanceof PlainVariable) {
-            return this.getInitialVariable().equals(variable);
-        } else {
-            CompositeVariable composite = (CompositeVariable) variable;
-            if (this.getInitialVariable().equals(composite.getInitialVariable())) {
-                return this.getRightPart().startsWithVariable(composite.getRightPart());
-            }
-            return false;
-        }
-    }
-
     private AbstractVariable getRightPartAfterPrefix(AbstractVariable variable) {
         if (variable instanceof PlainVariable) {
             if (this.getInitialVariable().equals(variable))
