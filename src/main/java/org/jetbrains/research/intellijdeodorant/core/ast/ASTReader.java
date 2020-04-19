@@ -104,13 +104,6 @@ public class ASTReader {
             constructorObject.setMethodBody(methodBodyObject);
         }
 
-        for (AnonymousClassDeclarationObject anonymous : constructorObject.getAnonymousClassDeclarations()) {
-            anonymous.setClassObject(classObject);
-            PsiAnonymousClass anonymousClassDeclaration = anonymous.getAnonymousClassDeclaration();
-            int anonymousClassDeclarationStartPosition = anonymousClassDeclaration.getStartOffsetInParent();
-            int anonymousClassDeclarationEndPosition = anonymousClassDeclarationStartPosition + anonymousClassDeclaration.getTextLength();
-        }
-
         if (methodDeclaration.isConstructor()) {
             classObject.addConstructor(constructorObject);
         } else {

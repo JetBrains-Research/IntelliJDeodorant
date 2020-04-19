@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
+import com.intellij.psi.PsiAnonymousClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiVariable;
@@ -129,8 +130,8 @@ public class CompositeStatementObject extends AbstractStatement {
         return literals;
     }
 
-    public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarationsInExpressions() {
-        List<AnonymousClassDeclarationObject> anonymousClassDeclarations = new ArrayList<>();
+    public List<PsiAnonymousClass> getAnonymousClassDeclarationsInExpressions() {
+        List<PsiAnonymousClass> anonymousClassDeclarations = new ArrayList<>();
         for (AbstractExpression expression : expressionList) {
             anonymousClassDeclarations.addAll(expression.getAnonymousClassDeclarations());
         }

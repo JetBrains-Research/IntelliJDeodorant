@@ -24,7 +24,7 @@ public abstract class AbstractMethodFragment {
     private final List<PsiVariable> localVariableInstructionList;
     private final List<CreationObject> creationList;
     private final List<LiteralObject> literalList;
-    private final List<AnonymousClassDeclarationObject> anonymousClassDeclarationList;
+    private final List<PsiAnonymousClass> anonymousClassDeclarationList;
     private final Set<String> exceptionsInThrowStatements;
     private final Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughFields;
     private final Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughParameters;
@@ -382,69 +382,7 @@ public abstract class AbstractMethodFragment {
                 }
                 PsiAnonymousClass anonymous = classInstanceCreation.getAnonymousClass();
                 if (anonymous != null) {
-                    final AnonymousClassDeclarationObject anonymousClassObject = new AnonymousClassDeclarationObject();
-                    if (anonymous.getName() != null) {
-                        anonymousClassObject.setName(anonymous.getName());
-                    }
-                    anonymousClassObject.setAnonymousClassDeclaration(anonymous);
-
-                    PsiField[] fields = anonymous.getFields();
-                    PsiMethod[] methods = anonymous.getMethods();
-
-                    for (PsiField psiField : fields) {
-                        anonymousClassObject.addField(psiField);
-                    }
-
-                    for (PsiMethod psiMethod : methods) {
-                        final ConstructorObject constructorObject = new ConstructorObject();
-                        constructorObject.setMethodDeclaration(psiMethod);
-                        constructorObject.setName(psiMethod.getName());
-                        constructorObject.setClassName(anonymousClassObject.getName());
-
-                        if (psiMethod.hasModifierProperty(PsiModifier.PUBLIC))
-                            constructorObject.setAccess(Access.PUBLIC);
-                        else if (psiMethod.hasModifierProperty(PsiModifier.PROTECTED))
-                            constructorObject.setAccess(Access.PROTECTED);
-                        else if (psiMethod.hasModifierProperty(PsiModifier.PRIVATE))
-                            constructorObject.setAccess(Access.PRIVATE);
-                        else
-                            constructorObject.setAccess(Access.NONE);
-
-                        PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
-                        for (PsiParameter parameter : parameters) {
-                            constructorObject.addParameter(parameter);
-                        }
-
-                        PsiCodeBlock methodBody = psiMethod.getBody();
-                        if (methodBody != null) {
-                            MethodBodyObject methodBodyObject = new MethodBodyObject(methodBody);
-                            constructorObject.setMethodBody(methodBodyObject);
-                        }
-
-                        MethodObject methodObject = new MethodObject(psiMethod, constructorObject);
-                        PsiModifierList extendedModifiers = psiMethod.getModifierList();
-                        PsiAnnotation[] annotations = extendedModifiers.getAnnotations();
-                        for (PsiAnnotation psiAnnotation : annotations) {
-                            if (Objects.equals(psiAnnotation.getQualifiedName(), "Test")) {
-                                methodObject.setTestAnnotation(true);
-                                break;
-                            }
-                        }
-                        PsiType returnType = psiMethod.getReturnType();
-                        methodObject.setReturnType(returnType);
-
-                        if (psiMethod.hasModifierProperty(PsiModifier.ABSTRACT))
-                            methodObject.setAbstract(true);
-                        if (psiMethod.hasModifierProperty(PsiModifier.STATIC))
-                            methodObject.setStatic(true);
-                        if (psiMethod.hasModifierProperty(PsiModifier.SYNCHRONIZED))
-                            methodObject.setSynchronized(true);
-                        if (psiMethod.hasModifierProperty(PsiModifier.NATIVE))
-                            methodObject.setNative(true);
-
-                        anonymousClassObject.addMethod(methodObject);
-                    }
-                    addAnonymousClassDeclaration(anonymousClassObject);
+                    addAnonymousClassDeclaration(anonymous);
                 }
 
                 PlainVariable variable = null;
@@ -510,7 +448,7 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    private void addAnonymousClassDeclaration(AnonymousClassDeclarationObject anonymousClassObject) {
+    private void addAnonymousClassDeclaration(PsiAnonymousClass anonymousClassObject) {
         anonymousClassDeclarationList.add(anonymousClassObject);
         if (parent != null) {
             parent.addAnonymousClassDeclaration(anonymousClassObject);
@@ -751,7 +689,7 @@ public abstract class AbstractMethodFragment {
         return literalList;
     }
 
-    public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations() {
+    public List<PsiAnonymousClass> getAnonymousClassDeclarations() {
         return anonymousClassDeclarationList;
     }
 

@@ -126,7 +126,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new ArrayList<>();
     }
 
-    public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations() {
+    public List<PsiAnonymousClass> getAnonymousClassDeclarations() {
         if (methodBody != null)
             return methodBody.getAnonymousClassDeclarations();
         else

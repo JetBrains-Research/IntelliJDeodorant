@@ -179,7 +179,7 @@ public class MethodBodyObject {
         return compositeStatement.getLiterals();
     }
 
-    public List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations() {
+    public List<PsiAnonymousClass> getAnonymousClassDeclarations() {
         return compositeStatement.getAnonymousClassDeclarations();
     }
 
