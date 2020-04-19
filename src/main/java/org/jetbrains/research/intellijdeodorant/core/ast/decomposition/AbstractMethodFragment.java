@@ -21,7 +21,7 @@ public abstract class AbstractMethodFragment {
     private final List<PsiField> fieldInstructionList;
     private final List<SuperFieldInstructionObject> superFieldInstructionList;
     private final List<PsiVariable> localVariableDeclarationList;
-    private final List<LocalVariableInstructionObject> localVariableInstructionList;
+    private final List<PsiVariable> localVariableInstructionList;
     private final List<CreationObject> creationList;
     private final List<LiteralObject> literalList;
     private final List<AnonymousClassDeclarationObject> anonymousClassDeclarationList;
@@ -151,12 +151,8 @@ public abstract class AbstractMethodFragment {
                     }
                 } else if (resolvedReference instanceof PsiVariable) {
                     PsiVariable resolvedVariable = (PsiVariable) resolvedReference;
-                    String variableName = resolvedVariable.getName();
-                    PsiType variableType = resolvedVariable.getType();
                     PlainVariable variable = new PlainVariable(resolvedVariable);
-                    LocalVariableInstructionObject localVariable = new LocalVariableInstructionObject(variableType, variableName);
-                    localVariable.setReference(psiReferenceExpression);
-                    addLocalVariableInstruction(localVariable);
+                    addLocalVariableInstruction(resolvedVariable);
                     Set<PsiAssignmentExpression> localVariableAssignments = getMatchingAssignments(resolvedVariable, assignments);
                     Set<PsiPostfixExpression> localVariablePostfixAssignments =
                             getMatchingPostfixAssignments(resolvedVariable, postfixExpressions);
@@ -222,7 +218,7 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    private void addLocalVariableInstruction(LocalVariableInstructionObject localVariable) {
+    private void addLocalVariableInstruction(PsiVariable localVariable) {
         localVariableInstructionList.add(localVariable);
         if (parent != null) {
             parent.addLocalVariableInstruction(localVariable);
@@ -717,7 +713,7 @@ public abstract class AbstractMethodFragment {
         return localVariableDeclarationList;
     }
 
-    public List<LocalVariableInstructionObject> getLocalVariableInstructions() {
+    public List<PsiVariable> getLocalVariableInstructions() {
         return localVariableInstructionList;
     }
 

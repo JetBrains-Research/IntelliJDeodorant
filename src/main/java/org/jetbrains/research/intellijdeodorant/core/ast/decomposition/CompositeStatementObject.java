@@ -73,8 +73,8 @@ public class CompositeStatementObject extends AbstractStatement {
         return localVariableDeclarations;
     }
 
-    public List<LocalVariableInstructionObject> getLocalVariableInstructionsInExpressions() {
-        List<LocalVariableInstructionObject> localVariableInstructions = new ArrayList<>();
+    public List<PsiVariable> getLocalVariableInstructionsInExpressions() {
+        List<PsiVariable> localVariableInstructions = new ArrayList<>();
         for (AbstractExpression expression : expressionList) {
             localVariableInstructions.addAll(expression.getLocalVariableInstructions());
         }

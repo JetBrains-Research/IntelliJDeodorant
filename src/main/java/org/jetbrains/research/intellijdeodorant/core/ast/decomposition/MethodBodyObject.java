@@ -163,7 +163,7 @@ public class MethodBodyObject {
         return compositeStatement.getLocalVariableDeclarations();
     }
 
-    public List<LocalVariableInstructionObject> getLocalVariableInstructions() {
+    public List<PsiVariable> getLocalVariableInstructions() {
         return compositeStatement.getLocalVariableInstructions();
     }
 

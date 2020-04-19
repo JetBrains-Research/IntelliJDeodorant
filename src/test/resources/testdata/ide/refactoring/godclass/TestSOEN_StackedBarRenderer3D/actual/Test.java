@@ -4,14 +4,15 @@ import org.jfree.chart.HashUtilities;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.event.RendererChangeEvent;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer3D;
 import org.jfree.chart.renderer.category.CategoryItemRendererState;
+import org.jfree.data.DataUtilities;
 import org.jfree.data.Range;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.general.DatasetUtilities;
 import org.jfree.util.BooleanUtilities;
 import org.jfree.util.PublicCloneable;
 
@@ -31,7 +32,7 @@ public class Test extends BarRenderer3D
     private static final long serialVersionUID = -5832945916493247123L;
 
 
-    private boolean renderAsPercentages;
+    private boolean ignoreZeroValues;
 
 
     public Test() {
@@ -46,47 +47,41 @@ public class Test extends BarRenderer3D
 
     public Test(boolean renderAsPercentages) {
         super();
-        this.renderAsPercentages = renderAsPercentages;
+        testProduct.setRenderAsPercentages2(renderAsPercentages);
     }
 
 
     public Test(double xOffset, double yOffset,
                 boolean renderAsPercentages) {
         super(xOffset, yOffset);
-        this.renderAsPercentages = renderAsPercentages;
+        testProduct.setRenderAsPercentages2(renderAsPercentages);
     }
 
 
     public boolean getRenderAsPercentages() {
-        return this.renderAsPercentages;
+        return this.testProduct.getRenderAsPercentages();
     }
 
 
     public void setRenderAsPercentages(boolean asPercentages) {
-        this.renderAsPercentages = asPercentages;
-        fireChangeEvent();
+        testProduct.setRenderAsPercentages(asPercentages);
     }
 
 
     public boolean getIgnoreZeroValues() {
-        return this.testProduct.getIgnoreZeroValues();
+        return this.ignoreZeroValues;
     }
 
 
     public void setIgnoreZeroValues(boolean ignore) {
-        testProduct.setIgnoreZeroValues(ignore, this);
+        this.ignoreZeroValues = ignore;
+        //TEST GIVES A WRONG RESULT: should be `test.notifyListeners()`. That's just a result of unresolved reference to the super class, in real project it won't happen.
+        notifyListeners(new RendererChangeEvent(this));
     }
 
 
     public Range findRangeBounds(CategoryDataset dataset) {
-        if (dataset == null) {
-            return null;
-        }
-        if (this.renderAsPercentages) {
-            return new Range(0.0, 1.0);
-        } else {
-            return DatasetUtilities.findStackedRangeBounds(dataset);
-        }
+        return testProduct.findRangeBounds(dataset);
     }
 
 
@@ -128,14 +123,60 @@ public class Test extends BarRenderer3D
 
     protected List createStackedValueList(CategoryDataset dataset,
                                           Comparable category, double base, boolean asPercentages) {
-        return testProduct.createStackedValueList(dataset, category, base, asPercentages);
+        int[] rows = new int[dataset.getRowCount()];
+        for (int i = 0; i < rows.length; i++) {
+            rows[i] = i;
+        }
+        return createStackedValueList(dataset, category, rows, base,
+                asPercentages);
     }
 
 
     protected List createStackedValueList(CategoryDataset dataset,
                                           Comparable category, int[] includedRows, double base,
                                           boolean asPercentages) {
-        return testProduct.createStackedValueList(dataset, category, includedRows, base, asPercentages);
+
+        List result = new ArrayList();
+        double posBase = base;
+        double negBase = base;
+        double total = 0.0;
+        if (asPercentages) {
+            total = DataUtilities.calculateColumnTotal(dataset,
+                    dataset.getColumnIndex(category), includedRows);
+        }
+
+        int baseIndex = -1;
+        int rowCount = includedRows.length;
+        for (int i = 0; i < rowCount; i++) {
+            int r = includedRows[i];
+            Number n = dataset.getValue(dataset.getRowKey(r), category);
+            if (n == null) {
+                continue;
+            }
+            double v = n.doubleValue();
+            if (asPercentages) {
+                v = v / total;
+            }
+            if ((v > 0.0) || (!this.ignoreZeroValues && v >= 0.0)) {
+                if (baseIndex < 0) {
+                    result.add(new Object[]{null, new Double(base)});
+                    baseIndex = 0;
+                }
+                posBase = posBase + v;
+                result.add(new Object[]{new Integer(r), new Double(posBase)});
+            } else if (v < 0.0) {
+                if (baseIndex < 0) {
+                    result.add(new Object[]{null, new Double(base)});
+                    baseIndex = 0;
+                }
+                negBase = negBase + v;
+                result.add(0, new Object[]{new Integer(-r - 1),
+                        new Double(negBase)});
+                baseIndex++;
+            }
+        }
+        return result;
+
     }
 
 
@@ -150,7 +191,9 @@ public class Test extends BarRenderer3D
         }
         Comparable category = dataset.getColumnKey(column);
 
-        List values = testProduct.createStackedValueList(dataset, dataset.getColumnKey(column), state.getVisibleSeriesArray(), getBase(), this.renderAsPercentages);
+        List values = createStackedValueList(dataset,
+                dataset.getColumnKey(column), state.getVisibleSeriesArray(),
+                getBase(), this.testProduct.getRenderAsPercentages());
 
         Rectangle2D adjusted = new Rectangle2D.Double(dataArea.getX(),
                 dataArea.getY() + getYOffset(),
@@ -351,10 +394,10 @@ public class Test extends BarRenderer3D
             return false;
         }
         Test that = (Test) obj;
-        if (this.renderAsPercentages != that.getRenderAsPercentages()) {
+        if (this.testProduct.getRenderAsPercentages() != that.getRenderAsPercentages()) {
             return false;
         }
-        if (this.testProduct.getIgnoreZeroValues() != that.testProduct.getIgnoreZeroValues()) {
+        if (this.ignoreZeroValues != that.ignoreZeroValues) {
             return false;
         }
         return super.equals(obj);
@@ -363,8 +406,8 @@ public class Test extends BarRenderer3D
 
     public int hashCode() {
         int hash = super.hashCode();
-        hash = HashUtilities.hashCode(hash, this.renderAsPercentages);
-        hash = HashUtilities.hashCode(hash, this.testProduct.getIgnoreZeroValues());
+        hash = HashUtilities.hashCode(hash, this.testProduct.getRenderAsPercentages());
+        hash = HashUtilities.hashCode(hash, this.ignoreZeroValues);
         return hash;
     }
 

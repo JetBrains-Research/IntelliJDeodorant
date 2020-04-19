@@ -295,11 +295,11 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean validTargetObject(ClassObject sourceClass, ClassObject targetClass) {
         String targetClassType = targetClass.getPsiType();
-        List<LocalVariableInstructionObject> localVariableInstructions = getLocalVariableInstructions();
-        for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
+        List<PsiVariable> localVariableInstructions = getLocalVariableInstructions();
+        for (PsiVariable localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getName())) {
                 for (PsiVariable variableDeclaration : getLocalVariableDeclarations()) {
-                    if (variableDeclaration.equals(localVariableInstruction.getReference().resolve()))
+                    if (variableDeclaration.equals(localVariableInstruction))
                         return false;
                 }
             }
@@ -316,12 +316,12 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
-        for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
+        for (PsiVariable localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
                 ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
                 while (parameterIterator.hasNext()) {
                     ParameterObject parameter = parameterIterator.next();
-                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimensions()== 0)
+                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimensions() == 0)
                         return true;
                 }
             }
@@ -473,7 +473,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getLocalVariableDeclarations();
     }
 
-    public List<LocalVariableInstructionObject> getLocalVariableInstructions() {
+    public List<PsiVariable> getLocalVariableInstructions() {
         return constructorObject.getLocalVariableInstructions();
     }
 

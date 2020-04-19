@@ -35,7 +35,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
         this.targetMethodInvocationMap = new LinkedHashMap<>();
         SmartList<PsiField> fieldInstructions = new SmartList<>(methodToBeMoved.getFieldInstructions());
-        SmartList<LocalVariableInstructionObject> localVariableInstructions = new SmartList<>(methodToBeMoved.getLocalVariableInstructions());
+        SmartList<PsiVariable> localVariableInstructions = new SmartList<>(methodToBeMoved.getLocalVariableInstructions());
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMap = new LinkedHashMap<>();
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughFields = methodToBeMoved.getNonDistinctInvokedMethodsThroughFields();
         for (AbstractVariable key : copyFromNonDistinctInvokedMethodsThroughFields.keySet()) {
@@ -122,7 +122,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         for (PlainVariable variable : usedFieldsThroughThisReference) {
             PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
             if (fieldInstruction != null && !fieldInstruction.hasModifierProperty(PsiModifier.STATIC)) {
-                if (fieldInstruction.getContainingClass().equals(targetClass.getPsiClass().getQualifiedName())) {
+                if (fieldInstruction.getContainingClass().equals(targetClass.getPsiClass())) {
                     //the used field in inherited from a superclass, which is the target
                     if (targetFieldReadMap.containsKey(fieldInstruction)) {
                         targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
@@ -141,7 +141,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
         for (PlainVariable variable : definedFieldsThroughThisReference) {
             PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction != null && fieldInstruction.getContainingClass().getQualifiedName().equals(targetClass.getName())) {
+            if (fieldInstruction != null && fieldInstruction.getContainingClass().equals(targetClass.getPsiClass())) {
                 //the defined field in inherited from a superclass, which is the target
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
@@ -191,7 +191,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     private void handleDefinedFields(List<AbstractVariable> definedFields, List<PsiField> fieldInstructions,
-                                     List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClass) {
+                                     List<PsiVariable> localVariableInstructions, ClassObject targetClass) {
         for (AbstractVariable abstractVariable : definedFields) {
             CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
             AbstractVariable leftPart = compositeVariable.getLeftPart();
@@ -207,9 +207,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 if (fieldInstruction != null)
                     variableTypeBinding = fieldInstruction;
             } else if (variable.isParameter()) {
-                LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
+                PsiVariable localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
-                    variableTypeBinding = localVariableInstruction.getReference();
+                    variableTypeBinding = localVariableInstruction;
             }
             PsiClass targetClassBinding = (PsiClass) targetClass.getAbstractTypeDeclaration();
             if (variable.getType().equals(targetClass.getName()) ||
@@ -236,10 +236,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         return null;
     }
 
-    private LocalVariableInstructionObject findLocalVariableInstruction(PlainVariable variable, List<LocalVariableInstructionObject> localVariableInstructions) {
-        for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
-            PsiElement resolvedElement = localVariableInstruction.getReference().resolve();
-            if (variable.getOrigin().equals(resolvedElement)) {
+    private PsiVariable findLocalVariableInstruction(PlainVariable variable, List<PsiVariable> localVariableInstructions) {
+        for (PsiVariable localVariableInstruction : localVariableInstructions) {
+            if (variable.getOrigin().equals(localVariableInstruction)) {
                 return localVariableInstruction;
             }
         }
@@ -247,7 +246,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     private void processExternalMethodInvocations(Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationMap,
-                                                  List<PsiField> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClassObject) {
+                                                  List<PsiField> fieldInstructions, List<PsiVariable> localVariableInstructions, ClassObject targetClassObject) {
         for (AbstractVariable abstractVariable : externalMethodInvocationMap.keySet()) {
             PlainVariable variable;
             if (abstractVariable instanceof CompositeVariable) {
@@ -261,9 +260,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
                 if (fieldInstruction != null)
                     variableType = fieldInstruction;
             } else if (variable.isParameter()) {
-                LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
+                PsiVariable localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
-                    variableType = localVariableInstruction.getReference();
+                    variableType = localVariableInstruction;
             }
             PsiElement targetPsiClass = targetClassObject.getAbstractTypeDeclaration();
             if (variable.getType().equals(targetClassObject.getPsiClass().getQualifiedName())) {

@@ -105,7 +105,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new ArrayList<>();
     }
 
-    public List<LocalVariableInstructionObject> getLocalVariableInstructions() {
+    public List<PsiVariable> getLocalVariableInstructions() {
         if (methodBody != null)
             return methodBody.getLocalVariableInstructions();
         else
