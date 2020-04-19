@@ -14,7 +14,6 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class ClassObject extends ClassDeclarationObject {
 
     private final List<ConstructorObject> constructorList;
-    private final List<EnumConstantDeclarationObject> enumConstantDeclarationList;
     private String superclass;
     private final List<String> interfaceList;
     private boolean _abstract;
@@ -32,7 +31,6 @@ public class ClassObject extends ClassDeclarationObject {
         this.name = psiClass.getName();
         this.constructorList = new ArrayList<>();
         this.interfaceList = new ArrayList<>();
-        this.enumConstantDeclarationList = new ArrayList<>();
         this._abstract = psiClass.hasModifierProperty(PsiModifier.ABSTRACT);
         this._interface = psiClass.isInterface();
         this._static = psiClass.hasModifierProperty(PsiModifier.STATIC);

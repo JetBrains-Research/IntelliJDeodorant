@@ -119,7 +119,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new ArrayList<>();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         if (methodBody != null)
             return methodBody.getLiterals();
         else
