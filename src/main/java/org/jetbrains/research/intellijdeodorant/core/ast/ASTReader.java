@@ -95,9 +95,7 @@ public class ASTReader {
 
         PsiParameter[] parameters = methodDeclaration.getParameterList().getParameters();
         for (PsiParameter parameter : parameters) {
-            ParameterObject parameterObject = new ParameterObject(parameter.getType(), parameter.getName(), parameter.isVarArgs());
-            parameterObject.setSingleVariableDeclaration(parameter);
-            constructorObject.addParameter(parameterObject);
+            constructorObject.addParameter(parameter);
         }
 
         PsiCodeBlock methodBody = methodDeclaration.getBody();

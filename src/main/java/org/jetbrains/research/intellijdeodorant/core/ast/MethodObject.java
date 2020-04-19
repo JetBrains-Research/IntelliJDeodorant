@@ -318,10 +318,10 @@ public class MethodObject implements AbstractMethodDeclaration {
 
         for (PsiVariable localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getPsiClass().getName())) {
-                ListIterator<ParameterObject> parameterIterator = getParameterListIterator();
+                ListIterator<PsiParameter> parameterIterator = getParameterListIterator();
                 while (parameterIterator.hasNext()) {
-                    ParameterObject parameter = parameterIterator.next();
-                    if (localVariableInstruction.getName().equals(parameter.getName()) && parameter.getType().getArrayDimensions() == 0)
+                    PsiParameter parameter = parameterIterator.next();
+                    if (localVariableInstruction.equals(parameter) && parameter.getType().getArrayDimensions() == 0)
                         return true;
                 }
             }
@@ -457,7 +457,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getClassName();
     }
 
-    public ListIterator<ParameterObject> getParameterListIterator() {
+    public ListIterator<PsiParameter> getParameterListIterator() {
         return constructorObject.getParameterListIterator();
     }
 

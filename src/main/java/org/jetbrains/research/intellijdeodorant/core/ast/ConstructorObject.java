@@ -18,7 +18,7 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class ConstructorObject implements AbstractMethodDeclaration {
 
     String name;
-    final List<ParameterObject> parameterList;
+    final List<PsiParameter> parameterList;
     Access access;
     String className;
     private MethodBodyObject methodBody;
@@ -76,11 +76,11 @@ public class ConstructorObject implements AbstractMethodDeclaration {
         return this.className;
     }
 
-    public void addParameter(ParameterObject parameter) {
+    public void addParameter(PsiParameter parameter) {
         parameterList.add(parameter);
     }
 
-    public ListIterator<ParameterObject> getParameterListIterator() {
+    public ListIterator<PsiParameter> getParameterListIterator() {
         return parameterList.listIterator();
     }
 
@@ -247,14 +247,14 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public List<PsiType> getParameterTypeList() {
         List<PsiType> list = new ArrayList<>();
-        for (ParameterObject parameterObject : parameterList)
+        for (PsiParameter parameterObject : parameterList)
             list.add(parameterObject.getType());
         return list;
     }
 
     public List<String> getParameterList() {
         List<String> list = new ArrayList<>();
-        for (ParameterObject parameterObject : parameterList)
+        for (PsiParameter parameterObject : parameterList)
             list.add(parameterObject.getType().toString());
         return list;
     }

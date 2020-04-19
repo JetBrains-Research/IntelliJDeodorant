@@ -412,9 +412,7 @@ public abstract class AbstractMethodFragment {
 
                         PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
                         for (PsiParameter parameter : parameters) {
-                            ParameterObject parameterObject = new ParameterObject(parameter.getType(), parameter.getName(), parameter.isVarArgs());
-                            parameterObject.setSingleVariableDeclaration(parameter);
-                            constructorObject.addParameter(parameterObject);
+                            constructorObject.addParameter(parameter);
                         }
 
                         PsiCodeBlock methodBody = psiMethod.getBody();

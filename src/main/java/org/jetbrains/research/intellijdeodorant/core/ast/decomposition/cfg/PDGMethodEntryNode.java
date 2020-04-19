@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
+import com.intellij.psi.PsiParameter;
 import org.jetbrains.research.intellijdeodorant.core.ast.AbstractMethodDeclaration;
-import org.jetbrains.research.intellijdeodorant.core.ast.ParameterObject;
 
 import java.util.ListIterator;
 
@@ -12,11 +12,10 @@ public class PDGMethodEntryNode extends PDGNode {
         super();
         this.method = method;
         this.id = 0;
-        ListIterator<ParameterObject> parameterIterator = method.getParameterListIterator();
+        ListIterator<PsiParameter> parameterIterator = method.getParameterListIterator();
         while (parameterIterator.hasNext()) {
-            ParameterObject parameter = parameterIterator.next();
-
-            PlainVariable parameterVariable = new PlainVariable(parameter.getSingleVariableDeclaration());
+            PsiParameter parameter = parameterIterator.next();
+            PlainVariable parameterVariable = new PlainVariable(parameter);
             declaredVariables.add(parameterVariable);
             definedVariables.add(parameterVariable);
         }

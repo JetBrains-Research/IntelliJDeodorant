@@ -5,6 +5,7 @@ import java.util.ListIterator;
 
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 
@@ -16,7 +17,7 @@ public interface AbstractMethodDeclaration {
 
     MethodBodyObject getMethodBody();
 
-    ListIterator<ParameterObject> getParameterListIterator();
+    ListIterator<PsiParameter> getParameterListIterator();
 
     List<PsiField> getFieldInstructions();
 

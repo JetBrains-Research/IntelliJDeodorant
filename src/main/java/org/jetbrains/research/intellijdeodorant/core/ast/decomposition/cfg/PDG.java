@@ -30,10 +30,10 @@ public class PDG extends Graph {
         this.variableDeclarationsInMethod = new LinkedHashSet<>();
         this.fieldsAccessedInMethod = new LinkedHashSet<>();
         this.fieldsAccessedInMethod.addAll(accessedFields);
-        ListIterator<ParameterObject> parameterIterator = cfg.getMethod().getParameterListIterator();
+        ListIterator<PsiParameter> parameterIterator = cfg.getMethod().getParameterListIterator();
         while (parameterIterator.hasNext()) {
-            ParameterObject parameter = parameterIterator.next();
-            variableDeclarationsInMethod.add(parameter.getVariableDeclaration());
+            PsiParameter parameter = parameterIterator.next();
+            variableDeclarationsInMethod.add(parameter);
         }
         variableDeclarationsInMethod.addAll(cfg.getMethod().getLocalVariableDeclarations());
         createControlDependenciesFromEntryNode();

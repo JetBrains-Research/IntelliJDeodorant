@@ -82,9 +82,9 @@ public class DistanceMatrix {
         for (String targetClass : targetClasses) {
             if (!targetClass.equals(sourceClass)) {
                 ClassObject targetClassObject = system.getClass(targetClass).getClassObject();
-                ListIterator<ParameterObject> parameterIterator = methodObject.getParameterListIterator();
+                ListIterator<PsiParameter> parameterIterator = methodObject.getParameterListIterator();
                 while (parameterIterator.hasNext()) {
-                    ParameterObject parameter = parameterIterator.next();
+                    PsiParameter parameter = parameterIterator.next();
                     Association association = system.containsAssociationWithMultiplicityBetweenClasses(targetClass, parameter.getType().getCanonicalText());
                     if (association != null) {
                         List<MethodInvocationObject> methodInvocations = methodObject.getMethodInvocations();
@@ -96,7 +96,7 @@ public class DistanceMatrix {
                                 for (PsiExpression expression : invocationArguments) {
                                     if (expression instanceof PsiReferenceExpression) {
                                         PsiReferenceExpression argumentName = (PsiReferenceExpression) expression;
-                                        if (parameter.getSingleVariableDeclaration().equals(argumentName.resolve()))
+                                        if (parameter.equals(argumentName.resolve()))
                                             parameterIsPassedAsArgument = true;
                                     }
                                 }
