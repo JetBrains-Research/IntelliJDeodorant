@@ -91,14 +91,14 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new ArrayList<>();
     }
 
-    public List<FieldInstructionObject> getFieldInstructions() {
+    public List<PsiField> getFieldInstructions() {
         if (methodBody != null)
             return methodBody.getFieldInstructions();
         else
             return new ArrayList<>();
     }
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
+    public List<PsiVariable> getLocalVariableDeclarations() {
         if (methodBody != null)
             return methodBody.getLocalVariableDeclarations();
         else
@@ -140,7 +140,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return false;
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction) {
         if (methodBody != null)
             return methodBody.containsFieldInstruction(fieldInstruction);
         else

@@ -1,6 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 
@@ -47,8 +49,8 @@ public class CompositeStatementObject extends AbstractStatement {
         return expressionList;
     }
 
-    public List<FieldInstructionObject> getFieldInstructionsInExpressions() {
-        List<FieldInstructionObject> fieldInstructions = new ArrayList<>();
+    public List<PsiField> getFieldInstructionsInExpressions() {
+        List<PsiField> fieldInstructions = new ArrayList<>();
         for (AbstractExpression expression : expressionList) {
             fieldInstructions.addAll(expression.getFieldInstructions());
         }
@@ -63,8 +65,8 @@ public class CompositeStatementObject extends AbstractStatement {
         return superFieldInstructions;
     }
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarationsInExpressions() {
-        List<LocalVariableDeclarationObject> localVariableDeclarations = new ArrayList<>();
+    public List<PsiVariable> getLocalVariableDeclarationsInExpressions() {
+        List<PsiVariable> localVariableDeclarations = new ArrayList<>();
         for (AbstractExpression expression : expressionList) {
             localVariableDeclarations.addAll(expression.getLocalVariableDeclarations());
         }

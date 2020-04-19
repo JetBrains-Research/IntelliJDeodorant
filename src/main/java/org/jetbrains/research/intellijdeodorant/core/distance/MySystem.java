@@ -1,5 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.AssociationDetection;
@@ -28,17 +30,17 @@ public class MySystem {
         for (ClassObject co : classObjects) {
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);
-                String superclass = co.getSuperclass();
-                if (systemObject.getClassObject(superclass) != null) {
-                    myClass.setSuperclass(superclass);
+            String superclass = co.getSuperclass();
+            if (systemObject.getClassObject(superclass) != null) {
+                myClass.setSuperclass(superclass);
             }
 
-            ListIterator<FieldObject> fieldIt = co.getFieldIterator();
+            ListIterator<PsiField> fieldIt = co.getFieldIterator();
             while (fieldIt.hasNext()) {
-                FieldObject fo = fieldIt.next();
-                if (!fo.isStatic()) {
+                PsiField fo = fieldIt.next();
+                if (!fo.hasModifierProperty(PsiModifier.STATIC)) {
                     MyAttribute myAttribute = new MyAttribute(co.getName(), fo.getType().toString(), fo.getName());
-                    myAttribute.setAccess(fo.getAccess().toString());
+                    myAttribute.setAccess("public");
                     myAttribute.setFieldObject(fo);
                     if (associationDetection.containsFieldObject(fo))
                         myAttribute.setReference(true);
@@ -75,6 +77,7 @@ public class MySystem {
                         while (attributeInstructionIterator.hasNext()) {
                             MyAttributeInstruction myInstruction = attributeInstructionIterator.next();
                             MyClass ownerClass = classMap.get(myInstruction.getClassOrigin());
+                            if (ownerClass == null) return;
                             MyAttribute accessedAttribute = ownerClass.getAttribute(myInstruction);
                             if (accessedAttribute != null) {
                                 if (accessedAttribute.isReference())
@@ -94,16 +97,16 @@ public class MySystem {
             ClassObject co = classIterator1.next();
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);
-                String superclass = co.getSuperclass();
-                if (systemObject.getClassObject(superclass) != null) {
-                    myClass.setSuperclass(superclass);
+            String superclass = co.getSuperclass();
+            if (systemObject.getClassObject(superclass) != null) {
+                myClass.setSuperclass(superclass);
             }
 
-            ListIterator<FieldObject> fieldIt = co.getFieldIterator();
+            ListIterator<PsiField> fieldIt = co.getFieldIterator();
             while (fieldIt.hasNext()) {
-                FieldObject fo = fieldIt.next();
+                PsiField fo = fieldIt.next();
                 MyAttribute myAttribute = new MyAttribute(co.getName(), fo.getType().toString(), fo.getName());
-                myAttribute.setAccess(fo.getAccess().toString());
+                myAttribute.setAccess("public");
                 myAttribute.setFieldObject(fo);
                 if (associationDetection.containsFieldObject(fo))
                     myAttribute.setReference(true);
@@ -140,6 +143,7 @@ public class MySystem {
                         while (attributeInstructionIterator.hasNext()) {
                             MyAttributeInstruction myInstruction = attributeInstructionIterator.next();
                             MyClass ownerClass = classMap.get(myInstruction.getClassOrigin());
+                            if (ownerClass == null) return;
                             MyAttribute accessedAttribute = ownerClass.getAttribute(myInstruction);
                             if (accessedAttribute != null) {
                                 if (accessedAttribute.isReference())

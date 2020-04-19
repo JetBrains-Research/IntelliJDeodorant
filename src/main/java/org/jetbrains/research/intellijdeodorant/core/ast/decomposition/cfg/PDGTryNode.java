@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.VariableDeclarationObject;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.CatchClauseObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TryStatementObject;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 public class PDGTryNode extends PDGBlockNode {
-    PDGTryNode(CFGTryNode cfgTryNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-               Set<FieldObject> fieldsAccessedInMethod) {
+    PDGTryNode(CFGTryNode cfgTryNode, Set<PsiVariable> variableDeclarationsInMethod,
+               Set<PsiField> fieldsAccessedInMethod) {
         super(cfgTryNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
         this.controlParent = cfgTryNode.getControlParent();
         determineDefinedAndUsedVariables();

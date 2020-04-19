@@ -116,7 +116,7 @@ public class MethodObject implements AbstractMethodDeclaration {
                 this.constructorObject.name, this.returnType, this.constructorObject.getParameterTypeList());
     }
 
-    public FieldInstructionObject isGetter() {
+    public PsiField isGetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -138,7 +138,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    public FieldInstructionObject isSetter() {
+    public PsiField isSetter() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -163,7 +163,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return null;
     }
 
-    public FieldInstructionObject isCollectionAdder() {
+    public PsiField isCollectionAdder() {
         if (getMethodBody() != null) {
             List<AbstractStatement> abstractStatements = getMethodBody().getCompositeStatement().getStatements();
             if (abstractStatements.size() == 1 && abstractStatements.get(0) instanceof StatementObject) {
@@ -298,8 +298,8 @@ public class MethodObject implements AbstractMethodDeclaration {
         List<LocalVariableInstructionObject> localVariableInstructions = getLocalVariableInstructions();
         for (LocalVariableInstructionObject localVariableInstruction : localVariableInstructions) {
             if (localVariableInstruction.getType().getCanonicalText().equals(targetClass.getName())) {
-                for (LocalVariableDeclarationObject variableDeclaration : getLocalVariableDeclarations()) {
-                    if (variableDeclaration.getVariableDeclaration().equals(localVariableInstruction.getReference().resolve()))
+                for (PsiVariable variableDeclaration : getLocalVariableDeclarations()) {
+                    if (variableDeclaration.equals(localVariableInstruction.getReference().resolve()))
                         return false;
                 }
             }
@@ -350,15 +350,15 @@ public class MethodObject implements AbstractMethodDeclaration {
             }
         }
 
-        List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
-        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
+        List<PsiField> fieldInstructions = getFieldInstructions();
+        for (PsiField fieldInstruction : fieldInstructions) {
             String fieldTypeBinding = fieldInstruction.getType().getCanonicalText();
             if (fieldTypeBinding != null && fieldInstruction.getType() != null &&
                     fieldInstruction.getType().getCanonicalText() != null && fieldInstruction.getType().getCanonicalText().equals(targetClass.getName())
                     || fieldTypeBinding != null && fieldTypeBinding.equals(targetClassType)) {
-                ListIterator<FieldObject> fieldIterator = sourceClass.getFieldIterator();
+                ListIterator<PsiField> fieldIterator = sourceClass.getFieldIterator();
                 while (fieldIterator.hasNext()) {
-                    FieldObject field = fieldIterator.next();
+                    PsiField field = fieldIterator.next();
                     if (fieldInstruction.getName().equals(field.getName()) && field.getType().getArrayDimensions() == 0)
                         return true;
                 }
@@ -370,7 +370,7 @@ public class MethodObject implements AbstractMethodDeclaration {
             if (methodInvocation.getOriginClassName().equals(sourceClass.getName())) {
                 MethodObject invokedMethod = sourceClass.getMethod(methodInvocation);
                 if (invokedMethod == null) continue;
-                FieldInstructionObject fieldInstruction = invokedMethod.isGetter();
+                PsiField fieldInstruction = invokedMethod.isGetter();
                 if (fieldInstruction != null && fieldInstruction.getType().getCanonicalText().equals(targetClass.getName()))
                     return true;
                 MethodInvocationObject delegation = invokedMethod.isDelegate();
@@ -382,10 +382,10 @@ public class MethodObject implements AbstractMethodDeclaration {
     }
 
     public boolean oneToManyRelationshipWithTargetClass(List<Association> associations, ClassObject targetClass) {
-        List<FieldInstructionObject> fieldInstructions = getFieldInstructions();
+        List<PsiField> fieldInstructions = getFieldInstructions();
         for (Association association : associations) {
-            FieldObject fieldObject = association.getFieldObject();
-            for (FieldInstructionObject fieldInstruction : fieldInstructions) {
+            PsiField fieldObject = association.getFieldObject();
+            for (PsiField fieldInstruction : fieldInstructions) {
                 if (fieldObject.equals(fieldInstruction) && targetClass.getName().equals(association.getTo()) &&
                         association.isContainer())
                     return true;
@@ -465,11 +465,11 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getMethodInvocations();
     }
 
-    public List<FieldInstructionObject> getFieldInstructions() {
+    public List<PsiField> getFieldInstructions() {
         return constructorObject.getFieldInstructions();
     }
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
+    public List<PsiVariable> getLocalVariableDeclarations() {
         return constructorObject.getLocalVariableDeclarations();
     }
 
@@ -489,7 +489,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.containsMethodInvocation(methodInvocation);
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction) {
         return constructorObject.containsFieldInstruction(fieldInstruction);
     }
 

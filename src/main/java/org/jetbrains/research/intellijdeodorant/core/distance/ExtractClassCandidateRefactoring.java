@@ -2,7 +2,6 @@ package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.GodClassVisualizationData;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
@@ -33,7 +32,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
         }
         this.topics = new ArrayList<>();
         Set<MethodObject> extractedMethods = new LinkedHashSet<>();
-        Set<FieldObject> extractedFields = new LinkedHashSet<>();
+        Set<PsiField> extractedFields = new LinkedHashSet<>();
         for (Entity entity : extractedEntities) {
             if (entity instanceof MyMethod) {
                 MyMethod myMethod = (MyMethod) entity;
@@ -81,7 +80,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
             if (entity instanceof MyAttribute) {
                 MyAttribute attribute = (MyAttribute) entity;
                 int index = sourceClass.getAttributeList().indexOf(attribute);
-                extractedFieldFragmentMap.put(index, attribute.getFieldObject().getVariableDeclaration());
+                extractedFieldFragmentMap.put(index, attribute.getFieldObject());
             }
         }
         return new LinkedHashSet<>(extractedFieldFragmentMap.values());
@@ -104,7 +103,7 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
             } else if (entity instanceof MyAttribute) {
                 MyAttribute attribute = (MyAttribute) entity;
                 if (!attribute.getAccess().equals("private")) {
-                    if (system.getSystemObject().containsFieldInstruction(attribute.getFieldObject().generateFieldInstruction(), sourceClass.getClassObject()))
+                    if (system.getSystemObject().containsFieldInstruction(attribute.getFieldObject(), sourceClass.getClassObject()))
                         return false;
                 }
             }
@@ -132,8 +131,8 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
     private boolean validRemainingFieldsInSourceClass() {
         for (MyAttribute sourceAttribute : sourceClass.getAttributeList()) {
             if (!extractedEntities.contains(sourceAttribute)) {
-                FieldObject fieldObject = sourceAttribute.getFieldObject();
-                if (!fieldObject.isStatic()) {
+                PsiField fieldObject = sourceAttribute.getFieldObject();
+                if (!fieldObject.hasModifierProperty(PsiModifier.STATIC)) {
                     return true;
                 }
             }

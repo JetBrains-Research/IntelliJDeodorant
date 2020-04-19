@@ -1,7 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
@@ -21,15 +22,23 @@ public abstract class MyAbstractStatement {
         this.methodInvocationList = new ArrayList<>();
         this.attributeInstructionList = new ArrayList<>();
         SystemObject system = ASTReader.getSystemObject();
-        List<FieldInstructionObject> fieldInstructions = statement.getFieldInstructions();
-        for (FieldInstructionObject fio : fieldInstructions) {
-            if (system.getClassObject(fio.getOwnerClass()) != null && !fio.isStatic()) {
-                MyAttributeInstruction myAttributeInstruction = new MyAttributeInstruction(fio.getOwnerClass(), fio.getType().toString(), fio.getName());
+        List<PsiField> fieldInstructions = statement.getFieldInstructions();
+        for (PsiField fio : fieldInstructions) {
+            if (fio.getContainingClass() != null && !fio.hasModifierProperty(PsiModifier.STATIC)){
+                MyAttributeInstruction myAttributeInstruction = new MyAttributeInstruction(fio.getContainingClass().getQualifiedName(), fio.getType().toString(), fio.getName());
 
                 if (!attributeInstructionList.contains(myAttributeInstruction))
                     attributeInstructionList.add(myAttributeInstruction);
             }
         }
+        /*TODO
+                for (PsiField fio : fieldInstructions) {
+            if (fio.getContainingClass() != null && !fio.hasModifierProperty(PsiModifier.STATIC)) {
+                if (!attributeInstructionList.contains(fio))
+                    attributeInstructionList.add(fio);
+            }
+        }
+         */
 
         List<MethodInvocationObject> methodInvocations = statement.getMethodInvocations();
         for (MethodInvocationObject mio : methodInvocations) {
@@ -50,15 +59,15 @@ public abstract class MyAbstractStatement {
     }
 
     private boolean isAccessor(MethodInvocationObject methodInvocation, SystemObject system) {
-        FieldInstructionObject fieldInstruction;
+        PsiField fieldInstruction;
         if ((fieldInstruction = system.containsGetter(methodInvocation)) != null) {
         } else if ((fieldInstruction = system.containsSetter(methodInvocation)) != null) {
         } else if ((fieldInstruction = system.containsCollectionAdder(methodInvocation)) != null) {
         }
 
-        if (fieldInstruction != null && system.getClassObject(fieldInstruction.getOwnerClass()) != null) {
+        if (fieldInstruction != null && fieldInstruction.getContainingClass() != null) {
             MyAttributeInstruction myAttributeInstruction =
-                    new MyAttributeInstruction(fieldInstruction.getOwnerClass(), fieldInstruction.getType().toString(), fieldInstruction.getName());
+                    new MyAttributeInstruction(fieldInstruction.getContainingClass().getQualifiedName(), fieldInstruction.getType().toString(), fieldInstruction.getName());
 
             if (!attributeInstructionList.contains(myAttributeInstruction))
                 attributeInstructionList.add(myAttributeInstruction);

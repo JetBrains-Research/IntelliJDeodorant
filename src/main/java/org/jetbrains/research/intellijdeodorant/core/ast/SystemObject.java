@@ -25,9 +25,9 @@ public class SystemObject {
     //Map that has as key the classname and as value
     //the position of className in the classNameList
     private final Map<String, Integer> classNameMap;
-    private final Map<MethodInvocationObject, FieldInstructionObject> getterMap;
-    private final Map<MethodInvocationObject, FieldInstructionObject> setterMap;
-    private final Map<MethodInvocationObject, FieldInstructionObject> collectionAdderMap;
+    private final Map<MethodInvocationObject, PsiField> getterMap;
+    private final Map<MethodInvocationObject, PsiField> setterMap;
+    private final Map<MethodInvocationObject, PsiField> collectionAdderMap;
     private final Map<MethodInvocationObject, MethodInvocationObject> delegateMap;
 
     public SystemObject() {
@@ -44,15 +44,15 @@ public class SystemObject {
         classList.add(c);
     }
 
-    public void addGetter(MethodInvocationObject methodInvocation, FieldInstructionObject fieldInstruction) {
+    public void addGetter(MethodInvocationObject methodInvocation, PsiField fieldInstruction) {
         getterMap.put(methodInvocation, fieldInstruction);
     }
 
-    public void addSetter(MethodInvocationObject methodInvocation, FieldInstructionObject fieldInstruction) {
+    public void addSetter(MethodInvocationObject methodInvocation, PsiField fieldInstruction) {
         setterMap.put(methodInvocation, fieldInstruction);
     }
 
-    public void addCollectionAdder(MethodInvocationObject methodInvocation, FieldInstructionObject fieldInstruction) {
+    public void addCollectionAdder(MethodInvocationObject methodInvocation, PsiField fieldInstruction) {
         collectionAdderMap.put(methodInvocation, fieldInstruction);
     }
 
@@ -60,15 +60,15 @@ public class SystemObject {
         delegateMap.put(methodInvocation, delegation);
     }
 
-    public FieldInstructionObject containsGetter(MethodInvocationObject methodInvocation) {
+    public PsiField containsGetter(MethodInvocationObject methodInvocation) {
         return getterMap.get(methodInvocation);
     }
 
-    public FieldInstructionObject containsSetter(MethodInvocationObject methodInvocation) {
+    public PsiField containsSetter(MethodInvocationObject methodInvocation) {
         return setterMap.get(methodInvocation);
     }
 
-    public FieldInstructionObject containsCollectionAdder(MethodInvocationObject methodInvocation) {
+    public PsiField containsCollectionAdder(MethodInvocationObject methodInvocation) {
         return collectionAdderMap.get(methodInvocation);
     }
 
@@ -84,7 +84,7 @@ public class SystemObject {
         return false;
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction, ClassObject excludedClass) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction, ClassObject excludedClass) {
         for (ClassObject classObject : classList) {
             if (!excludedClass.equals(classObject) && classObject.containsFieldInstruction(fieldInstruction))
                 return true;
@@ -172,10 +172,10 @@ public class SystemObject {
                             if (validType(methodReturnType) && declaringClassObject != null) {
                                 PsiExpression fieldInstruction = MethodDeclarationUtility.isGetter(invokedMethod);
                                 if (fieldInstruction != null) {
-                                    ListIterator<FieldObject> fieldIterator = declaringClassObject.getFieldIterator();
+                                    ListIterator<PsiField> fieldIterator = declaringClassObject.getFieldIterator();
                                     while (fieldIterator.hasNext()) {
-                                        FieldObject fieldObject = fieldIterator.next();
-                                        PsiField declaredField = fieldObject.getVariableDeclaration();
+                                        PsiField fieldObject = fieldIterator.next();
+                                        PsiField declaredField = fieldObject;
                                         if (!(fieldInstruction instanceof PsiReferenceExpression)) {
                                             continue;
                                         }
@@ -366,10 +366,10 @@ public class SystemObject {
             if (binding instanceof PsiVariable) {
                 PsiVariable variableBinding = (PsiVariable) binding;
                 if (variableBinding instanceof PsiField) {
-                    ListIterator<FieldObject> fieldIterator = typeCheckClassObject.getFieldIterator();
+                    ListIterator<PsiField> fieldIterator = typeCheckClassObject.getFieldIterator();
                     while (fieldIterator.hasNext()) {
-                        FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclaration();
+                        PsiField fieldObject = fieldIterator.next();
+                        PsiField fragment = fieldObject;
                         if (variableBinding.equals(fragment)) {
                             elimination.setTypeField(fragment);
                             break;
@@ -522,11 +522,11 @@ public class SystemObject {
                 PsiClass declaringClassTypeBinding = superAccessedField.getContainingClass();
                 ClassObject declaringClass = getClassObject(declaringClassTypeBinding.getQualifiedName());
                 if (declaringClass != null) {
-                    ListIterator<FieldObject> fieldIterator = declaringClass.getFieldIterator();
+                    ListIterator<PsiField> fieldIterator = declaringClass.getFieldIterator();
                     PsiField fieldFragment = null;
                     while (fieldIterator.hasNext()) {
-                        FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclaration();
+                        PsiField fieldObject = fieldIterator.next();
+                        PsiField fragment = fieldObject;
                         if (fragment.equals(superAccessedField)) {
                             fieldFragment = fragment;
                             elimination.addSuperAccessedField(fragment, null);
@@ -552,11 +552,11 @@ public class SystemObject {
                 PsiClass declaringClassTypeBinding = superAssignedField.getContainingClass();
                 ClassObject declaringClass = getClassObject(declaringClassTypeBinding.getQualifiedName());
                 if (declaringClass != null) {
-                    ListIterator<FieldObject> fieldIterator = declaringClass.getFieldIterator();
+                    ListIterator<PsiField> fieldIterator = declaringClass.getFieldIterator();
                     PsiField fieldFragment = null;
                     while (fieldIterator.hasNext()) {
-                        FieldObject fieldObject = fieldIterator.next();
-                        PsiField fragment = fieldObject.getVariableDeclaration();
+                        PsiField fieldObject = fieldIterator.next();
+                        PsiField fragment = fieldObject;
                         if (fragment.equals(superAssignedField)) {
                             fieldFragment = fragment;
                             elimination.addSuperAssignedField(fragment, null);

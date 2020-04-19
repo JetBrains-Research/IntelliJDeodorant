@@ -72,22 +72,7 @@ public class ASTReader {
     }
 
     private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        FieldObject fieldObject = new FieldObject(fieldDeclaration.getType(), fieldDeclaration.getName(), fieldDeclaration);
-        fieldObject.setClassName(classObject.getName());
-
-        if (fieldDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
-            fieldObject.setAccess(Access.PUBLIC);
-        else if (fieldDeclaration.hasModifierProperty(PsiModifier.PROTECTED))
-            fieldObject.setAccess(Access.PROTECTED);
-        else if (fieldDeclaration.hasModifierProperty(PsiModifier.PRIVATE))
-            fieldObject.setAccess(Access.PRIVATE);
-        else
-            fieldObject.setAccess(Access.NONE);
-        if (fieldDeclaration.hasModifierProperty(PsiModifier.STATIC))
-            fieldObject.setStatic(true);
-
-        classObject.addField(fieldObject);
-
+        classObject.addField(fieldDeclaration);
     }
 
     private void processMethodDeclaration(final ClassObject classObject, PsiMethod methodDeclaration) {
@@ -151,7 +136,7 @@ public class ASTReader {
                 methodObject.setNative(true);
 
             classObject.addMethod(methodObject);
-            FieldInstructionObject fieldInstruction = methodObject.isGetter();
+            PsiField fieldInstruction = methodObject.isGetter();
             if (fieldInstruction != null)
                 systemObject.addGetter(methodObject.generateMethodInvocation(), fieldInstruction);
             fieldInstruction = methodObject.isSetter();

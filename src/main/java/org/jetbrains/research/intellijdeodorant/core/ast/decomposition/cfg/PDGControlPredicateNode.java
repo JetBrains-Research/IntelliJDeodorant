@@ -1,5 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiVariable;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractExpression;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.CompositeStatementObject;
@@ -11,8 +13,8 @@ import java.util.Set;
 
 class PDGControlPredicateNode extends PDGNode {
 
-    PDGControlPredicateNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-                            Set<FieldObject> fieldsAccessedInMethod) {
+    PDGControlPredicateNode(CFGNode cfgNode, Set<PsiVariable> variableDeclarationsInMethod,
+                            Set<PsiField> fieldsAccessedInMethod) {
         super(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
         determineDefinedAndUsedVariables();
     }

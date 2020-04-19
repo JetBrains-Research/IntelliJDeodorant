@@ -10,12 +10,12 @@ public class PDG extends Graph {
     private final CFG cfg;
     private final PDGMethodEntryNode entryNode;
     private final Map<CFGBranchNode, Set<CFGNode>> nestingMap;
-    private final Set<VariableDeclarationObject> variableDeclarationsInMethod;
-    private final Set<FieldObject> fieldsAccessedInMethod;
+    private final Set<PsiVariable> variableDeclarationsInMethod;
+    private final Set<PsiField> fieldsAccessedInMethod;
     private final Map<PDGNode, Set<BasicBlock>> dominatedBlockMap;
     private final PsiFile psiFile;
 
-    public PDG(CFG cfg, PsiFile psiFile, Set<FieldObject> accessedFields) {
+    public PDG(CFG cfg, PsiFile psiFile, Set<PsiField> accessedFields) {
         this.cfg = cfg;
         this.psiFile = psiFile;
         this.entryNode = new PDGMethodEntryNode(cfg.getMethod());
@@ -33,7 +33,7 @@ public class PDG extends Graph {
         ListIterator<ParameterObject> parameterIterator = cfg.getMethod().getParameterListIterator();
         while (parameterIterator.hasNext()) {
             ParameterObject parameter = parameterIterator.next();
-            variableDeclarationsInMethod.add(parameter);
+            variableDeclarationsInMethod.add(parameter.getVariableDeclaration());
         }
         variableDeclarationsInMethod.addAll(cfg.getMethod().getLocalVariableDeclarations());
         createControlDependenciesFromEntryNode();
@@ -60,24 +60,16 @@ public class PDG extends Graph {
         return psiFile;
     }
 
-    public Set<VariableDeclarationObject> getVariableDeclarationObjectsInMethod() {
+    public Set<PsiVariable> getVariableDeclarationObjectsInMethod() {
         return variableDeclarationsInMethod;
     }
 
     public Set<PsiVariable> getVariableDeclarationsInMethod() {
-        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
-        for (VariableDeclarationObject variableDeclaration : variableDeclarationsInMethod) {
-            variableDeclarations.add(variableDeclaration.getVariableDeclaration());
-        }
-        return variableDeclarations;
+        return new LinkedHashSet<>(variableDeclarationsInMethod);
     }
 
     private Set<PsiVariable> getFieldsAccessedInMethod() {
-        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
-        for (FieldObject field : fieldsAccessedInMethod) {
-            variableDeclarations.add(field.getVariableDeclaration());
-        }
-        return variableDeclarations;
+        return new LinkedHashSet<>(fieldsAccessedInMethod);
     }
 
     private PDGBlockNode isDirectlyNestedWithinBlockNode(PDGNode node) {

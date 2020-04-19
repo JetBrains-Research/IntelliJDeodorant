@@ -1,10 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.*;
 import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
@@ -106,9 +103,9 @@ public class DistanceMatrix {
                                 if (parameterIsPassedAsArgument) {
                                     MethodObject invokedMethod = targetClassObject.getMethod(methodInvocation);
                                     if (invokedMethod != null) {
-                                        List<FieldInstructionObject> fieldInstructions = invokedMethod.getFieldInstructions();
+                                        List<PsiField> fieldInstructions = invokedMethod.getFieldInstructions();
                                         boolean containerFieldIsAccessed = false;
-                                        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
+                                        for (PsiField fieldInstruction : fieldInstructions) {
                                             if (association.getFieldObject().equals(fieldInstruction)) {
                                                 containerFieldIsAccessed = true;
                                                 break;

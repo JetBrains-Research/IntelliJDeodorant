@@ -18,10 +18,10 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
 
     private final Map<MethodInvocationObject, Integer> sourceMethodInvocationMap;
     private final Map<MethodInvocationObject, Integer> targetMethodInvocationMap;
-    private final Map<FieldInstructionObject, Integer> sourceFieldReadMap;
-    private final Map<FieldInstructionObject, Integer> sourceFieldWriteMap;
-    private final Map<FieldInstructionObject, Integer> targetFieldReadMap;
-    private final Map<FieldInstructionObject, Integer> targetFieldWriteMap;
+    private final Map<PsiField, Integer> sourceFieldReadMap;
+    private final Map<PsiField, Integer> sourceFieldWriteMap;
+    private final Map<PsiField, Integer> targetFieldReadMap;
+    private final Map<PsiField, Integer> targetFieldWriteMap;
     private final ClassObject sourceClass;
     private final MethodObject methodToBeMoved;
     private final ClassObject targetClass;
@@ -34,7 +34,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         SmartList<MethodInvocationObject> sourceMethodInvocations = new SmartList<>(methodToBeMoved.getNonDistinctInvokedMethodsThroughThisReference());
 
         this.targetMethodInvocationMap = new LinkedHashMap<>();
-        SmartList<FieldInstructionObject> fieldInstructions = new SmartList<>(methodToBeMoved.getFieldInstructions());
+        SmartList<PsiField> fieldInstructions = new SmartList<>(methodToBeMoved.getFieldInstructions());
         SmartList<LocalVariableInstructionObject> localVariableInstructions = new SmartList<>(methodToBeMoved.getLocalVariableInstructions());
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationsThroughFieldsMap = new LinkedHashMap<>();
         Map<AbstractVariable, ArrayList<MethodInvocationObject>> copyFromNonDistinctInvokedMethodsThroughFields = methodToBeMoved.getNonDistinctInvokedMethodsThroughFields();
@@ -120,9 +120,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         processExternalMethodInvocations(externalMethodInvocationsThroughParametersMap, fieldInstructions, localVariableInstructions, targetClass);
 
         for (PlainVariable variable : usedFieldsThroughThisReference) {
-            FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction != null && !fieldInstruction.isStatic()) {
-                if (fieldInstruction.getOwnerClass().equals(targetClass.getPsiClass().getQualifiedName())) {
+            PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
+            if (fieldInstruction != null && !fieldInstruction.hasModifierProperty(PsiModifier.STATIC)) {
+                if (fieldInstruction.getContainingClass().equals(targetClass.getPsiClass().getQualifiedName())) {
                     //the used field in inherited from a superclass, which is the target
                     if (targetFieldReadMap.containsKey(fieldInstruction)) {
                         targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
@@ -140,8 +140,8 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         }
 
         for (PlainVariable variable : definedFieldsThroughThisReference) {
-            FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
-            if (fieldInstruction != null && fieldInstruction.getOwnerClass().equals(targetClass.getName())) {
+            PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
+            if (fieldInstruction != null && fieldInstruction.getContainingClass().getQualifiedName().equals(targetClass.getName())) {
                 //the defined field in inherited from a superclass, which is the target
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
@@ -164,7 +164,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         handleDefinedFields(definedFieldsThroughParameters, fieldInstructions, localVariableInstructions, targetClass);
     }
 
-    private void handleUsedFields(List<AbstractVariable> usedFields, List<FieldInstructionObject> fieldInstructions, ClassObject targetClass) {
+    private void handleUsedFields(List<AbstractVariable> usedFields, List<PsiField> fieldInstructions, ClassObject targetClass) {
         for (AbstractVariable abstractVariable : usedFields) {
             CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
             AbstractVariable leftPart = compositeVariable.getLeftPart();
@@ -178,8 +178,8 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             PsiClass superClassTarget = targetClass.getPsiClass().getSuperClass();
             if (variable.getType().equals(targetClass.getName()) ||
                     superClassTarget != null && variable.getType().equals(superClassTarget.getQualifiedName())) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
-                if (fieldInstruction != null && !fieldInstruction.isStatic()) {
+                PsiField fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
+                if (fieldInstruction != null && !fieldInstruction.hasModifierProperty(PsiModifier.STATIC)) {
                     if (targetFieldReadMap.containsKey(fieldInstruction)) {
                         targetFieldReadMap.put(fieldInstruction, targetFieldReadMap.get(fieldInstruction) + 1);
                     } else {
@@ -190,7 +190,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         }
     }
 
-    private void handleDefinedFields(List<AbstractVariable> definedFields, List<FieldInstructionObject> fieldInstructions,
+    private void handleDefinedFields(List<AbstractVariable> definedFields, List<PsiField> fieldInstructions,
                                      List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClass) {
         for (AbstractVariable abstractVariable : definedFields) {
             CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
@@ -203,9 +203,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             }
             PsiElement variableTypeBinding = null;
             if (variable.isField()) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
+                PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableTypeBinding = fieldInstruction.getElement();
+                    variableTypeBinding = fieldInstruction;
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
@@ -214,7 +214,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             PsiClass targetClassBinding = (PsiClass) targetClass.getAbstractTypeDeclaration();
             if (variable.getType().equals(targetClass.getName()) ||
                     (variableTypeBinding != null && targetClassBinding.equals(variableTypeBinding.getOriginalElement()))) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
+                PsiField fieldInstruction = findFieldInstruction(compositeVariable.getFinalVariable(), fieldInstructions);
                 if (targetFieldWriteMap.containsKey(fieldInstruction)) {
                     targetFieldWriteMap.put(fieldInstruction, targetFieldWriteMap.get(fieldInstruction) + 1);
                 } else {
@@ -224,10 +224,10 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         }
     }
 
-    private FieldInstructionObject findFieldInstruction(PlainVariable variable, List<FieldInstructionObject> fieldInstructions) {
-        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            PsiElement psiElement = fieldInstruction.getElement();
-            if (psiElement instanceof PsiField) {
+    private PsiField findFieldInstruction(PlainVariable variable, List<PsiField> fieldInstructions) {
+        for (PsiField fieldInstruction : fieldInstructions) {
+            PsiElement psiElement = fieldInstruction;
+            if (psiElement != null) {
                 PsiField psiField = (PsiField) psiElement;
                 if (psiField.getName().equals(variable.getName()))
                     return fieldInstruction;
@@ -247,7 +247,7 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     private void processExternalMethodInvocations(Map<AbstractVariable, ArrayList<MethodInvocationObject>> externalMethodInvocationMap,
-                                                  List<FieldInstructionObject> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClassObject) {
+                                                  List<PsiField> fieldInstructions, List<LocalVariableInstructionObject> localVariableInstructions, ClassObject targetClassObject) {
         for (AbstractVariable abstractVariable : externalMethodInvocationMap.keySet()) {
             PlainVariable variable;
             if (abstractVariable instanceof CompositeVariable) {
@@ -257,9 +257,9 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
             }
             PsiElement variableType = null;
             if (variable.isField()) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(variable, fieldInstructions);
+                PsiField fieldInstruction = findFieldInstruction(variable, fieldInstructions);
                 if (fieldInstruction != null)
-                    variableType = fieldInstruction.getElement();
+                    variableType = fieldInstruction;
             } else if (variable.isParameter()) {
                 LocalVariableInstructionObject localVariableInstruction = findLocalVariableInstruction(variable, localVariableInstructions);
                 if (localVariableInstruction != null)
@@ -299,19 +299,19 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         return targetMethodInvocationMap;
     }
 
-    private Map<FieldInstructionObject, Integer> getSourceFieldReadMap() {
+    private Map<PsiField, Integer> getSourceFieldReadMap() {
         return sourceFieldReadMap;
     }
 
-    private Map<FieldInstructionObject, Integer> getSourceFieldWriteMap() {
+    private Map<PsiField, Integer> getSourceFieldWriteMap() {
         return sourceFieldWriteMap;
     }
 
-    private Map<FieldInstructionObject, Integer> getTargetFieldReadMap() {
+    private Map<PsiField, Integer> getTargetFieldReadMap() {
         return targetFieldReadMap;
     }
 
-    private Map<FieldInstructionObject, Integer> getTargetFieldWriteMap() {
+    private Map<PsiField, Integer> getTargetFieldWriteMap() {
         return targetFieldWriteMap;
     }
 
@@ -330,13 +330,13 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("--SOURCE FIELD READS--").append("\n");
-        Map<FieldInstructionObject, Integer> sourceFieldReadMap = getSourceFieldReadMap();
-        for (FieldInstructionObject fieldInstruction : sourceFieldReadMap.keySet()) {
+        Map<PsiField, Integer> sourceFieldReadMap = getSourceFieldReadMap();
+        for (PsiField fieldInstruction : sourceFieldReadMap.keySet()) {
             sb.append(fieldInstruction).append("\t").append(sourceFieldReadMap.get(fieldInstruction)).append("\n");
         }
         sb.append("--SOURCE FIELD WRITES--").append("\n");
-        Map<FieldInstructionObject, Integer> sourceFieldWriteMap = getSourceFieldWriteMap();
-        for (FieldInstructionObject fieldInstruction : sourceFieldWriteMap.keySet()) {
+        Map<PsiField, Integer> sourceFieldWriteMap = getSourceFieldWriteMap();
+        for (PsiField fieldInstruction : sourceFieldWriteMap.keySet()) {
             sb.append(fieldInstruction).append("\t").append(sourceFieldWriteMap.get(fieldInstruction)).append("\n");
         }
         sb.append("--SOURCE METHOD CALLS--").append("\n");
@@ -346,13 +346,13 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
         }
         sb.append("\n");
         sb.append("--TARGET FIELD READS--").append("\n");
-        Map<FieldInstructionObject, Integer> targetFieldReadMap = getTargetFieldReadMap();
-        for (FieldInstructionObject fieldInstruction : targetFieldReadMap.keySet()) {
+        Map<PsiField, Integer> targetFieldReadMap = getTargetFieldReadMap();
+        for (PsiField fieldInstruction : targetFieldReadMap.keySet()) {
             sb.append(fieldInstruction).append("\t").append(targetFieldReadMap.get(fieldInstruction)).append("\n");
         }
         sb.append("--TARGET FIELD WRITES--").append("\n");
-        Map<FieldInstructionObject, Integer> targetFieldWriteMap = getTargetFieldWriteMap();
-        for (FieldInstructionObject fieldInstruction : targetFieldWriteMap.keySet()) {
+        Map<PsiField, Integer> targetFieldWriteMap = getTargetFieldWriteMap();
+        for (PsiField fieldInstruction : targetFieldWriteMap.keySet()) {
             sb.append(fieldInstruction).append("\t").append(targetFieldWriteMap.get(fieldInstruction)).append("\n");
         }
         sb.append("--TARGET METHOD CALLS--").append("\n");
@@ -364,14 +364,14 @@ public class FeatureEnvyVisualizationData implements VisualizationData {
     }
 
     public int getDistinctSourceDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
+        Set<PsiField> fields = new LinkedHashSet<>();
         fields.addAll(sourceFieldReadMap.keySet());
         fields.addAll(sourceFieldWriteMap.keySet());
         return fields.size() + sourceMethodInvocationMap.size();
     }
 
     public int getDistinctTargetDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
+        Set<PsiField> fields = new LinkedHashSet<>();
         fields.addAll(targetFieldReadMap.keySet());
         fields.addAll(targetFieldWriteMap.keySet());
         return fields.size() + targetMethodInvocationMap.size();

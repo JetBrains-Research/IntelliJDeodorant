@@ -2,6 +2,7 @@ package org.jetbrains.research.intellijdeodorant.core;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
 
@@ -11,15 +12,15 @@ public class GodClassVisualizationData implements VisualizationData {
     //the MethodObject keys correspond to the methods suggested to be extracted in a new class
     private final Map<MethodObject, Map<MethodInvocationObject, Integer>> internalMethodInvocationMap;
     private final Map<MethodObject, Map<MethodInvocationObject, Integer>> externalMethodInvocationMap;
-    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldReadMap;
-    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> internalFieldWriteMap;
-    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldReadMap;
-    private final Map<MethodObject, Map<FieldInstructionObject, Integer>> externalFieldWriteMap;
+    private final Map<MethodObject, Map<PsiField, Integer>> internalFieldReadMap;
+    private final Map<MethodObject, Map<PsiField, Integer>> internalFieldWriteMap;
+    private final Map<MethodObject, Map<PsiField, Integer>> externalFieldReadMap;
+    private final Map<MethodObject, Map<PsiField, Integer>> externalFieldWriteMap;
     private final Set<MethodObject> extractedMethods;
-    private final Set<FieldObject> extractedFields;
+    private final Set<PsiField> extractedFields;
     private final ClassObject sourceClass;
 
-    public GodClassVisualizationData(ClassObject sourceClass, Set<MethodObject> extractedMethods, Set<FieldObject> extractedFields) {
+    public GodClassVisualizationData(ClassObject sourceClass, Set<MethodObject> extractedMethods, Set<PsiField> extractedFields) {
         this.sourceClass = sourceClass;
         this.extractedMethods = extractedMethods;
         this.extractedFields = extractedFields;
@@ -39,12 +40,12 @@ public class GodClassVisualizationData implements VisualizationData {
                     insertToMap(method, invocation, externalMethodInvocationMap);
                 }
             }
-            List<FieldInstructionObject> fieldInstructions = method.getFieldInstructions();
+            List<PsiField> fieldInstructions = method.getFieldInstructions();
             List<PlainVariable> fieldAccesses = method.getNonDistinctUsedFieldsThroughThisReference();
             for (PlainVariable fieldAccess : fieldAccesses) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(fieldAccess, fieldInstructions);
+                PsiField fieldInstruction = findFieldInstruction(fieldAccess, fieldInstructions);
                 //exclude accesses to static fields
-                if (!fieldInstruction.isStatic()) {
+                if (!fieldInstruction.hasModifierProperty(PsiModifier.STATIC)) {
                     if (isAccessToExtractedField(fieldInstruction, extractedFields)) {
                         insertToMap(method, fieldInstruction, internalFieldReadMap, 1);
                     } else {
@@ -54,9 +55,9 @@ public class GodClassVisualizationData implements VisualizationData {
             }
             List<PlainVariable> fieldWrites = method.getNonDistinctDefinedFieldsThroughThisReference();
             for (PlainVariable fieldWrite : fieldWrites) {
-                FieldInstructionObject fieldInstruction = findFieldInstruction(fieldWrite, fieldInstructions);
+                PsiField fieldInstruction = findFieldInstruction(fieldWrite, fieldInstructions);
                 //exclude accesses to static fields
-                if (!fieldInstruction.isStatic()) {
+                if (!fieldInstruction.hasModifierProperty(PsiModifier.STATIC)) {
                     if (isAccessToExtractedField(fieldInstruction, extractedFields)) {
                         insertToMap(method, fieldInstruction, internalFieldWriteMap, 1);
                     } else {
@@ -74,7 +75,7 @@ public class GodClassVisualizationData implements VisualizationData {
                     int count = methodInvocationMap.get(invocation);
                     MethodObject methodDeclaration = sourceClass.getMethod(invocation);
                     if (methodDeclaration != null) {
-                        FieldInstructionObject getterFieldInstruction = methodDeclaration.isGetter();
+                        PsiField getterFieldInstruction = methodDeclaration.isGetter();
                         if (getterFieldInstruction != null) {
                             if (isAccessToExtractedField(getterFieldInstruction, extractedFields)) {
                                 //remove getter method calls in source class
@@ -83,7 +84,7 @@ public class GodClassVisualizationData implements VisualizationData {
                                 insertToMap(method, getterFieldInstruction, internalFieldReadMap, count);
                             }
                         }
-                        FieldInstructionObject setterFieldInstruction = methodDeclaration.isSetter();
+                        PsiField setterFieldInstruction = methodDeclaration.isSetter();
                         if (setterFieldInstruction != null) {
                             if (isAccessToExtractedField(setterFieldInstruction, extractedFields)) {
                                 //remove setter method calls in source class
@@ -120,17 +121,17 @@ public class GodClassVisualizationData implements VisualizationData {
         }
     }
 
-    private void insertToMap(MethodObject method, FieldInstructionObject fieldInstruction,
-                             Map<MethodObject, Map<FieldInstructionObject, Integer>> map, int count) {
+    private void insertToMap(MethodObject method, PsiField fieldInstruction,
+                             Map<MethodObject, Map<PsiField, Integer>> map, int count) {
         if (map.containsKey(method)) {
-            Map<FieldInstructionObject, Integer> fieldAccessMap = map.get(method);
+            Map<PsiField, Integer> fieldAccessMap = map.get(method);
             if (fieldAccessMap.containsKey(fieldInstruction)) {
                 fieldAccessMap.put(fieldInstruction, fieldAccessMap.get(fieldInstruction) + count);
             } else {
                 fieldAccessMap.put(fieldInstruction, count);
             }
         } else {
-            Map<FieldInstructionObject, Integer> fieldAccessMap = new LinkedHashMap<>();
+            Map<PsiField, Integer> fieldAccessMap = new LinkedHashMap<>();
             fieldAccessMap.put(fieldInstruction, count);
             map.put(method, fieldAccessMap);
         }
@@ -144,17 +145,17 @@ public class GodClassVisualizationData implements VisualizationData {
         return false;
     }
 
-    private boolean isAccessToExtractedField(FieldInstructionObject instruction, Set<FieldObject> extractedFields) {
-        for (FieldObject field : extractedFields) {
+    private boolean isAccessToExtractedField(PsiField instruction, Set<PsiField> extractedFields) {
+        for (PsiField field : extractedFields) {
             if (field.equals(instruction))
                 return true;
         }
         return false;
     }
 
-    private FieldInstructionObject findFieldInstruction(PlainVariable variable, List<FieldInstructionObject> fieldInstructions) {
-        for (FieldInstructionObject fieldInstruction : fieldInstructions) {
-            PsiElement psiElement = fieldInstruction.getElement();
+    private PsiField findFieldInstruction(PlainVariable variable, List<PsiField> fieldInstructions) {
+        for (PsiField fieldInstruction : fieldInstructions) {
+            PsiElement psiElement = fieldInstruction;
             if (psiElement instanceof PsiField) {
                 PsiField psiField = (PsiField) psiElement;
                 if (psiField.getName().equals(variable.getName()))
@@ -172,32 +173,20 @@ public class GodClassVisualizationData implements VisualizationData {
         return externalMethodInvocationMap;
     }
 
-    public Map<MethodObject, Map<FieldInstructionObject, Integer>> getInternalFieldReadMap() {
+    public Map<MethodObject, Map<PsiField, Integer>> getInternalFieldReadMap() {
         return internalFieldReadMap;
     }
 
-    public Map<MethodObject, Map<FieldInstructionObject, Integer>> getInternalFieldWriteMap() {
+    public Map<MethodObject, Map<PsiField, Integer>> getInternalFieldWriteMap() {
         return internalFieldWriteMap;
     }
 
-    public Map<MethodObject, Map<FieldInstructionObject, Integer>> getExternalFieldReadMap() {
+    public Map<MethodObject, Map<PsiField, Integer>> getExternalFieldReadMap() {
         return externalFieldReadMap;
     }
 
-    public Map<MethodObject, Map<FieldInstructionObject, Integer>> getExternalFieldWriteMap() {
+    public Map<MethodObject, Map<PsiField, Integer>> getExternalFieldWriteMap() {
         return externalFieldWriteMap;
-    }
-
-    public Set<MethodObject> getExtractedMethods() {
-        return extractedMethods;
-    }
-
-    public Set<FieldObject> getExtractedFields() {
-        return extractedFields;
-    }
-
-    public ClassObject getSourceClass() {
-        return sourceClass;
     }
 
     public String toString() {
@@ -229,12 +218,12 @@ public class GodClassVisualizationData implements VisualizationData {
         return sb.toString();
     }
 
-    private String fieldAccessMapToString(Map<MethodObject, Map<FieldInstructionObject, Integer>> map) {
+    private String fieldAccessMapToString(Map<MethodObject, Map<PsiField, Integer>> map) {
         StringBuilder sb = new StringBuilder();
         for (MethodObject method : map.keySet()) {
             sb.append(method).append("\n");
-            Map<FieldInstructionObject, Integer> fieldAccessMap = map.get(method);
-            for (FieldInstructionObject instruction : fieldAccessMap.keySet()) {
+            Map<PsiField, Integer> fieldAccessMap = map.get(method);
+            for (PsiField instruction : fieldAccessMap.keySet()) {
                 sb.append("\t").append(instruction).append(" : ").append(fieldAccessMap.get(instruction)).append("\n");
             }
         }
@@ -242,13 +231,13 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public int getDistinctTargetDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
+        Set<PsiField> fields = new LinkedHashSet<>();
         for (MethodObject key : internalFieldReadMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = internalFieldReadMap.get(key);
+            Map<PsiField, Integer> value = internalFieldReadMap.get(key);
             fields.addAll(value.keySet());
         }
         for (MethodObject key : internalFieldWriteMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = internalFieldWriteMap.get(key);
+            Map<PsiField, Integer> value = internalFieldWriteMap.get(key);
             fields.addAll(value.keySet());
         }
         Set<MethodInvocationObject> methods = new LinkedHashSet<>();
@@ -260,13 +249,13 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public int getDistinctSourceDependencies() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
+        Set<PsiField> fields = new LinkedHashSet<>();
         for (MethodObject key : externalFieldReadMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = externalFieldReadMap.get(key);
+            Map<PsiField, Integer> value = externalFieldReadMap.get(key);
             fields.addAll(value.keySet());
         }
         for (MethodObject key : externalFieldWriteMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = externalFieldWriteMap.get(key);
+            Map<PsiField, Integer> value = externalFieldWriteMap.get(key);
             fields.addAll(value.keySet());
         }
         Set<MethodInvocationObject> methods = new LinkedHashSet<>();
@@ -278,17 +267,17 @@ public class GodClassVisualizationData implements VisualizationData {
     }
 
     public boolean containsNonAccessedFieldInExtractedClass() {
-        Set<FieldInstructionObject> fields = new LinkedHashSet<>();
+        Set<PsiField> fields = new LinkedHashSet<>();
         for (MethodObject key : internalFieldReadMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = internalFieldReadMap.get(key);
+            Map<PsiField, Integer> value = internalFieldReadMap.get(key);
             fields.addAll(value.keySet());
         }
         for (MethodObject key : internalFieldWriteMap.keySet()) {
-            Map<FieldInstructionObject, Integer> value = internalFieldWriteMap.get(key);
+            Map<PsiField, Integer> value = internalFieldWriteMap.get(key);
             fields.addAll(value.keySet());
         }
-        for (FieldObject field : extractedFields) {
-            if (!fields.contains(field.generateFieldInstruction())) {
+        for (PsiField field : extractedFields) {
+            if (!fields.contains(field)) {
                 return true;
             }
         }

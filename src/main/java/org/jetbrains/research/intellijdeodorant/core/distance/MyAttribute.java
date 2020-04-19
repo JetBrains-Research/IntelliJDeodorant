@@ -1,8 +1,12 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.SmartPsiElementPointer;
 
 import java.util.*;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class MyAttribute extends Entity {
 
@@ -12,7 +16,7 @@ public class MyAttribute extends Entity {
     private final List<MyMethod> methodList;
     private boolean reference;
     private String access;
-    private FieldObject fieldObject;
+    private SmartPsiElementPointer<PsiElement> fieldObject;
     private volatile int hashCode = 0;
 
     public MyAttribute(String classOrigin, String classType, String name) {
@@ -23,12 +27,12 @@ public class MyAttribute extends Entity {
         this.reference = false;
     }
 
-    public FieldObject getFieldObject() {
-        return fieldObject;
+    public PsiField getFieldObject() {
+        return (PsiField) fieldObject.getElement();
     }
 
-    public void setFieldObject(FieldObject fieldObject) {
-        this.fieldObject = fieldObject;
+    public void setFieldObject(PsiField fieldObject) {
+        this.fieldObject = toPointer(fieldObject);
     }
 
     public String getAccess() {

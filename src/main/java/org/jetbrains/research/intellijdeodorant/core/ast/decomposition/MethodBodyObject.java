@@ -155,11 +155,11 @@ public class MethodBodyObject {
         return typeCheckEliminations;
     }
 
-    public List<FieldInstructionObject> getFieldInstructions() {
+    public List<PsiField> getFieldInstructions() {
         return compositeStatement.getFieldInstructions();
     }
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
+    public List<PsiVariable> getLocalVariableDeclarations() {
         return compositeStatement.getLocalVariableDeclarations();
     }
 
@@ -187,7 +187,7 @@ public class MethodBodyObject {
         return compositeStatement.containsMethodInvocation(methodInvocation);
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction) {
         return compositeStatement.containsFieldInstruction(fieldInstruction);
     }
 

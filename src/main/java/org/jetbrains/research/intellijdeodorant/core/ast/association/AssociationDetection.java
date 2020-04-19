@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.association;
 
+import com.intellij.psi.PsiField;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class AssociationDetection {
         generateAssociations(system);
     }
 
-    public boolean containsFieldObject(FieldObject field) {
+    public boolean containsFieldObject(PsiField field) {
         for (Association association : associationList)
             if (association.getFieldObject().equals(field))
                 return true;
@@ -53,26 +54,20 @@ public class AssociationDetection {
         while (classIt.hasNext()) {
             ClassObject classObject = classIt.next();
 
-            ListIterator<FieldObject> fieldIt = classObject.getFieldIterator();
+            ListIterator<PsiField> fieldIt = classObject.getFieldIterator();
             while (fieldIt.hasNext()) {
-                FieldObject fieldObject = fieldIt.next();
+                PsiField fieldObject = fieldIt.next();
                 String type = fieldObject.getType().getCanonicalText();
                 //cover also other collections in the future
                 if (acceptableOriginClassNames.contains(type)) {
                     String genericType = fieldObject.getType().getCanonicalText();
-                    if (genericType != null) {
-                        for (String className : systemObject.getClassNames()) {
-                            if (genericType.contains(className)) {
-                                Association association = new Association(fieldObject, classObject.getName(), className);
-                                association.setContainer(true);
-                                if (!associationList.contains(association))
-                                    associationList.add(association);
-                            }
+                    for (String className : systemObject.getClassNames()) {
+                        if (genericType.contains(className)) {
+                            Association association = new Association(fieldObject, classObject.getName(), className);
+                            association.setContainer(true);
+                            if (!associationList.contains(association))
+                                associationList.add(association);
                         }
-                    } else {
-                        Association association = checkCollectionAttribute(systemObject, classObject, fieldObject);
-                        if (association != null && !associationList.contains(association))
-                            associationList.add(association);
                     }
                 } else if (systemObject.getClassObject(type) != null) {
                     Association association = new Association(fieldObject, classObject.getName(), type);
@@ -85,12 +80,12 @@ public class AssociationDetection {
         }
     }
 
-    private Association checkCollectionAttribute(SystemObject systemObject, ClassObject classObject, FieldObject field) {
+    private Association checkCollectionAttribute(SystemObject systemObject, ClassObject classObject, PsiField field) {
         ListIterator<MethodObject> methodIt = classObject.getMethodIterator();
         while (methodIt.hasNext()) {
             MethodObject method = methodIt.next();
-            FieldInstructionObject fieldInstruction = method.isCollectionAdder();
-            if (fieldInstruction != null && field.equals(fieldInstruction)) {
+            PsiField fieldInstruction = method.isCollectionAdder();
+            if (field.equals(fieldInstruction)) {
                 List<String> parameterList = method.getParameterList();
                 if (parameterList.size() == 1 && systemObject.getClassObject(parameterList.get(0)) != null) {
                     Association association = new Association(field, classObject.getName(), parameterList.get(0));

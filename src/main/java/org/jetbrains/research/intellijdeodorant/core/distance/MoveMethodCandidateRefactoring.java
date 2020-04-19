@@ -1,11 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import org.jetbrains.research.intellijdeodorant.core.FeatureEnvyVisualizationData;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.PlainVariable;
@@ -47,8 +43,8 @@ public class MoveMethodCandidateRefactoring extends CandidateRefactoring impleme
                     }
                 }
                 if (!systemMemberAccessed && invokedMethod != null) {
-                    for (FieldInstructionObject fieldInstructionObject : invokedMethod.getFieldInstructions()) {
-                        if (system.getSystemObject().getClassObject(fieldInstructionObject.getOwnerClass()) != null) {
+                    for (PsiField fieldInstructionObject : invokedMethod.getFieldInstructions()) {
+                        if (fieldInstructionObject.getContainingClass() != null) {
                             systemMemberAccessed = true;
                             break;
                         }

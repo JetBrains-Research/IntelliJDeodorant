@@ -2,6 +2,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiAnonymousClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.SmartPsiElementPointer;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
@@ -34,7 +35,7 @@ public class AnonymousClassDeclarationObject extends ClassDeclarationObject {
         StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append("\n\n").append("Fields:");
-        for (FieldObject field : fieldList)
+        for (PsiField field : fieldList)
             sb.append("\n").append(field.toString());
 
         sb.append("\n\n").append("Methods:");

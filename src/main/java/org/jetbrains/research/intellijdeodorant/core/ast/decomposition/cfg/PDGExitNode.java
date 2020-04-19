@@ -1,15 +1,15 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.VariableDeclarationObject;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiVariable;
 
 import java.util.Set;
 
 class PDGExitNode extends PDGStatementNode {
     private AbstractVariable returnedVariable;
 
-    PDGExitNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-                Set<FieldObject> fieldsAccessedInMethod) {
+    PDGExitNode(CFGNode cfgNode, Set<PsiVariable> variableDeclarationsInMethod,
+                Set<PsiField> fieldsAccessedInMethod) {
         super(cfgNode, variableDeclarationsInMethod, fieldsAccessedInMethod);
         if (cfgNode instanceof CFGExitNode) {
             CFGExitNode exitNode = (CFGExitNode) cfgNode;

@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
+import com.intellij.psi.PsiField;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.CatchClauseObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.TryStatementObject;
 
@@ -12,7 +13,7 @@ import java.util.Set;
 public abstract class ClassDeclarationObject {
     String name;
     final List<MethodObject> methodList;
-    final List<FieldObject> fieldList;
+    final List<PsiField> fieldList;
 
     ClassDeclarationObject() {
         this.methodList = new ArrayList<>();
@@ -27,7 +28,7 @@ public abstract class ClassDeclarationObject {
         methodList.add(method);
     }
 
-    public void addField(FieldObject f) {
+    public void addField(PsiField f) {
         fieldList.add(f);
     }
 
@@ -39,7 +40,7 @@ public abstract class ClassDeclarationObject {
         return methodList.listIterator();
     }
 
-    public ListIterator<FieldObject> getFieldIterator() {
+    public ListIterator<PsiField> getFieldIterator() {
         return fieldList.listIterator();
     }
 
@@ -91,7 +92,7 @@ public abstract class ClassDeclarationObject {
         return false;
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction) {
         for (MethodObject method : methodList) {
             if (method.containsFieldInstruction(fieldInstruction))
                 return true;
@@ -115,20 +116,10 @@ public abstract class ClassDeclarationObject {
         return false;
     }
 
-    public boolean hasFieldType(String className) {
-        ListIterator<FieldObject> fi = getFieldIterator();
-        while (fi.hasNext()) {
-            FieldObject fo = fi.next();
-            if (fo.getType().getCanonicalText().equals(className))
-                return true;
-        }
-        return false;
-    }
-
-    public Set<FieldObject> getFieldsAccessedInsideMethod(AbstractMethodDeclaration method) {
-        Set<FieldObject> fields = new LinkedHashSet<>();
-        for (FieldInstructionObject fieldInstruction : method.getFieldInstructions()) {
-            FieldObject accessedFieldFromThisClass = findField(fieldInstruction);
+    public Set<PsiField> getFieldsAccessedInsideMethod(AbstractMethodDeclaration method) {
+        Set<PsiField> fields = new LinkedHashSet<>();
+        for (PsiField fieldInstruction : method.getFieldInstructions()) {
+            PsiField accessedFieldFromThisClass = findField(fieldInstruction);
             if (accessedFieldFromThisClass != null) {
                 fields.add(accessedFieldFromThisClass);
             }
@@ -137,16 +128,16 @@ public abstract class ClassDeclarationObject {
             List<TryStatementObject> tryStatements = method.getMethodBody().getTryStatements();
             for (TryStatementObject tryStatement : tryStatements) {
                 for (CatchClauseObject catchClause : tryStatement.getCatchClauses()) {
-                    for (FieldInstructionObject fieldInstruction : catchClause.getBody().getFieldInstructions()) {
-                        FieldObject accessedFieldFromThisClass = findField(fieldInstruction);
+                    for (PsiField fieldInstruction : catchClause.getBody().getFieldInstructions()) {
+                        PsiField accessedFieldFromThisClass = findField(fieldInstruction);
                         if (accessedFieldFromThisClass != null) {
                             fields.add(accessedFieldFromThisClass);
                         }
                     }
                 }
                 if (tryStatement.getFinallyClause() != null) {
-                    for (FieldInstructionObject fieldInstruction : tryStatement.getFinallyClause().getFieldInstructions()) {
-                        FieldObject accessedFieldFromThisClass = findField(fieldInstruction);
+                    for (PsiField fieldInstruction : tryStatement.getFinallyClause().getFieldInstructions()) {
+                        PsiField accessedFieldFromThisClass = findField(fieldInstruction);
                         if (accessedFieldFromThisClass != null) {
                             fields.add(accessedFieldFromThisClass);
                         }
@@ -157,8 +148,8 @@ public abstract class ClassDeclarationObject {
         return fields;
     }
 
-    private FieldObject getField(FieldInstructionObject fieldInstruction) {
-        for (FieldObject field : fieldList) {
+    private PsiField getField(PsiField fieldInstruction) {
+        for (PsiField field : fieldList) {
             if (field.equals(fieldInstruction)) {
                 return field;
             }
@@ -166,8 +157,8 @@ public abstract class ClassDeclarationObject {
         return null;
     }
 
-    FieldObject findField(FieldInstructionObject fieldInstruction) {
-        FieldObject field = getField(fieldInstruction);
+    PsiField findField(PsiField fieldInstruction) {
+        PsiField field = getField(fieldInstruction);
         if (field != null) {
             return field;
         } else {

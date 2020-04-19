@@ -59,11 +59,6 @@ class EnumConstantDeclarationObject {
         return this.enumName;
     }
 
-    public boolean equals(FieldInstructionObject fio) {
-        return this.enumName.equals(fio.getOwnerClass()) &&
-                this.name.equals(fio.getName());
-    }
-
     public int hashCode() {
         if (hashCode == 0) {
             int result = 17;

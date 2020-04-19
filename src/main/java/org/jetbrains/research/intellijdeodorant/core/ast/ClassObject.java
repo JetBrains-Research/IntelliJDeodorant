@@ -175,7 +175,7 @@ public class ClassObject extends ClassDeclarationObject {
             sb.append(interfaceList.get(interfaceList.size() - 1));
         }
         sb.append("\n\n").append("Fields:");
-        for (FieldObject field : fieldList)
+        for (PsiField field : fieldList)
             sb.append("\n").append(field.toString());
 
         sb.append("\n\n").append("Constructors:");

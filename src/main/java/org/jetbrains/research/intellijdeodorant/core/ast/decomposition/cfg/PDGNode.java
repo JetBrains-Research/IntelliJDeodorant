@@ -17,8 +17,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     protected final Set<AbstractVariable> usedVariables;
     final Set<CreationObject> createdTypes;
     final Set<String> thrownExceptionTypes;
-    private Set<VariableDeclarationObject> variableDeclarationsInMethod;
-    private Set<FieldObject> fieldsAccessedInMethod;
+    private Set<PsiVariable> variableDeclarationsInMethod;
+    private Set<PsiField> fieldsAccessedInMethod;
     private Set<AbstractVariable> originalDefinedVariables;
     private Set<AbstractVariable> originalUsedVariables;
 
@@ -31,8 +31,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         this.thrownExceptionTypes = new LinkedHashSet<>();
     }
 
-    PDGNode(CFGNode cfgNode, Set<VariableDeclarationObject> variableDeclarationsInMethod,
-            Set<FieldObject> fieldsAccessedInMethod) {
+    PDGNode(CFGNode cfgNode, Set<PsiVariable> variableDeclarationsInMethod,
+            Set<PsiField> fieldsAccessedInMethod) {
         super();
         this.cfgNode = cfgNode;
         this.variableDeclarationsInMethod = variableDeclarationsInMethod;
@@ -271,7 +271,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     void updateReachingAliasSet(ReachingAliasSet reachingAliasSet) {
-        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
+        Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiElement statement = getASTStatement();
@@ -289,8 +289,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                         }
                         if (initializerSimpleName != null) {
                             PsiVariable initializerVariableDeclaration = null;
-                            for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                                PsiVariable declaration = declarationObject.getVariableDeclaration();
+                            for (PsiElement declarationObject : variableDeclarations) {
+                                PsiVariable declaration = (PsiVariable) declarationObject;
                                 if (declaration.equals((initializerSimpleName))) {
                                     initializerVariableDeclaration = declaration;
                                     break;
@@ -314,7 +314,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     }
 
     private void processAssignment(ReachingAliasSet reachingAliasSet,
-                                   Set<VariableDeclarationObject> variableDeclarations, PsiAssignmentExpression assignment) {
+                                   Set<PsiVariable> variableDeclarations, PsiAssignmentExpression assignment) {
         PsiExpression leftHandSideExpression = assignment.getLExpression();
         PsiExpression rightHandSideExpression = assignment.getRExpression();
         PsiElement leftHandSideElement = null;
@@ -327,8 +327,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         }
         if (leftHandSideSimpleName != null && !isPrimitive(leftHandSideSimpleName.getType())) {
             PsiVariable leftHandSideVariableDeclaration = null;
-            for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                PsiVariable declaration = declarationObject.getVariableDeclaration();
+            for (PsiElement declarationObject : variableDeclarations) {
+                PsiVariable declaration = (PsiVariable) declarationObject;
                 if (declaration.equals(leftHandSideSimpleName)) {
                     leftHandSideVariableDeclaration = declaration;
                     break;
@@ -353,8 +353,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             }
             if (rightHandSideSimpleName != null) {
                 PsiVariable rightHandSideVariableDeclaration = null;
-                for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                    PsiVariable declaration = declarationObject.getVariableDeclaration();
+                for (PsiVariable declarationObject : variableDeclarations) {
+                    PsiVariable declaration = declarationObject;
                     if (declaration.equals(rightHandSideSimpleName)) {
                         rightHandSideVariableDeclaration = declaration;
                         break;
@@ -409,7 +409,7 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
 
     Map<PsiVariable, PsiNewExpression> getClassInstantiations() {
         Map<PsiVariable, PsiNewExpression> classInstantiationMap = new LinkedHashMap<>();
-        Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
+        Set<PsiElement> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiElement statement = getASTStatement();
@@ -443,8 +443,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
                     }
                     if (leftHandSideSimpleName != null) {
                         PsiVariable leftHandSideVariableDeclaration = null;
-                        for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                            PsiVariable declaration = declarationObject.getVariableDeclaration();
+                        for (PsiElement declarationObject : variableDeclarations) {
+                            PsiVariable declaration = (PsiVariable) declarationObject;
                             if (declaration.equals(leftHandSideSimpleName)) {
                                 leftHandSideVariableDeclaration = declaration;
                                 break;

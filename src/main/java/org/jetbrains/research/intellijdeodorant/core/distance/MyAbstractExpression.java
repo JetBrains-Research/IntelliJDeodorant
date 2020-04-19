@@ -1,7 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiModifier;
 import org.jetbrains.research.intellijdeodorant.core.ast.ASTReader;
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldInstructionObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.SystemObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractExpression;
@@ -22,10 +23,10 @@ class MyAbstractExpression {
         this.attributeInstructionList = new ArrayList<>();
         SystemObject system = ASTReader.getSystemObject();
 
-        List<FieldInstructionObject> fieldInstructions = expression.getFieldInstructions();
-        for (FieldInstructionObject fio : fieldInstructions) {
-            if (system.getClassObject(fio.getOwnerClass()) != null && !fio.isStatic()) {
-                MyAttributeInstruction myAttributeInstruction = new MyAttributeInstruction(fio.getOwnerClass(), fio.getType().toString(), fio.getName());
+        List<PsiField> fieldInstructions = expression.getFieldInstructions();
+        for (PsiField fio : fieldInstructions) {
+            if (fio.getContainingClass() != null && !fio.hasModifierProperty(PsiModifier.STATIC)) {
+                MyAttributeInstruction myAttributeInstruction = new MyAttributeInstruction(fio.getContainingClass().getQualifiedName(), fio.getType().toString(), fio.getName());
 
                 if (!attributeInstructionList.contains(myAttributeInstruction))
                     attributeInstructionList.add(myAttributeInstruction);
@@ -49,7 +50,7 @@ class MyAbstractExpression {
     }
 
     private boolean isAccessor(MethodInvocationObject methodInvocation, SystemObject system) {
-        FieldInstructionObject fieldInstruction = null;
+        PsiField fieldInstruction = null;
         if ((system.containsGetter(methodInvocation)) != null) {
             fieldInstruction = system.containsGetter(methodInvocation);
         } else if ((system.containsSetter(methodInvocation)) != null) {
@@ -60,7 +61,7 @@ class MyAbstractExpression {
 
         if (fieldInstruction != null) {
             MyAttributeInstruction myAttributeInstruction =
-                    new MyAttributeInstruction(fieldInstruction.getOwnerClass(), fieldInstruction.getType().toString(), fieldInstruction.getName());
+                    new MyAttributeInstruction(fieldInstruction.getContainingClass().getQualifiedName(), fieldInstruction.getType().toString(), fieldInstruction.getName());
 
             if (!attributeInstructionList.contains(myAttributeInstruction))
                 attributeInstructionList.add(myAttributeInstruction);

@@ -1,23 +1,27 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.association;
 
-import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class Association {
 
     private final String from;
     private final String to;
     private boolean container;
-    private final FieldObject fieldObject;
+    private final SmartPsiElementPointer<PsiElement> fieldObject;
 
-    public Association(FieldObject fieldObject, String from, String to) {
-        this.fieldObject = fieldObject;
+    public Association(PsiField fieldObject, String from, String to) {
+        this.fieldObject = toPointer(fieldObject);
         this.from = from;
         this.to = to;
         this.container = false;
     }
 
-    public FieldObject getFieldObject() {
-        return fieldObject;
+    public PsiField getFieldObject() {
+        return (PsiField) fieldObject.getElement();
     }
 
     public String getTo() {

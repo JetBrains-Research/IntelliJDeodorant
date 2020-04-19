@@ -18,9 +18,9 @@ public abstract class AbstractMethodFragment {
     private final List<MethodInvocationObject> methodInvocationList;
     private final List<SuperMethodInvocationObject> superMethodInvocationList;
     private final List<ConstructorInvocationObject> constructorInvocationList;
-    private final List<FieldInstructionObject> fieldInstructionList;
+    private final List<PsiField> fieldInstructionList;
     private final List<SuperFieldInstructionObject> superFieldInstructionList;
-    private final List<LocalVariableDeclarationObject> localVariableDeclarationList;
+    private final List<PsiVariable> localVariableDeclarationList;
     private final List<LocalVariableInstructionObject> localVariableInstructionList;
     private final List<CreationObject> creationList;
     private final List<LiteralObject> literalList;
@@ -115,10 +115,7 @@ public abstract class AbstractMethodFragment {
                                     superFieldInstruction.setStatic(true);
                                 addSuperFieldInstruction(superFieldInstruction);
                             } else {
-                                FieldInstructionObject fieldInstruction = new FieldInstructionObject(originClassName, fieldType, fieldName, psiField);
-                                if (psiField.hasModifierProperty(PsiModifier.STATIC))
-                                    fieldInstruction.setStatic(true);
-                                addFieldInstruction(fieldInstruction);
+                                addFieldInstruction(psiField);
                                 Set<PsiAssignmentExpression> fieldAssignments = getMatchingAssignments(psiField, assignments);
                                 Set<PsiPostfixExpression> fieldPostfixAssignments = getMatchingPostfixAssignments(psiField, postfixExpressions);
                                 Set<PsiPrefixExpression> fieldPrefixAssignments = getMatchingPrefixAssignments(psiField, prefixExpressions);
@@ -197,18 +194,14 @@ public abstract class AbstractMethodFragment {
             for (PsiElement element : declaredElements) {
                 if (element instanceof PsiLocalVariable) {
                     PsiLocalVariable declaredVariable = (PsiLocalVariable) element;
-                    PsiType variableType = declaredVariable.getType();
-                    LocalVariableDeclarationObject localVariable =
-                            new LocalVariableDeclarationObject(variableType, declaredVariable.getName());
-                    localVariable.setVariableDeclaration(declaredVariable);
-                    addLocalVariableDeclaration(localVariable);
+                    addLocalVariableDeclaration(declaredVariable);
                     addDeclaredLocalVariable(new PlainVariable(declaredVariable));
                 }
             }
         }
     }
 
-    private void addFieldInstruction(FieldInstructionObject fieldInstruction) {
+    private void addFieldInstruction(PsiField fieldInstruction) {
         fieldInstructionList.add(fieldInstruction);
         if (parent != null) {
             parent.addFieldInstruction(fieldInstruction);
@@ -222,7 +215,7 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    private void addLocalVariableDeclaration(LocalVariableDeclarationObject localVariable) {
+    private void addLocalVariableDeclaration(PsiVariable localVariable) {
         localVariableDeclarationList.add(localVariable);
         if (parent != null) {
             parent.addLocalVariableDeclaration(localVariable);
@@ -336,10 +329,8 @@ public abstract class AbstractMethodFragment {
         PsiMethod resolvedMethod = methodInvocation.resolveMethod();
         if (resolvedMethod == null) return;
         ArrayList<PsiType> typeObjects = new ArrayList<>();
-        if (resolvedMethod != null) {
-            for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
-                typeObjects.add(parameter.getType());
-            }
+        for (PsiParameter parameter : resolvedMethod.getParameterList().getParameters()) {
+            typeObjects.add(parameter.getType());
         }
 
         MethodInvocationObject methodInvocationObject = new MethodInvocationObject(originClassName, methodInvocationName, resolvedMethod.getReturnType(), typeObjects);
@@ -405,21 +396,7 @@ public abstract class AbstractMethodFragment {
                     PsiMethod[] methods = anonymous.getMethods();
 
                     for (PsiField psiField : fields) {
-                        FieldObject fieldObject = new FieldObject(psiField.getType(), psiField.getName(), psiField);
-                        fieldObject.setClassName(anonymousClassObject.getName());
-                        if (psiField.hasModifierProperty(PsiModifier.PUBLIC))
-                            fieldObject.setAccess(Access.PUBLIC);
-                        else if (psiField.hasModifierProperty(PsiModifier.PROTECTED))
-                            fieldObject.setAccess(Access.PROTECTED);
-                        else if (psiField.hasModifierProperty(PsiModifier.PRIVATE))
-                            fieldObject.setAccess(Access.PRIVATE);
-                        else
-                            fieldObject.setAccess(Access.NONE);
-
-                        if (psiField.hasModifierProperty(PsiModifier.STATIC))
-                            fieldObject.setStatic(true);
-
-                        anonymousClassObject.addField(fieldObject);
+                        anonymousClassObject.addField(psiField);
                     }
 
                     for (PsiMethod psiMethod : methods) {
@@ -728,7 +705,7 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    public List<FieldInstructionObject> getFieldInstructions() {
+    public List<PsiField> getFieldInstructions() {
         return fieldInstructionList;
     }
 
@@ -736,7 +713,7 @@ public abstract class AbstractMethodFragment {
         return superFieldInstructionList;
     }
 
-    public List<LocalVariableDeclarationObject> getLocalVariableDeclarations() {
+    public List<PsiVariable> getLocalVariableDeclarations() {
         return localVariableDeclarationList;
     }
 
@@ -792,7 +769,7 @@ public abstract class AbstractMethodFragment {
         return methodInvocationList.contains(methodInvocation);
     }
 
-    public boolean containsFieldInstruction(FieldInstructionObject fieldInstruction) {
+    public boolean containsFieldInstruction(PsiField fieldInstruction) {
         return fieldInstructionList.contains(fieldInstruction);
     }
 
