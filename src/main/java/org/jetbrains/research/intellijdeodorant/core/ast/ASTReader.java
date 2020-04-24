@@ -11,15 +11,12 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import java.util.*;
 
 public class ASTReader {
-
     private static SystemObject systemObject;
-    private static ProjectInfo examinedProject;
 
     public ASTReader(ProjectInfo project, ProgressIndicator indicator) {
         indicator.setText(IntelliJDeodorantBundle.message("feature.envy.parsing.indicator"));
         indicator.setFraction(0.0);
         systemObject = new SystemObject();
-        examinedProject = project;
         List<PsiClass> classes = project.getClasses();
         int processedClasses = 0;
         int classesCount = classes.size();
@@ -207,10 +204,6 @@ public class ASTReader {
 
     public static SystemObject getSystemObject() {
         return systemObject;
-    }
-
-    public static ProjectInfo getExaminedProject() {
-        return examinedProject;
     }
 
 }

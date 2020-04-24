@@ -7,7 +7,6 @@ import java.util.ListIterator;
 import java.util.Set;
 
 class MyMethodBody {
-
     private final MyCompositeStatement compositeStatement;
     private final MethodBodyObject methodBodyObject;
 
@@ -42,24 +41,8 @@ class MyMethodBody {
         }
     }
 
-    public MethodBodyObject getMethodBodyObject() {
-        return this.methodBodyObject;
-    }
-
-    public boolean containsAttributeInstruction(MyAttributeInstruction instruction) {
-        return this.compositeStatement.containsAttributeInstruction(instruction);
-    }
-
     public boolean containsMethodInvocation(MyMethodInvocation invocation) {
         return this.compositeStatement.containsMethodInvocation(invocation);
-    }
-
-    public int getNumberOfAttributeInstructions() {
-        return this.compositeStatement.getNumberOfAttributeInstructions();
-    }
-
-    public int getNumberOfMethodInvocations() {
-        return this.compositeStatement.getNumberOfMethodInvocations();
     }
 
     public ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
@@ -72,26 +55,6 @@ class MyMethodBody {
 
     public void setAttributeInstructionReference(MyAttributeInstruction myAttributeInstruction, boolean reference) {
         this.compositeStatement.setAttributeInstructionReference(myAttributeInstruction, reference);
-    }
-
-    public MyAbstractStatement getAbstractStatement(AbstractStatement statement) {
-        return this.compositeStatement.getAbstractStatement(statement);
-    }
-
-    public void addAttributeInstructionInStatementsOrExpressionsContainingMethodInvocation(MyAttributeInstruction attributeInstruction, MyMethodInvocation methodInvocation) {
-        this.compositeStatement.addAttributeInstructionInStatementsOrExpressionsContainingMethodInvocation(attributeInstruction, methodInvocation);
-    }
-
-    public void insertMethodInvocationBeforeStatement(MyAbstractStatement parentStatement, MyStatement methodInvocation) {
-        this.compositeStatement.insertMethodInvocationBeforeStatement(parentStatement, methodInvocation);
-    }
-
-    public void removeStatement(MyAbstractStatement statementToRemove) {
-        this.compositeStatement.removeStatement(statementToRemove);
-    }
-
-    public void replaceSiblingStatementsWithMethodInvocation(List<MyAbstractStatement> statementsToRemove, MyStatement methodInvocation) {
-        this.compositeStatement.replaceSiblingStatementsWithMethodInvocation(statementsToRemove, methodInvocation);
     }
 
     public Set<String> getEntitySet() {

@@ -14,11 +14,6 @@ public class StatementExtractor {
 
     private StatementInstanceChecker instanceChecker;
 
-    public List<PsiStatement> getConstructorInvocations(PsiStatement statement) {
-        instanceChecker = new InstanceOfConstructorInvocation();
-        return getStatements(statement);
-    }
-
     public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) {
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
@@ -86,11 +81,6 @@ public class StatementExtractor {
 
     public List<PsiStatement> getDoStatements(PsiStatement statement) {
         instanceChecker = new InstanceOfDoStatement();
-        return getStatements(statement);
-    }
-
-    public List<PsiStatement> getTypeDeclarationStatements(PsiStatement statement) {
-        instanceChecker = new InstanceOfTypeDeclarationStatement();
         return getStatements(statement);
     }
 

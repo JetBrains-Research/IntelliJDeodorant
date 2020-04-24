@@ -115,22 +115,6 @@ public class Stemmer {
         return new String(b, 0, i_end);
     }
 
-    /**
-     * Returns the length of the word resulting from the stemming process.
-     */
-    public int getResultLength() {
-        return i_end;
-    }
-
-    /**
-     * Returns a reference to a character buffer containing the results of
-     * the stemming process.  You also need to consult getResultLength()
-     * to determine the length of the result.
-     */
-    public char[] getResultBuffer() {
-        return b;
-    }
-
     /* cons(i) is true <=> b[i] is a consonant. */
 
     private boolean cons(int i) {

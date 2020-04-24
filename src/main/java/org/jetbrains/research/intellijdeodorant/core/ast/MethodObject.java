@@ -18,7 +18,6 @@ import java.util.*;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class MethodObject implements AbstractMethodDeclaration {
-
     private TypeObject returnType;
     private boolean _abstract;
     private boolean _static;
@@ -482,10 +481,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getSuperMethodInvocations();
     }
 
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return constructorObject.getConstructorInvocations();
-    }
-
     public List<FieldInstructionObject> getFieldInstructions() {
         return constructorObject.getFieldInstructions();
     }
@@ -636,10 +631,6 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations() {
         return constructorObject.getParametersPassedAsArgumentsInSuperMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return constructorObject.getParametersPassedAsArgumentsInConstructorInvocations();
     }
 
     public boolean containsSuperMethodInvocation() {

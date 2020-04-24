@@ -5,25 +5,14 @@ import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 import java.util.*;
 
 public class ExtractedConcept implements Comparable<ExtractedConcept> {
-
     private final Set<ExtractClassCandidateRefactoring> conceptClusters;
     private final Set<Entity> conceptEntities;
-    private final String sourceClass;
     private List<String> topics;
 
-    public ExtractedConcept(Set<Entity> conceptEntities, String sourceClass) {
+    public ExtractedConcept(Set<Entity> conceptEntities) {
         this.conceptEntities = conceptEntities;
         this.conceptClusters = new HashSet<>();
-        this.sourceClass = sourceClass;
         this.topics = new ArrayList<>();
-    }
-
-    public List<String> getTopics() {
-        return topics;
-    }
-
-    public String getSourceClass() {
-        return sourceClass;
     }
 
     public Set<Entity> getConceptEntities() {

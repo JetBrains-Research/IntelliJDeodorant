@@ -443,7 +443,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                         null
                 );
                 String staticFieldNameDeclaringClass = null;
-                boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
                 if (!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
                     staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
                 }
@@ -1612,21 +1611,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return contextMethods;
     }
 
-    private Set<PsiMethod> getMethodDeclarationsWithinAnonymousClassDeclarations(PsiMethod methodDeclaration) {
-        Set<PsiMethod> methods = new LinkedHashSet<>();
-        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-        List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(methodDeclaration.getBody());
-        for (PsiExpression expression : classInstanceCreations) {
-            PsiNewExpression classInstanceCreation = (PsiNewExpression) expression;
-            PsiAnonymousClass anonymousClassDeclaration = classInstanceCreation.getAnonymousClass();
-            if (anonymousClassDeclaration != null) {
-                PsiMethod[] declarationMethods = anonymousClassDeclaration.getMethods();
-                methods.addAll(Arrays.asList(declarationMethods));
-            }
-        }
-        return methods;
-    }
-
     private Set<PsiMethod> getMethodDeclarationsWithinAnonymousClassDeclarations(PsiField fieldDeclaration) {
         Set<PsiMethod> methods = new LinkedHashSet<>();
         PsiExpression expression = fieldDeclaration.getInitializer();
@@ -1682,10 +1666,8 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     PsiAssignmentExpression assignment = (PsiAssignmentExpression) expression;
                     PsiExpression leftHandSide = assignment.getLExpression();
                     PsiReferenceExpression assignedVariable = null;
-                    PsiExpression invoker = null;
                     if (leftHandSide instanceof PsiReferenceExpression) {
                         assignedVariable = (PsiReferenceExpression) leftHandSide;
-                        invoker = assignedVariable.getQualifierExpression();
                     }
                     PsiExpression rightHandSide = assignment.getRExpression();
                     List<PsiExpression> accessedVariables = expressionExtractor.getVariableInstructions(rightHandSide);

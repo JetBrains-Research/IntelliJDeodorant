@@ -16,15 +16,4 @@ public class Graph {
         return nodes;
     }
 
-    public Set<GraphEdge> getEdges() {
-        return edges;
-    }
-
-    public void addNode(GraphNode node) {
-        nodes.add(node);
-    }
-
-    public void addEdge(GraphEdge edge) {
-        edges.add(edge);
-    }
 }

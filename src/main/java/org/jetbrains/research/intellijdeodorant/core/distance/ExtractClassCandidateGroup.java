@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.core.distance;
 import java.util.*;
 
 public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandidateGroup> {
-
     private final String source;
     private final ArrayList<ExtractClassCandidateRefactoring> candidates;
     private final ArrayList<ExtractedConcept> extractedConcepts;
@@ -51,7 +50,7 @@ public class ExtractClassCandidateGroup implements Comparable<ExtractClassCandid
                 }
             } while (previousSize < conceptEntities.size());
             Set<ExtractClassCandidateRefactoring> candidatesToBeRemoved = new HashSet<>();
-            ExtractedConcept newConcept = new ExtractedConcept(conceptEntities, source);
+            ExtractedConcept newConcept = new ExtractedConcept(conceptEntities);
             for (Integer j : indexSet) {
                 newConcept.addConceptCluster(tempCandidates.get(j));
                 candidatesToBeRemoved.add(tempCandidates.get(j));

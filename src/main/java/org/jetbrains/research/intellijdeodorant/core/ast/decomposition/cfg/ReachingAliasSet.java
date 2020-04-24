@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 class ReachingAliasSet {
-
     private final List<LinkedHashSet<PsiVariable>> aliasSets;
 
     ReachingAliasSet() {
@@ -61,14 +60,6 @@ class ReachingAliasSet {
         }
     }
 
-    public boolean containsAlias(PsiVariable variableDeclaration) {
-        for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
-            if (aliasSet.contains(variableDeclaration))
-                return true;
-        }
-        return false;
-    }
-
     boolean containsAlias(AbstractVariable variable) {
         for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
             for (PsiVariable alias : aliasSet) {
@@ -77,20 +68,6 @@ class ReachingAliasSet {
             }
         }
         return false;
-    }
-
-    public Set<PsiVariable> getAliases(PsiVariable variable) {
-        for (LinkedHashSet<PsiVariable> aliasSet : aliasSets) {
-            if (aliasSet.contains(variable)) {
-                Set<PsiVariable> aliases = new LinkedHashSet<>();
-                for (PsiVariable alias : aliasSet) {
-                    if (!alias.equals(variable))
-                        aliases.add(alias);
-                }
-                return aliases;
-            }
-        }
-        return null;
     }
 
     Set<PsiVariable> getAliases(AbstractVariable variable) {

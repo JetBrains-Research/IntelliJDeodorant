@@ -15,14 +15,13 @@ import java.util.stream.Collectors;
  * Collects information about project: files, classes, and methods.
  */
 public class ProjectInfo {
-    private final List<PsiJavaFile> psiFiles;
     private final List<PsiClass> psiClasses;
     private final List<PsiMethod> psiMethods;
     private final Project project;
 
     public ProjectInfo(Project project) {
         this.project = project;
-        this.psiFiles = PsiUtils.extractFiles(project);
+        List<PsiJavaFile> psiFiles = PsiUtils.extractFiles(project);
         this.psiClasses = psiFiles.stream()
                 .flatMap(psiFile -> PsiUtils.extractClasses(psiFile).stream())
                 .collect(Collectors.toList());
@@ -62,10 +61,6 @@ public class ProjectInfo {
 
     public List<PsiMethod> getMethods() {
         return psiMethods;
-    }
-
-    public List<PsiJavaFile> getPsiFiles() {
-        return psiFiles;
     }
 
     public Project getProject() {

@@ -327,7 +327,7 @@ public class DistanceMatrix {
         for (MyClass sourceClass : oldClasses) {
             if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
                 double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
-                Clustering clustering = Clustering.getInstance(0, distanceMatrix);
+                Clustering clustering = Clustering.getInstance(distanceMatrix);
                 ArrayList<Entity> entities = new ArrayList<>();
                 entities.addAll(sourceClass.getAttributeList());
                 entities.addAll(sourceClass.getMethodList());
@@ -347,7 +347,6 @@ public class DistanceMatrix {
                         }
                     }
                 }
-                // Clustering End
             }
         }
         indicator.setFraction(1.0);

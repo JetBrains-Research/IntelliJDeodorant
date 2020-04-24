@@ -31,14 +31,6 @@ public class MyMethodInvocation {
         return parameterList;
     }
 
-    public int getNumberOfParameters() {
-        return this.parameterList.size();
-    }
-
-    public void setClassOrigin(String classOrigin) {
-        this.classOrigin = classOrigin;
-    }
-
     public boolean equals(Object o) {
         if (this == o) {
             return true;

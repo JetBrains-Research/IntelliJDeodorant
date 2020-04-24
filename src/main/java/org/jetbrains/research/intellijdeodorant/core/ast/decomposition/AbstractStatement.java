@@ -16,7 +16,6 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
  * It is for that reason we cover two cases (PsiStatement and PsiCodeBlock) here by using common parent PsiElement.
  */
 public abstract class AbstractStatement extends AbstractMethodFragment {
-
     private final SmartPsiElementPointer<PsiElement> statement;
     private final StatementType type;
 
@@ -37,18 +36,6 @@ public abstract class AbstractStatement extends AbstractMethodFragment {
 
     StatementType getType() {
         return type;
-    }
-
-    public int getNestingDepth() {
-        AbstractStatement parent = (AbstractStatement) this.getParent();
-        int depth = 0;
-        while (parent != null) {
-            if (!parent.getType().equals(StatementType.BLOCK)) {
-                depth++;
-            }
-            parent = (AbstractStatement) parent.getParent();
-        }
-        return depth;
     }
 
     protected abstract List<String> stringRepresentation();

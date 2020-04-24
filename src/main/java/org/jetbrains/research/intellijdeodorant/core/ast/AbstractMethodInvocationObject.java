@@ -6,7 +6,6 @@ import com.intellij.psi.SmartPsiElementPointer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 public abstract class AbstractMethodInvocationObject {
@@ -37,13 +36,6 @@ public abstract class AbstractMethodInvocationObject {
         this._static = false;
     }
 
-    public void addParameter(TypeObject parameterType) {
-        parameterList.add(parameterType);
-    }
-
-    public ListIterator<TypeObject> getParameterListIterator() {
-        return parameterList.listIterator();
-    }
 
     public List<TypeObject> getParameterTypeList() {
         return this.parameterList;
@@ -51,10 +43,6 @@ public abstract class AbstractMethodInvocationObject {
 
     public TypeObject getReturnType() {
         return returnType;
-    }
-
-    public TypeObject getOriginClassType() {
-        return this.originClassType;
     }
 
     public String getOriginClassName() {
@@ -78,10 +66,6 @@ public abstract class AbstractMethodInvocationObject {
 
     public void setStatic(boolean s) {
         _static = s;
-    }
-
-    public void addThrownException(String type) {
-        thrownExceptions.add(type);
     }
 
     public Set<String> getThrownExceptions() {
@@ -136,16 +120,4 @@ public abstract class AbstractMethodInvocationObject {
         return sb.toString();
     }
 
-    public String getSignature() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(methodName);
-        sb.append("(");
-        if (!parameterList.isEmpty()) {
-            for (int i = 0; i < parameterList.size() - 1; i++)
-                sb.append(parameterList.get(i)).append(", ");
-            sb.append(parameterList.get(parameterList.size() - 1));
-        }
-        sb.append(")");
-        return sb.toString();
-    }
 }

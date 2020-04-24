@@ -53,34 +53,10 @@ public class ExpressionExtractor {
         return getExpressions(expression);
     }
 
-    // returns a List of SuperMethodInvocation objects
-    public List<PsiExpression> getSuperMethodInvocations(PsiExpression expression) {
-        instanceChecker = new InstanceOfSuperMethodInvocation();
-        return getExpressions(expression);
-    }
-
-    // returns a List of FieldAccess objects
-    public List<PsiExpression> getFieldAccesses(PsiStatement statement) {
-        instanceChecker = new InstanceOfFieldAccess();
-        return getExpressions(statement);
-    }
-
     // returns a List of SuperFieldAccess objects
     public List<PsiExpression> getSuperFieldAccesses(PsiElement statement) {
         instanceChecker = new InstanceOfSuperFieldAccess();
         return getExpressions(statement);
-    }
-
-    // returns a List of FieldAccess objects
-    public List<PsiExpression> getFieldAccesses(PsiExpression expression) {
-        instanceChecker = new InstanceOfFieldAccess();
-        return getExpressions(expression);
-    }
-
-    // returns a List of SuperFieldAccess objects
-    public List<PsiExpression> getSuperFieldAccesses(PsiExpression expression) {
-        instanceChecker = new InstanceOfSuperFieldAccess();
-        return getExpressions(expression);
     }
 
     // returns a List of ClassInstanceCreation objects
@@ -115,33 +91,15 @@ public class ExpressionExtractor {
     }
 
     // returns a List of ArrayAccess objects
-    public List<PsiExpression> getArrayAccesses(PsiStatement statement) {
-        instanceChecker = new InstanceOfArrayAccess();
-        return getExpressions(statement);
-    }
-
-    // returns a List of ArrayAccess objects
     public List<PsiExpression> getArrayAccesses(PsiExpression expression) {
         instanceChecker = new InstanceOfArrayAccess();
         return getExpressions(expression);
     }
 
     // returns a List of ThisExpression objects
-    public List<PsiExpression> getThisExpressions(PsiStatement statement) {
-        instanceChecker = new InstanceOfThisExpression();
-        return getExpressions(statement);
-    }
-
-    // returns a List of ThisExpression objects
     public List<PsiExpression> getThisExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfThisExpression();
         return getExpressions(expression);
-    }
-
-    // returns a List of TypeLiteral objects
-    public List<PsiExpression> getTypeLiterals(PsiStatement statement) {
-        instanceChecker = new InstanceOfTypeLiteral();
-        return getExpressions(statement);
     }
 
     // returns a List of Type, String, Boolean, Character, Number, and Null Literal objects
@@ -166,22 +124,6 @@ public class ExpressionExtractor {
     public List<PsiExpression> getInfixExpressions(PsiStatement statement) {
         instanceChecker = new InstanceOfInfixExpression();
         return getExpressions(statement);
-    }
-
-    // returns a List of InfixExpression objects
-    public List<PsiExpression> getInfixExpressions(PsiExpression expression) {
-        instanceChecker = new InstanceOfInfixExpression();
-        return getExpressions(expression);
-    }
-
-    public List<PsiExpression> getInstanceOfExpressions(PsiStatement statement) {
-        instanceChecker = new InstanceOfInstanceOfExpression();
-        return getExpressions(statement);
-    }
-
-    public List<PsiExpression> getInstanceOfExpressions(PsiExpression expression) {
-        instanceChecker = new InstanceOfInstanceOfExpression();
-        return getExpressions(expression);
     }
 
     // returns a List of Assignment objects
@@ -229,30 +171,6 @@ public class ExpressionExtractor {
     // returns a List of PrefixExpression objects
     public List<PsiExpression> getPrefixExpressions(PsiExpression expression) {
         instanceChecker = new InstanceOfPrefixExpression();
-        return getExpressions(expression);
-    }
-
-    // returns a List of ConditionalExpression objects
-    public List<PsiExpression> getConditionalExpressions(PsiStatement statement) {
-        instanceChecker = new InstanceOfConditionalExpression();
-        return getExpressions(statement);
-    }
-
-    // returns a List of VariableDeclarationExpression objects
-    public List<PsiExpression> getConditionalExpressions(PsiExpression expression) {
-        instanceChecker = new InstanceOfConditionalExpression();
-        return getExpressions(expression);
-    }
-
-    // returns a List of variable updaters (i.e. Assignment, PrefixExpression, or PostfixExpression objects)
-    public List<PsiExpression> getVariableModifiers(PsiStatement statement) {
-        instanceChecker = new InstanceOfVariableModifier();
-        return getExpressions(statement);
-    }
-
-    // returns a List of variable updaters (i.e. Assignment, PrefixExpression, or PostfixExpression objects)
-    public List<PsiExpression> getVariableModifiers(PsiExpression expression) {
-        instanceChecker = new InstanceOfVariableModifier();
         return getExpressions(expression);
     }
 

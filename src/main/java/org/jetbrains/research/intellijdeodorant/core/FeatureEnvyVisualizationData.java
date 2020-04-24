@@ -15,7 +15,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.Plain
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 
 public class FeatureEnvyVisualizationData implements VisualizationData {
-
     private final Map<MethodInvocationObject, Integer> sourceMethodInvocationMap;
     private final Map<MethodInvocationObject, Integer> targetMethodInvocationMap;
     private final Map<FieldInstructionObject, Integer> sourceFieldReadMap;

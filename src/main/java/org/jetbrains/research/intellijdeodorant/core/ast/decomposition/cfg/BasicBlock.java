@@ -65,10 +65,6 @@ public class BasicBlock {
         tryNode.setBasicBlock(this);
     }
 
-    public BasicBlock getPreviousBasicBlock() {
-        return previousBasicBlock;
-    }
-
     public void setPreviousBasicBlock(BasicBlock previousBasicBlock) {
         this.previousBasicBlock = previousBasicBlock;
     }

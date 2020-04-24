@@ -4,8 +4,6 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SmartPsiElementPointer;
 
-import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
-
 class CommentObject {
     private SmartPsiElementPointer<PsiElement> comment;
     private final String text;
@@ -21,10 +19,6 @@ class CommentObject {
         this.endLine = endLine;
     }
 
-    public void setComment(PsiComment comment) {
-        this.comment = toPointer(comment);
-    }
-
     public PsiComment getComment() {
         return (PsiComment) comment.getElement();
     }
@@ -36,16 +30,6 @@ class CommentObject {
     public CommentType getType() {
         return type;
     }
-
-    //first line of the file starts from 0
-    public int getStartLine() {
-        return startLine;
-    }
-
-    public int getEndLine() {
-        return endLine;
-    }
-
 
     public int getStartPosition() {
         return getComment().getStartOffsetInParent();

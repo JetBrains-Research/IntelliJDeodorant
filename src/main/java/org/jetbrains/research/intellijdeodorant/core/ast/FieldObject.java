@@ -6,13 +6,11 @@ import com.intellij.psi.SmartPsiElementPointer;
 import com.intellij.util.SmartList;
 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class FieldObject extends VariableDeclarationObject {
-
     private final String name;
     private final TypeObject type;
     private final SmartList<CommentObject> commentList;
@@ -51,16 +49,8 @@ public class FieldObject extends VariableDeclarationObject {
         return type;
     }
 
-    public boolean addComment(CommentObject comment) {
-        return commentList.add(comment);
-    }
-
     public void addComments(List<CommentObject> comments) {
         commentList.addAll(comments);
-    }
-
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return commentList.listIterator();
     }
 
     public boolean isStatic() {
@@ -85,10 +75,6 @@ public class FieldObject extends VariableDeclarationObject {
 
     public void setClassName(String className) {
         this.className = className;
-    }
-
-    public String getClassName() {
-        return this.className;
     }
 
     public boolean equals(FieldInstructionObject fio) {

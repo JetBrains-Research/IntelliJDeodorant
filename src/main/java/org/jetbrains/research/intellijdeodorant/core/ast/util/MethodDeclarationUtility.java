@@ -37,7 +37,7 @@ public class MethodDeclarationUtility {
                     if (methodInvocationExpression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression previousChainedMethodInvocation = (PsiMethodCallExpression) methodInvocationExpression;
                         List<PsiMethod> parentClassMethods = new ArrayList<>();
-                        if (parentClass.isEnum() || !parentClass.isAnnotationType()) {
+                        if (parentClass != null && (parentClass.isEnum() || !parentClass.isAnnotationType())) {
                             PsiMethod[] parentClassMethodArray = parentClass.getMethods();
                             parentClassMethods.addAll(Arrays.asList(parentClassMethodArray));
                         }

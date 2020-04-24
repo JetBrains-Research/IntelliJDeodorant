@@ -18,7 +18,6 @@ import java.util.Set;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class ConstructorObject implements AbstractMethodDeclaration {
-
     String name;
     final List<ParameterObject> parameterList;
     final List<CommentObject> commentList;
@@ -50,10 +49,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public MethodBodyObject getMethodBody() {
         return this.methodBody;
-    }
-
-    public void addExceptionInJavaDocThrows(String exception) {
-        this.exceptionsInJavaDocThrows.add(exception);
     }
 
     public Set<String> getExceptionsInJavaDocThrows() {
@@ -120,13 +115,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
     public List<SuperMethodInvocationObject> getSuperMethodInvocations() {
         if (methodBody != null)
             return methodBody.getSuperMethodInvocations();
-        else
-            return new ArrayList<>();
-    }
-
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        if (methodBody != null)
-            return methodBody.getConstructorInvocations();
         else
             return new ArrayList<>();
     }
@@ -397,13 +385,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new LinkedHashMap<>();
     }
 
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        if (methodBody != null)
-            return methodBody.getParametersPassedAsArgumentsInConstructorInvocations();
-        else
-            return new LinkedHashMap<>();
-    }
-
     public boolean containsSuperMethodInvocation() {
         if (methodBody != null)
             return methodBody.containsSuperMethodInvocation();
@@ -435,11 +416,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
     public boolean equals(ClassInstanceCreationObject creationObject) {
         return this.className.equals(creationObject.getType().getClassType()) &&
                 equalParameterTypes(this.getParameterTypeList(), creationObject.getParameterTypeList());
-    }
-
-    public boolean equals(ConstructorInvocationObject constructorInvocationObject) {
-        return this.className.equals(constructorInvocationObject.getOriginClassType().getClassType()) &&
-                equalParameterTypes(this.getParameterTypeList(), constructorInvocationObject.getParameterTypeList());
     }
 
     private boolean equalParameterTypes(List<TypeObject> list1, List<TypeObject> list2) {

@@ -37,10 +37,6 @@ public abstract class ClassDeclarationObject {
         commentList.add(comment);
     }
 
-    public boolean addComments(List<CommentObject> comments) {
-        return commentList.addAll(comments);
-    }
-
     public List<MethodObject> getMethodList() {
         return methodList;
     }
@@ -51,14 +47,6 @@ public abstract class ClassDeclarationObject {
 
     public ListIterator<FieldObject> getFieldIterator() {
         return fieldList.listIterator();
-    }
-
-    public ListIterator<CommentObject> getCommentIterator() {
-        return commentList.listIterator();
-    }
-
-    public int getNumberOfMethods() {
-        return methodList.size();
     }
 
     public void setName(String name) {
@@ -138,16 +126,6 @@ public abstract class ClassDeclarationObject {
     public boolean containsSuperMethodInvocation(SuperMethodInvocationObject superMethodInvocation) {
         for (MethodObject method : methodList) {
             if (method.containsSuperMethodInvocation(superMethodInvocation))
-                return true;
-        }
-        return false;
-    }
-
-    public boolean hasFieldType(String className) {
-        ListIterator<FieldObject> fi = getFieldIterator();
-        while (fi.hasNext()) {
-            FieldObject fo = fi.next();
-            if (fo.getType().getClassType().equals(className))
                 return true;
         }
         return false;

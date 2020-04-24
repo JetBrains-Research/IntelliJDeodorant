@@ -1,12 +1,10 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodObject;
-import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
 
 import java.util.*;
 
 public class MyMethod extends Entity {
-
     private String classOrigin;
     private String methodName;
     private final String returnType;
@@ -45,37 +43,12 @@ public class MyMethod extends Entity {
         this.methodBody = methodBody;
     }
 
-    public MyMethodInvocation generateMethodInvocation() {
-        return new MyMethodInvocation(this.classOrigin, this.methodName, this.returnType, this.parameterList);
-    }
-
     public boolean isAbstract() {
         return isAbstract;
     }
 
     public void setAbstract(boolean anAbstract) {
         isAbstract = anAbstract;
-    }
-
-    public boolean containsParameter(String p) {
-        for (String parameter : parameterList) {
-            if (parameter.equals(p))
-                return true;
-        }
-        return false;
-    }
-
-    public void setClassOrigin(String className) {
-        this.classOrigin = className;
-    }
-
-    public void removeParameter(String className) {
-        this.parameterList.remove(className);
-    }
-
-    public void addParameter(String parameter) {
-        if (!parameterList.contains(parameter))
-            parameterList.add(parameter);
     }
 
     public String getClassOrigin() {
@@ -103,13 +76,6 @@ public class MyMethod extends Entity {
             this.methodBody.setAttributeInstructionReference(myAttributeInstruction, reference);
     }
 
-    public MyAbstractStatement getAbstractStatement(AbstractStatement statement) {
-        if (this.methodBody != null)
-            return this.methodBody.getAbstractStatement(statement);
-        else
-            return null;
-    }
-
     private ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
 
         if (this.methodBody != null)
@@ -123,23 +89,6 @@ public class MyMethod extends Entity {
             return this.methodBody.getAttributeInstructionIterator();
         else
             return new ArrayList<MyAttributeInstruction>().listIterator();
-    }
-
-    public int getNumberOfAttributeInstructions() {
-        if (this.methodBody != null)
-            return this.methodBody.getNumberOfAttributeInstructions();
-        else
-            return 0;
-    }
-
-    public int getNumberOfMethodInvocations() {
-        if (this.methodBody != null)
-            return this.methodBody.getNumberOfMethodInvocations();
-        else return 0;
-    }
-
-    public int getNumberOfParameters() {
-        return this.parameterList.size();
     }
 
     private boolean equals(MyMethodInvocation methodInvocation) {
