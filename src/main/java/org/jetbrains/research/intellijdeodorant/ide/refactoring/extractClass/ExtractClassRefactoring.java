@@ -1377,8 +1377,8 @@ public class ExtractClassRefactoring {
 
             removeRedundantThisQualifierFromExpression(setterQualifier);
 
-            if (newAssignedVariable != null && (newOperator.getText().equals("++")) ||
-                    newOperator.getText().equals("--")) {
+            if (newAssignedVariable != null && (newOperator.getText().equals("++") ||
+                    newOperator.getText().equals("--"))) {
                 PsiElement binding = newAssignedVariable.resolve();
                 if (binding instanceof PsiVariable) {
                     PsiVariable variableBinding = (PsiVariable) binding;
