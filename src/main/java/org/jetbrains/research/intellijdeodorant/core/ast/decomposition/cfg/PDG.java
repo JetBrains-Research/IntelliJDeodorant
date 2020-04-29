@@ -677,12 +677,14 @@ public class PDG extends Graph {
                 if (srcCFGNode instanceof CFGBranchDoLoopNode)
                     loop = (CFGBranchDoLoopNode) srcCFGNode;
             }
-            PDGNode dstPDGNode = dstCFGNode.getPDGNode();
-            if (dstPDGNode.definesLocalVariable(variableInstruction)) {
-                PDGOutputDependence outputDependence = new PDGOutputDependence(initialNode, dstPDGNode, variableInstruction, loop);
-                edges.add(outputDependence);
-            } else
-                outputDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
+            if (dstCFGNode != null) {
+                PDGNode dstPDGNode = dstCFGNode.getPDGNode();
+                if (dstPDGNode.definesLocalVariable(variableInstruction)) {
+                    PDGOutputDependence outputDependence = new PDGOutputDependence(initialNode, dstPDGNode, variableInstruction, loop);
+                    edges.add(outputDependence);
+                } else
+                    outputDependenceSearch(initialNode, variableInstruction, dstPDGNode, visitedNodes, loop);
+            }
         }
     }
 
