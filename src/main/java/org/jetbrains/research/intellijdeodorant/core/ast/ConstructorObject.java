@@ -20,7 +20,6 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class ConstructorObject implements AbstractMethodDeclaration {
     String name;
     final List<ParameterObject> parameterList;
-    final List<CommentObject> commentList;
     Access access;
     String className;
     private MethodBodyObject methodBody;
@@ -30,7 +29,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public ConstructorObject() {
         this.parameterList = new ArrayList<>();
-        this.commentList = new ArrayList<>();
         this.exceptionsInJavaDocThrows = new LinkedHashSet<>();
         this.access = Access.NONE;
     }
@@ -77,14 +75,6 @@ public class ConstructorObject implements AbstractMethodDeclaration {
 
     public String getClassName() {
         return this.className;
-    }
-
-    public void addComment(CommentObject comment) {
-        commentList.add(comment);
-    }
-
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return commentList.listIterator();
     }
 
     public void addParameter(ParameterObject parameter) {

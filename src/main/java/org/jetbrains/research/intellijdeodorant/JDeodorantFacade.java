@@ -20,7 +20,7 @@ public class JDeodorantFacade {
 
         Set<String> classNamesToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : classObjectsToBeExamined) {
-            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
+            if (!classObject.isEnum() && !classObject.isInterface())
                 classNamesToBeExamined.add(classObject.getName());
         }
         MySystem system = new MySystem(ASTReader.getSystemObject(), false);
@@ -40,7 +40,7 @@ public class JDeodorantFacade {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
             Set<String> classNamesToBeExamined = new LinkedHashSet<>();
             for (ClassObject classObject : classObjectsToBeExamined) {
-                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
+                if (!classObject.isEnum() && !classObject.isInterface())
                     classNamesToBeExamined.add(classObject.getName());
             }
             MySystem system = new MySystem(systemObject, true);
@@ -76,7 +76,7 @@ public class JDeodorantFacade {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
 
             for (ClassObject classObject : classObjectsToBeExamined) {
-                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
+                if (!classObject.isEnum() && !classObject.isInterface()) {
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
                     while (methodIterator.hasNext()) {
                         MethodObject methodObject = methodIterator.next();
@@ -163,7 +163,7 @@ public class JDeodorantFacade {
 
         Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : systemObject.getClassObjects()) {
-            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+            if (!classObject.isEnum() && !classObject.isInterface()) {
                 classObjectsToBeExamined.add(classObject);
             }
         }

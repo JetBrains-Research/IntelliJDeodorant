@@ -13,7 +13,6 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 public class FieldObject extends VariableDeclarationObject {
     private final String name;
     private final TypeObject type;
-    private final SmartList<CommentObject> commentList;
     private boolean _static;
     private Access access;
     private String className;
@@ -25,7 +24,6 @@ public class FieldObject extends VariableDeclarationObject {
         this.name = fieldName;
         this._static = false;
         this.access = Access.NONE;
-        this.commentList = new SmartList<>();
         this.psiField = toPointer(field);
     }
 
@@ -47,10 +45,6 @@ public class FieldObject extends VariableDeclarationObject {
 
     public TypeObject getType() {
         return type;
-    }
-
-    public void addComments(List<CommentObject> comments) {
-        commentList.addAll(comments);
     }
 
     public boolean isStatic() {

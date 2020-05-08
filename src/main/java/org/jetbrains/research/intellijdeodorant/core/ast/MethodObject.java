@@ -461,10 +461,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getClassName();
     }
 
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return constructorObject.getCommentListIterator();
-    }
-
     public ListIterator<ParameterObject> getParameterListIterator() {
         return constructorObject.getParameterListIterator();
     }
