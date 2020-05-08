@@ -21,7 +21,7 @@ public abstract class AbstractMethodFragment {
     private final List<LocalVariableDeclarationObject> localVariableDeclarationList;
     private final List<LocalVariableInstructionObject> localVariableInstructionList;
     private final List<CreationObject> creationList;
-    private final List<LiteralObject> literalList;
+    private final List<PsiExpression> literalList;
     private final List<AnonymousClassDeclarationObject> anonymousClassDeclarationList;
     private final Set<String> exceptionsInThrowStatements;
     private final Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughFields;
@@ -553,12 +553,11 @@ public abstract class AbstractMethodFragment {
 
     void processLiterals(List<PsiExpression> literals) {
         for (PsiExpression literal : literals) {
-            LiteralObject literalObject = new LiteralObject(literal);
-            addLiteral(literalObject);
+            addLiteral(literal);
         }
     }
 
-    private void addLiteral(LiteralObject literalObject) {
+    private void addLiteral(PsiExpression literalObject) {
         literalList.add(literalObject);
         if (parent != null) {
             parent.addLiteral(literalObject);
@@ -782,7 +781,7 @@ public abstract class AbstractMethodFragment {
         return creationList;
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return literalList;
     }
 

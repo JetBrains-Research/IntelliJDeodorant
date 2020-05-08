@@ -188,7 +188,7 @@ public class MethodBodyObject {
         return compositeStatement.getCreations();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return compositeStatement.getLiterals();
     }
 

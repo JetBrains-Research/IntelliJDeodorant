@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
@@ -42,7 +43,7 @@ public interface AbstractMethodDeclaration {
 
     List<CreationObject> getCreations();
 
-    List<LiteralObject> getLiterals();
+    List<PsiExpression> getLiterals();
 
     List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations();
 

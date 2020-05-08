@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.SmartPsiElementPointer;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
@@ -144,7 +145,7 @@ public class ConstructorObject implements AbstractMethodDeclaration {
             return new ArrayList<>();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         if (methodBody != null)
             return methodBody.getLiterals();
         else
