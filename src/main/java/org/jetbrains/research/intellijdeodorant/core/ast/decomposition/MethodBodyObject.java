@@ -12,7 +12,6 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateCheckin
 import java.util.*;
 
 public class MethodBodyObject {
-
     private final CompositeStatementObject compositeStatement;
 
     public MethodBodyObject(PsiCodeBlock methodBody) {
@@ -185,15 +184,11 @@ public class MethodBodyObject {
         return compositeStatement.getSuperMethodInvocations();
     }
 
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return compositeStatement.getConstructorInvocations();
-    }
-
     public List<CreationObject> getCreations() {
         return compositeStatement.getCreations();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return compositeStatement.getLiterals();
     }
 
@@ -323,10 +318,6 @@ public class MethodBodyObject {
 
     public Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations() {
         return compositeStatement.getParametersPassedAsArgumentsInSuperMethodInvocations();
-    }
-
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return compositeStatement.getParametersPassedAsArgumentsInConstructorInvocations();
     }
 
     public boolean containsSuperMethodInvocation() {

@@ -25,15 +25,8 @@ class CFGTryNode extends CFGBlockNode {
         return hasResources;
     }
 
-    public List<String> getHandledExceptions() {
-        return handledExceptions;
-    }
-
     boolean hasFinallyClauseClosingVariable(AbstractVariable variable) {
         return ((TryStatementObject) getStatement()).hasFinallyClauseClosingVariable(variable);
     }
 
-    boolean hasCatchClause() {
-        return ((TryStatementObject) getStatement()).hasCatchClause();
-    }
 }

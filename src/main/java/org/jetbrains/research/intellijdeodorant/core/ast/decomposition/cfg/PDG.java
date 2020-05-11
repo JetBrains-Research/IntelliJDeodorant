@@ -60,10 +60,6 @@ public class PDG extends Graph {
         return psiFile;
     }
 
-    public Set<VariableDeclarationObject> getVariableDeclarationObjectsInMethod() {
-        return variableDeclarationsInMethod;
-    }
-
     public Set<PsiVariable> getVariableDeclarationsInMethod() {
         Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         for (VariableDeclarationObject variableDeclaration : variableDeclarationsInMethod) {
@@ -91,19 +87,6 @@ public class PDG extends Graph {
         return null;
     }
 
-    private PDGBlockNode isNestedWithinBlockNode(PDGNode node) {
-        PDGBlockNode blockNode = isDirectlyNestedWithinBlockNode(node);
-        if (blockNode != null) {
-            return blockNode;
-        } else {
-            PDGNode controlParent = node.getControlDependenceParent();
-            if (controlParent != null) {
-                return isNestedWithinBlockNode(controlParent);
-            }
-            return null;
-        }
-    }
-
     public Set<PsiVariable> getVariableDeclarationsAndAccessedFieldsInMethod() {
         Set<PsiVariable> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(getVariableDeclarationsInMethod());
@@ -111,40 +94,8 @@ public class PDG extends Graph {
         return variableDeclarations;
     }
 
-    public Set<PlainVariable> getVariablesWithMethodBodyScope() {
-        Set<PlainVariable> variables = new LinkedHashSet<>();
-        for (AbstractVariable variable : entryNode.declaredVariables)
-            variables.add((PlainVariable) variable);
-        for (GraphNode node : nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (pdgNode.hasIncomingControlDependenceFromMethodEntryNode() && !(pdgNode instanceof PDGControlPredicateNode)) {
-                for (AbstractVariable variable : pdgNode.declaredVariables)
-                    variables.add((PlainVariable) variable);
-            }
-        }
-        return variables;
-    }
-
-    public Set<PlainVariable> getAllDeclaredVariables() {
-        Set<PlainVariable> variables = new LinkedHashSet<>();
-        for (AbstractVariable variable : entryNode.declaredVariables)
-            variables.add((PlainVariable) variable);
-        for (GraphNode node : nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (!(pdgNode instanceof PDGControlPredicateNode)) {
-                for (AbstractVariable variable : pdgNode.declaredVariables)
-                    variables.add((PlainVariable) variable);
-            }
-        }
-        return variables;
-    }
-
     int getTotalNumberOfStatements() {
         return nodes.size();
-    }
-
-    public Iterator<GraphNode> getNodeIterator() {
-        return nodes.iterator();
     }
 
     Map<CompositeVariable, LinkedHashSet<PDGNode>> getDefinedAttributesOfReference(PlainVariable reference) {
@@ -176,16 +127,6 @@ public class PDG extends Graph {
             PDGNode pdgNode = (PDGNode) node;
             if (pdgNode.definesLocalVariable(localVariableCriterion) &&
                     !pdgNode.declaresLocalVariable(localVariableCriterion))
-                nodeCriteria.add(pdgNode);
-        }
-        return nodeCriteria;
-    }
-
-    public Set<PDGNode> getAssignmentNodesOfVariableCriterionIncludingDeclaration(AbstractVariable localVariableCriterion) {
-        Set<PDGNode> nodeCriteria = new LinkedHashSet<>();
-        for (GraphNode node : nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (pdgNode.definesLocalVariable(localVariableCriterion))
                 nodeCriteria.add(pdgNode);
         }
         return nodeCriteria;
@@ -779,23 +720,4 @@ public class PDG extends Graph {
         return returnedVariables;
     }
 
-    public PDGNode getFirstDef(PlainVariable variable) {
-        for (GraphNode node : nodes) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (pdgNode.definesLocalVariable(variable))
-                return pdgNode;
-        }
-        return null;
-    }
-
-    public PDGNode getLastUse(PlainVariable variable) {
-        List<GraphNode> reversedNodeList = new ArrayList<>(nodes);
-        Collections.reverse(reversedNodeList);
-        for (GraphNode node : reversedNodeList) {
-            PDGNode pdgNode = (PDGNode) node;
-            if (pdgNode.usesLocalVariable(variable))
-                return pdgNode;
-        }
-        return null;
-    }
 }

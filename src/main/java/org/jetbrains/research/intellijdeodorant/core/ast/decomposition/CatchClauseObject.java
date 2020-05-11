@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CatchClauseObject {
-
     private CompositeStatementObject body;
     private final List<AbstractExpression> expressionList;
     private final List<String> exceptionTypes;

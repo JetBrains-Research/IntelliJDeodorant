@@ -66,24 +66,4 @@ public class CompleteInheritanceDetection {
         }
     }
 
-    public Set<String> getRoots() {
-        return subclassMap.keySet();
-    }
-
-    public Set<InheritanceTree> getMatchingTrees(String subclassName) {
-        Set<InheritanceTree> inheritanceTrees = new LinkedHashSet<>();
-        for (String superclass : subclassMap.keySet()) {
-            LinkedHashSet<String> subclasses = subclassMap.get(superclass);
-            boolean matchingInheritanceHierarchy = false;
-            for (String subclass : subclasses) {
-                if ((subclass.contains(".") && subclass.endsWith("." + subclassName)) || subclass.equals(subclassName)) {
-                    matchingInheritanceHierarchy = true;
-                    break;
-                }
-            }
-            if (matchingInheritanceHierarchy)
-                inheritanceTrees.add(getTree(superclass));
-        }
-        return inheritanceTrees;
-    }
 }

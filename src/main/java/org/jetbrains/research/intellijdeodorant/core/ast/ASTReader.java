@@ -11,15 +11,12 @@ import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import java.util.*;
 
 public class ASTReader {
-
     private static SystemObject systemObject;
-    private static ProjectInfo examinedProject;
 
     public ASTReader(ProjectInfo project, ProgressIndicator indicator) {
         indicator.setText(IntelliJDeodorantBundle.message("feature.envy.parsing.indicator"));
         indicator.setFraction(0.0);
         systemObject = new SystemObject();
-        examinedProject = project;
         List<PsiClass> classes = project.getClasses();
         int processedClasses = 0;
         int classesCount = classes.size();
@@ -76,22 +73,10 @@ public class ASTReader {
     }
 
     private void processFieldDeclaration(final ClassObject classObject, PsiField fieldDeclaration) {
-        SmartList<CommentObject> fieldDeclarationComments = new SmartList<>();
-        int fieldDeclarationStartPosition = fieldDeclaration.getStartOffsetInParent();
-        int fieldDeclarationEndPosition = fieldDeclarationStartPosition + fieldDeclaration.getTextLength();
-        for (CommentObject comment : classObject.commentList) {
-            int commentStartPosition = comment.getStartPosition();
-            int commentEndPosition = commentStartPosition + comment.getLength();
-            if (fieldDeclarationStartPosition <= commentStartPosition && fieldDeclarationEndPosition >= commentEndPosition) {
-                fieldDeclarationComments.add(comment);
-            }
-        }
-
         TypeObject typeObject = TypeObject.extractTypeObject(fieldDeclaration.getType().getCanonicalText());
         typeObject.setArrayDimension(typeObject.getArrayDimension());
         FieldObject fieldObject = new FieldObject(typeObject, fieldDeclaration.getName(), fieldDeclaration);
         fieldObject.setClassName(classObject.getName());
-        fieldObject.addComments(fieldDeclarationComments);
 
         if (fieldDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             fieldObject.setAccess(Access.PUBLIC);
@@ -114,15 +99,6 @@ public class ASTReader {
         constructorObject.setMethodDeclaration(methodDeclaration);
         constructorObject.setName(methodName);
         constructorObject.setClassName(classObject.getName());
-        int methodDeclarationStartPosition = methodDeclaration.getStartOffsetInParent();
-        int methodDeclarationEndPosition = methodDeclarationStartPosition + methodDeclaration.getTextLength();
-        for (CommentObject comment : classObject.commentList) {
-            int commentStartPosition = comment.getStartPosition();
-            int commentEndPosition = commentStartPosition + comment.getLength();
-            if (methodDeclarationStartPosition <= commentStartPosition && methodDeclarationEndPosition >= commentEndPosition) {
-                constructorObject.addComment(comment);
-            }
-        }
 
         if (methodDeclaration.hasModifierProperty(PsiModifier.PUBLIC))
             constructorObject.setAccess(Access.PUBLIC);
@@ -153,16 +129,6 @@ public class ASTReader {
 
         for (AnonymousClassDeclarationObject anonymous : constructorObject.getAnonymousClassDeclarations()) {
             anonymous.setClassObject(classObject);
-            PsiAnonymousClass anonymousClassDeclaration = anonymous.getAnonymousClassDeclaration();
-            int anonymousClassDeclarationStartPosition = anonymousClassDeclaration.getStartOffsetInParent();
-            int anonymousClassDeclarationEndPosition = anonymousClassDeclarationStartPosition + anonymousClassDeclaration.getTextLength();
-            for (CommentObject comment : constructorObject.commentList) {
-                int commentStartPosition = comment.getStartPosition();
-                int commentEndPosition = commentStartPosition + comment.getLength();
-                if (anonymousClassDeclarationStartPosition <= commentStartPosition && anonymousClassDeclarationEndPosition >= commentEndPosition) {
-                    anonymous.addComment(comment);
-                }
-            }
         }
 
         if (methodDeclaration.isConstructor()) {
@@ -207,10 +173,6 @@ public class ASTReader {
 
     public static SystemObject getSystemObject() {
         return systemObject;
-    }
-
-    public static ProjectInfo getExaminedProject() {
-        return examinedProject;
     }
 
 }

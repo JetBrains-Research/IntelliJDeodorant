@@ -10,10 +10,6 @@ public class ArrayCreationObject extends CreationObject {
         super(type);
     }
 
-    public PsiNewExpression getArrayCreation() {
-        return (PsiNewExpression) this.creation.getElement();
-    }
-
     public void setArrayCreation(PsiNewExpression creation) {
         this.creation = toPointer(creation);
     }

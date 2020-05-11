@@ -471,38 +471,4 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
             j++;
         }
     }
-
-    private Set<PsiType> getRequiredImportDeclarationsBasedOnSignature() {
-        Set<PsiType> typeBindings = new LinkedHashSet<>();
-        if (returnedVariable != null) {
-            PsiType returnType = returnedVariable.getType();
-            typeBindings.add(returnType);
-        }
-
-        Set<PsiParameter> parameters = typeCheckElimination.getAccessedParameters();
-        for (PsiParameter parameter : parameters) {
-            if (!parameter.equals(returnedVariable) && !parameter.equals(typeVariable)) {
-                PsiType parameterType = parameter.getType();
-                typeBindings.add(parameterType);
-            }
-        }
-
-        Set<PsiVariable> accessedLocalVariables = typeCheckElimination.getAccessedLocalVariables();
-        for (PsiVariable fragment : accessedLocalVariables) {
-            if (!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
-                PsiType variableType = fragment.getType();
-                typeBindings.add(variableType);
-            }
-        }
-
-        if (typeCheckElimination.getAccessedFields().size() > 0 || typeCheckElimination.getAssignedFields().size() > 0 ||
-                typeCheckElimination.getAccessedMethods().size() > 0 || typeCheckElimination.getSuperAccessedMethods().size() > 0 ||
-                typeCheckElimination.getSuperAccessedFieldBindings().size() > 0 || typeCheckElimination.getSuperAssignedFieldBindings().size() > 0) {
-            typeBindings.add(PsiTypesUtil.getClassType(sourceTypeDeclaration));
-        }
-
-        typeBindings.addAll(thrownExceptions);
-
-        return typeBindings;
-    }
 }

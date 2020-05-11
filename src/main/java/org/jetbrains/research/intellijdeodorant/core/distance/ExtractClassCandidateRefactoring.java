@@ -15,7 +15,6 @@ import java.util.*;
 import static org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring.DELIMITER;
 
 public class ExtractClassCandidateRefactoring extends CandidateRefactoring implements Comparable<ExtractClassCandidateRefactoring> {
-
     private final MySystem system;
     private final MyClass sourceClass;
     private final List<Entity> extractedEntities;
@@ -237,10 +236,6 @@ public class ExtractClassCandidateRefactoring extends CandidateRefactoring imple
 
     public String toString() {
         return sourceClass.toString() + DELIMITER + extractedEntities.toString();
-    }
-
-    public String getAnnotationText() {
-        return visualizationData.toString();
     }
 
     public int compareTo(ExtractClassCandidateRefactoring other) {

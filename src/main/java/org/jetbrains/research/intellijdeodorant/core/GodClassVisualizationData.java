@@ -188,18 +188,6 @@ public class GodClassVisualizationData implements VisualizationData {
         return externalFieldWriteMap;
     }
 
-    public Set<MethodObject> getExtractedMethods() {
-        return extractedMethods;
-    }
-
-    public Set<FieldObject> getExtractedFields() {
-        return extractedFields;
-    }
-
-    public ClassObject getSourceClass() {
-        return sourceClass;
-    }
-
     public String toString() {
 
         return "--FIELD READS FROM EXTRACTED METHODS TO EXTRACTED FIELDS--" + "\n" +

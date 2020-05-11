@@ -8,7 +8,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBod
 import java.util.*;
 
 public class MySystem {
-
     private final Map<String, MyClass> classMap;
     private final AssociationDetection associationDetection;
     private final SystemObject systemObject;
@@ -165,16 +164,6 @@ public class MySystem {
 
     public MyClass getClass(String className) {
         return classMap.get(className);
-    }
-
-    public void addClass(MyClass newClass) {
-        if (!classMap.containsKey(newClass.getName())) {
-            classMap.put(newClass.getName(), newClass);
-        }
-    }
-
-    public void removeClass(MyClass oldClass) {
-        classMap.remove(oldClass.getName());
     }
 
     public SystemObject getSystemObject() {

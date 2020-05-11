@@ -1,7 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
 public class MyAttributeInstruction {
-
     private String classOrigin;
     private final String classType;
     private final String name;
@@ -24,10 +23,6 @@ public class MyAttributeInstruction {
 
     public String getClassOrigin() {
         return classOrigin;
-    }
-
-    public void setClassOrigin(String classOrigin) {
-        this.classOrigin = classOrigin;
     }
 
     public String getClassType() {

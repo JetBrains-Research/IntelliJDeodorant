@@ -24,34 +24,8 @@ public class AdjacencyList {
             return new LinkedHashSet<>();
     }
 
-    public void reverseEdge(Edge e) {
-        adjacencies.get(e.from).remove(e);
-        addEdge(e.to, e.from, e.weight);
-    }
-
-    public void reverseGraph() {
-        adjacencies = getReversedList().adjacencies;
-    }
-
-    public AdjacencyList getReversedList() {
-        AdjacencyList newlist = new AdjacencyList();
-        for (LinkedHashSet<Edge> edges : adjacencies.values()) {
-            for (Edge e : edges) {
-                newlist.addEdge(e.to, e.from, e.weight);
-            }
-        }
-        return newlist;
-    }
-
     public Set<Node> getSourceNodeSet() {
         return adjacencies.keySet();
     }
 
-    public Collection<Edge> getAllEdges() {
-        ArrayList<Edge> edges = new ArrayList<>();
-        for (LinkedHashSet<Edge> e : adjacencies.values()) {
-            edges.addAll(e);
-        }
-        return edges;
-    }
 }

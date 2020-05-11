@@ -9,15 +9,12 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractS
 import java.util.*;
 
 public abstract class MyAbstractStatement {
-
     private AbstractStatement statement;
-    private MyCompositeStatement parent;
     private List<MyMethodInvocation> methodInvocationList;
     private List<MyAttributeInstruction> attributeInstructionList;
 
     MyAbstractStatement(AbstractStatement statement) {
         this.statement = statement;
-        this.parent = null;
         this.methodInvocationList = new ArrayList<>();
         this.attributeInstructionList = new ArrayList<>();
         SystemObject system = ASTReader.getSystemObject();
@@ -59,7 +56,6 @@ public abstract class MyAbstractStatement {
         if (fieldInstruction != null && system.getClassObject(fieldInstruction.getOwnerClass()) != null) {
             MyAttributeInstruction myAttributeInstruction =
                     new MyAttributeInstruction(fieldInstruction.getOwnerClass(), fieldInstruction.getType().toString(), fieldInstruction.getName());
-
             if (!attributeInstructionList.contains(myAttributeInstruction))
                 attributeInstructionList.add(myAttributeInstruction);
             return true;
@@ -81,39 +77,6 @@ public abstract class MyAbstractStatement {
         return (delegation2 = system.containsDelegate(delegation)) != null && delegation2.equals(methodInvocation);
     }
 
-    MyAbstractStatement(List<MyAbstractStatement> statementList) {
-        this.statement = null;
-        this.parent = null;
-        this.methodInvocationList = new ArrayList<>();
-        this.attributeInstructionList = new ArrayList<>();
-        for (MyAbstractStatement myAbstractStatement : statementList) {
-            methodInvocationList.addAll(myAbstractStatement.methodInvocationList);
-            attributeInstructionList.addAll(myAbstractStatement.attributeInstructionList);
-        }
-    }
-
-    MyAbstractStatement(MyMethodInvocation methodInvocation) {
-        this.statement = null;
-        this.parent = null;
-        this.methodInvocationList = new ArrayList<>();
-        this.attributeInstructionList = new ArrayList<>();
-        this.methodInvocationList.add(methodInvocation);
-    }
-
-    MyAbstractStatement() {
-        this.parent = null;
-        this.methodInvocationList = new ArrayList<>();
-        this.attributeInstructionList = new ArrayList<>();
-    }
-
-    void setMethodInvocationList(List<MyMethodInvocation> list) {
-        this.methodInvocationList = list;
-    }
-
-    void setAttributeInstructionList(List<MyAttributeInstruction> list) {
-        this.attributeInstructionList = list;
-    }
-
     public boolean containsAttributeInstruction(MyAttributeInstruction instruction) {
         return attributeInstructionList.contains(instruction);
     }
@@ -122,46 +85,12 @@ public abstract class MyAbstractStatement {
         return methodInvocationList.contains(invocation);
     }
 
-    public void addMethodInvocation(MyMethodInvocation myMethodInvocation) {
-        if (!methodInvocationList.contains(myMethodInvocation))
-            methodInvocationList.add(myMethodInvocation);
-    }
-
-    void addAttributeInstruction(MyAttributeInstruction myAttributeInstruction) {
-        if (!attributeInstructionList.contains(myAttributeInstruction))
-            attributeInstructionList.add(myAttributeInstruction);
-    }
-
-    public int getNumberOfAttributeInstructions() {
-        return this.attributeInstructionList.size();
-    }
-
-    public int getNumberOfMethodInvocations() {
-        return this.methodInvocationList.size();
-    }
-
     public ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
         return methodInvocationList.listIterator();
     }
 
-    public List<MyMethodInvocation> getMethodInvocationList() {
-        return methodInvocationList;
-    }
-
     public ListIterator<MyAttributeInstruction> getAttributeInstructionIterator() {
         return attributeInstructionList.listIterator();
-    }
-
-    public List<MyAttributeInstruction> getAttributeInstructionList() {
-        return attributeInstructionList;
-    }
-
-    void setParent(MyCompositeStatement parent) {
-        this.parent = parent;
-    }
-
-    MyCompositeStatement getParent() {
-        return this.parent;
     }
 
     public AbstractStatement getStatement() {

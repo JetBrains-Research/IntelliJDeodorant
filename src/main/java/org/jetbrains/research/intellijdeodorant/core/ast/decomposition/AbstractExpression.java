@@ -11,7 +11,6 @@ import java.util.List;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class AbstractExpression extends AbstractMethodFragment {
-
     private final SmartPsiElementPointer<PsiExpression> expression;
 
     public AbstractExpression(@NotNull PsiExpression expression) {

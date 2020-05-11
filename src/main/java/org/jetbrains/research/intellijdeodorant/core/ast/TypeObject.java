@@ -1,8 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TypeObject {
     private final String classType;
     private String genericType;
@@ -39,39 +36,6 @@ public class TypeObject {
             return true;
         else
             return this.classType.equals(typeObject.classType);
-    }
-
-    public boolean equalsGenericType(TypeObject typeObject) {
-        if (this.genericType == null && typeObject.genericType == null)
-            return true;
-        else if (this.genericType != null && typeObject.genericType != null) {
-            //remove < > , and whitespace 
-            String[] thisTokens = this.genericType.split("<|>|,|\\s");
-            String[] otherTokens = typeObject.genericType.split("<|>|,|\\s");
-            List<String> singleLetters1 = new ArrayList<>();
-            List<String> words1 = new ArrayList<>();
-            for (String token : thisTokens) {
-                if (token.length() == 1)
-                    singleLetters1.add(token);
-                else if (token.length() > 1)
-                    words1.add(token);
-            }
-            List<String> singleLetters2 = new ArrayList<>();
-            List<String> words2 = new ArrayList<>();
-            for (String token : otherTokens) {
-                if (token.length() == 1)
-                    singleLetters2.add(token);
-                else if (token.length() > 1)
-                    words2.add(token);
-            }
-            boolean allLetters1 = singleLetters1.size() > 0 && words1.size() == 0;
-            boolean allLetters2 = singleLetters2.size() > 0 && words2.size() == 0;
-            if (allLetters1 || allLetters2)
-                return true;
-            else
-                return this.genericType.equals(typeObject.genericType);
-        }
-        return false;
     }
 
     public boolean equals(Object o) {

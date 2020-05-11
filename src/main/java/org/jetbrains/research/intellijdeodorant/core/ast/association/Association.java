@@ -3,7 +3,6 @@ package org.jetbrains.research.intellijdeodorant.core.ast.association;
 import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 
 public class Association {
-
     private final String from;
     private final String to;
     private boolean container;

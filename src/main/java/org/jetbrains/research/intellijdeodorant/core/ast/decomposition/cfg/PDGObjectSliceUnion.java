@@ -218,10 +218,6 @@ public class PDGObjectSliceUnion {
         return iFile;
     }
 
-    public int getMethodSize() {
-        return methodSize;
-    }
-
     public BasicBlock getBoundaryBlock() {
         return boundaryBlock;
     }

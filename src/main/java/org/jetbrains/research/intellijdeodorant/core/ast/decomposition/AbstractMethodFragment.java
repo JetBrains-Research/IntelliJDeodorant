@@ -14,16 +14,14 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.resolveMet
 
 public abstract class AbstractMethodFragment {
     private final AbstractMethodFragment parent;
-
     private final List<MethodInvocationObject> methodInvocationList;
     private final List<SuperMethodInvocationObject> superMethodInvocationList;
-    private final List<ConstructorInvocationObject> constructorInvocationList;
     private final List<FieldInstructionObject> fieldInstructionList;
     private final List<SuperFieldInstructionObject> superFieldInstructionList;
     private final List<LocalVariableDeclarationObject> localVariableDeclarationList;
     private final List<LocalVariableInstructionObject> localVariableInstructionList;
     private final List<CreationObject> creationList;
-    private final List<LiteralObject> literalList;
+    private final List<PsiExpression> literalList;
     private final List<AnonymousClassDeclarationObject> anonymousClassDeclarationList;
     private final Set<String> exceptionsInThrowStatements;
     private final Map<AbstractVariable, ArrayList<MethodInvocationObject>> nonDistinctInvokedMethodsThroughFields;
@@ -45,14 +43,12 @@ public abstract class AbstractMethodFragment {
     private final Set<PlainVariable> usedLocalVariables;
     private final Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> parametersPassedAsArgumentsInMethodInvocations;
     private final Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> parametersPassedAsArgumentsInSuperMethodInvocations;
-    private final Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> parametersPassedAsArgumentsInConstructorInvocations;
     private final Map<PlainVariable, LinkedHashSet<ClassInstanceCreationObject>> variablesAssignedWithClassInstanceCreations;
 
     AbstractMethodFragment(AbstractMethodFragment parent) {
         this.parent = parent;
         this.methodInvocationList = new ArrayList<>();
         this.superMethodInvocationList = new ArrayList<>();
-        this.constructorInvocationList = new ArrayList<>();
         this.fieldInstructionList = new ArrayList<>();
         this.superFieldInstructionList = new ArrayList<>();
         this.localVariableDeclarationList = new ArrayList<>();
@@ -81,7 +77,6 @@ public abstract class AbstractMethodFragment {
         this.usedLocalVariables = new LinkedHashSet<>();
         this.parametersPassedAsArgumentsInMethodInvocations = new LinkedHashMap<>();
         this.parametersPassedAsArgumentsInSuperMethodInvocations = new LinkedHashMap<>();
-        this.parametersPassedAsArgumentsInConstructorInvocations = new LinkedHashMap<>();
         this.variablesAssignedWithClassInstanceCreations = new LinkedHashMap<>();
     }
 
@@ -383,33 +378,10 @@ public abstract class AbstractMethodFragment {
         }
     }
 
-    private PsiMethodCallExpression getFirstMethodCallInAChain(PsiMethodCallExpression methodCallExpression) {
-        PsiExpression qualifierExpression = methodCallExpression.getMethodExpression().getQualifierExpression();
-        if (qualifierExpression instanceof PsiMethodCallExpression) {
-            return getFirstMethodCallInAChain((PsiMethodCallExpression) qualifierExpression);
-        } else {
-            return methodCallExpression;
-        }
-    }
-
     private void addMethodInvocation(MethodInvocationObject methodInvocationObject) {
         methodInvocationList.add(methodInvocationObject);
         if (parent != null) {
             parent.addMethodInvocation(methodInvocationObject);
-        }
-    }
-
-    private void addSuperMethodInvocation(SuperMethodInvocationObject superMethodInvocationObject) {
-        superMethodInvocationList.add(superMethodInvocationObject);
-        if (parent != null) {
-            parent.addSuperMethodInvocation(superMethodInvocationObject);
-        }
-    }
-
-    private void addConstructorInvocation(ConstructorInvocationObject constructorInvocationObject) {
-        constructorInvocationList.add(constructorInvocationObject);
-        if (parent != null) {
-            parent.addConstructorInvocation(constructorInvocationObject);
         }
     }
 
@@ -581,12 +553,11 @@ public abstract class AbstractMethodFragment {
 
     void processLiterals(List<PsiExpression> literals) {
         for (PsiExpression literal : literals) {
-            LiteralObject literalObject = new LiteralObject(literal);
-            addLiteral(literalObject);
+            addLiteral(literal);
         }
     }
 
-    private void addLiteral(LiteralObject literalObject) {
+    private void addLiteral(PsiExpression literalObject) {
         literalList.add(literalObject);
         if (parent != null) {
             parent.addLiteral(literalObject);
@@ -673,48 +644,6 @@ public abstract class AbstractMethodFragment {
         nonDistinctInvokedStaticMethods.add(methodInvocation);
         if (parent != null) {
             parent.addStaticallyInvokedMethod(methodInvocation);
-        }
-    }
-
-    private void addParameterPassedAsArgumentInMethodInvocation(PlainVariable parameter, MethodInvocationObject methodInvocation) {
-        if (parametersPassedAsArgumentsInMethodInvocations.containsKey(parameter)) {
-            LinkedHashSet<MethodInvocationObject> methodInvocations = parametersPassedAsArgumentsInMethodInvocations.get(parameter);
-            methodInvocations.add(methodInvocation);
-        } else {
-            LinkedHashSet<MethodInvocationObject> methodInvocations = new LinkedHashSet<>();
-            methodInvocations.add(methodInvocation);
-            parametersPassedAsArgumentsInMethodInvocations.put(parameter, methodInvocations);
-        }
-        if (parent != null) {
-            parent.addParameterPassedAsArgumentInMethodInvocation(parameter, methodInvocation);
-        }
-    }
-
-    private void addParameterPassedAsArgumentInSuperMethodInvocation(PlainVariable parameter, SuperMethodInvocationObject methodInvocation) {
-        if (parametersPassedAsArgumentsInSuperMethodInvocations.containsKey(parameter)) {
-            LinkedHashSet<SuperMethodInvocationObject> methodInvocations = parametersPassedAsArgumentsInSuperMethodInvocations.get(parameter);
-            methodInvocations.add(methodInvocation);
-        } else {
-            LinkedHashSet<SuperMethodInvocationObject> methodInvocations = new LinkedHashSet<>();
-            methodInvocations.add(methodInvocation);
-            parametersPassedAsArgumentsInSuperMethodInvocations.put(parameter, methodInvocations);
-        }
-        if (parent != null) {
-            parent.addParameterPassedAsArgumentInSuperMethodInvocation(parameter, methodInvocation);
-        }
-    }
-
-    private void addParameterPassedAsArgumentInConstructorInvocation(PlainVariable parameter, ConstructorInvocationObject constructorInvocation) {
-        if (parametersPassedAsArgumentsInConstructorInvocations.containsKey(parameter)) {
-            LinkedHashSet<ConstructorInvocationObject> constructorInvocations = parametersPassedAsArgumentsInConstructorInvocations.get(parameter);
-            constructorInvocations.add(constructorInvocation);
-        } else {
-            LinkedHashSet<ConstructorInvocationObject> constructorInvocations = new LinkedHashSet<>();
-            constructorInvocations.add(constructorInvocation);
-            parametersPassedAsArgumentsInConstructorInvocations.put(parameter, constructorInvocations);
-        }
-        if (parent != null) {
-            parent.addParameterPassedAsArgumentInConstructorInvocation(parameter, constructorInvocation);
         }
     }
 
@@ -848,35 +777,11 @@ public abstract class AbstractMethodFragment {
         return superMethodInvocationList;
     }
 
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return constructorInvocationList;
-    }
-
     public List<CreationObject> getCreations() {
         return creationList;
     }
 
-    List<ClassInstanceCreationObject> getClassInstanceCreations() {
-        List<ClassInstanceCreationObject> classInstanceCreations = new ArrayList<>();
-        for (CreationObject creation : creationList) {
-            if (creation instanceof ClassInstanceCreationObject) {
-                classInstanceCreations.add((ClassInstanceCreationObject) creation);
-            }
-        }
-        return classInstanceCreations;
-    }
-
-    List<ArrayCreationObject> getArrayCreations() {
-        List<ArrayCreationObject> arrayCreations = new ArrayList<>();
-        for (CreationObject creation : creationList) {
-            if (creation instanceof ArrayCreationObject) {
-                arrayCreations.add((ArrayCreationObject) creation);
-            }
-        }
-        return arrayCreations;
-    }
-
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return literalList;
     }
 
@@ -898,10 +803,6 @@ public abstract class AbstractMethodFragment {
 
     public boolean containsSuperMethodInvocation(SuperMethodInvocationObject superMethodInvocation) {
         return superMethodInvocationList.contains(superMethodInvocation);
-    }
-
-    public boolean containsLocalVariableDeclaration(LocalVariableDeclarationObject lvdo) {
-        return localVariableDeclarationList.contains(lvdo);
     }
 
     public Map<AbstractVariable, LinkedHashSet<MethodInvocationObject>> getInvokedMethodsThroughFields() {
@@ -939,10 +840,6 @@ public abstract class AbstractMethodFragment {
         return invokedMethodsThroughLocalVariables;
     }
 
-    public Map<AbstractVariable, ArrayList<MethodInvocationObject>> getNonDistinctInvokedMethodsThroughLocalVariables() {
-        return nonDistinctInvokedMethodsThroughLocalVariables;
-    }
-
     public Set<MethodInvocationObject> getInvokedMethodsThroughThisReference() {
         return new LinkedHashSet<>(nonDistinctInvokedMethodsThroughThisReference);
     }
@@ -953,10 +850,6 @@ public abstract class AbstractMethodFragment {
 
     public Set<MethodInvocationObject> getInvokedStaticMethods() {
         return new LinkedHashSet<>(nonDistinctInvokedStaticMethods);
-    }
-
-    List<MethodInvocationObject> getNonDistinctInvokedStaticMethods() {
-        return nonDistinctInvokedStaticMethods;
     }
 
     public Set<AbstractVariable> getDefinedFieldsThroughFields() {
@@ -999,14 +892,6 @@ public abstract class AbstractMethodFragment {
         return new LinkedHashSet<>(nonDistinctUsedFieldsThroughLocalVariables);
     }
 
-    public List<AbstractVariable> getNonDistinctDefinedFieldsThroughLocalVariables() {
-        return nonDistinctDefinedFieldsThroughLocalVariables;
-    }
-
-    public List<AbstractVariable> getNonDistinctUsedFieldsThroughLocalVariables() {
-        return nonDistinctUsedFieldsThroughLocalVariables;
-    }
-
     public Set<PlainVariable> getDefinedFieldsThroughThisReference() {
         return new LinkedHashSet<>(nonDistinctDefinedFieldsThroughThisReference);
     }
@@ -1043,11 +928,4 @@ public abstract class AbstractMethodFragment {
         return parametersPassedAsArgumentsInSuperMethodInvocations;
     }
 
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return parametersPassedAsArgumentsInConstructorInvocations;
-    }
-
-    public Map<PlainVariable, LinkedHashSet<ClassInstanceCreationObject>> getVariablesAssignedWithClassInstanceCreations() {
-        return variablesAssignedWithClassInstanceCreations;
-    }
 }

@@ -42,32 +42,6 @@ public class SystemObject {
         classList.add(c);
     }
 
-    public void addClasses(List<ClassObject> classObjects) {
-        for (ClassObject classObject : classObjects)
-            addClass(classObject);
-    }
-
-    public void replaceClass(ClassObject c) {
-        int position = getPositionInClassList(c.getName());
-        if (position != -1) {
-            classList.set(position, c);
-        } else {
-            addClass(c);
-        }
-    }
-
-    public void removeClass(ClassObject c) {
-        int position = getPositionInClassList(c.getName());
-        if (position != -1) {
-            for (int i = position + 1; i < classList.size(); i++) {
-                ClassObject classObject = classList.get(i);
-                classNameMap.put(classObject.getName(), classNameMap.get(classObject.getName()) - 1);
-            }
-            classNameMap.remove(c.getName());
-            classList.remove(c);
-        }
-    }
-
     public void addGetter(MethodInvocationObject methodInvocation, FieldInstructionObject fieldInstruction) {
         getterMap.put(methodInvocation, fieldInstruction);
     }
@@ -152,10 +126,6 @@ public class SystemObject {
 
     public ListIterator<ClassObject> getClassListIterator() {
         return classList.listIterator();
-    }
-
-    public int getClassNumber() {
-        return classList.size();
     }
 
     private int getPositionInClassList(String className) {

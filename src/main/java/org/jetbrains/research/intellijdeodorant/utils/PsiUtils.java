@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class PsiUtils {
-
     private static final String FILE_TYPE_NAME = "JAVA";
 
     public static String calculateSignature(PsiMethod method) {

@@ -6,7 +6,6 @@ import com.intellij.psi.SmartPsiElementPointer;
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class SuperFieldInstructionObject {
-
     private final String ownerClass;
     private final TypeObject type;
     private final String name;
@@ -19,10 +18,6 @@ public class SuperFieldInstructionObject {
         this.type = type;
         this.name = name;
         this._static = false;
-    }
-
-    public String getOwnerClass() {
-        return ownerClass;
     }
 
     public TypeObject getType() {

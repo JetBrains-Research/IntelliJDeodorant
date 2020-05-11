@@ -9,7 +9,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractE
 import java.util.*;
 
 class MyAbstractExpression {
-
     private AbstractExpression expression;
     private MyCompositeStatement owner;
     private List<MyMethodInvocation> methodInvocationList;
@@ -77,38 +76,8 @@ class MyAbstractExpression {
             return methodInvocation;
     }
 
-    public void setMethodInvocationList(List<MyMethodInvocation> list) {
-        this.methodInvocationList = list;
-    }
-
-    public void setAttributeInstructionList(List<MyAttributeInstruction> list) {
-        this.attributeInstructionList = list;
-    }
-
-    public boolean containsAttributeInstruction(MyAttributeInstruction instruction) {
-        return attributeInstructionList.contains(instruction);
-    }
-
     public boolean containsMethodInvocation(MyMethodInvocation invocation) {
         return methodInvocationList.contains(invocation);
-    }
-
-    public void addMethodInvocation(MyMethodInvocation myMethodInvocation) {
-        if (!methodInvocationList.contains(myMethodInvocation))
-            methodInvocationList.add(myMethodInvocation);
-    }
-
-    public void addAttributeInstruction(MyAttributeInstruction myAttributeInstruction) {
-        if (!attributeInstructionList.contains(myAttributeInstruction))
-            attributeInstructionList.add(myAttributeInstruction);
-    }
-
-    public int getNumberOfAttributeInstructions() {
-        return this.attributeInstructionList.size();
-    }
-
-    public int getNumberOfMethodInvocations() {
-        return this.methodInvocationList.size();
     }
 
     public ListIterator<MyMethodInvocation> getMethodInvocationIterator() {
@@ -121,10 +90,6 @@ class MyAbstractExpression {
 
     public void setOwner(MyCompositeStatement owner) {
         this.owner = owner;
-    }
-
-    public MyCompositeStatement getOwner() {
-        return this.owner;
     }
 
     public AbstractExpression getExpression() {

@@ -71,10 +71,10 @@ public abstract class PolymorphismRefactoring {
 
     private void addQualifierToSourceTypeMethodCalls(PsiMethodCallExpression newMethodInvocation, PsiMethod methodDeclaration) {
         String invokerName = sourceTypeDeclaration.getName();
-        if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
+        if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC) && invokerName != null) {
             invokerName = invokerName.substring(0, 1).toLowerCase() + invokerName.substring(1);
+            newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
         }
-        newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
     }
 
     protected void replaceThisExpressionWithContextParameterInMethodInvocationArguments(List<PsiExpression> oldMethodInvocations,
@@ -446,7 +446,6 @@ public abstract class PolymorphismRefactoring {
         return null;
     }
 
-
     protected void generateGettersForAccessedFields() {
         Set<PsiField> accessedFields = new LinkedHashSet<>();
         accessedFields.addAll(typeCheckElimination.getAccessedFields());
@@ -550,10 +549,6 @@ public abstract class PolymorphismRefactoring {
 
     public PsiClass getSourceTypeDeclaration() {
         return sourceTypeDeclaration;
-    }
-
-    public PsiFile getSourceFile() {
-        return sourceFile;
     }
 
     public TypeCheckElimination getTypeCheckElimination() {
