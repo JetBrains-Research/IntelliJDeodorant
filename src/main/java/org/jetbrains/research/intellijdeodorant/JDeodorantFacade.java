@@ -14,18 +14,10 @@ import java.util.*;
 
 public class JDeodorantFacade {
 
-    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator, Set<String> classNamesToBeExamined) {
         new ASTReader(project, indicator);
-        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(ASTReader.getSystemObject().getClassObjects());
-
-        Set<String> classNamesToBeExamined = new LinkedHashSet<>();
-        for (ClassObject classObject : classObjectsToBeExamined) {
-            if (!classObject.isEnum() && !classObject.isInterface())
-                classNamesToBeExamined.add(classObject.getName());
-        }
         MySystem system = new MySystem(ASTReader.getSystemObject(), false);
         DistanceMatrix distanceMatrix = new DistanceMatrix(system);
-
         List<MoveMethodCandidateRefactoring> candidateRefactoring =
                 distanceMatrix.getMoveMethodCandidateRefactoringsByAccess(classNamesToBeExamined, indicator);
         List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<>(candidateRefactoring);

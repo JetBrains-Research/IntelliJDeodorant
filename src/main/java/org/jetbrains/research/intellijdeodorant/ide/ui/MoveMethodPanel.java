@@ -1,17 +1,16 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMember;
+import com.intellij.psi.*;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TableSpeedSearch;
-import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +24,7 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringsAppl
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.ui.listeners.DoubleClickListener;
 import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
+import org.jetbrains.research.intellijdeodorant.utils.PsiUtils;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -48,18 +48,20 @@ class MoveMethodPanel extends JPanel {
     private final JBTable table = new JBTable();
     private final JButton selectAllButton = new JButton();
     private final JButton deselectAllButton = new JButton();
-    private final JButton doRefactorButton = new JButton();
-    private final JButton refreshButton = new JButton();
+    private final JButton doRefactorButton = new JButton(AllIcons.Actions.RefactoringBulb);
+    private final JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private JScrollPane scrollPane = new JBScrollPane();
-    private final JButton exportButton = new JButton();
+    private final JButton exportButton = new JButton(AllIcons.ToolbarDecorator.Export);
     private final JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
+    private final ScopeChooserCombo scopeChooserCombo;
 
     MoveMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
+        this.scopeChooserCombo = new ScopeChooserCombo(scope.getProject());
         setLayout(new BorderLayout());
         model = new MoveMethodTableModel(refactorings);
         setupGUI();
@@ -67,7 +69,7 @@ class MoveMethodPanel extends JPanel {
 
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonsPanel(), BorderLayout.SOUTH);
+        add(createButtonsPanel(), BorderLayout.NORTH);
     }
 
     private JScrollPane createTablePanel() {
@@ -95,37 +97,26 @@ class MoveMethodPanel extends JPanel {
     }
 
     private JComponent createButtonsPanel() {
-        final JPanel panel = new JPanel(new BorderLayout());
-        final JPanel buttonsPanel = new JBPanel<JBPanel<JBPanel>>();
-        buttonsPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonsPanel = new JPanel(new BorderLayout());
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        buttonsPanel.add(scopeChooserCombo);
 
-        selectAllButton.setText(IntelliJDeodorantBundle.message("select.all.button"));
-        selectAllButton.addActionListener(e -> model.selectAll());
-        selectAllButton.setEnabled(false);
-        buttonsPanel.add(selectAllButton);
+        refreshButton.setToolTipText(IntelliJDeodorantBundle.message("refresh.button"));
+        refreshButton.addActionListener(l -> refreshPanel());
+        buttonsPanel.add(refreshButton);
 
-        deselectAllButton.setText(IntelliJDeodorantBundle.message("deselect.all.button"));
-        deselectAllButton.addActionListener(e -> model.deselectAll());
-        deselectAllButton.setEnabled(false);
-        buttonsPanel.add(deselectAllButton);
-
-        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
+        doRefactorButton.setToolTipText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.addActionListener(e -> doRefactor());
         doRefactorButton.setEnabled(false);
         buttonsPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
-        refreshButton.addActionListener(l -> refreshPanel());
-        buttonsPanel.add(refreshButton);
-
-        exportButton.setText(IntelliJDeodorantBundle.message("export"));
+        exportButton.setToolTipText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(e -> ExportResultsUtil.export(getValidRefactoringsSuggestions(), this));
         exportButton.setEnabled(false);
         buttonsPanel.add(exportButton);
-        panel.add(buttonsPanel, BorderLayout.EAST);
 
         model.addTableModelListener(l -> enableButtonsOnConditions());
-        return panel;
+        return buttonsPanel;
     }
 
     private List<MoveMethodRefactoring> getValidRefactoringsSuggestions() {
@@ -172,13 +163,19 @@ class MoveMethodPanel extends JPanel {
 
     private void calculateRefactorings() {
         Project project = scope.getProject();
-        ProjectInfo projectInfo = new ProjectInfo(project);
+        ProjectInfo projectInfo = new ProjectInfo(scopeChooserCombo.getScope(), true);
+        Set<String> classNamesToBeExamined = new HashSet<>();
+
+        PsiUtils.extractFiles(project).stream()
+                .filter(file -> scopeChooserCombo.getScope().contains(file))
+                .forEach(list ->
+                        Arrays.stream(list.getClasses()).map(PsiClass::getQualifiedName).forEach(classNamesToBeExamined::add));
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("feature.envy.detect.indicator.status"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    List<MoveMethodCandidateRefactoring> candidates = JDeodorantFacade.getMoveMethodRefactoringOpportunities(projectInfo, indicator);
+                    List<MoveMethodCandidateRefactoring> candidates = JDeodorantFacade.getMoveMethodRefactoringOpportunities(projectInfo, indicator, classNamesToBeExamined);
                     final List<MoveMethodRefactoring> references = candidates.stream().filter(Objects::nonNull)
                             .map(x ->
                                     new MoveMethodRefactoring(x.getSourceMethodDeclaration(),

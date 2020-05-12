@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
@@ -22,7 +23,6 @@ import com.intellij.refactoring.extractMethod.ExtractMethodHandler;
 import com.intellij.refactoring.extractMethod.PrepareFailedException;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableTree;
@@ -63,24 +63,26 @@ class ExtractMethodPanel extends JPanel {
     private final AnalysisScope scope;
     private final ExtractMethodTreeTableModel treeTableModel = new ExtractMethodTreeTableModel();
     private final TreeTable treeTable = new TreeTable(treeTableModel);
-    private final JButton doRefactorButton = new JButton();
-    private final JButton refreshButton = new JButton();
+    private final JButton doRefactorButton = new JButton(AllIcons.Actions.RefactoringBulb);
+    private final JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
     private JScrollPane scrollPane = new JBScrollPane();
-    private final JButton exportButton = new JButton();
+    private final JButton exportButton = new JButton(AllIcons.ToolbarDecorator.Export);
     private final JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
+    private final ScopeChooserCombo scopeChooserCombo;
 
     ExtractMethodPanel(@NotNull AnalysisScope scope) {
         this.scope = scope;
+        this.scopeChooserCombo = new ScopeChooserCombo(scope.getProject());
         setLayout(new BorderLayout());
         setupGUI();
     }
 
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
+        add(createButtonPanel(), BorderLayout.NORTH);
     }
 
     /**
@@ -109,27 +111,27 @@ class ExtractMethodPanel extends JPanel {
      * @return panel with buttons.
      */
     private JComponent createButtonPanel() {
-        final JPanel panel = new JPanel(new BorderLayout());
-        final JPanel buttonPanel = new JBPanel<JBPanel<JBPanel>>();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonsPanel = new JPanel(new BorderLayout());
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        scopeChooserCombo.setToolTipText("Searching Scope");
+        buttonsPanel.add(scopeChooserCombo);
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
-        doRefactorButton.addActionListener(e -> refactorSelected());
-        doRefactorButton.setEnabled(false);
-        buttonPanel.add(doRefactorButton);
-
-        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
+        refreshButton.setToolTipText(IntelliJDeodorantBundle.message("refresh.button"));
         refreshButton.addActionListener(l -> refreshPanel());
         refreshButton.setEnabled(true);
-        buttonPanel.add(refreshButton);
+        buttonsPanel.add(refreshButton);
 
-        exportButton.setText(IntelliJDeodorantBundle.message("export"));
-        exportButton.addActionListener(e -> ExportResultsUtil.export(getAvailableRefactoringSuggestions(), panel));
+        doRefactorButton.setToolTipText(IntelliJDeodorantBundle.message("refactor.button"));
+        doRefactorButton.addActionListener(e -> refactorSelected());
+        doRefactorButton.setEnabled(false);
+        buttonsPanel.add(doRefactorButton);
+
+        exportButton.setToolTipText(IntelliJDeodorantBundle.message("export"));
+        exportButton.addActionListener(e -> ExportResultsUtil.export(getAvailableRefactoringSuggestions(), this));
         exportButton.setEnabled(false);
-        buttonPanel.add(exportButton);
+        buttonsPanel.add(exportButton);
 
-        panel.add(buttonPanel, BorderLayout.EAST);
-        return panel;
+        return buttonsPanel;
     }
 
     /**
@@ -196,7 +198,7 @@ class ExtractMethodPanel extends JPanel {
      */
     private void calculateRefactorings() {
         Project project = scope.getProject();
-        ProjectInfo projectInfo = new ProjectInfo(project);
+        ProjectInfo projectInfo = new ProjectInfo(scopeChooserCombo.getScope(), false);
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
                 IntelliJDeodorantBundle.message("long.method.detect.indicator.status"), true) {

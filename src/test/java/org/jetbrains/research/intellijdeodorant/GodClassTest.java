@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -193,7 +194,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
 
             myFixture.copyDirectoryToProject(testName + "/initial", testName + "/actual");
 
-            Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(myFixture.getProject()), fakeProgressIndicator);
+            Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(new AnalysisScope(myFixture.getProject()), false), fakeProgressIndicator);
 
             assertTrue(candidateGroups.size() > 0);
 

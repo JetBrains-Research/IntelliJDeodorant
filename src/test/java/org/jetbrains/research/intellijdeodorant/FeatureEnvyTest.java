@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightProjectDescriptor;
@@ -9,6 +10,8 @@ import org.jetbrains.research.intellijdeodorant.core.FeatureEnvyVisualizationDat
 import org.jetbrains.research.intellijdeodorant.core.distance.MoveMethodCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.core.distance.ProjectInfo;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
@@ -23,8 +26,8 @@ public class FeatureEnvyTest extends LightJavaCodeInsightFixtureTestCase {
         myFixture.addFileToProject("src/resources/B.java", toClass);
         myFixture.allowTreeAccessForAllFiles();
         Project project = myFixture.getProject();
-        ProjectInfo projectInfo = new ProjectInfo(project);
-        return JDeodorantFacade.getMoveMethodRefactoringOpportunities(projectInfo, new ProgressIndicatorBase());
+        ProjectInfo projectInfo = new ProjectInfo(new AnalysisScope(project), true);
+        return JDeodorantFacade.getMoveMethodRefactoringOpportunities(projectInfo, new ProgressIndicatorBase(), new HashSet<>(Arrays.asList("testCases.featureEnvy.A", "testCases.featureEnvy.B")));
     }
 
     @NotNull

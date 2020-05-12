@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationDisplayType;
@@ -30,7 +31,6 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableTree;
@@ -65,14 +65,15 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     protected final AnalysisScope scope;
     private final AbstractTreeTableModel model;
     private final TreeTable treeTable;
-    private final JButton doRefactorButton = new JButton();
-    private final JButton refreshButton = new JButton();
-    private final JButton exportButton = new JButton();
+    private final JButton doRefactorButton = new JButton(AllIcons.Actions.RefactoringBulb);
+    private final JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
+    private final JButton exportButton = new JButton(AllIcons.ToolbarDecorator.Export);
     private JScrollPane scrollPane = new JBScrollPane();
     private final JLabel refreshLabel = new JLabel(
             IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
+    private final ScopeChooserCombo scopeChooserCombo;
     private final RefactoringType refactoringType;
     private static Notification errorNotification;
     private final int refactorDepth;
@@ -83,6 +84,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                                     AbstractTreeTableModel model,
                                     int refactorDepth) {
         this.scope = scope;
+        this.scopeChooserCombo = new ScopeChooserCombo(scope.getProject());
         this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
@@ -138,7 +140,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
+        add(createButtonPanel(), BorderLayout.NORTH);
         registerPsiModificationListener();
         showRefreshingProposal();
     }
@@ -214,25 +216,24 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * @return panel with buttons.
      */
     private JComponent createButtonPanel() {
-        final JPanel panel = new JPanel(new BorderLayout());
-        final JPanel buttonPanel = new JBPanel<JBPanel<JBPanel>>();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonsPanel = new JPanel(new BorderLayout());
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        buttonsPanel.add(scopeChooserCombo);
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message("refactor.button"));
+        refreshButton.setToolTipText(IntelliJDeodorantBundle.message("refresh.button"));
+        refreshButton.addActionListener(l -> refreshPanel());
+        buttonsPanel.add(refreshButton);
+
+        doRefactorButton.setToolTipText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.setEnabled(false);
         doRefactorButton.addActionListener(l -> refactorSelected());
-        buttonPanel.add(doRefactorButton);
+        buttonsPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message("refresh.button"));
-        refreshButton.addActionListener(l -> refreshPanel());
-        buttonPanel.add(refreshButton);
-
-        exportButton.setText(IntelliJDeodorantBundle.message("export"));
+        exportButton.setToolTipText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(l -> exportResults());
-        buttonPanel.add(exportButton);
+        buttonsPanel.add(exportButton);
 
-        panel.add(buttonPanel, BorderLayout.EAST);
-        return panel;
+        return buttonsPanel;
     }
 
     private void exportResults() {
@@ -288,7 +289,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      */
     private void calculateRefactorings() {
         Project project = scope.getProject();
-        ProjectInfo projectInfo = new ProjectInfo(project);
+        ProjectInfo projectInfo = new ProjectInfo(scopeChooserCombo.getScope(), false);
 
         final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
                 IntelliJDeodorantBundle.message(detectIndicatorStatusTextKey), true) {

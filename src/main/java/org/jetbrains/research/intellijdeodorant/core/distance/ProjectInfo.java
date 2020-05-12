@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
@@ -19,9 +20,9 @@ public class ProjectInfo {
     private final List<PsiMethod> psiMethods;
     private final Project project;
 
-    public ProjectInfo(Project project) {
-        this.project = project;
-        List<PsiJavaFile> psiFiles = PsiUtils.extractFiles(project);
+    public ProjectInfo(AnalysisScope scope, boolean analyseAllFiles) {
+        this.project = scope.getProject();
+        List<PsiJavaFile> psiFiles = analyseAllFiles ? PsiUtils.extractFiles(project) : PsiUtils.extractFiles(project).stream().filter(scope::contains).collect(Collectors.toList());
         this.psiClasses = psiFiles.stream()
                 .flatMap(psiFile -> PsiUtils.extractClasses(psiFile).stream())
                 .collect(Collectors.toList());

@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.distance;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiField;
@@ -34,7 +35,7 @@ public class GodClassDistanceMatrixTest extends LightJavaCodeInsightFixtureTestC
         myFixture.configureByFile(PATH_TO_TESTS + classFileName);
         Project project = myFixture.getProject();
         PsiFile psiFile = FilenameIndex.getFilesByName(project, classFileName, GlobalSearchScope.allScope(project))[0];
-        ProjectInfo projectInfo = new ProjectInfo(project);
+        ProjectInfo projectInfo = new ProjectInfo(new AnalysisScope(project), false);
 
         Set<ExtractClassCandidateGroup> set = getExtractClassRefactoringOpportunities(projectInfo, new ProgressIndicatorBase());
 
