@@ -169,7 +169,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                             source = getTextAndReformat(parent);
                             PsiElement elementToReplace = initialToCopy.get(elementChange.getPsiElement());
                             PsiElement replacingElement = initialToCopy.get(elementChange.getAnchor());
-                            elementToReplace.replace(replacingElement);
+                            if (replacingElement != null)
+                                elementToReplace.replace(replacingElement);
                             updated = getTextAndReformat(parentCopy);
                             break;
                         }
@@ -201,7 +202,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
                     ExtractClassPreviewProcessor.mapElementsToCopy(initialMethod, copyMethod, initialToCopy);
 
                     sourceElement = initialToCopy.get(sourceElement);
-                    sourceElement.replace(extractedElement);
+                    if (extractedElement != null)
+                        sourceElement.replace(extractedElement);
 
                     updated = getTextAndReformat(copyMethod);
                 }
