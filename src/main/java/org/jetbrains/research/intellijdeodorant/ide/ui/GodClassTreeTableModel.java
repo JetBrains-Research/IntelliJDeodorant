@@ -45,38 +45,35 @@ public class GodClassTreeTableModel extends AbstractTreeTableModel {
     }
 
     @Override
-    public int getChildCount(Object parent) {
+    public List<?> getChildren(Object parent) {
         if (parent instanceof AbstractExtractClassCandidateRefactoringGroup) {
             AbstractExtractClassCandidateRefactoringGroup abstractGroup = (AbstractExtractClassCandidateRefactoringGroup) parent;
             ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) abstractGroup.getCandidateRefactoringGroup();
 
-            return group.getExtractedConcepts().size();
+            return group.getExtractedConcepts();
         } else if (parent instanceof ExtractedConceptAndChildren) {
             ExtractedConceptAndChildren concept = (ExtractedConceptAndChildren) parent;
-            return concept.children.size();
+            return concept.children;
         } else {
-            return super.getChildCount(parent);
+            return super.getChildren(parent);
         }
     }
 
     @Override
     public Object getChild(Object parent, int index) {
-        if (parent instanceof AbstractExtractClassCandidateRefactoringGroup) {
-            AbstractExtractClassCandidateRefactoringGroup abstractGroup = (AbstractExtractClassCandidateRefactoringGroup) parent;
-            ExtractClassCandidateGroup group = (ExtractClassCandidateGroup) abstractGroup.getCandidateRefactoringGroup();
+        Object child = super.getChild(parent, index);
 
-            return new ExtractedConceptAndChildren(group.getExtractedConcepts().get(index));
-        } else if (parent instanceof ExtractedConceptAndChildren) {
-            ExtractedConceptAndChildren concept = (ExtractedConceptAndChildren) parent;
-            return concept.children.get(index);
+        if (parent instanceof AbstractExtractClassCandidateRefactoringGroup
+                && child instanceof ExtractedConcept) {
+            return new ExtractedConceptAndChildren((ExtractedConcept) child);
         } else {
-            return super.getChild(parent, index);
+            return child;
         }
     }
 
     private static class ExtractedConceptAndChildren {
-        private ExtractedConcept extractedConcept;
-        private List<AbstractExtractClassCandidateRefactoring> children;
+        private final ExtractedConcept extractedConcept;
+        private final List<AbstractExtractClassCandidateRefactoring> children;
 
         private ExtractedConceptAndChildren(ExtractedConcept extractedConcept) {
             this.extractedConcept = extractedConcept;

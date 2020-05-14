@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.analysis.AnalysisScope;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.EditorHelper;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationDisplayType;
@@ -12,6 +13,7 @@ import com.intellij.openapi.compiler.CompileStatusNotification;
 import com.intellij.openapi.compiler.CompilerManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -26,13 +28,12 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.impl.PsiModificationTrackerImpl;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.treetable.TreeTable;
+import com.intellij.ui.treeStructure.treetable.TreeTableTree;
 import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,33 +51,32 @@ import org.jetbrains.research.intellijdeodorant.utils.ExportResultsUtil;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRefactoringPanel extends JPanel {
-    private static final String REFACTOR_BUTTON_TEXT_KEY = "refactor.button";
-    private static final String REFRESH_BUTTON_TEXT_KEY = "refresh.button";
-    private static final String EXPORT_BUTTON_TEXT_KEY = "export";
-    private static final String REFRESH_NEEDED_TEXT = "press.refresh.to.find.refactoring.opportunities";
     private static final NotificationGroup NOTIFICATION_GROUP =
             new NotificationGroup(IntelliJDeodorantBundle.message("intellijdeodorant"), NotificationDisplayType.STICKY_BALLOON, true);
-    private String detectIndicatorStatusTextKey;
+    private final String detectIndicatorStatusTextKey;
     @NotNull
     protected final AnalysisScope scope;
-    private AbstractTreeTableModel model;
+    private final AbstractTreeTableModel model;
     private final TreeTable treeTable;
-    private final JButton doRefactorButton = new JButton();
-    private final JButton refreshButton = new JButton();
-    private final JButton exportButton = new JButton();
+    private final JButton doRefactorButton = new JButton(AllIcons.Actions.RefactoringBulb);
+    private final JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
+    private final JButton exportButton = new JButton(AllIcons.ToolbarDecorator.Export);
     private JScrollPane scrollPane = new JBScrollPane();
-    private JLabel refreshLabel = new JLabel(
-            IntelliJDeodorantBundle.message(REFRESH_NEEDED_TEXT),
+    private final JLabel refreshLabel = new JLabel(
+            IntelliJDeodorantBundle.message("press.refresh.to.find.refactoring.opportunities"),
             SwingConstants.CENTER
     );
-    private RefactoringType refactoringType;
+    private final ScopeChooserCombo scopeChooserCombo;
+    private final RefactoringType refactoringType;
     private static Notification errorNotification;
-    private int refactorDepth;
+    private final int refactorDepth;
 
     private boolean isPreviewUsage;
 
@@ -86,6 +86,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                                     AbstractTreeTableModel model,
                                     int refactorDepth) {
         this.scope = scope;
+        this.scopeChooserCombo = new ScopeChooserCombo(scope.getProject());
         this.detectIndicatorStatusTextKey = detectIndicatorStatusTextKey;
         this.refactoringType = refactoringType;
         this.model = model;
@@ -96,7 +97,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         setupGUI();
     }
 
-    public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable, Project project, ProjectInfo projectInfo) {
+    protected void logFound(Project project, Integer total) {}
+
+    public static void runAfterCompilationCheck(Task.Backgroundable afterCompilationBackgroundable,
+                                                Project project, ProjectInfo projectInfo) {
         final Task.Backgroundable compilationBackgroundable = new Task.Backgroundable(project, IntelliJDeodorantBundle.message("project.compiling.indicator.text"), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -108,7 +112,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     }
 
     /**
-     * Runs task only if there are no compilation errors in the project.
+     * Compiles the project and runs the task only if there are no compilation errors.
      */
     private static void runAfterCompilationCheck(ProjectInfo projectInfo, Task task) {
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -124,6 +128,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                     if (errors == 0 && !aborted) {
                         ProgressManager.getInstance().run(task);
                     } else {
+                        task.onCancel();
                         AbstractRefactoringPanel.showCompilationErrorNotification(project);
                     }
                 };
@@ -137,30 +142,32 @@ public abstract class AbstractRefactoringPanel extends JPanel {
 
     private void setupGUI() {
         add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
+        add(createButtonPanel(), BorderLayout.NORTH);
         registerPsiModificationListener();
         showRefreshingProposal();
     }
 
     private void removeSelection() {
-        treeTable.getTree().setSelectionPath(null);
+        treeTable.getTree().clearSelection();
     }
 
     /**
-     * Shows treeTable with available refactorings.
+     * Shows the panel with refactoring suggestions.
      */
     private void showRefactoringsTable() {
         removeSelection();
         scrollPane.setVisible(true);
         model.reload();
         exportButton.setEnabled(!model.getCandidateRefactoringGroups().isEmpty());
+        refreshButton.setEnabled(true);
         scrollPane.setViewportView(treeTable);
     }
 
     /**
-     * Hides treeTable with refactorings and shows text which proposes refreshing available refactorings.
+     * Clears the panel and shows text that proposes to press the Refresh button to search for refactoring opportunities.
      */
     protected void showRefreshingProposal() {
+        model.candidateRefactoringGroups.clear();
         removeSelection();
         if (errorNotification != null && !errorNotification.isExpired()) {
             errorNotification.expire();
@@ -168,14 +175,17 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         scrollPane.setVisible(true);
         exportButton.setEnabled(false);
         scrollPane.setViewportView(refreshLabel);
+        refreshButton.setEnabled(true);
     }
 
     /**
-     * Hides treeTable with refactorings and leaves panel empty
+     * Hides the panel while calculation of refactoring suggestions is in progress.
      */
     private void showEmptyPanel() {
+        model.candidateRefactoringGroups.clear();
         removeSelection();
         exportButton.setEnabled(false);
+        refreshButton.setEnabled(false);
         scrollPane.setVisible(false);
     }
 
@@ -198,15 +208,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * Adds a listener that invalidates found refactoring opportunities if the structure of PSI is changed.
      */
     private void registerPsiModificationListener() {
-        MessageBus projectMessageBus = scope.getProject().getMessageBus();
-        projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, new PsiModificationTracker.Listener() {
-            @Override
-            public void modificationCountChanged() {
-                if (!isPreviewUsage) {
-                    ApplicationManager.getApplication().invokeLater(() -> showRefreshingProposal());
-                }
-            }
-        });
+        if (!isPreviewUsage) {
+            MessageBus projectMessageBus = scope.getProject().getMessageBus();
+            projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, () -> ApplicationManager.getApplication().invokeLater(this::showRefreshingProposal));
+        }
     }
 
     /**
@@ -215,25 +220,24 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * @return panel with buttons.
      */
     private JComponent createButtonPanel() {
-        final JPanel panel = new JPanel(new BorderLayout());
-        final JPanel buttonPanel = new JBPanel<JBPanel<JBPanel>>();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        JPanel buttonsPanel = new JPanel(new BorderLayout());
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        buttonsPanel.add(scopeChooserCombo);
 
-        doRefactorButton.setText(IntelliJDeodorantBundle.message(REFACTOR_BUTTON_TEXT_KEY));
+        refreshButton.setToolTipText(IntelliJDeodorantBundle.message("refresh.button"));
+        refreshButton.addActionListener(l -> refreshPanel());
+        buttonsPanel.add(refreshButton);
+
+        doRefactorButton.setToolTipText(IntelliJDeodorantBundle.message("refactor.button"));
         doRefactorButton.setEnabled(false);
         doRefactorButton.addActionListener(l -> refactorSelected());
-        buttonPanel.add(doRefactorButton);
+        buttonsPanel.add(doRefactorButton);
 
-        refreshButton.setText(IntelliJDeodorantBundle.message(REFRESH_BUTTON_TEXT_KEY));
-        refreshButton.addActionListener(l -> refreshPanel());
-        buttonPanel.add(refreshButton);
-
-        exportButton.setText(IntelliJDeodorantBundle.message(EXPORT_BUTTON_TEXT_KEY));
+        exportButton.setToolTipText(IntelliJDeodorantBundle.message("export"));
         exportButton.addActionListener(l -> exportResults());
-        buttonPanel.add(exportButton);
+        buttonsPanel.add(exportButton);
 
-        panel.add(buttonPanel, BorderLayout.EAST);
-        return panel;
+        return buttonsPanel;
     }
 
     private void exportResults() {
@@ -288,9 +292,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * Calculates suggestions for whole project.
      */
     private void calculateRefactorings() {
-        ProjectInfo projectInfo = new ProjectInfo(scope.getProject());
+        Project project = scope.getProject();
+        ProjectInfo projectInfo = new ProjectInfo(scopeChooserCombo.getScope(), false);
 
-        final Task.Backgroundable backgroundable = new Task.Backgroundable(scope.getProject(),
+        final Task.Backgroundable backgroundable = new Task.Backgroundable(project,
                 IntelliJDeodorantBundle.message(detectIndicatorStatusTextKey), true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -301,9 +306,15 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                         showCompilationErrorNotification(getProject());
                         candidates = new ArrayList<>();
                     }
+                    logFound(project, candidates.size());
                     model.setCandidateRefactoringGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });
+            }
+
+            @Override
+            public void onCancel() {
+                showRefreshingProposal();
             }
         };
 
@@ -313,13 +324,29 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     /**
      * Highlights refactoring-specific code fragment.
      */
-    private void highlightCode() {
-        TreePath selectedPath = treeTable.getTree().getSelectionModel().getSelectionPath();
-        if (selectedPath != null && selectedPath.getPathCount() == refactorDepth) {
+    private void highlightCode(InputEvent e) {
+        TreeTableTree treeTableTree = treeTable.getTree();
+        TreePath selectedPath = treeTableTree.getSelectionModel().getSelectionPath();
+        if (selectedPath != null) {
             Object o = selectedPath.getLastPathComponent();
             if (refactoringType.instanceOfCandidateRefactoring(o)) {
                 AbstractCandidateRefactoring refactoring = (AbstractCandidateRefactoring) o;
                 refactoring.highlightCode();
+            } else {
+                expandOrCollapsePath(e, treeTableTree, selectedPath);
+            }
+        }
+    }
+
+    /**
+     * Collapse if the selected path is extended, otherwise expand.
+     */
+    public static void expandOrCollapsePath(InputEvent e, TreeTableTree treeTableTree, TreePath selectedPath) {
+        if (e instanceof KeyEvent) {
+            if (treeTableTree.isExpanded(selectedPath)) {
+                treeTableTree.collapsePath(selectedPath);
+            } else {
+                treeTableTree.expandPath(selectedPath);
             }
         }
     }
@@ -383,15 +410,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         if (editor == null) {
             return;
         }
-        Color foregroundColor = editor.getColorsScheme().getColor(EditorColors.SELECTION_FOREGROUND_COLOR);
-        Color backgroundColor = new JBColor(new Color(84, 168, 78), new Color(16, 105, 15));
-        TextAttributes attributes = new TextAttributes(foregroundColor,
-                backgroundColor,
-                null,
-                null,
-                0
-        );
 
+        TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
         editor.getMarkupModel().addRangeHighlighter(
                 psiElement.getTextRange().getStartOffset(),
                 psiElement.getTextRange().getEndOffset(),

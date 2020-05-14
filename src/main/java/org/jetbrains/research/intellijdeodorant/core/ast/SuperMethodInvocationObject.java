@@ -1,7 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
-import com.intellij.psi.PsiSuperExpression;
-
 import java.util.List;
 
 public class SuperMethodInvocationObject extends AbstractMethodInvocationObject {
@@ -14,11 +12,4 @@ public class SuperMethodInvocationObject extends AbstractMethodInvocationObject 
         super(originClassType, methodName, returnType, parameterList);
     }
 
-    public void setSuperMethodInvocation(PsiSuperExpression superMethodInvocation) {
-        this.methodInvocation = ASTInformationGenerator.generateASTInformation(superMethodInvocation);
-    }
-
-    public PsiSuperExpression getSuperMethodInvocation() {
-        return (PsiSuperExpression) this.methodInvocation.recoverASTNode();
-    }
 }

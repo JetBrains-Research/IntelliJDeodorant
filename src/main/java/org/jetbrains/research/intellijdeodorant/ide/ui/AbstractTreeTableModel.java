@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
+import com.sun.istack.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringType.AbstractCandidateRefactoringGroup;
@@ -11,16 +12,15 @@ import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
 public abstract class AbstractTreeTableModel extends DefaultTreeModel implements TreeTableModel {
-    private int numberOfColumns;
-    private String[] columnNames;
+    private final String[] columnNames;
     protected List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups;
-    private RefactoringType refactoringType;
+    private final RefactoringType refactoringType;
 
-    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, RefactoringType refactoringType) {
+    public AbstractTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups,
+                                  String[] columnNames, RefactoringType refactoringType) {
         super(new DefaultMutableTreeNode("root"));
         this.candidateRefactoringGroups = candidateRefactoringGroups;
         this.columnNames = columnNames;
-        this.numberOfColumns = columnNames.length;
         this.refactoringType = refactoringType;
     }
 
@@ -34,7 +34,7 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public int getColumnCount() {
-        return numberOfColumns;
+        return columnNames.length;
     }
 
     @Override
@@ -64,7 +64,6 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
 
     @Override
     public void setTree(JTree tree) {
-        "".hashCode();
     }
 
     @Override
@@ -72,27 +71,48 @@ public abstract class AbstractTreeTableModel extends DefaultTreeModel implements
         return node instanceof AbstractCandidateRefactoring;
     }
 
-    @Override
-    public Object getChild(Object parent, int index) {
+    @Nullable
+    public List<?> getChildren(Object parent) {
         if (parent instanceof AbstractCandidateRefactoringGroup) {
             AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
-            return group.getCandidates().get(index);
+            return group.getCandidates();
         }
-        return candidateRefactoringGroups.get(index);
+
+        if (parent instanceof AbstractCandidateRefactoring) {
+            return null;
+        }
+
+        return candidateRefactoringGroups;
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+        List<?> children = getChildren(parent);
+        if (children != null) {
+            return children.get(index);
+        }
+
+        return null;
     }
 
     @Override
     public int getChildCount(Object parent) {
-        if (parent instanceof AbstractCandidateRefactoringGroup) {
-            AbstractCandidateRefactoringGroup group = (AbstractCandidateRefactoringGroup) parent;
-            return group.getCandidates().size();
-        }
-
-        if (parent instanceof AbstractCandidateRefactoring) {
+        List<?> children = getChildren(parent);
+        if (children != null) {
+            return children.size();
+        } else {
             return 0;
         }
+    }
 
-        return candidateRefactoringGroups.size();
+    @Override
+    public int getIndexOfChild(Object parent, Object child) {
+        List<?> children = getChildren(parent);
+        if (children != null) {
+            return children.indexOf(child);
+        } else {
+            return -1;
+        }
     }
 
     RefactoringType getRefactoringType() {

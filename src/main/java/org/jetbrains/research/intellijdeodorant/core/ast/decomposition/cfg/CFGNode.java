@@ -4,7 +4,7 @@ import com.intellij.psi.PsiStatement;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.AbstractStatement;
 
 public class CFGNode extends GraphNode implements Comparable<CFGNode> {
-    private AbstractStatement statement;
+    private final AbstractStatement statement;
     private BasicBlock basicBlock;
     private PDGNode pdgNode;
     private volatile int hashCode = 0;

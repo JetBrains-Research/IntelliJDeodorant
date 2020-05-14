@@ -1,7 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.psi.PsiPackage;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.ui.RefactoringDialog;
 import org.jetbrains.annotations.Nullable;
@@ -17,61 +16,27 @@ import com.intellij.util.ui.FormBuilder;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
-    private static final String TYPE_NAME_NOT_VALID =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.invalid");
-    private static final String TYPE_NAME_EXISTS_IN_PACKAGE =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.package");
-    private static final String TYPE_NAME_EXISTS_IN_JAVA_LANG =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.javalang");
-    private static final String NAME_ALREADY_CHOSEN =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.chosen");
-    private ReplaceTypeCodeWithStateStrategy refactoring;
-    private Map<JTextField, PsiField> textMap = new HashMap<>();
-    private Map<JTextField, String> defaultNamingMap = new HashMap<>();
+    private final ReplaceTypeCodeWithStateStrategy refactoring;
+    private final Map<JTextField, PsiField> textMap = new HashMap<>();
+    private final Map<JTextField, String> defaultNamingMap = new HashMap<>();
 
     @Nullable
-    private PsiPackage parentPackage;
-    private List<String> javaLangClassNames;
-    private Runnable applyRefactoringCallback;
+    private final PsiPackage parentPackage;
+    private final List<String> javaLangClassNames = new ArrayList<>(Arrays.asList(
+            "Boolean", "Byte", "Character", "Class", "Double", "Enum", "Error", "Exception",
+            "Float", "Integer", "Long", "Math", "Number", "Object", "Package", "Process",
+            "Runtime", "Short", "String", "StringBuffer", "StringBuilder", "System", "Thread", "Void"));
+    private final Runnable applyRefactoringCallback;
     private JPanel mainPanel;
-    private JButton restoreButton = new JButton();
+    private final JButton restoreButton = new JButton();
 
     public ReplaceTypeCodeWithStateStrategyDialog(ReplaceTypeCodeWithStateStrategy refactoring,
                                                   Runnable applyRefactoringCallback) {
         super(refactoring.getProject(), true);
 
         this.refactoring = refactoring;
-        this.javaLangClassNames = new ArrayList<>();
-        this.javaLangClassNames.add("Boolean");
-        this.javaLangClassNames.add("Byte");
-        this.javaLangClassNames.add("Character");
-        this.javaLangClassNames.add("Class");
-        this.javaLangClassNames.add("Double");
-        this.javaLangClassNames.add("Enum");
-        this.javaLangClassNames.add("Error");
-        this.javaLangClassNames.add("Exception");
-        this.javaLangClassNames.add("Float");
-        this.javaLangClassNames.add("Integer");
-        this.javaLangClassNames.add("Long");
-        this.javaLangClassNames.add("Math");
-        this.javaLangClassNames.add("Number");
-        this.javaLangClassNames.add("Object");
-        this.javaLangClassNames.add("Package");
-        this.javaLangClassNames.add("Process");
-        this.javaLangClassNames.add("Runtime");
-        this.javaLangClassNames.add("Short");
-        this.javaLangClassNames.add("String");
-        this.javaLangClassNames.add("StringBuffer");
-        this.javaLangClassNames.add("StringBuilder");
-        this.javaLangClassNames.add("System");
-        this.javaLangClassNames.add("Thread");
-        this.javaLangClassNames.add("Void");
-
         String packageName = PsiUtil.getPackageName(refactoring.getSourceTypeDeclaration());
         parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
         this.applyRefactoringCallback = applyRefactoringCallback;
@@ -172,13 +137,13 @@ public class ReplaceTypeCodeWithStateStrategyDialog extends RefactoringDialog {
         for (JTextField textField : textMap.keySet()) {
             String text = textField.getText();
             if (!Pattern.matches(classNamePattern, textField.getText())) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_NOT_VALID, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.invalid"), textField));
             } else if (parentPackage != null && parentPackage.containsClassNamed(text)) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_PACKAGE, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.package"), textField));
             } else if (javaLangClassNames.contains(text)) {
-                validationInfoList.add(new ValidationInfo(TYPE_NAME_EXISTS_IN_JAVA_LANG, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.exists.javalang"), textField));
             } else if (encounteredNames.contains(text)) {
-                validationInfoList.add(new ValidationInfo(NAME_ALREADY_CHOSEN, textField));
+                validationInfoList.add(new ValidationInfo(IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.dialog.error.chosen"), textField));
             } else {
                 refactoring.setTypeNameForNamedConstant(textMap.get(textField), textField.getText());
             }

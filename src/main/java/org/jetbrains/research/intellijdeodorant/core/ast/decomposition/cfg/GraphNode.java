@@ -6,8 +6,8 @@ import java.util.Set;
 public class GraphNode {
     private static int nodeNum = 0;
     protected int id;
-    protected Set<GraphEdge> incomingEdges;
-    protected Set<GraphEdge> outgoingEdges;
+    protected final Set<GraphEdge> incomingEdges;
+    protected final Set<GraphEdge> outgoingEdges;
 
     GraphNode() {
         nodeNum++;

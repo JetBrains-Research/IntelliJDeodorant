@@ -11,10 +11,10 @@ public class CFG extends Graph {
     private static final int JOIN_TOP_LIST = 1;
     private static final int PLACE_NEW_LIST_SECOND_FROM_TOP = 2;
     private static final int JOIN_SECOND_FROM_TOP_LIST = 3;
-    private AbstractMethodDeclaration method;
-    private Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
-    private Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
-    private Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
+    private final AbstractMethodDeclaration method;
+    private final Stack<List<CFGBranchConditionalNode>> unjoinedConditionalNodes;
+    private final Map<CFGBranchSwitchNode, List<CFGNode>> switchBreakMap;
+    private final Map<CFGBlockNode, List<CFGNode>> directlyNestedNodesInBlocks;
     private BasicBlockCFG basicBlockCFG;
 
     public CFG(AbstractMethodDeclaration method) {
@@ -150,9 +150,11 @@ public class CFG extends Graph {
             directlyNestedNodeInBlock(tryNode);
             findBlockNodeControlParent(tryNode);
             directlyNestedNodesInBlocks.put(tryNode, new ArrayList<>());
-            AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            if (firstStatement instanceof CompositeStatementObject) {
-                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (!compositeStatement.getStatements().isEmpty()) {
+                AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
+                if (firstStatement instanceof CompositeStatementObject) {
+                    previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+                }
             }
         } else {
             //if a try node has resources, it is treated as a non-composite node
@@ -165,9 +167,11 @@ public class CFG extends Graph {
             ArrayList<CFGNode> currentNodes = new ArrayList<>();
             currentNodes.add(tryNode);
             previousNodes = currentNodes;
-            AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
-            if (firstStatement instanceof CompositeStatementObject) {
-                previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+            if (!compositeStatement.getStatements().isEmpty()) {
+                AbstractStatement firstStatement = compositeStatement.getStatements().get(0);
+                if (firstStatement instanceof CompositeStatementObject) {
+                    previousNodes = process(previousNodes, (CompositeStatementObject) firstStatement);
+                }
             }
         }
         return previousNodes;
@@ -233,7 +237,7 @@ public class CFG extends Graph {
             flow.setLoopbackFlow(true);
             edges.add(flow);
         }
-        if (previousNodes.size() > 1) {
+        if (previousNodes.size() > 1 && !unjoinedConditionalNodes.empty()) {
             List<CFGBranchConditionalNode> conditionalNodes = unjoinedConditionalNodes.pop();
             for (CFGBranchConditionalNode conditionalNode : conditionalNodes) {
                 conditionalNode.setJoinNode(currentNode);
@@ -349,6 +353,8 @@ public class CFG extends Graph {
                         else
                             previousStatement = null;
                     }
+                } else {
+                    previousStatement = null;
                 }
                 j++;
             }
@@ -418,12 +424,14 @@ public class CFG extends Graph {
             CFGSwitchCaseNode switchCase = (CFGSwitchCaseNode) currentNode;
             if (previousNodesContainBreakOrReturn(previousNodes, composite)) {
                 CFGBranchSwitchNode switchNode = getMostRecentSwitchNode();
-                Flow flow = new Flow(switchNode, currentNode);
-                if (switchCase.isDefault())
-                    flow.setFalseControlFlow(true);
-                else
-                    flow.setTrueControlFlow(true);
-                edges.add(flow);
+                if (switchNode != null) {
+                    Flow flow = new Flow(switchNode, currentNode);
+                    if (switchCase.isDefault())
+                        flow.setFalseControlFlow(true);
+                    else
+                        flow.setTrueControlFlow(true);
+                    edges.add(flow);
+                }
             } else
                 createTopDownFlow(previousNodes, currentNode);
         } else
@@ -520,82 +528,86 @@ public class CFG extends Graph {
         createTopDownFlow(previousNodes, currentNode);
         previousNodes = new ArrayList<>();
         List<AbstractStatement> ifStatementList = compositeStatement.getStatements();
-        AbstractStatement thenClause = ifStatementList.get(0);
-        if (thenClause instanceof StatementObject) {
-            StatementObject thenClauseStatement = (StatementObject) thenClause;
-            CFGNode thenClauseNode = createNonCompositeNode(thenClauseStatement);
-            nodes.add(thenClauseNode);
-            ArrayList<CFGNode> currentNodes = new ArrayList<>();
-            currentNodes.add(currentNode);
-            createTopDownFlow(currentNodes, thenClauseNode);
-            previousNodes.add(thenClauseNode);
-        } else if (thenClause instanceof CompositeStatementObject) {
-            CompositeStatementObject thenClauseCompositeStatement = (CompositeStatementObject) thenClause;
-            ArrayList<CFGNode> currentNodes = new ArrayList<>();
-            currentNodes.add(currentNode);
-            if (thenClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
-                previousNodes.addAll(processIfStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
-            else if (thenClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
-                previousNodes.addAll(processSwitchStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
-            else if (isLoop(thenClauseCompositeStatement))
-                previousNodes.addAll(processLoopStatement(currentNodes, thenClauseCompositeStatement));
-            else if (thenClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
-                previousNodes.addAll(processDoStatement(currentNodes, thenClauseCompositeStatement));
-            else
-                previousNodes.addAll(process(currentNodes, thenClauseCompositeStatement));
-        }
-        if (ifStatementList.size() == 2) {
-            AbstractStatement elseClause = ifStatementList.get(1);
-            if (elseClause instanceof StatementObject) {
-                StatementObject elseClauseStatement = (StatementObject) elseClause;
-                CFGNode elseClauseNode = createNonCompositeNode(elseClauseStatement);
-                nodes.add(elseClauseNode);
+        if (ifStatementList.size() > 0) {
+            AbstractStatement thenClause = ifStatementList.get(0);
+            if (thenClause instanceof StatementObject) {
+                StatementObject thenClauseStatement = (StatementObject) thenClause;
+                CFGNode thenClauseNode = createNonCompositeNode(thenClauseStatement);
+                nodes.add(thenClauseNode);
                 ArrayList<CFGNode> currentNodes = new ArrayList<>();
                 currentNodes.add(currentNode);
-                createTopDownFlow(currentNodes, elseClauseNode);
-                previousNodes.add(elseClauseNode);
-            } else if (elseClause instanceof CompositeStatementObject) {
-                CompositeStatementObject elseClauseCompositeStatement = (CompositeStatementObject) elseClause;
+                createTopDownFlow(currentNodes, thenClauseNode);
+                previousNodes.add(thenClauseNode);
+            } else if (thenClause instanceof CompositeStatementObject) {
+                CompositeStatementObject thenClauseCompositeStatement = (CompositeStatementObject) thenClause;
                 ArrayList<CFGNode> currentNodes = new ArrayList<>();
                 currentNodes.add(currentNode);
-                if (elseClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
-                    previousNodes.addAll(processIfStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
-                else if (elseClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
-                    previousNodes.addAll(processSwitchStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
-                else if (isLoop(elseClauseCompositeStatement))
-                    previousNodes.addAll(processLoopStatement(currentNodes, elseClauseCompositeStatement));
-                else if (elseClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
-                    previousNodes.addAll(processDoStatement(currentNodes, elseClauseCompositeStatement));
+                if (thenClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
+                    previousNodes.addAll(processIfStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
+                else if (thenClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
+                    previousNodes.addAll(processSwitchStatement(currentNodes, thenClauseCompositeStatement, JOIN_TOP_LIST));
+                else if (isLoop(thenClauseCompositeStatement))
+                    previousNodes.addAll(processLoopStatement(currentNodes, thenClauseCompositeStatement));
+                else if (thenClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
+                    previousNodes.addAll(processDoStatement(currentNodes, thenClauseCompositeStatement));
                 else
-                    previousNodes.addAll(process(currentNodes, elseClauseCompositeStatement));
+                    previousNodes.addAll(process(currentNodes, thenClauseCompositeStatement));
             }
-        } else {
-            previousNodes.add(currentNode);
+            if (ifStatementList.size() == 2) {
+                AbstractStatement elseClause = ifStatementList.get(1);
+                if (elseClause instanceof StatementObject) {
+                    StatementObject elseClauseStatement = (StatementObject) elseClause;
+                    CFGNode elseClauseNode = createNonCompositeNode(elseClauseStatement);
+                    nodes.add(elseClauseNode);
+                    ArrayList<CFGNode> currentNodes = new ArrayList<>();
+                    currentNodes.add(currentNode);
+                    createTopDownFlow(currentNodes, elseClauseNode);
+                    previousNodes.add(elseClauseNode);
+                } else if (elseClause instanceof CompositeStatementObject) {
+                    CompositeStatementObject elseClauseCompositeStatement = (CompositeStatementObject) elseClause;
+                    ArrayList<CFGNode> currentNodes = new ArrayList<>();
+                    currentNodes.add(currentNode);
+                    if (elseClauseCompositeStatement.getStatement() instanceof PsiIfStatement)
+                        previousNodes.addAll(processIfStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
+                    else if (elseClauseCompositeStatement.getStatement() instanceof PsiSwitchStatement)
+                        previousNodes.addAll(processSwitchStatement(currentNodes, elseClauseCompositeStatement, JOIN_TOP_LIST));
+                    else if (isLoop(elseClauseCompositeStatement))
+                        previousNodes.addAll(processLoopStatement(currentNodes, elseClauseCompositeStatement));
+                    else if (elseClauseCompositeStatement.getStatement() instanceof PsiDoWhileStatement)
+                        previousNodes.addAll(processDoStatement(currentNodes, elseClauseCompositeStatement));
+                    else
+                        previousNodes.addAll(process(currentNodes, elseClauseCompositeStatement));
+                }
+            } else {
+                previousNodes.add(currentNode);
+            }
         }
         return previousNodes;
     }
 
     private void handleAction(CFGBranchConditionalNode currentNode, int action) {
-        if (action == JOIN_TOP_LIST && !unjoinedConditionalNodes.empty()) {
-            List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.peek();
-            topList.add(currentNode);
-        } else if (action == JOIN_SECOND_FROM_TOP_LIST) {
-            if (unjoinedConditionalNodes.size() > 1) {
-                List<CFGBranchConditionalNode> list = unjoinedConditionalNodes.elementAt(unjoinedConditionalNodes.size() - 2);
-                list.add(currentNode);
-            } else {
+        if (!unjoinedConditionalNodes.empty()) {
+            if (action == JOIN_TOP_LIST) {
+                List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.peek();
+                topList.add(currentNode);
+            } else if (action == JOIN_SECOND_FROM_TOP_LIST) {
+                if (unjoinedConditionalNodes.size() > 1) {
+                    List<CFGBranchConditionalNode> list = unjoinedConditionalNodes.elementAt(unjoinedConditionalNodes.size() - 2);
+                    list.add(currentNode);
+                } else {
+                    List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
+                    List<CFGBranchConditionalNode> list = new ArrayList<>();
+                    list.add(currentNode);
+                    unjoinedConditionalNodes.push(list);
+                    unjoinedConditionalNodes.push(topList);
+                }
+            } else if (action == PLACE_NEW_LIST_SECOND_FROM_TOP) {
                 List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
                 List<CFGBranchConditionalNode> list = new ArrayList<>();
                 list.add(currentNode);
                 unjoinedConditionalNodes.push(list);
                 unjoinedConditionalNodes.push(topList);
             }
-        } else if (action == PLACE_NEW_LIST_SECOND_FROM_TOP && !unjoinedConditionalNodes.empty()) {
-            List<CFGBranchConditionalNode> topList = unjoinedConditionalNodes.pop();
-            List<CFGBranchConditionalNode> list = new ArrayList<>();
-            list.add(currentNode);
-            unjoinedConditionalNodes.push(list);
-            unjoinedConditionalNodes.push(topList);
         } else {
             List<CFGBranchConditionalNode> list = new ArrayList<>();
             list.add(currentNode);
@@ -616,7 +628,7 @@ public class CFG extends Graph {
             }
             edges.add(flow);
         }
-        if (previousNodes.size() > 1) {
+        if (previousNodes.size() > 1 && !unjoinedConditionalNodes.empty()) {
             List<CFGBranchConditionalNode> conditionalNodes = unjoinedConditionalNodes.pop();
             for (CFGBranchConditionalNode conditionalNode : conditionalNodes) {
                 conditionalNode.setJoinNode(currentNode);

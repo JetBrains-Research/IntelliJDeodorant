@@ -13,7 +13,7 @@ public class TopicFinder {
 
     public static List<String> findTopics(List<String> codeElements) {
         HumaniseCamelCase humaniser = new HumaniseCamelCase();
-        List<String> lowerCaseWords = new ArrayList<String>();
+        List<String> lowerCaseWords = new ArrayList<>();
         for (String codeElement : codeElements) {
             //split based on underscores
             String[] tokens = codeElement.split("_");
@@ -37,7 +37,7 @@ public class TopicFinder {
         }
 
         //count the frequencies of the words
-        Map<String, Integer> frequencyMap = new HashMap<String, Integer>();
+        Map<String, Integer> frequencyMap = new HashMap<>();
         for (String word : lowerCaseWords) {
             if (frequencyMap.containsKey(word)) {
                 frequencyMap.put(word, frequencyMap.get(word) + 1);
@@ -45,7 +45,7 @@ public class TopicFinder {
                 frequencyMap.put(word, 1);
             }
         }
-        List<String> topFrequentWords = new ArrayList<String>();
+        List<String> topFrequentWords = new ArrayList<>();
         int max = 0;
         for (String key : frequencyMap.keySet()) {
             int frequency = frequencyMap.get(key);

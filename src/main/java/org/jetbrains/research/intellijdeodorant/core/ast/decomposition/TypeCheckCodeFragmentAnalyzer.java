@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
@@ -12,22 +11,24 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class TypeCheckCodeFragmentAnalyzer {
-    private TypeCheckElimination typeCheckElimination;
-    private PsiClass typeDeclaration;
-    private PsiMethod typeCheckMethod;
-    private PsiField[] fields;
-    private PsiMethod[] methods;
-    private Map<PsiVariable, Integer> typeVariableCounterMap;
-    private Map<PsiMethodCallExpression, Integer> typeMethodInvocationCounterMap;
-    private Map<PsiExpression, IfStatementExpressionAnalyzer> complexExpressionMap;
+    private final TypeCheckElimination typeCheckElimination;
+    private final SmartPsiElementPointer<PsiElement> typeDeclaration;
+    private final SmartPsiElementPointer<PsiElement> typeCheckMethod;
+    private final PsiField[] fields;
+    private final PsiMethod[] methods;
+    private final Map<PsiVariable, Integer> typeVariableCounterMap;
+    private final Map<PsiMethodCallExpression, Integer> typeMethodInvocationCounterMap;
+    private final Map<PsiExpression, IfStatementExpressionAnalyzer> complexExpressionMap;
 
     public TypeCheckCodeFragmentAnalyzer(TypeCheckElimination typeCheckElimination,
                                          PsiClass typeDeclaration,
                                          PsiMethod typeCheckMethod) {
         this.typeCheckElimination = typeCheckElimination;
-        this.typeDeclaration = typeDeclaration;
-        this.typeCheckMethod = typeCheckMethod;
+        this.typeDeclaration = toPointer(typeDeclaration);
+        this.typeCheckMethod = toPointer(typeCheckMethod);
         this.fields = typeDeclaration.getFields();
         this.methods = typeDeclaration.getMethods();
         this.typeVariableCounterMap = new LinkedHashMap<>();
@@ -68,7 +69,7 @@ public class TypeCheckCodeFragmentAnalyzer {
 
                             }
                         } else if (switchStatementExpressionNameVariableBinding instanceof PsiParameter) {
-                            PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                            PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                             for (PsiParameter parameter : parameters) {
                                 if (parameter.equals(switchStatementExpressionNameVariableBinding)) {
                                     typeCheckElimination.setTypeLocalVariable(parameter);
@@ -77,9 +78,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                             }
                         } else {
                             StatementExtractor statementExtractor = new StatementExtractor();
-                            ExpressionExtractor expressionExtractor = new ExpressionExtractor();
                             List<PsiVariable> declaredVariables = new ArrayList<>();
-                            List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
+                            List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(getTypeCheckMethod().getBody());
                             for (PsiStatement statement : variableDeclarationStatements) {
                                 PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
                                 PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
@@ -95,7 +95,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                                 }
                             }
                             List<PsiStatement> enhancedForStatements = new ArrayList<>();
-                            for (PsiStatement statementInBlock : typeCheckMethod.getBody().getStatements()) {
+                            for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
                                 enhancedForStatements.addAll(statementExtractor.getEnhancedForStatements(statementInBlock));
                             }
                             for (PsiStatement eFStatement : enhancedForStatements) {
@@ -112,7 +112,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                     PsiMethodCallExpression switchStatementExpressionMethodInvocation = (PsiMethodCallExpression) switchStatementExpressionName;
                     PsiExpression invoker = switchStatementExpressionMethodInvocation.getMethodExpression().getQualifierExpression();
                     PsiMethod switchStatementExpressionMethodBinding = (PsiMethod) switchStatementExpressionMethodInvocation.getMethodExpression().resolve();
-                    if (!switchStatementExpressionMethodBinding.getContainingClass().equals(typeDeclaration) && //TODO probably causes NPE
+                    PsiClass psiClass = switchStatementExpressionMethodBinding == null ? null : switchStatementExpressionMethodBinding.getContainingClass();
+                    if (psiClass != null && !psiClass.equals(getTypeDeclaration()) &&
                             invoker != null && !(invoker instanceof PsiThisExpression)) {
                         typeCheckElimination.setTypeMethodInvocation(switchStatementExpressionMethodInvocation);
                     }
@@ -121,13 +122,15 @@ public class TypeCheckCodeFragmentAnalyzer {
         }
 
         Set<PsiExpression> typeCheckExpressions = typeCheckElimination.getTypeCheckExpressions();
+        typeCheckExpressions.removeIf(Objects::isNull);
         for (PsiExpression typeCheckExpression : typeCheckExpressions) {
-            if (typeCheckExpression.getParent().getParent() instanceof PsiSwitchLabelStatement) {
+            PsiElement parent = typeCheckExpression.getParent();
+            if (parent != null && parent.getParent() instanceof PsiSwitchLabelStatement) {
                 if (typeCheckExpression instanceof PsiReferenceExpression) {
                     PsiReferenceExpression referenceExpression = ((PsiReferenceExpression) typeCheckExpression);
                     if (referenceExpression.resolve() instanceof PsiVariable) {
                         PsiVariable variable = (PsiVariable) referenceExpression.resolve();
-                        if (variable instanceof PsiField && variable.hasModifier(JvmModifier.STATIC)) {
+                        if (variable instanceof PsiField && variable.hasModifierProperty(PsiModifier.STATIC)) {
                             ArrayList<PsiField> staticTypes = new ArrayList<>();
                             staticTypes.add((PsiField) variable);
                             typeCheckElimination.addStaticType(typeCheckExpression, staticTypes);
@@ -159,7 +162,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                         analyzer.putTypeMethodInvocationExpression(operandMethodInvocation, instanceofExpression);
                         analyzer.putTypeMethodInvocationSubclass(operandMethodInvocation, instanceofExpression.getCheckType().getType());
                     }
-                    //typeCheckElimination.addSubclassType(typeCheckExpression, instanceofExpression.getRightOperand());
                     complexExpressionMap.put(typeCheckExpression, analyzer);
                 }
             } else if (typeCheckExpression instanceof PsiBinaryExpression) {
@@ -180,7 +182,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             PsiElement leftOperandNameBinding = leftOperandName.resolve();
                             if (leftOperandNameBinding instanceof PsiVariable) {
                                 PsiVariable leftOperandNameVariableBinding = (PsiVariable) leftOperandNameBinding;
-                                if (leftOperandNameVariableBinding instanceof PsiField && leftOperandNameVariableBinding.hasModifier(JvmModifier.STATIC))
+                                if (leftOperandNameVariableBinding instanceof PsiField && leftOperandNameVariableBinding.hasModifierProperty(PsiModifier.STATIC))
                                     staticFieldName = leftOperandName;
                             }
                         }
@@ -189,7 +191,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             PsiElement rightOperandNameBinding = rightOperandName.resolve();
                             if (rightOperandNameBinding instanceof PsiVariable) {
                                 PsiVariable rightOperandNameVariableBinding = (PsiVariable) rightOperandNameBinding;
-                                if (rightOperandNameVariableBinding instanceof PsiField && rightOperandNameVariableBinding.hasModifier(JvmModifier.STATIC))
+                                if (rightOperandNameVariableBinding instanceof PsiField && rightOperandNameVariableBinding.hasModifierProperty(PsiModifier.STATIC))
                                     staticFieldName = rightOperandName;
                             }
                         }
@@ -199,14 +201,14 @@ public class TypeCheckCodeFragmentAnalyzer {
                             } else if (rightOperandExpression instanceof PsiMethodCallExpression) {
                                 typeMethodInvocation = (PsiMethodCallExpression) rightOperandExpression;
                             }
-                        } else if (staticFieldName != null && staticFieldName.equals(rightOperandExpression)) {
+                        } else if (staticFieldName != null) {
                             if (leftOperandExpression instanceof PsiReferenceExpression) {
                                 typeVariableName = (PsiReferenceExpression) leftOperandExpression;
                             } else if (leftOperandExpression instanceof PsiMethodCallExpression) {
                                 typeMethodInvocation = (PsiMethodCallExpression) leftOperandExpression;
                             }
                         }
-                    } else if (leftOperandExpression != null && rightOperandExpression == null) {
+                    } else if (leftOperandExpression != null) {
                         if (rightOperand instanceof PsiClassObjectAccessExpression) {
                             PsiClassObjectAccessExpression typeLiteral = (PsiClassObjectAccessExpression) rightOperand;
                             subclassType = typeLiteral.getOperand().getType();
@@ -216,7 +218,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                                 typeMethodInvocation = (PsiMethodCallExpression) leftOperandExpression;
                             }
                         }
-                    } else if (leftOperandExpression == null && rightOperandExpression != null) {
+                    } else if (rightOperandExpression != null) {
                         if (leftOperand instanceof PsiClassObjectAccessExpression) {
                             PsiClassObjectAccessExpression typeLiteral = (PsiClassObjectAccessExpression) leftOperand;
                             subclassType = typeLiteral.getOperand().getType();
@@ -340,7 +342,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                             }
                         }
                     } else if (typeVariable instanceof PsiParameter) {
-                        PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                        PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                         for (PsiParameter parameter : parameters) {
                             if (parameter.equals(typeVariable)) {
                                 typeCheckElimination.setTypeLocalVariable(parameter);
@@ -349,9 +351,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                         }
                     } else {
                         StatementExtractor statementExtractor = new StatementExtractor();
-                        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
                         List<PsiElement> variableDeclarationFragments = new ArrayList<>();
-                        List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
+                        List<PsiStatement> variableDeclarationStatements = statementExtractor.getVariableDeclarationStatements(getTypeCheckMethod().getBody());
                         for (PsiStatement statement : variableDeclarationStatements) {
                             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
                             List<PsiElement> fragments = Arrays.asList(variableDeclarationStatement.getDeclaredElements());
@@ -363,7 +364,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                                 break;
                             }
                         }
-                        List<PsiStatement> enhancedForStatements = statementExtractor.getEnhancedForStatements(typeCheckMethod.getBody());
+                        List<PsiStatement> enhancedForStatements = statementExtractor.getEnhancedForStatements(getTypeCheckMethod().getBody());
                         for (PsiStatement eFStatement : enhancedForStatements) {
                             PsiForeachStatement enhancedForStatement = (PsiForeachStatement) eFStatement;
                             PsiParameter formalParameter = enhancedForStatement.getIterationParameter();
@@ -381,7 +382,8 @@ public class TypeCheckCodeFragmentAnalyzer {
                 for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
                     IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
                     for (PsiMethodCallExpression analyzerTypeMethodInvocation : analyzer.getTargetMethodInvocations()) {
-                        if (analyzerTypeMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+                        PsiMethod resolvedMethod = analyzerTypeMethodInvocation.resolveMethod();
+                        if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                             if (typeMethodInvocationCounterMap.get(typeMethodInvocation) == typeCheckExpressions.size()) {
                                 typeCheckElimination.addRemainingIfStatementExpression(analyzer.getCompleteExpression(),
                                         analyzer.getRemainingExpression(analyzer.getTypeMethodInvocationExpression(analyzerTypeMethodInvocation)));
@@ -402,8 +404,9 @@ public class TypeCheckCodeFragmentAnalyzer {
                 }
                 PsiExpression invoker = typeMethodInvocation.getMethodExpression().getQualifierExpression();
                 PsiMethod typeMethodInvocationBinding = typeMethodInvocation.resolveMethod();
-                if (!typeDeclaration.equals(typeMethodInvocationBinding.getContainingClass()) &&
-                        invoker != null && !(invoker instanceof PsiThisExpression)) {
+                if (typeMethodInvocationBinding != null && invoker != null
+                        && !getTypeDeclaration().equals(typeMethodInvocationBinding.getContainingClass())
+                        && !(invoker instanceof PsiThisExpression)) {
                     typeCheckElimination.setTypeMethodInvocation(typeMethodInvocation);
                 }
             }
@@ -419,7 +422,7 @@ public class TypeCheckCodeFragmentAnalyzer {
         }
         StatementExtractor statementExtractor = new StatementExtractor();
         List<PsiVariable> variableDeclarationFragmentsInsideTypeCheckMethodApartFromTypeCheckCodeFragment = new ArrayList<>();
-        List<PsiStatement> variableDeclarationStatementsInsideTypeCheckMethod = statementExtractor.getVariableDeclarationStatements(typeCheckMethod.getBody());
+        List<PsiStatement> variableDeclarationStatementsInsideTypeCheckMethod = statementExtractor.getVariableDeclarationStatements(getTypeCheckMethod().getBody());
         for (PsiStatement statement : variableDeclarationStatementsInsideTypeCheckMethod) {
             PsiDeclarationStatement variableDeclarationStatement = (PsiDeclarationStatement) statement;
             PsiElement[] fragments = variableDeclarationStatement.getDeclaredElements();
@@ -442,7 +445,7 @@ public class TypeCheckCodeFragmentAnalyzer {
             }
         }
         List<PsiStatement> enhancedForStatementsInsideTypeCheckMethodApartFromTypeCheckCodeFragment = new ArrayList<>();
-        for (PsiStatement statementInBlock : typeCheckMethod.getBody().getStatements()) {
+        for (PsiStatement statementInBlock : getTypeCheckMethod().getBody().getStatements()) {
             enhancedForStatementsInsideTypeCheckMethodApartFromTypeCheckCodeFragment.addAll(statementExtractor.getEnhancedForStatements(statementInBlock));
         }
         for (ArrayList<PsiStatement> typeCheckStatementList : allTypeCheckStatements) {
@@ -457,21 +460,23 @@ public class TypeCheckCodeFragmentAnalyzer {
                 for (PsiExpression expression : methodInvocations) {
                     if (expression instanceof PsiMethodCallExpression) {
                         PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                        PsiMethod methodBinding = methodInvocation.resolveMethod();
+                        PsiMethod resolvedMethod = methodInvocation.resolveMethod();
+                        if (resolvedMethod == null) continue;
                         PsiExpression invoker = methodInvocation.getMethodExpression().getQualifierExpression();
-                        if (methodBinding != null && typeDeclaration.equals(methodBinding.getContainingClass())) {
+                        if (getTypeDeclaration().equals(resolvedMethod.getContainingClass())) {
                             for (PsiMethod method : methods) {
-                                if (method.equals(methodBinding)) {
+                                if (method.equals(resolvedMethod)) {
                                     typeCheckElimination.addAccessedMethod(method);
                                 }
                             }
                         } else if (invoker == null || invoker instanceof PsiThisExpression) {
-                            PsiClass superclassTypeBinding = typeDeclaration.getSuperClass();
-                            while (superclassTypeBinding != null && !superclassTypeBinding.equals(methodBinding.getContainingClass())) {
+                            PsiClass psiClass = resolvedMethod.getContainingClass();
+                            PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
+                            while (superclassTypeBinding != null && !superclassTypeBinding.equals(psiClass)) {
                                 superclassTypeBinding = superclassTypeBinding.getSuperClass();
                             }
-                            if (methodBinding.getContainingClass().equals(superclassTypeBinding))
-                                typeCheckElimination.addSuperAccessedMethod(methodBinding);
+                            if (psiClass != null && psiClass.equals(superclassTypeBinding))
+                                typeCheckElimination.addSuperAccessedMethod(resolvedMethod);
                         }
                     }
                 }
@@ -485,13 +490,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                         if (variableInstructionVariableBinding instanceof PsiField) {
                             PsiField variableInstructionFieldBinding = (PsiField) variableInstructionVariableBinding;
                             if (variableInstructionFieldBinding.getContainingClass() != null) {
-                                if (typeDeclaration.equals(variableInstructionFieldBinding.getContainingClass())) {
+                                if (getTypeDeclaration().equals(variableInstructionFieldBinding.getContainingClass())) {
                                     for (PsiField field : fields) {
                                         if (field.equals(variableInstructionFieldBinding)) {
-                                            PsiExpression parentExpression = simpleName;
                                             boolean isAssigned = false;
-                                            if (parentExpression.getParent() instanceof PsiAssignmentExpression) {
-                                                PsiAssignmentExpression assignment = (PsiAssignmentExpression) parentExpression.getParent();
+                                            if (simpleName.getParent() instanceof PsiAssignmentExpression) {
+                                                PsiAssignmentExpression assignment = (PsiAssignmentExpression) simpleName.getParent();
                                                 PsiExpression leftHandSide = assignment.getLExpression();
                                                 PsiReferenceExpression leftHandSideName = null;
                                                 if (leftHandSide instanceof PsiReferenceExpression) {
@@ -503,13 +507,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                     if (!assignment.getOperationTokenType().equals(JavaTokenType.EQ))
                                                         typeCheckElimination.addAccessedField(field);
                                                 }
-                                            } else if (parentExpression.getParent() instanceof PsiPostfixExpression) {
-                                                //PostfixExpression postfixExpression = (PostfixExpression)parentExpression.getParent();
+                                            } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
                                                 isAssigned = true;
                                                 typeCheckElimination.addAssignedField(field);
                                                 typeCheckElimination.addAccessedField(field);
-                                            } else if (parentExpression.getParent() instanceof PsiPrefixExpression) {
-                                                PsiPrefixExpression prefixExpression = (PsiPrefixExpression) parentExpression.getParent();
+                                            } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
+                                                PsiPrefixExpression prefixExpression = (PsiPrefixExpression) simpleName.getParent();
                                                 IElementType operator = prefixExpression.getOperationTokenType();
                                                 if (operator.equals(JavaTokenType.PLUSPLUS) || operator.equals(JavaTokenType.MINUSMINUS)) {
                                                     isAssigned = true;
@@ -522,15 +525,14 @@ public class TypeCheckCodeFragmentAnalyzer {
                                         }
                                     }
                                 } else {
-                                    PsiClass superclassTypeBinding = typeDeclaration.getSuperClass();
+                                    PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
                                     while (superclassTypeBinding != null && !superclassTypeBinding.equals(variableInstructionFieldBinding.getContainingClass())) {
                                         superclassTypeBinding = superclassTypeBinding.getSuperClass();
                                     }
                                     if (variableInstructionFieldBinding.getContainingClass().equals(superclassTypeBinding)) {
-                                        PsiExpression parentExpression = simpleName;
                                         boolean isAssigned = false;
-                                        if (parentExpression.getParent() instanceof PsiAssignmentExpression) {
-                                            PsiAssignmentExpression assignment = (PsiAssignmentExpression) parentExpression.getParent();
+                                        if (simpleName.getParent() instanceof PsiAssignmentExpression) {
+                                            PsiAssignmentExpression assignment = (PsiAssignmentExpression) simpleName.getParent();
                                             PsiExpression leftHandSide = assignment.getLExpression();
                                             PsiReferenceExpression leftHandSideName = null;
                                             if (leftHandSide instanceof PsiReferenceExpression) {
@@ -542,13 +544,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                 if (!assignment.getOperationTokenType().equals(JavaTokenType.EQ))
                                                     typeCheckElimination.addSuperAccessedFieldBinding(variableInstructionFieldBinding, null);
                                             }
-                                        } else if (parentExpression.getParent() instanceof PsiPostfixExpression) {
-                                            //PostfixExpression postfixExpression = (PostfixExpression)parentExpression.getParent();
+                                        } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
                                             isAssigned = true;
                                             typeCheckElimination.addSuperAssignedFieldBinding(variableInstructionFieldBinding, null);
                                             typeCheckElimination.addSuperAccessedFieldBinding(variableInstructionFieldBinding, null);
-                                        } else if (parentExpression.getParent() instanceof PsiPrefixExpression) {
-                                            PsiPrefixExpression prefixExpression = (PsiPrefixExpression) parentExpression.getParent();
+                                        } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
+                                            PsiPrefixExpression prefixExpression = (PsiPrefixExpression) simpleName.getParent();
                                             IElementType operator = prefixExpression.getOperationTokenType();
                                             if (operator.equals(JavaTokenType.PLUSPLUS) || operator.equals(JavaTokenType.MINUSMINUS)) {
                                                 isAssigned = true;
@@ -562,7 +563,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                                 }
                             }
                         } else if (variableInstructionVariableBinding instanceof PsiParameter) {
-                            PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                            PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                             for (PsiParameter parameter : parameters) {
                                 if (parameter.equals(variableInstructionVariableBinding)) {
                                     boolean isAssigned = false;
@@ -577,7 +578,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                                             }
                                         }
                                     } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                        //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                         isAssigned = true;
                                         typeCheckElimination.addAssignedParameter(parameter);
                                     } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
@@ -610,7 +610,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                                             }
                                         }
                                     } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                        //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                         isAssigned = true;
                                         typeCheckElimination.addAssignedLocalVariable(fragment);
                                     } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
@@ -642,7 +641,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                                             }
                                         }
                                     } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                        //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                         isAssigned = true;
                                         typeCheckElimination.addAssignedLocalVariable(formalParameter);
                                     } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
@@ -684,21 +682,22 @@ public class TypeCheckCodeFragmentAnalyzer {
                     for (PsiExpression expression : methodInvocations) {
                         if (expression instanceof PsiMethodCallExpression) {
                             PsiMethodCallExpression methodInvocation = (PsiMethodCallExpression) expression;
-                            PsiMethod methodBinding = methodInvocation.resolveMethod();
+                            PsiMethod resolvedMethod = methodInvocation.resolveMethod();
                             PsiExpression invoker = methodInvocation.getMethodExpression().getQualifierExpression();
-                            if (methodBinding != null && typeDeclaration.equals(methodBinding.getContainingClass())) {
+                            if (resolvedMethod == null) continue;
+                            if (getTypeDeclaration().equals(resolvedMethod.getContainingClass())) {
                                 for (PsiMethod method : methods) {
-                                    if (method.equals(methodBinding)) {
+                                    if (method.equals(resolvedMethod)) {
                                         typeCheckElimination.addAccessedMethod(method);
                                     }
                                 }
-                            } else if (invoker == null || (invoker != null && invoker instanceof PsiThisExpression)) {
-                                PsiClass superclassTypeBinding = typeDeclaration.getSuperClass();
-                                while (superclassTypeBinding != null && !superclassTypeBinding.equals(methodBinding.getContainingClass())) {
+                            } else if (invoker == null || (invoker instanceof PsiThisExpression)) {
+                                PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
+                                while (superclassTypeBinding != null && !superclassTypeBinding.equals(resolvedMethod.getContainingClass())) {
                                     superclassTypeBinding = superclassTypeBinding.getContainingClass();
                                 }
-                                if (methodBinding.getContainingClass().equals(superclassTypeBinding))
-                                    typeCheckElimination.addSuperAccessedMethod(methodBinding);
+                                if (resolvedMethod.getContainingClass().equals(superclassTypeBinding))
+                                    typeCheckElimination.addSuperAccessedMethod(resolvedMethod);
                             }
                         }
                     }
@@ -707,18 +706,17 @@ public class TypeCheckCodeFragmentAnalyzer {
                     for (PsiExpression variableInstruction : variableInstructions) {
                         PsiReferenceExpression simpleName = (PsiReferenceExpression) variableInstruction;
                         PsiElement variableInstructionBinding = simpleName.resolve();
-                        if (variableInstructionBinding != null && variableInstructionBinding instanceof PsiVariable) {
+                        if (variableInstructionBinding instanceof PsiVariable) {
                             PsiVariable variableInstructionVariableBinding = (PsiVariable) variableInstructionBinding;
                             if (variableInstructionVariableBinding instanceof PsiField) {
                                 PsiField variableInstructionField = (PsiField) variableInstructionVariableBinding;
                                 if (variableInstructionField.getContainingClass() != null) {
-                                    if (typeDeclaration.equals(variableInstructionField.getContainingClass())) {
+                                    if (getTypeDeclaration().equals(variableInstructionField.getContainingClass())) {
                                         for (PsiField field : fields) {
                                             if (field.equals(variableInstructionVariableBinding)) {
-                                                PsiExpression parentExpression = simpleName;
                                                 boolean isAssigned = false;
-                                                if (parentExpression.getParent() instanceof PsiAssignmentExpression) {
-                                                    PsiAssignmentExpression assignment = (PsiAssignmentExpression) parentExpression.getParent();
+                                                if (simpleName.getParent() instanceof PsiAssignmentExpression) {
+                                                    PsiAssignmentExpression assignment = (PsiAssignmentExpression) simpleName.getParent();
                                                     PsiExpression leftHandSide = assignment.getLExpression();
                                                     PsiReferenceExpression leftHandSideName = null;
                                                     if (leftHandSide instanceof PsiReferenceExpression) {
@@ -730,13 +728,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                         if (!assignment.getOperationTokenType().equals(JavaTokenType.EQ))
                                                             typeCheckElimination.addAccessedField(field);
                                                     }
-                                                } else if (parentExpression.getParent() instanceof PsiPostfixExpression) {
-                                                    //PostfixExpression postfixExpression = (PostfixExpression)parentExpression.getParent();
+                                                } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
                                                     isAssigned = true;
                                                     typeCheckElimination.addAssignedField(field);
                                                     typeCheckElimination.addAccessedField(field);
-                                                } else if (parentExpression.getParent() instanceof PsiPrefixExpression) {
-                                                    PsiPrefixExpression prefixExpression = (PsiPrefixExpression) parentExpression.getParent();
+                                                } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
+                                                    PsiPrefixExpression prefixExpression = (PsiPrefixExpression) simpleName.getParent();
                                                     IElementType operator = prefixExpression.getOperationTokenType();
                                                     if (operator.equals(JavaTokenType.PLUSPLUS) || operator.equals(JavaTokenType.MINUSMINUS)) {
                                                         isAssigned = true;
@@ -750,15 +747,14 @@ public class TypeCheckCodeFragmentAnalyzer {
 
                                         }
                                     } else {
-                                        PsiClass superclassTypeBinding = typeDeclaration.getSuperClass();
+                                        PsiClass superclassTypeBinding = getTypeDeclaration().getSuperClass();
                                         while (superclassTypeBinding != null && !superclassTypeBinding.equals(variableInstructionField.getContainingClass())) {
                                             superclassTypeBinding = superclassTypeBinding.getSuperClass();
                                         }
                                         if (variableInstructionField.getContainingClass().equals(superclassTypeBinding)) {
-                                            PsiExpression parentExpression = simpleName;
                                             boolean isAssigned = false;
-                                            if (parentExpression.getParent() instanceof PsiAssignmentExpression) {
-                                                PsiAssignmentExpression assignment = (PsiAssignmentExpression) parentExpression.getParent();
+                                            if (simpleName.getParent() instanceof PsiAssignmentExpression) {
+                                                PsiAssignmentExpression assignment = (PsiAssignmentExpression) simpleName.getParent();
                                                 PsiExpression leftHandSide = assignment.getLExpression();
                                                 PsiReferenceExpression leftHandSideName = null;
                                                 if (leftHandSide instanceof PsiReferenceExpression) {
@@ -770,13 +766,12 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                     if (!assignment.getOperationTokenType().equals(JavaTokenType.EQ))
                                                         typeCheckElimination.addSuperAccessedFieldBinding(variableInstructionField, null);
                                                 }
-                                            } else if (parentExpression.getParent() instanceof PsiPostfixExpression) {
-                                                //PostfixExpression postfixExpression = (PostfixExpression)parentExpression.getParent();
+                                            } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
                                                 isAssigned = true;
                                                 typeCheckElimination.addSuperAssignedFieldBinding(variableInstructionField, null);
                                                 typeCheckElimination.addSuperAccessedFieldBinding(variableInstructionField, null);
-                                            } else if (parentExpression.getParent() instanceof PsiPrefixExpression) {
-                                                PsiPrefixExpression prefixExpression = (PsiPrefixExpression) parentExpression.getParent();
+                                            } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
+                                                PsiPrefixExpression prefixExpression = (PsiPrefixExpression) simpleName.getParent();
                                                 IElementType operator = prefixExpression.getOperationTokenType();
                                                 if (operator.equals(JavaTokenType.PLUSPLUS) || operator.equals(JavaTokenType.MINUSMINUS)) {
                                                     isAssigned = true;
@@ -790,7 +785,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                                     }
                                 }
                             } else if (variableInstructionVariableBinding instanceof PsiParameter) {
-                                PsiParameter[] parameters = typeCheckMethod.getParameterList().getParameters();
+                                PsiParameter[] parameters = getTypeCheckMethod().getParameterList().getParameters();
                                 for (PsiParameter parameter : parameters) {
                                     if (parameter.equals(variableInstructionVariableBinding)) {
                                         boolean isAssigned = false;
@@ -804,7 +799,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                 }
                                             }
                                         } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                            //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                             isAssigned = true;
                                             typeCheckElimination.addAssignedParameter(parameter);
                                         } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
@@ -832,23 +826,22 @@ public class TypeCheckCodeFragmentAnalyzer {
                                             if (leftHandSide instanceof PsiReferenceExpression) {
                                                 if (leftHandSide.equals(simpleName)) {
                                                     isAssigned = true;
-                                                    typeCheckElimination.addAssignedLocalVariable((PsiLocalVariable) variable);
+                                                    typeCheckElimination.addAssignedLocalVariable(variable);
                                                 }
                                             }
                                         } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                            //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                             isAssigned = true;
-                                            typeCheckElimination.addAssignedLocalVariable((PsiLocalVariable) variable);
+                                            typeCheckElimination.addAssignedLocalVariable(variable);
                                         } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
                                             PsiPrefixExpression prefixExpression = (PsiPrefixExpression) simpleName.getParent();
                                             IElementType operator = prefixExpression.getOperationTokenType();
                                             if (operator.equals(JavaTokenType.PLUSPLUS) || operator.equals(JavaTokenType.MINUSMINUS)) {
                                                 isAssigned = true;
-                                                typeCheckElimination.addAssignedLocalVariable((PsiLocalVariable) variable);
+                                                typeCheckElimination.addAssignedLocalVariable(variable);
                                             }
                                         }
                                         if (!isAssigned)
-                                            typeCheckElimination.addAccessedLocalVariable((PsiLocalVariable) variable);
+                                            typeCheckElimination.addAccessedLocalVariable(variable);
                                         break;
                                     }
                                 }
@@ -868,7 +861,6 @@ public class TypeCheckCodeFragmentAnalyzer {
                                                 }
                                             }
                                         } else if (simpleName.getParent() instanceof PsiPostfixExpression) {
-                                            //PostfixExpression postfixExpression = (PostfixExpression)simpleName.getParent();
                                             isAssigned = true;
                                             typeCheckElimination.addAssignedLocalVariable(formalParameter);
                                         } else if (simpleName.getParent() instanceof PsiPrefixExpression) {
@@ -920,9 +912,10 @@ public class TypeCheckCodeFragmentAnalyzer {
         int typeVariableCounter = 0;
         for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
             IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
-            for (PsiReferenceExpression analyzerTypeVariable : analyzer.getTargetVariables()) {
-                if (typeVariable.equals(analyzerTypeVariable.resolve())) {
-                    List<PsiReferenceExpression> staticFields = analyzer.getTypeVariableStaticField(analyzerTypeVariable);
+            Set<PsiReferenceExpression> targetVariablesReferences = analyzer.getTargetVariables();
+            for (PsiReferenceExpression referenceExpression : targetVariablesReferences) {
+                if (typeVariable != null && typeVariable.equals(referenceExpression.resolve())) {
+                    List<PsiReferenceExpression> staticFields = analyzer.getTypeVariableStaticField(referenceExpression);
                     if (staticFields != null && staticFields.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
                         typeVariableCounter++;
@@ -932,7 +925,7 @@ public class TypeCheckCodeFragmentAnalyzer {
                         validTypeCheckExpressions++;
                         typeVariableCounter += staticFields.size();
                     }
-                    List<PsiType> subclasses = analyzer.getTypeVariableSubclass(analyzerTypeVariable);
+                    List<PsiType> subclasses = analyzer.getTypeVariableSubclass(referenceExpression);
                     if (subclasses != null && subclasses.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
                         typeVariableCounter++;
@@ -955,7 +948,8 @@ public class TypeCheckCodeFragmentAnalyzer {
         for (PsiExpression complexExpression : complexExpressionMap.keySet()) {
             IfStatementExpressionAnalyzer analyzer = complexExpressionMap.get(complexExpression);
             for (PsiMethodCallExpression analyzerTypeMethodInvocation : analyzer.getTargetMethodInvocations()) {
-                if (analyzerTypeMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+                PsiMethod resolvedMethod = analyzerTypeMethodInvocation.resolveMethod();
+                if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                     List<PsiReferenceExpression> staticFields = analyzer.getTypeMethodInvocationStaticField(analyzerTypeMethodInvocation);
                     if (staticFields != null && staticFields.size() == 1 && analyzer.allParentNodesAreConditionalAndOperators()) {
                         validTypeCheckExpressions++;
@@ -985,9 +979,18 @@ public class TypeCheckCodeFragmentAnalyzer {
 
     private PsiMethodCallExpression containsTypeMethodInvocationKey(PsiMethodCallExpression methodInvocation) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationCounterMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(methodInvocation.resolveMethod()))
+            PsiMethod resolvedMethod = keyMethodInvocation.resolveMethod();
+            if (resolvedMethod != null && resolvedMethod.equals(methodInvocation.resolveMethod()))
                 return keyMethodInvocation;
         }
         return null;
+    }
+
+    private PsiMethod getTypeCheckMethod() {
+        return (PsiMethod) typeCheckMethod.getElement();
+    }
+
+    private PsiClass getTypeDeclaration() {
+        return (PsiClass) typeDeclaration.getElement();
     }
 }

@@ -5,6 +5,7 @@ import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.core.ast.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
@@ -78,7 +79,7 @@ public class DistanceMatrix {
     }
 
     private List<MoveMethodCandidateRefactoring> identifyConceptualBindings(MyMethod method, Set<String> targetClasses) {
-        List<MoveMethodCandidateRefactoring> candidateRefactoringList = new ArrayList<>();
+        SmartList<MoveMethodCandidateRefactoring> candidateRefactoringList = new SmartList<>();
         MethodObject methodObject = method.getMethodObject();
         String sourceClass = method.getClassOrigin();
         for (String targetClass : targetClasses) {
@@ -321,12 +322,12 @@ public class DistanceMatrix {
             }
         }
 
-        indicator.setText("Identification of Extract Class refactoring opportunities");
+        indicator.setText(IntelliJDeodorantBundle.message("god.class.identification.indicator"));
         indicator.setFraction(0.0);
         for (MyClass sourceClass : oldClasses) {
             if (!sourceClass.getMethodList().isEmpty() && !sourceClass.getAttributeList().isEmpty()) {
                 double[][] distanceMatrix = getJaccardDistanceMatrix(sourceClass);
-                Clustering clustering = Clustering.getInstance(0, distanceMatrix);
+                Clustering clustering = Clustering.getInstance(distanceMatrix);
                 ArrayList<Entity> entities = new ArrayList<>();
                 entities.addAll(sourceClass.getAttributeList());
                 entities.addAll(sourceClass.getMethodList());
@@ -346,7 +347,6 @@ public class DistanceMatrix {
                         }
                     }
                 }
-                // Clustering End
             }
         }
         indicator.setFraction(1.0);

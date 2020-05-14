@@ -8,9 +8,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.Refactoring;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.RefactoringVisitor;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.getHumanReadableName;
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.getNumberOfLinesInMethod;
 
 /**
  * Representation of a refactoring, which moves method to a target class.
@@ -25,6 +27,8 @@ public class MoveMethodRefactoring implements Refactoring {
     String qualifiedMethodName;
     private final int sourceAccessedMembers;
     private final int targetAccessedMembers;
+    private final int methodLength;
+    private final int methodParametersCount;
 
     /**
      * Creates refactoring.
@@ -49,6 +53,8 @@ public class MoveMethodRefactoring implements Refactoring {
         this.qualifiedMethodName = getHumanReadableName(this.method.getElement());
         this.sourceAccessedMembers = sourceAccessedMembers;
         this.targetAccessedMembers = targetAccessedMembers;
+        this.methodLength = getNumberOfLinesInMethod(method);
+        this.methodParametersCount = method.getParameterList().getParametersCount();
     }
 
     /**
@@ -81,7 +87,7 @@ public class MoveMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns class in which method is placed in this refactoring
+     * Returns class in which method is placed in this refactoring.
      */
     public @NotNull
     Optional<PsiClass> getOptionalTargetClass() {
@@ -89,7 +95,7 @@ public class MoveMethodRefactoring implements Refactoring {
     }
 
     /**
-     * Returns class in which method is placed in this refactoring
+     * Returns class in which method is placed in this refactoring.
      */
     public @NotNull
     PsiClass getTargetClass() {
@@ -109,19 +115,20 @@ public class MoveMethodRefactoring implements Refactoring {
 
         MoveMethodRefactoring that = (MoveMethodRefactoring) o;
 
-        return method.equals(that.method) && targetClass.equals(that.targetClass);
+        return Objects.equals(method.getElement(), that.method.getElement())
+                && Objects.equals(targetClass.getElement(), that.targetClass.getElement());
     }
 
     public boolean methodEquals(@NotNull MoveMethodRefactoring that) {
         if (this == that) return true;
 
-        return method.equals(that.method);
+        return Objects.equals(method.getElement(), that.method.getElement());
     }
 
     @Override
     public int hashCode() {
-        int result = method.hashCode();
-        result = 31 * result + targetClass.hashCode();
+        int result = Objects.hashCode(method.getElement());
+        result = 31 * result + Objects.hashCode(targetClass.getElement());
         return result;
     }
 
@@ -136,7 +143,9 @@ public class MoveMethodRefactoring implements Refactoring {
     @NotNull
     @Override
     public String getDescription() {
-        return getHumanReadableName(method.getElement()) + DELIMITER + getHumanReadableName(targetClass.getElement());
+        return getHumanReadableName(method.getElement()) + DELIMITER +
+                getHumanReadableName(targetClass.getElement()) + DELIMITER +
+                getSourceAccessedMembers() + "/" + getTargetAccessedMembers();
     }
 
     @NotNull
@@ -156,5 +165,13 @@ public class MoveMethodRefactoring implements Refactoring {
 
     public int getTargetAccessedMembers() {
         return targetAccessedMembers;
+    }
+
+    public int getMethodLength() {
+        return methodLength;
+    }
+
+    public int getMethodParametersCount() {
+        return methodParametersCount;
     }
 }

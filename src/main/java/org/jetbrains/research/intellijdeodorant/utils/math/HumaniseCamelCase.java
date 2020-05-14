@@ -4,23 +4,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HumaniseCamelCase {
-    //----------------------------------------------------------------------- Static Properties and Constants
 
     private static final String CAMEL_CASE_PATTERN = "([A-Z]|[a-z])[a-z]*";
-
-    //----------------------------------------------------------------------- Instance Properties
-
     private String humanisedString;
     private String acronym;
 
-    //----------------------------------------------------------------------- Instance Methods
-
     /**
-     * Converts a camelCase to a more human form, with spaces. E.g. 'Camel case'
+     * Converts a camelCase to a more human form, with spaces.
      *
-     * @param camelCaseString
+     * @param camelCaseString a string.
      * @return a humanised version of a camelCaseString if it is indeed camel-case. Returns the
-     * original string if it is'nt camel-case
+     * original string if it isn't camel-case.
      */
     public String humanise(String camelCaseString) {
         reset();

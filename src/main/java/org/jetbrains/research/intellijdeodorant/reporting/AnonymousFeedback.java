@@ -71,7 +71,7 @@ class AnonymousFeedback {
             Issue duplicate = findFirstDuplicate(newGibHubIssue.getTitle(), issueService, repoID);
             boolean isNewIssue = true;
             if (duplicate != null) {
-                String newErrorComment = generateGitHubIssueBody(errorReportInformation, false);
+                String newErrorComment = generateGitHubIssueBody(errorReportInformation);
                 issueService.createComment(repoID, duplicate.getNumber(), newErrorComment);
                 newGibHubIssue = duplicate;
                 isNewIssue = false;
@@ -136,7 +136,7 @@ class AnonymousFeedback {
         }
 
         final Issue gitHubIssue = new Issue();
-        final String body = generateGitHubIssueBody(errorReportInformation, true);
+        final String body = generateGitHubIssueBody(errorReportInformation);
         gitHubIssue.setTitle(String.format(GIT_ISSUE_TITLE, errorHash, errorMessage));
         gitHubIssue.setBody(body);
         Label bugLabel = new Label();
@@ -149,12 +149,12 @@ class AnonymousFeedback {
 
     /**
      * Creates the body of the GitHub issue. It will contain information about the system, error report information
-     * provided by the user and the full stack trace. Everything is formatted using markdown.
+     * provided by the user, and the full stack trace. Everything is formatted using markdown.
      *
      * @param errorReportInformation details provided by {@link ErrorReportInformation}
      * @return a markdown string representing the GitHub issue body.
      */
-    private static String generateGitHubIssueBody(ErrorReportInformation errorReportInformation, boolean addStacktrace) {
+    private static String generateGitHubIssueBody(ErrorReportInformation errorReportInformation) {
         String errorDescription = errorReportInformation.get(ERROR_DESCRIPTION);
         if (errorDescription == null) {
             errorDescription = "";
@@ -177,12 +177,9 @@ class AnonymousFeedback {
             result.append("\n");
         }
 
-        if (addStacktrace) {
-            result.append("\n```\n");
-            result.append(stackTrace);
-            result.append("\n```\n");
-        }
-
+        result.append("\n```\n");
+        result.append(stackTrace);
+        result.append("\n```\n");
         return result.toString();
     }
 }

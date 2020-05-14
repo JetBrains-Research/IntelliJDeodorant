@@ -5,7 +5,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.ClassObject;
 import java.util.*;
 
 public class MyClass {
-
     private final String name;
     private String superclass;
     private final List<MyAttribute> attributeList;
@@ -59,14 +58,6 @@ public class MyClass {
     public void addMethod(MyMethod method) {
         if (!methodList.contains(method))
             methodList.add(method);
-    }
-
-    public void removeMethod(MyMethod method) {
-        methodList.remove(method);
-    }
-
-    public void removeAttribute(MyAttribute attribute) {
-        attributeList.remove(attribute);
     }
 
     public List<MyAttribute> getAttributeList() {

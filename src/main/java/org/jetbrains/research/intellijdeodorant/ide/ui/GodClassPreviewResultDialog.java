@@ -40,12 +40,12 @@ import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractCl
 import static org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassPreviewProcessor.PsiElementChange.ChangeType.ADD_BEFORE;
 
 public class GodClassPreviewResultDialog extends DiffWindow {
-    private MutableDiffRequestChain myChain;
-    private ExtractClassPreviewProcessor previewProcessor;
-    private Project project;
-    DiffContentFactory diffContentFactory;
-    private JavaCodeStyleManager javaCodeStyleManager;
-    private CodeStyleManager codeStyleManager;
+    private final MutableDiffRequestChain myChain;
+    private final ExtractClassPreviewProcessor previewProcessor;
+    private final Project project;
+    private final DiffContentFactory diffContentFactory;
+    private final JavaCodeStyleManager javaCodeStyleManager;
+    private final CodeStyleManager codeStyleManager;
 
     public GodClassPreviewResultDialog(@NotNull Project project, @NotNull MutableDiffRequestChain requestChain,
                                        @NotNull DiffDialogHints hints, ExtractClassPreviewProcessor previewProcessor) {
@@ -54,9 +54,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
         this.project = project;
         this.diffContentFactory = DiffContentFactory.getInstance();
         this.previewProcessor = previewProcessor;
-
-        javaCodeStyleManager = JavaCodeStyleManager.getInstance(project);
-        codeStyleManager = CodeStyleManager.getInstance(project);
+        this.javaCodeStyleManager = JavaCodeStyleManager.getInstance(project);
+        this.codeStyleManager = CodeStyleManager.getInstance(project);
     }
 
     @NotNull
@@ -66,8 +65,8 @@ public class GodClassPreviewResultDialog extends DiffWindow {
     }
 
     private class MyCacheDiffRequestChainProcessor extends CacheDiffRequestChainProcessor {
-        private TreeTableModel model = new TreeTableList();
-        private TreeTable treeTable = new TreeTable(model);
+        private final TreeTableModel model = new TreeTableList();
+        private final TreeTable treeTable = new TreeTable(model);
         private JScrollPane scrollPane;
 
         MyCacheDiffRequestChainProcessor(@Nullable Project project, @NotNull DiffRequestChain requestChain) {
@@ -102,6 +101,7 @@ public class GodClassPreviewResultDialog extends DiffWindow {
             treeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             treeTable.getTree().addTreeSelectionListener((ElementSelectionListener) this::updateDiff);
             scrollPane = ScrollPaneFactory.createScrollPane(treeTable);
+            myChain.setContent2(diffContentFactory.create(project, getTextAndReformat(previewProcessor.getExtractedClass().getPsiClass()), JavaFileType.INSTANCE));
         }
 
         /**
@@ -115,7 +115,6 @@ public class GodClassPreviewResultDialog extends DiffWindow {
 
             if (selectedPath != null) {
                 Object lastComponent = selectedPath.getLastPathComponent();
-
                 if (lastComponent == previewProcessor.getExtractedClass()) {
                     source = "";
                     updated = getTextAndReformat(previewProcessor.getExtractedClass().getPsiClass());

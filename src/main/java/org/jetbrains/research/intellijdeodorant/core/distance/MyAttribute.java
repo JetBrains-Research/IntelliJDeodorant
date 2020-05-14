@@ -5,7 +5,6 @@ import org.jetbrains.research.intellijdeodorant.core.ast.FieldObject;
 import java.util.*;
 
 public class MyAttribute extends Entity {
-
     private String classOrigin;
     private String classType;
     private final String name;
@@ -39,26 +38,12 @@ public class MyAttribute extends Entity {
         this.access = access;
     }
 
-    public MyAttributeInstruction generateAttributeInstruction() {
-        MyAttributeInstruction instruction = new MyAttributeInstruction(this.classOrigin, this.classType, this.name);
-        instruction.setReference(this.reference);
-        return instruction;
-    }
-
-    public void setClassOrigin(String className) {
-        this.classOrigin = className;
-    }
-
     public String getClassOrigin() {
         return classOrigin;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setClassType(String type) {
-        classType = type;
     }
 
     public String getClassType() {
@@ -76,10 +61,6 @@ public class MyAttribute extends Entity {
     public void addMethod(MyMethod method) {
         if (!methodList.contains(method))
             methodList.add(method);
-    }
-
-    public ListIterator<MyMethod> getMethodIterator() {
-        return methodList.listIterator();
     }
 
     public boolean equals(MyAttributeInstruction attributeInstruction) {

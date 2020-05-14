@@ -1,6 +1,5 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
-
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
 
@@ -9,21 +8,21 @@ import java.util.*;
 
 public class IfStatementExpressionAnalyzer {
     //parent nodes are CONDITIONAL_AND (&&), CONDITIONAL_OR (||) infix operators, while leaf nodes are expressions
-    private DefaultMutableTreeNode root;
-    private PsiExpression completeExpression;
+    private final DefaultMutableTreeNode root;
+    private final PsiExpression completeExpression;
     //contains the expressions corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, PsiExpression> typeVariableExpressionMap;
+    private final Map<PsiReferenceExpression, PsiExpression> typeVariableExpressionMap;
     //contains the static fields corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, ArrayList<PsiReferenceExpression>> typeVariableStaticFieldMap;
+    private final Map<PsiReferenceExpression, ArrayList<PsiReferenceExpression>> typeVariableStaticFieldMap;
     //contains the subclass types corresponding to each candidate type variable
-    private Map<PsiReferenceExpression, ArrayList<PsiType>> typeVariableSubclassMap;
+    private final Map<PsiReferenceExpression, ArrayList<PsiType>> typeVariableSubclassMap;
 
     //contains the expressions corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, PsiExpression> typeMethodInvocationExpressionMap;
+    private final Map<PsiMethodCallExpression, PsiExpression> typeMethodInvocationExpressionMap;
     //contains the static fields corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, ArrayList<PsiReferenceExpression>> typeMethodInvocationStaticFieldMap;
+    private final Map<PsiMethodCallExpression, ArrayList<PsiReferenceExpression>> typeMethodInvocationStaticFieldMap;
     //contains the subclass types corresponding to each candidate type method invocation
-    private Map<PsiMethodCallExpression, ArrayList<PsiType>> typeMethodInvocationSubclassMap;
+    private final Map<PsiMethodCallExpression, ArrayList<PsiType>> typeMethodInvocationSubclassMap;
 
     public IfStatementExpressionAnalyzer(PsiExpression completeExpression) {
         this.root = new DefaultMutableTreeNode();
@@ -57,7 +56,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeVariableStaticField(PsiReferenceExpression typeVariable, PsiReferenceExpression staticField) {
         for (PsiReferenceExpression keySimpleName : typeVariableStaticFieldMap.keySet()) {
-            if (keySimpleName.resolve().equals(typeVariable.resolve())) {
+            PsiElement resolvedElement = keySimpleName.resolve();
+            if (resolvedElement != null && resolvedElement.equals(typeVariable.resolve())) {
                 ArrayList<PsiReferenceExpression> staticFields = typeVariableStaticFieldMap.get(keySimpleName);
                 staticFields.add(staticField);
                 return;
@@ -74,7 +74,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeVariableSubclass(PsiReferenceExpression typeVariable, PsiType subclass) {
         for (PsiReferenceExpression keySimpleName : typeVariableSubclassMap.keySet()) {
-            if (keySimpleName.resolve().equals(typeVariable.resolve())) {
+            PsiElement resolvedElement = keySimpleName.resolve();
+            if (resolvedElement != null && resolvedElement.equals(typeVariable.resolve())) {
                 ArrayList<PsiType> subclasses = typeVariableSubclassMap.get(keySimpleName);
                 subclasses.add(subclass);
                 return;
@@ -94,7 +95,7 @@ public class IfStatementExpressionAnalyzer {
     }
 
     public Set<PsiMethodCallExpression> getTargetMethodInvocations() {
-        Set<PsiMethodCallExpression> targetMethodInvocations = new LinkedHashSet<PsiMethodCallExpression>();
+        Set<PsiMethodCallExpression> targetMethodInvocations = new LinkedHashSet<>();
         for (PsiMethodCallExpression targetMethodInvocation : typeMethodInvocationExpressionMap.keySet()) {
             if (typeMethodInvocationStaticFieldMap.containsKey(targetMethodInvocation) ||
                     typeMethodInvocationSubclassMap.containsKey(targetMethodInvocation))
@@ -109,7 +110,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeMethodInvocationStaticField(PsiMethodCallExpression typeMethodInvocation, PsiReferenceExpression staticField) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationStaticFieldMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+            PsiMethod resolvedMethod = keyMethodInvocation.resolveMethod();
+            if (resolvedMethod != null && resolvedMethod.equals(typeMethodInvocation.resolveMethod())) {
                 ArrayList<PsiReferenceExpression> staticFields = typeMethodInvocationStaticFieldMap.get(keyMethodInvocation);
                 staticFields.add(staticField);
                 return;
@@ -126,7 +128,8 @@ public class IfStatementExpressionAnalyzer {
 
     public void putTypeMethodInvocationSubclass(PsiMethodCallExpression typeMethodInvocation, PsiType subclass) {
         for (PsiMethodCallExpression keyMethodInvocation : typeMethodInvocationSubclassMap.keySet()) {
-            if (keyMethodInvocation.resolveMethod().equals(typeMethodInvocation.resolveMethod())) {
+            PsiMethod resolveMethod = keyMethodInvocation.resolveMethod();
+            if (resolveMethod != null && resolveMethod.equals(typeMethodInvocation.resolveMethod())) {
                 ArrayList<PsiType> subclasses = typeMethodInvocationSubclassMap.get(keyMethodInvocation);
                 subclasses.add(subclass);
                 return;
@@ -214,11 +217,10 @@ public class IfStatementExpressionAnalyzer {
                     } else {
                         newRoot = sibling;
                     }
-                    break;
                 } else {
                     newRoot = null;
-                    break;
                 }
+                break;
             }
             leaf = leaf.getNextLeaf();
         }

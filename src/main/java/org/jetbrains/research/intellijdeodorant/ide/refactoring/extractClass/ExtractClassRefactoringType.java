@@ -44,7 +44,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
     }
 
     public static class AbstractExtractClassCandidateRefactoring extends AbstractCandidateRefactoring {
-        private PsiClass sourceClass;
+        private final PsiClass sourceClass;
 
         public AbstractExtractClassCandidateRefactoring(ExtractClassCandidateRefactoring candidateRefactoring) {
             super(candidateRefactoring);
@@ -89,7 +89,7 @@ public class ExtractClassRefactoringType extends RefactoringType {
         @NotNull
         @Override
         public String getExportDefaultFilename() {
-            return "God-Class-Refactoring";
+            return "God-Class";
         }
     }
 
@@ -119,11 +119,6 @@ public class ExtractClassRefactoringType extends RefactoringType {
             renewRefactoring();
         }
 
-        @Override
-        public void apply() {
-            refactoring.apply();
-        }
-
         public ExtractClassRefactoring renewRefactoring() {
             this.refactoring = new ExtractClassRefactoring(candidateRefactoring.getSourceFile(),
                     candidateRefactoring.getSourceClassTypeDeclaration(),
@@ -132,6 +127,12 @@ public class ExtractClassRefactoringType extends RefactoringType {
                     candidateRefactoring.getDelegateMethods(),
                     candidateRefactoring.getDefaultTargetClassName());
             return refactoring;
+        }
+
+
+        @Override
+        public void apply() {
+            refactoring.apply();
         }
 
         public ExtractClassRefactoring getRefactoring() {

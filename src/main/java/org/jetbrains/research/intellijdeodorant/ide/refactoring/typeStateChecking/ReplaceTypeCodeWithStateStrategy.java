@@ -6,6 +6,7 @@ import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocTag;
 import com.intellij.psi.util.*;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -13,11 +14,10 @@ import java.util.*;
 
 @SuppressWarnings("restriction")
 public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
-    private PsiVariable returnedVariable;
-    private Set<PsiType> requiredImportDeclarationsBasedOnSignature;
-    private Set<PsiClassType> thrownExceptions;
-    private Map<PsiField, String> staticFieldMap;
-    private Map<PsiField, String> additionalStaticFieldMap;
+    private final PsiVariable returnedVariable;
+    private final Set<PsiClassType> thrownExceptions;
+    private final Map<PsiField, String> staticFieldMap;
+    private final Map<PsiField, String> additionalStaticFieldMap;
     private String abstractClassName;
 
     public ReplaceTypeCodeWithStateStrategy(PsiFile sourceFile,
@@ -26,7 +26,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                             TypeCheckElimination typeCheckElimination) {
         super(sourceFile, project, sourceTypeDeclaration, typeCheckElimination);
         this.returnedVariable = typeCheckElimination.getTypeCheckMethodReturnedVariable();
-        this.requiredImportDeclarationsBasedOnSignature = new LinkedHashSet<>();
         this.thrownExceptions = typeCheckElimination.getThrownExceptions();
         this.staticFieldMap = new LinkedHashMap<>();
         for (PsiField simpleName : typeCheckElimination.getStaticFields()) {
@@ -52,6 +51,10 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         } else if (typeCheckElimination.getTypeLocalVariable() != null || typeCheckElimination.getTypeMethodInvocation() != null) {
             modifyTypeCheckMethod();
         }
+
+        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
+                typeCheckElimination.getTotalCaseStatementsCount(),
+                typeCheckElimination.getAverageNumberOfStatements());
     }
 
     private void checkInitialConditions() {
@@ -440,7 +443,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                         null
                 );
                 String staticFieldNameDeclaringClass = null;
-                boolean isEnumConstant = staticFieldName instanceof PsiEnumConstant;
                 if (!sourceTypeDeclaration.equals(staticFieldName.getContainingClass())) {
                     staticFieldNameDeclaringClass = staticFieldName.getContainingClass().getName();
                 }
@@ -619,7 +621,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
             DefaultMutableTreeNode rootNode = tree.getRootNode();
             String rootClassName = (String) rootNode.getUserObject();
             DefaultMutableTreeNode leaf = rootNode.getFirstLeaf();
-            List<String> subclassNames = new ArrayList<String>();
+            List<String> subclassNames = new ArrayList<>();
             while (leaf != null) {
                 subclassNames.add((String) leaf.getUserObject());
                 leaf = leaf.getNextLeaf();
@@ -764,16 +766,16 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
 
         List<ArrayList<PsiStatement>> typeCheckStatements = typeCheckElimination.getTypeCheckStatements();
-        List<String> subclassNames = new ArrayList<String>(staticFieldMap.values());
+        List<String> subclassNames = new ArrayList<>(staticFieldMap.values());
         subclassNames.addAll(additionalStaticFieldMap.values());
         if (tree != null) {
             DefaultMutableTreeNode rootNode = tree.getRootNode();
             DefaultMutableTreeNode leaf = rootNode.getFirstLeaf();
             while (leaf != null) {
                 String qualifiedSubclassName = (String) leaf.getUserObject();
-                String subclassName = null;
+                String subclassName;
                 if (qualifiedSubclassName.contains("."))
-                    subclassName = qualifiedSubclassName.substring(qualifiedSubclassName.lastIndexOf(".") + 1, qualifiedSubclassName.length());
+                    subclassName = qualifiedSubclassName.substring(qualifiedSubclassName.lastIndexOf(".") + 1);
                 else
                     subclassName = qualifiedSubclassName;
                 if (!subclassNames.contains(subclassName))
@@ -801,7 +803,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         }
 
         for (int i = 0; i < subclassNames.size(); i++) {
-            ArrayList<PsiStatement> statements = null;
+            ArrayList<PsiStatement> statements;
             DefaultMutableTreeNode remainingIfStatementExpression = null;
             if (i < typeCheckStatements.size()) {
                 statements = typeCheckStatements.get(i);
@@ -1400,8 +1402,8 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                             }
 
                             if (accessedVariable != null) {
-                                PsiElement resolvedAccessdVariable = accessedVariable.resolve();
-                                if (resolvedAccessdVariable.equals(resolvedAccessdVariable)) {
+                                PsiElement resolvedAccessedVariable = accessedVariable.resolve();
+                                if (resolvedAccessedVariable instanceof PsiVariable) {
                                     if (modify && !nodeExistsInsideTypeCheckCodeFragment(initializerExpression)) {
                                         String getterMethodName;
                                         if (typeCheckElimination.getTypeFieldGetterMethod() != null) {
@@ -1432,7 +1434,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
 
                                 if (accessedVariable != null) {
                                     PsiElement argumentBinding = accessedVariable.resolve();
-                                    if (argumentBinding != null && argumentBinding instanceof PsiVariable) {
+                                    if (argumentBinding instanceof PsiVariable) {
                                         PsiVariable accessedVariableBinding = (PsiVariable) argumentBinding;
                                         if (accessedVariableBinding instanceof PsiField && typeCheckElimination.getTypeField().equals(accessedVariableBinding)) {
                                             if (modify && !nodeExistsInsideTypeCheckCodeFragment(argument)) {
@@ -1609,21 +1611,6 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         return contextMethods;
     }
 
-    private Set<PsiMethod> getMethodDeclarationsWithinAnonymousClassDeclarations(PsiMethod methodDeclaration) {
-        Set<PsiMethod> methods = new LinkedHashSet<>();
-        ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-        List<PsiExpression> classInstanceCreations = expressionExtractor.getClassInstanceCreations(methodDeclaration.getBody());
-        for (PsiExpression expression : classInstanceCreations) {
-            PsiNewExpression classInstanceCreation = (PsiNewExpression) expression;
-            PsiAnonymousClass anonymousClassDeclaration = classInstanceCreation.getAnonymousClass();
-            if (anonymousClassDeclaration != null) {
-                PsiMethod[] declarationMethods = anonymousClassDeclaration.getMethods();
-                methods.addAll(Arrays.asList(declarationMethods));
-            }
-        }
-        return methods;
-    }
-
     private Set<PsiMethod> getMethodDeclarationsWithinAnonymousClassDeclarations(PsiField fieldDeclaration) {
         Set<PsiMethod> methods = new LinkedHashSet<>();
         PsiExpression expression = fieldDeclaration.getInitializer();
@@ -1651,19 +1638,13 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
         PsiStatement statement = typeCheckElimination.getTypeCheckCodeFragment();
         int startPosition = statement.getTextOffset();
         int endPosition = startPosition + statement.getTextLength();
-        if (node.getTextOffset() >= startPosition && node.getTextOffset() <= endPosition) {
-            return true;
-        } else {
-            return false;
-        }
+        return node.getTextOffset() >= startPosition && node.getTextOffset() <= endPosition;
     }
 
     private void setPublicModifierToStaticFields() {
         PsiField[] fieldDeclarations = sourceTypeDeclaration.getFields();
         List<PsiField> staticFields = typeCheckElimination.getStaticFields();
-        for (PsiField simpleName : additionalStaticFieldMap.keySet()) {
-            staticFields.add(simpleName);
-        }
+        staticFields.addAll(additionalStaticFieldMap.keySet());
         for (PsiField fieldDeclaration : fieldDeclarations) {
             for (PsiField staticField : staticFields) {
                 if (staticField.equals(fieldDeclaration)) {
@@ -1685,10 +1666,8 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                     PsiAssignmentExpression assignment = (PsiAssignmentExpression) expression;
                     PsiExpression leftHandSide = assignment.getLExpression();
                     PsiReferenceExpression assignedVariable = null;
-                    PsiExpression invoker = null;
                     if (leftHandSide instanceof PsiReferenceExpression) {
                         assignedVariable = (PsiReferenceExpression) leftHandSide;
-                        invoker = assignedVariable.getQualifierExpression();
                     }
                     PsiExpression rightHandSide = assignment.getRExpression();
                     List<PsiExpression> accessedVariables = expressionExtractor.getVariableInstructions(rightHandSide);
@@ -1700,7 +1679,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
                                 for (PsiExpression expression2 : accessedVariables) {
                                     PsiReferenceExpression accessedVariable = (PsiReferenceExpression) expression2;
                                     PsiElement rightHandBinding = accessedVariable.resolve();
-                                    if (rightHandBinding != null && rightHandBinding instanceof PsiVariable) {
+                                    if (rightHandBinding instanceof PsiVariable) {
                                         PsiVariable accessedVariableBinding = (PsiVariable) rightHandBinding;
                                         if (accessedVariableBinding instanceof PsiField
                                                 && accessedVariableBinding.getModifierList().hasModifierProperty(PsiModifier.STATIC)
@@ -1859,14 +1838,13 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     }
 
     private String generateSubclassName(PsiVariable variable) {
-        String subclassName = "";
+        StringBuilder subclassName = new StringBuilder();
         StringTokenizer tokenizer = new StringTokenizer(variable.getName(), "_");
         while (tokenizer.hasMoreTokens()) {
-            String tempName = tokenizer.nextToken().toLowerCase().toString();
-            subclassName += tempName.subSequence(0, 1).toString().toUpperCase() +
-                    tempName.subSequence(1, tempName.length()).toString();
+            String tempName = tokenizer.nextToken().toLowerCase();
+            subclassName.append(tempName.subSequence(0, 1).toString().toUpperCase()).append(tempName.subSequence(1, tempName.length()).toString());
         }
-        return subclassName;
+        return subclassName.toString();
     }
 
     private String commonSubstring(List<String> subclassNames) {
@@ -1896,7 +1874,7 @@ public class ReplaceTypeCodeWithStateStrategy extends PolymorphismRefactoring {
     }
 
     private List<String> commonSubstrings(String s1, String s2) {
-        List<String> commonSubstrings = new ArrayList<String>();
+        List<String> commonSubstrings = new ArrayList<>();
         int m = s1.length();
         int n = s2.length();
         int[][] num = new int[m][n];

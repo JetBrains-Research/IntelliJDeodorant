@@ -12,7 +12,6 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateCheckin
 import java.util.*;
 
 public class MethodBodyObject {
-
     private final CompositeStatementObject compositeStatement;
 
     public MethodBodyObject(PsiCodeBlock methodBody) {
@@ -36,55 +35,61 @@ public class MethodBodyObject {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             TypeCheckElimination typeCheckElimination = new TypeCheckElimination();
             typeCheckElimination.setTypeCheckCodeFragment(switchStatement);
-            PsiStatement[] statements = switchStatement.getBody().getStatements();
-            boolean isDefaultCase = false;
-            Set<PsiExpression> switchCaseExpressions = new LinkedHashSet<>();
-            for (PsiStatement statement2 : statements) {
-                if (statement2 instanceof PsiSwitchLabelStatement) {
-                    PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) statement2;
-                    isDefaultCase = switchCase.isDefaultCase();
-                    if (!isDefaultCase) {
-                        switchCaseExpressions.addAll(Arrays.asList(switchCase.getCaseValues().getExpressions()));
-                    }
-                } else {
-                    if (statement2 instanceof PsiBlockStatement) {
-                        PsiBlockStatement block = (PsiBlockStatement) statement2;
-                        PsiStatement[] statementsInBlock = block.getCodeBlock().getStatements();
-                        for (PsiStatement statementInBlock : statementsInBlock) {
-                            if (!(statementInBlock instanceof PsiBreakStatement)) {
-                                for (PsiExpression expression : switchCaseExpressions) {
-                                    typeCheckElimination.addTypeCheck(expression, statementInBlock);
-                                }
-                                if (isDefaultCase) {
-                                    typeCheckElimination.addDefaultCaseStatement(statementInBlock);
-                                }
+            PsiCodeBlock switchBody = switchStatement.getBody();
+            if (switchBody != null) {
+                PsiStatement[] statements = switchBody.getStatements();
+                boolean isDefaultCase = false;
+                Set<PsiExpression> switchCaseExpressions = new LinkedHashSet<>();
+                for (PsiStatement psiStatement : statements) {
+                    if (psiStatement instanceof PsiSwitchLabelStatement) {
+                        PsiSwitchLabelStatement switchCase = (PsiSwitchLabelStatement) psiStatement;
+                        isDefaultCase = switchCase.isDefaultCase();
+                        if (!isDefaultCase) {
+                            PsiExpressionList expressionList = switchCase.getCaseValues();
+                            if (expressionList != null) {
+                                switchCaseExpressions.addAll(Arrays.asList(expressionList.getExpressions()));
                             }
-                        }
-                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
-                        if (branchingStatements.size() > 0) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                if (!typeCheckElimination.containsTypeCheckExpression(expression)) {
-                                    typeCheckElimination.addEmptyTypeCheck(expression);
-                                }
-                            }
-                            switchCaseExpressions.clear();
                         }
                     } else {
-                        if (!(statement2 instanceof PsiBreakStatement)) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                typeCheckElimination.addTypeCheck(expression, statement2);
+                        if (psiStatement instanceof PsiBlockStatement) {
+                            PsiBlockStatement block = (PsiBlockStatement) psiStatement;
+                            PsiStatement[] statementsInBlock = block.getCodeBlock().getStatements();
+                            for (PsiStatement statementInBlock : statementsInBlock) {
+                                if (!(statementInBlock instanceof PsiBreakStatement)) {
+                                    for (PsiExpression expression : switchCaseExpressions) {
+                                        typeCheckElimination.addTypeCheck(expression, statementInBlock);
+                                    }
+                                    if (isDefaultCase) {
+                                        typeCheckElimination.addDefaultCaseStatement(statementInBlock);
+                                    }
+                                }
                             }
-                            if (isDefaultCase) {
-                                typeCheckElimination.addDefaultCaseStatement(statement2);
+                            List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(psiStatement);
+                            if (branchingStatements.size() > 0) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    if (!typeCheckElimination.containsTypeCheckExpression(expression)) {
+                                        typeCheckElimination.addEmptyTypeCheck(expression);
+                                    }
+                                }
+                                switchCaseExpressions.clear();
                             }
-                        }
-                        List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(statement2);
-                        if (statement2 instanceof PsiBreakStatement || statement2 instanceof PsiReturnStatement || branchingStatements.size() > 0) {
-                            for (PsiExpression expression : switchCaseExpressions) {
-                                if (!typeCheckElimination.containsTypeCheckExpression(expression))
-                                    typeCheckElimination.addEmptyTypeCheck(expression);
+                        } else {
+                            if (!(psiStatement instanceof PsiBreakStatement)) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    typeCheckElimination.addTypeCheck(expression, psiStatement);
+                                }
+                                if (isDefaultCase) {
+                                    typeCheckElimination.addDefaultCaseStatement(psiStatement);
+                                }
                             }
-                            switchCaseExpressions.clear();
+                            List<PsiStatement> branchingStatements = statementExtractor.getBranchingStatements(psiStatement);
+                            if (psiStatement instanceof PsiBreakStatement || psiStatement instanceof PsiReturnStatement || branchingStatements.size() > 0) {
+                                for (PsiExpression expression : switchCaseExpressions) {
+                                    if (!typeCheckElimination.containsTypeCheckExpression(expression))
+                                        typeCheckElimination.addEmptyTypeCheck(expression);
+                                }
+                                switchCaseExpressions.clear();
+                            }
                         }
                     }
                 }
@@ -179,15 +184,11 @@ public class MethodBodyObject {
         return compositeStatement.getSuperMethodInvocations();
     }
 
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return compositeStatement.getConstructorInvocations();
-    }
-
     public List<CreationObject> getCreations() {
         return compositeStatement.getCreations();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return compositeStatement.getLiterals();
     }
 
@@ -319,10 +320,6 @@ public class MethodBodyObject {
         return compositeStatement.getParametersPassedAsArgumentsInSuperMethodInvocations();
     }
 
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return compositeStatement.getParametersPassedAsArgumentsInConstructorInvocations();
-    }
-
     public boolean containsSuperMethodInvocation() {
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
         List<PsiExpression> superMethodInvocations = expressionExtractor.getSuperMethodInvocations(compositeStatement.getStatement());
@@ -356,8 +353,11 @@ public class MethodBodyObject {
         } else if (statement instanceof PsiIfStatement) {
             PsiIfStatement ifStatement = (PsiIfStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(ifStatement, StatementType.IF, parent);
-            AbstractExpression abstractExpression = new AbstractExpression(ifStatement.getCondition(), child);
-            child.addExpression(abstractExpression);
+            PsiExpression conditionExpression = ifStatement.getCondition();
+            if (conditionExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(conditionExpression, child);
+                child.addExpression(abstractExpression);
+            }
             parent.addStatement(child);
             processStatement(child, ifStatement.getThenBranch());
             if (ifStatement.getElseBranch() != null) {
@@ -367,10 +367,11 @@ public class MethodBodyObject {
             PsiForStatement forStatement = (PsiForStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(forStatement, StatementType.FOR, parent);
             parent.addStatement(child);
-
-            AbstractExpression abstractExpression = new AbstractExpression(forStatement.getCondition(), child);
-            child.addExpression(abstractExpression);
-
+            PsiExpression conditionExpression = forStatement.getCondition();
+            if (conditionExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(conditionExpression, child);
+                child.addExpression(abstractExpression);
+            }
             processStatement(child, forStatement.getBody());
             processStatement(child, forStatement.getInitialization());
             processStatement(child, forStatement.getUpdate());
@@ -378,28 +379,35 @@ public class MethodBodyObject {
             PsiForeachStatement enhancedForStatement = (PsiForeachStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(enhancedForStatement, StatementType.ENHANCED_FOR, parent);
             PsiParameter variableDeclaration = enhancedForStatement.getIterationParameter();
-            AbstractExpression variableDeclarationName = new AbstractExpression(variableDeclaration.getInitializer(), child);
-            child.addExpression(variableDeclarationName);
             if (variableDeclaration.getInitializer() != null) {
                 AbstractExpression variableDeclarationInitializer = new AbstractExpression(variableDeclaration.getInitializer(), child);
                 child.addExpression(variableDeclarationInitializer);
             }
-            AbstractExpression abstractExpression = new AbstractExpression(enhancedForStatement.getIteratedValue(), child);
-            child.addExpression(abstractExpression);
+            PsiExpression iteratedValueExpression = enhancedForStatement.getIteratedValue();
+            if (iteratedValueExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(iteratedValueExpression, child);
+                child.addExpression(abstractExpression);
+            }
             parent.addStatement(child);
             processStatement(child, enhancedForStatement.getBody());
         } else if (statement instanceof PsiWhileStatement) {
             PsiWhileStatement whileStatement = (PsiWhileStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(whileStatement, StatementType.WHILE, parent);
-            AbstractExpression abstractExpression = new AbstractExpression(whileStatement.getCondition(), child);
-            child.addExpression(abstractExpression);
+            PsiExpression conditionExpression = whileStatement.getCondition();
+            if (conditionExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(conditionExpression, child);
+                child.addExpression(abstractExpression);
+            }
             parent.addStatement(child);
             processStatement(child, whileStatement.getBody());
         } else if (statement instanceof PsiDoWhileStatement) {
             PsiDoWhileStatement doStatement = (PsiDoWhileStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(doStatement, StatementType.DO, parent);
-            AbstractExpression abstractExpression = new AbstractExpression(doStatement.getCondition(), child);
-            child.addExpression(abstractExpression);
+            PsiExpression conditionExpression = doStatement.getCondition();
+            if (conditionExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(conditionExpression, child);
+                child.addExpression(abstractExpression);
+            }
             parent.addStatement(child);
             processStatement(child, doStatement.getBody());
         } else if (statement instanceof PsiExpressionStatement) {
@@ -416,8 +424,11 @@ public class MethodBodyObject {
              */
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             CompositeStatementObject child = new CompositeStatementObject(switchStatement, StatementType.SWITCH, parent);
-            AbstractExpression abstractExpression = new AbstractExpression(switchStatement.getExpression(), child);
-            child.addExpression(abstractExpression);
+            PsiExpression switchStatementExpression = switchStatement.getExpression();
+            if (switchStatementExpression != null) {
+                AbstractExpression abstractExpression = new AbstractExpression(switchStatementExpression, child);
+                child.addExpression(abstractExpression);
+            }
             parent.addStatement(child);
             if (switchStatement.getBody() != null) {
                 PsiStatement[] switchStatements = switchStatement.getBody().getStatements();

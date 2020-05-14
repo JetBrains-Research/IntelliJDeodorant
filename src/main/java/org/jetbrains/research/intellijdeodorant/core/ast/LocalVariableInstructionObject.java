@@ -1,12 +1,16 @@
 package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
 public class LocalVariableInstructionObject {
     private final TypeObject type;
     private final String name;
-    private ASTInformation reference;
+    private SmartPsiElementPointer<PsiExpression> reference;
     private volatile int hashCode = 0;
 
     public LocalVariableInstructionObject(TypeObject type, String name) {
@@ -23,11 +27,11 @@ public class LocalVariableInstructionObject {
     }
 
     public void setReference(PsiReferenceExpression reference) {
-        this.reference = ASTInformationGenerator.generateASTInformation(reference);
+        this.reference = toPointer(reference);
     }
 
     public PsiReferenceExpression getReference() {
-        PsiElement node = this.reference.recoverASTNode();
+        PsiElement node = this.reference.getElement();
         return (PsiReferenceExpression) node;
     }
 
@@ -39,7 +43,7 @@ public class LocalVariableInstructionObject {
         if (o instanceof LocalVariableInstructionObject) {
             LocalVariableInstructionObject lvio = (LocalVariableInstructionObject) o;
             return this.name.equals(lvio.name) && this.type.equals(lvio.type) &&
-                    this.reference.equals(lvio.reference);
+                    getReference().equals(lvio.getReference());
         }
         return false;
     }
@@ -58,7 +62,7 @@ public class LocalVariableInstructionObject {
             int result = 17;
             result = 37 * result + type.hashCode();
             result = 37 * result + name.hashCode();
-            result = 37 * result + reference.hashCode();
+            result = 37 * result + getReference().hashCode();
             hashCode = result;
         }
         return hashCode;

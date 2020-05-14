@@ -16,7 +16,7 @@ class RefactoringsPanel extends SimpleToolWindowPanel {
     }
 
     /**
-     * Creates a tabbed panel that consist of panels for each code smell type.
+     * Adds a panel for each code smell to the main panel.
      *
      * @param project current project.
      */

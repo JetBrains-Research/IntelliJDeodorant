@@ -1,6 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
 import com.intellij.psi.PsiStatement;
+import com.intellij.util.SmartList;
 import org.jetbrains.research.intellijdeodorant.core.ast.MethodInvocationObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
 
@@ -10,12 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 public class TryStatementObject extends CompositeStatementObject {
-    private final List<CatchClauseObject> catchClauses;
+    private final SmartList<CatchClauseObject> catchClauses;
     private CompositeStatementObject finallyClause;
 
     public TryStatementObject(PsiStatement statement, AbstractMethodFragment parent) {
         super(statement, StatementType.TRY, parent);
-        this.catchClauses = new ArrayList<>();
+        this.catchClauses = new SmartList<>();
     }
 
     public List<AbstractStatement> getStatementsInsideTryBlock() {
@@ -45,7 +46,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<AbstractExpression> getExpressions() {
-        List<AbstractExpression> expressions = new ArrayList<>(super.getExpressions());
+        SmartList<AbstractExpression> expressions = new SmartList<>(super.getExpressions());
         for (CatchClauseObject catchClause : catchClauses) {
             expressions.addAll(catchClause.getExpressions());
         }
@@ -53,7 +54,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<String> stringRepresentation() {
-        List<String> stringRepresentation = new ArrayList<>(super.stringRepresentation());
+        SmartList<String> stringRepresentation = new SmartList<>(super.stringRepresentation());
         for (CatchClauseObject catchClause : catchClauses) {
             stringRepresentation.addAll(catchClause.stringRepresentation());
         }
@@ -86,7 +87,7 @@ public class TryStatementObject extends CompositeStatementObject {
     }
 
     public List<TryStatementObject> getTryStatements() {
-        List<TryStatementObject> tryStatements = new ArrayList<>(super.getTryStatements());
+        SmartList<TryStatementObject> tryStatements = new SmartList<>(super.getTryStatements());
         for (CatchClauseObject catchClause : catchClauses) {
             tryStatements.addAll(catchClause.getTryStatements());
         }

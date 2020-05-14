@@ -1,8 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 public abstract class PDGAbstractDataDependence extends PDGDependence {
-    private AbstractVariable data;
-    private CFGBranchNode loop;
+    private final AbstractVariable data;
+    private final CFGBranchNode loop;
     private volatile int hashCode = 0;
 
     PDGAbstractDataDependence(PDGNode src, PDGNode dst, PDGDependenceType type,

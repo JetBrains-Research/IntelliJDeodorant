@@ -19,8 +19,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemObject {
-    private static final String TYPE_STATE_CHECKING_INDICATOR_KEY = "type.state.checking.identification.indicator";
-
     private final List<ClassObject> classList;
     //Map that has as key the classname and as value
     //the position of className in the classNameList
@@ -42,32 +40,6 @@ public class SystemObject {
     public void addClass(ClassObject c) {
         classNameMap.put(c.getName(), classList.size());
         classList.add(c);
-    }
-
-    public void addClasses(List<ClassObject> classObjects) {
-        for (ClassObject classObject : classObjects)
-            addClass(classObject);
-    }
-
-    public void replaceClass(ClassObject c) {
-        int position = getPositionInClassList(c.getName());
-        if (position != -1) {
-            classList.set(position, c);
-        } else {
-            addClass(c);
-        }
-    }
-
-    public void removeClass(ClassObject c) {
-        int position = getPositionInClassList(c.getName());
-        if (position != -1) {
-            for (int i = position + 1; i < classList.size(); i++) {
-                ClassObject classObject = classList.get(i);
-                classNameMap.put(classObject.getName(), classNameMap.get(classObject.getName()) - 1);
-            }
-            classNameMap.remove(c.getName());
-            classList.remove(c);
-        }
     }
 
     public void addGetter(MethodInvocationObject methodInvocation, FieldInstructionObject fieldInstruction) {
@@ -156,10 +128,6 @@ public class SystemObject {
         return classList.listIterator();
     }
 
-    public int getClassNumber() {
-        return classList.size();
-    }
-
     private int getPositionInClassList(String className) {
         Integer pos = classNameMap.get(className);
         if (pos != null)
@@ -181,7 +149,7 @@ public class SystemObject {
     }
 
     public List<TypeCheckEliminationGroup> generateTypeCheckEliminations(Set<ClassObject> classObjectsToBeExamined, ProgressIndicator indicator) {
-        indicator.setText(IntelliJDeodorantBundle.message(TYPE_STATE_CHECKING_INDICATOR_KEY));
+        indicator.setText(IntelliJDeodorantBundle.message("type.state.checking.identification.indicator"));
         indicator.setFraction(0.0);
         List<TypeCheckElimination> typeCheckEliminationResults = new ArrayList<>();
         List<TypeCheckEliminationGroup> typeCheckEliminationGroups = new ArrayList<>();
@@ -241,7 +209,7 @@ public class SystemObject {
                                                     ArrayList<TypeCheckElimination> typeCheckEliminations = inheritanceTreeMap.get(tree.getRootNode().getUserObject());
                                                     typeCheckEliminations.add(elimination);
                                                 } else {
-                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
                                                     typeCheckEliminations.add(elimination);
                                                     inheritanceTreeMap.put((String) tree.getRootNode().getUserObject(), typeCheckEliminations);
                                                 }
@@ -254,7 +222,7 @@ public class SystemObject {
                                                     ArrayList<TypeCheckElimination> typeCheckEliminations = inheritanceTreeMap.get(tree2.getRootNode().getUserObject());
                                                     typeCheckEliminations.add(elimination);
                                                 } else {
-                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                                                    ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
                                                     typeCheckEliminations.add(elimination);
                                                     inheritanceTreeMap.put((String) tree2.getRootNode().getUserObject(), typeCheckEliminations);
                                                 }
@@ -271,7 +239,7 @@ public class SystemObject {
                                 ArrayList<TypeCheckElimination> rank = staticFieldRankMap.get(size);
                                 rank.add(elimination);
                             } else {
-                                ArrayList<TypeCheckElimination> rank = new ArrayList<TypeCheckElimination>();
+                                ArrayList<TypeCheckElimination> rank = new ArrayList<>();
                                 rank.add(elimination);
                                 staticFieldRankMap.put(size, rank);
                             }
@@ -367,7 +335,7 @@ public class SystemObject {
                     }
                 }
             }
-            ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<TypeCheckElimination>();
+            ArrayList<TypeCheckElimination> typeCheckEliminations = new ArrayList<>();
             for (TypeCheckElimination elimination : affectedEliminations) {
                 if (!elimination.isTypeCheckMethodStateSetter())
                     typeCheckEliminations.add(elimination);
@@ -394,7 +362,7 @@ public class SystemObject {
         if (resolvedClass == null) {
             return false;
         }
-        return resolvedClass.isEnum() || resolvedClass.getQualifiedName().equals("java.lang.String");
+        return resolvedClass.isEnum() || "java.lang.String".equals(resolvedClass.getQualifiedName());
     }
 
     private PsiType handleTypeMethodInvocation(PsiMethodCallExpression typeMethodInvocation, TypeCheckElimination elimination) {
@@ -502,7 +470,7 @@ public class SystemObject {
         if (tree != null) {
             DefaultMutableTreeNode rootNode = tree.getRootNode();
             DefaultMutableTreeNode leaf = rootNode.getFirstLeaf();
-            List<String> inheritanceHierarchySubclassNames = new ArrayList<String>();
+            List<String> inheritanceHierarchySubclassNames = new ArrayList<>();
             while (leaf != null) {
                 inheritanceHierarchySubclassNames.add((String) leaf.getUserObject());
                 leaf = leaf.getNextLeaf();
@@ -511,8 +479,7 @@ public class SystemObject {
             for (PsiField staticField : staticFields) {
                 for (String subclassName : inheritanceHierarchySubclassNames) {
                     ClassObject classObject = getClassObject(subclassName);
-                    ASTInformation classDeclarationAstInformation = classObject.getAbstractTypeDeclaration();
-                    PsiElement abstractTypeDeclaration = classDeclarationAstInformation.recoverASTNode();
+                    PsiElement abstractTypeDeclaration = classObject.getAbstractTypeDeclaration();
                     if (abstractTypeDeclaration instanceof PsiClass) {
                         PsiClass typeDeclaration = (PsiClass) abstractTypeDeclaration;
                         PsiDocComment javadoc = typeDeclaration.getDocComment();
@@ -635,7 +602,7 @@ public class SystemObject {
                 ArrayList<TypeCheckElimination> tempTypeCheckEliminations = typeDeclarationMap.get(bindingKey);
                 tempTypeCheckEliminations.add(elimination);
             } else {
-                ArrayList<TypeCheckElimination> tempTypeCheckEliminations = new ArrayList<TypeCheckElimination>();
+                ArrayList<TypeCheckElimination> tempTypeCheckEliminations = new ArrayList<>();
                 tempTypeCheckEliminations.add(elimination);
                 typeDeclarationMap.put(bindingKey, tempTypeCheckEliminations);
             }

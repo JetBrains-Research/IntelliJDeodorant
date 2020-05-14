@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant.ast;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.progress.util.ProgressIndicatorBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
@@ -47,7 +48,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
         myFixture.configureByText("TestFieldAccess.java", testContent);
 
         Project project = myFixture.getProject();
-        ProjectInfo projectInfo = new ProjectInfo(project);
+        ProjectInfo projectInfo = new ProjectInfo(new AnalysisScope(project), false);
 
         new ASTReader(projectInfo, new ProgressIndicatorBase());
         SystemObject systemObject = ASTReader.getSystemObject();
@@ -64,7 +65,7 @@ public class FieldAccessTest extends LightJavaCodeInsightFixtureTestCase {
             fieldName = "SWITCH_CASE_TEST";
         }
 
-        assertTrue(fieldName + "'s entity set does not contain given method.", entitySet.size() == 2);
+        assertEquals(fieldName + "'s entity set does not contain given method.", 2, entitySet.size());
     }
 
     public void testSimpleTest() {

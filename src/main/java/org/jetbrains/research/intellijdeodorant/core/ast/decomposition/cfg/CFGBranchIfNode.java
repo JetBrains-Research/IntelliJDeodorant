@@ -24,19 +24,22 @@ class CFGBranchIfNode extends CFGBranchConditionalNode {
             Set<AbstractStatement> nestedStatements = new LinkedHashSet<>();
             CompositeStatementObject composite = (CompositeStatementObject) abstractStatement;
             List<AbstractStatement> statements = composite.getStatements();
-            AbstractStatement trueControlFlowStatement = statements.get(0);
-            if (trueControlFlowStatement.getStatement() instanceof PsiBlockStatement) {
-                CompositeStatementObject blockStatement = (CompositeStatementObject) trueControlFlowStatement;
-                processBlockStatement(nestedStatements, blockStatement);
-            } else if (trueControlFlowStatement.getStatement() instanceof PsiLabeledStatement
-                    || trueControlFlowStatement.getStatement() instanceof PsiSynchronizedStatement) {
-                CompositeStatementObject labeledStatement = (CompositeStatementObject) trueControlFlowStatement;
-                processLabeledStatement(nestedStatements, labeledStatement);
-            } else if (trueControlFlowStatement instanceof PsiTryStatement) {
-                CompositeStatementObject tryStatement = (CompositeStatementObject) trueControlFlowStatement;
-                processTryStatement(nestedStatements, tryStatement);
-            } else
-                nestedStatements.add(trueControlFlowStatement);
+            if (statements.size() > 0) {
+                AbstractStatement trueControlFlowStatement = statements.get(0);
+                if (trueControlFlowStatement.getStatement() instanceof PsiBlockStatement) {
+                    CompositeStatementObject blockStatement = (CompositeStatementObject) trueControlFlowStatement;
+                    processBlockStatement(nestedStatements, blockStatement);
+                } else if (trueControlFlowStatement.getStatement() instanceof PsiLabeledStatement
+                        || trueControlFlowStatement.getStatement() instanceof PsiSynchronizedStatement) {
+                    CompositeStatementObject labeledStatement = (CompositeStatementObject) trueControlFlowStatement;
+                    processLabeledStatement(nestedStatements, labeledStatement);
+                } else if (trueControlFlowStatement instanceof PsiTryStatement) {
+                    CompositeStatementObject tryStatement = (CompositeStatementObject) trueControlFlowStatement;
+                    processTryStatement(nestedStatements, tryStatement);
+                } else {
+                    nestedStatements.add(trueControlFlowStatement);
+                }
+            }
             List<BasicBlock> nestedBasicBlocks = getNestedBasicBlocks();
             nestedBasicBlocks.add(0, getBasicBlock());
             for (BasicBlock nestedBlock : nestedBasicBlocks) {

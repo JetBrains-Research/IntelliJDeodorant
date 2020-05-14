@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.MethodBodyObject;
 import org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg.AbstractVariable;
@@ -24,8 +25,6 @@ public interface AbstractMethodDeclaration {
 
     String getClassName();
 
-    ListIterator<CommentObject> getCommentListIterator();
-
     ListIterator<ParameterObject> getParameterListIterator();
 
     ParameterObject getParameter(int position);
@@ -33,8 +32,6 @@ public interface AbstractMethodDeclaration {
     List<MethodInvocationObject> getMethodInvocations();
 
     List<SuperMethodInvocationObject> getSuperMethodInvocations();
-
-    List<ConstructorInvocationObject> getConstructorInvocations();
 
     List<FieldInstructionObject> getFieldInstructions();
 
@@ -46,7 +43,7 @@ public interface AbstractMethodDeclaration {
 
     List<CreationObject> getCreations();
 
-    List<LiteralObject> getLiterals();
+    List<PsiExpression> getLiterals();
 
     List<AnonymousClassDeclarationObject> getAnonymousClassDeclarations();
 
@@ -113,8 +110,6 @@ public interface AbstractMethodDeclaration {
     Map<PlainVariable, LinkedHashSet<MethodInvocationObject>> getParametersPassedAsArgumentsInMethodInvocations();
 
     Map<PlainVariable, LinkedHashSet<SuperMethodInvocationObject>> getParametersPassedAsArgumentsInSuperMethodInvocations();
-
-    Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations();
 
     boolean containsSuperMethodInvocation();
 

@@ -7,9 +7,9 @@ import java.util.LinkedHashSet;
 
 public class TarjanAlgorithm {
     private int index = 0;
-    private ArrayList<Node> stack = new ArrayList<Node>();
-    private AdjacencyList list;
-    private LinkedHashSet<LinkedHashSet<Node>> SCC = new LinkedHashSet<LinkedHashSet<Node>>();
+    private final ArrayList<Node> stack = new ArrayList<>();
+    private final AdjacencyList list;
+    private final LinkedHashSet<LinkedHashSet<Node>> SCC = new LinkedHashSet<>();
 
     public TarjanAlgorithm(AdjacencyList list) {
         this.list = list;
@@ -34,7 +34,7 @@ public class TarjanAlgorithm {
         }
         if (v.lowlink == v.index) {
             Node n;
-            LinkedHashSet<Node> component = new LinkedHashSet<Node>();
+            LinkedHashSet<Node> component = new LinkedHashSet<>();
             do {
                 n = stack.remove(0);
                 component.add(n);

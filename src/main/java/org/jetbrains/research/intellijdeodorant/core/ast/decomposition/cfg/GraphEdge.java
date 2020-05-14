@@ -1,8 +1,8 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 public class GraphEdge {
-    protected GraphNode src;
-    protected GraphNode dst;
+    protected final GraphNode src;
+    protected final GraphNode dst;
 
     GraphEdge(GraphNode src, GraphNode dst) {
         this.src = src;

@@ -1,7 +1,7 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition.cfg;
 
 public class PDGControlDependence extends PDGDependence {
-    private boolean trueControlDependence;
+    private final boolean trueControlDependence;
     private volatile int hashCode = 0;
 
     PDGControlDependence(PDGNode src, PDGNode dst, boolean trueControlDependence) {
@@ -9,18 +9,6 @@ public class PDGControlDependence extends PDGDependence {
         this.trueControlDependence = trueControlDependence;
         src.addOutgoingEdge(this);
         dst.addIncomingEdge(this);
-    }
-
-    boolean isTrueControlDependence() {
-        return trueControlDependence;
-    }
-
-    public boolean isFalseControlDependence() {
-        return !trueControlDependence;
-    }
-
-    public boolean sameLabel(PDGControlDependence other) {
-        return this.trueControlDependence == other.trueControlDependence;
     }
 
     public boolean equals(Object o) {

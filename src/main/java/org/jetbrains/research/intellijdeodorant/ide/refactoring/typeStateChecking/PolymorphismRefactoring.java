@@ -16,12 +16,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public abstract class PolymorphismRefactoring {
-    protected PsiFile sourceFile;
-    protected PsiClass sourceTypeDeclaration;
-    protected Project project;
-    protected TypeCheckElimination typeCheckElimination;
-    protected PsiElementFactory elementFactory;
-    protected CodeStyleManager codeStyleManager;
+    protected final PsiFile sourceFile;
+    protected final PsiClass sourceTypeDeclaration;
+    protected final Project project;
+    protected final TypeCheckElimination typeCheckElimination;
+    protected final PsiElementFactory elementFactory;
+    protected final CodeStyleManager codeStyleManager;
 
     final protected PsiJavaToken semicolon;
 
@@ -32,7 +32,7 @@ public abstract class PolymorphismRefactoring {
         this.sourceFile = sourceFile;
         this.sourceTypeDeclaration = sourceTypeDeclaration;
         this.typeCheckElimination = typeCheckElimination;
-        elementFactory = PsiElementFactory.SERVICE.getInstance(project);
+        elementFactory = PsiElementFactory.getInstance(project);
         codeStyleManager = CodeStyleManager.getInstance(project);
         this.project = project;
         semicolon = (PsiJavaToken) elementFactory.createStatementFromText(";", null).getFirstChild();
@@ -71,10 +71,10 @@ public abstract class PolymorphismRefactoring {
 
     private void addQualifierToSourceTypeMethodCalls(PsiMethodCallExpression newMethodInvocation, PsiMethod methodDeclaration) {
         String invokerName = sourceTypeDeclaration.getName();
-        if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC)) {
+        if (!methodDeclaration.getModifierList().hasModifierProperty(PsiModifier.STATIC) && invokerName != null) {
             invokerName = invokerName.substring(0, 1).toLowerCase() + invokerName.substring(1);
+            newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
         }
-        newMethodInvocation.getMethodExpression().setQualifierExpression(elementFactory.createExpressionFromText(invokerName, null));
     }
 
     protected void replaceThisExpressionWithContextParameterInMethodInvocationArguments(List<PsiExpression> oldMethodInvocations,
@@ -137,12 +137,10 @@ public abstract class PolymorphismRefactoring {
         for (int i = 0; i < newVariableInstructions.size(); i++) {
             PsiReferenceExpression newSimpleName = (PsiReferenceExpression) newVariableInstructions.get(i);
             PsiReferenceExpression oldSimpleName = (PsiReferenceExpression) oldVariableInstructions.get(i);
-            PsiExpression newParentExpression = newSimpleName;
-            PsiExpression oldParentExpression = oldSimpleName;
 
-            if (newParentExpression.getParent() instanceof PsiAssignmentExpression) {
-                PsiAssignmentExpression newAssignment = (PsiAssignmentExpression) newParentExpression.getParent();
-                PsiAssignmentExpression oldAssignment = (PsiAssignmentExpression) oldParentExpression.getParent();
+            if (newSimpleName.getParent() instanceof PsiAssignmentExpression) {
+                PsiAssignmentExpression newAssignment = (PsiAssignmentExpression) newSimpleName.getParent();
+                PsiAssignmentExpression oldAssignment = (PsiAssignmentExpression) oldSimpleName.getParent();
                 PsiExpression newLeftHandSide = newAssignment.getLExpression();
                 PsiExpression oldLeftHandSide = oldAssignment.getLExpression();
                 PsiReferenceExpression newLeftHandSideName = null;
@@ -261,9 +259,9 @@ public abstract class PolymorphismRefactoring {
                         }
                     }
                 }
-            } else if (newParentExpression.getParent() instanceof PsiPostfixExpression) { // TODO: does not work for {a = b++} (even in the original plugin)
-                PsiUnaryExpression newPostfixExpression = (PsiPostfixExpression) newParentExpression.getParent();
-                PsiPostfixExpression oldPostfixExpression = (PsiPostfixExpression) oldParentExpression.getParent();
+            } else if (newSimpleName.getParent() instanceof PsiPostfixExpression) { // TODO: does not work for {a = b++} (even in the original plugin)
+                PsiUnaryExpression newPostfixExpression = (PsiPostfixExpression) newSimpleName.getParent();
+                PsiPostfixExpression oldPostfixExpression = (PsiPostfixExpression) oldSimpleName.getParent();
                 PsiReferenceExpression newOperandReference = null;
                 PsiReferenceExpression oldOperandReference = null;
                 if (newPostfixExpression.getOperand() instanceof PsiReferenceExpression) {
@@ -282,9 +280,9 @@ public abstract class PolymorphismRefactoring {
                             invokerName
                     );
                 }
-            } else if (newParentExpression.getParent() instanceof PsiPrefixExpression) {
-                PsiUnaryExpression newPrefixExpression = (PsiPrefixExpression) newParentExpression.getParent();
-                PsiPrefixExpression oldPrefixExpression = (PsiPrefixExpression) oldParentExpression.getParent();
+            } else if (newSimpleName.getParent() instanceof PsiPrefixExpression) {
+                PsiUnaryExpression newPrefixExpression = (PsiPrefixExpression) newSimpleName.getParent();
+                PsiPrefixExpression oldPrefixExpression = (PsiPrefixExpression) oldSimpleName.getParent();
                 PsiReferenceExpression newOperandSimpleName = null;
                 PsiReferenceExpression oldOperandSimpleName = null;
                 if (newPrefixExpression.getOperand() instanceof PsiReferenceExpression) {
@@ -385,7 +383,7 @@ public abstract class PolymorphismRefactoring {
     }
 
     private String getGetterName(Set<PsiField> superAccessedFields, PsiField assignedFieldBinding) {
-        PsiMethod getterMethodBinding = null;
+        PsiMethod getterMethodBinding;
         if (superAccessedFields.contains(assignedFieldBinding)) {
             getterMethodBinding = typeCheckElimination.getGetterMethodBindingOfSuperAccessedField(assignedFieldBinding);
         } else {
@@ -402,7 +400,7 @@ public abstract class PolymorphismRefactoring {
     }
 
     private PsiMethodCallExpression generateSetterInvocation(Set<PsiField> superAssignedFields, String invokerName, PsiField assignedFieldBinding) {
-        PsiMethod setterMethodBinding = null;
+        PsiMethod setterMethodBinding;
         if (superAssignedFields.contains(assignedFieldBinding)) {
             setterMethodBinding = typeCheckElimination.getSetterMethodBindingOfSuperAssignedField(assignedFieldBinding);
         } else {
@@ -416,11 +414,10 @@ public abstract class PolymorphismRefactoring {
             leftHandMethodName = "set" + leftHandMethodName.substring(0, 1).toUpperCase() + leftHandMethodName.substring(1);
         }
 
-        PsiMethodCallExpression setterInvocation = (PsiMethodCallExpression) elementFactory.createExpressionFromText(
+        return (PsiMethodCallExpression) elementFactory.createExpressionFromText(
                 invokerName + "." + leftHandMethodName + "()",
                 null
         );
-        return setterInvocation;
     }
 
     private void setPublicModifierToSourceField(PsiField variableBinding) {
@@ -448,7 +445,6 @@ public abstract class PolymorphismRefactoring {
         }
         return null;
     }
-
 
     protected void generateGettersForAccessedFields() {
         Set<PsiField> accessedFields = new LinkedHashSet<>();
@@ -555,7 +551,7 @@ public abstract class PolymorphismRefactoring {
         return sourceTypeDeclaration;
     }
 
-    public PsiFile getSourceFile() {
-        return sourceFile;
+    public TypeCheckElimination getTypeCheckElimination() {
+        return typeCheckElimination;
     }
 }

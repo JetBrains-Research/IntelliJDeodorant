@@ -8,7 +8,4 @@ class MyStatement extends MyAbstractStatement {
 		super(statement);
 	}
 
-	public MyStatement(MyMethodInvocation methodInvocation) {
-		super(methodInvocation);
-	}
 }

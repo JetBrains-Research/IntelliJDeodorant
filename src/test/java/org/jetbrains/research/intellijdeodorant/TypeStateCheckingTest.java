@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -103,7 +104,7 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         initTest();
         Project project = myFixture.getProject();
         Set<TypeCheckEliminationGroup> set = JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
-                new ProjectInfo(project), fakeProgressIndicator
+                new ProjectInfo(new AnalysisScope(project), false), fakeProgressIndicator
         );
         assertEquals(0, set.size());
         checkTest();
@@ -132,7 +133,7 @@ public class TypeStateCheckingTest extends LightJavaCodeInsightFixtureTestCase {
         while (eliminationGroupSizes.size() != 0) {
             Set<TypeCheckEliminationGroup> eliminationGroups =
                     JDeodorantFacade.getTypeCheckEliminationRefactoringOpportunities(
-                            new ProjectInfo(project),
+                            new ProjectInfo(new AnalysisScope(project), false),
                             fakeProgressIndicator
                     );
             assertEquals(eliminationGroupSizes.size(), eliminationGroups.size());

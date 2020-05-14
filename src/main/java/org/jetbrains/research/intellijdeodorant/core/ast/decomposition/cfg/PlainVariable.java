@@ -40,7 +40,7 @@ public class PlainVariable extends AbstractVariable {
             return this.getOrigin().equals(plain.getOrigin());
         }
         if (o instanceof String) {
-            return ((String) o).equals("this") && this.getOrigin() instanceof PsiClass;
+            return o.equals("this") && this.getOrigin() instanceof PsiClass;
         }
         return false;
     }

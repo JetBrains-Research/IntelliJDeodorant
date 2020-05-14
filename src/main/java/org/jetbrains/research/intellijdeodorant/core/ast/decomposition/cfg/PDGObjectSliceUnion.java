@@ -11,18 +11,18 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class PDGObjectSliceUnion {
-    private PDG pdg;
-    private AbstractMethodDeclaration method;
-    private BasicBlock boundaryBlock;
-    private Set<PDGNode> allNodeCriteria;
-    private AbstractVariable objectReference;
-    private PsiFile iFile;
-    private int methodSize;
-    private PDGSlice subgraph;
-    private Set<PDGNode> sliceNodes;
-    private Set<AbstractVariable> passedParameters;
-    private Set<PDGNode> indispensableNodes;
-    private Set<PDGNode> removableNodes;
+    private final PDG pdg;
+    private final AbstractMethodDeclaration method;
+    private final BasicBlock boundaryBlock;
+    private final Set<PDGNode> allNodeCriteria;
+    private final AbstractVariable objectReference;
+    private final PsiFile iFile;
+    private final int methodSize;
+    private final PDGSlice subgraph;
+    private final Set<PDGNode> sliceNodes;
+    private final Set<AbstractVariable> passedParameters;
+    private final Set<PDGNode> indispensableNodes;
+    private final Set<PDGNode> removableNodes;
 
     PDGObjectSliceUnion(PDG pdg, BasicBlock boundaryBlock, Set<PDGNode> allNodeCriteria, PlainVariable objectReference) {
         this.pdg = pdg;
@@ -216,10 +216,6 @@ public class PDGObjectSliceUnion {
 
     public PsiFile getIFile() {
         return iFile;
-    }
-
-    public int getMethodSize() {
-        return methodSize;
     }
 
     public BasicBlock getBoundaryBlock() {

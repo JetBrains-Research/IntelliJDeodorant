@@ -1,30 +1,18 @@
 package org.jetbrains.research.intellijdeodorant.core.distance;
 
-
 import org.jetbrains.research.intellijdeodorant.utils.TopicFinder;
 
 import java.util.*;
 
 public class ExtractedConcept implements Comparable<ExtractedConcept> {
-
-    private Set<ExtractClassCandidateRefactoring> conceptClusters;
-    private Set<Entity> conceptEntities;
-    private String sourceClass;
+    private final Set<ExtractClassCandidateRefactoring> conceptClusters;
+    private final Set<Entity> conceptEntities;
     private List<String> topics;
 
-    public ExtractedConcept(Set<Entity> conceptEntities, String sourceClass) {
+    public ExtractedConcept(Set<Entity> conceptEntities) {
         this.conceptEntities = conceptEntities;
-        this.conceptClusters = new HashSet<ExtractClassCandidateRefactoring>();
-        this.sourceClass = sourceClass;
-        this.topics = new ArrayList<String>();
-    }
-
-    public List<String> getTopics() {
-        return topics;
-    }
-
-    public String getSourceClass() {
-        return sourceClass;
+        this.conceptClusters = new HashSet<>();
+        this.topics = new ArrayList<>();
     }
 
     public Set<Entity> getConceptEntities() {
@@ -40,7 +28,7 @@ public class ExtractedConcept implements Comparable<ExtractedConcept> {
     }
 
     public void findTopics() {
-        List<String> codeElements = new ArrayList<String>();
+        List<String> codeElements = new ArrayList<>();
         for (Entity entity : this.getConceptEntities()) {
             if (entity instanceof MyAttribute) {
                 MyAttribute attribute = (MyAttribute) entity;
@@ -54,8 +42,8 @@ public class ExtractedConcept implements Comparable<ExtractedConcept> {
     }
 
     public int compareTo(ExtractedConcept other) {
-        TreeSet<ExtractClassCandidateRefactoring> thisSet = new TreeSet<ExtractClassCandidateRefactoring>(this.conceptClusters);
-        TreeSet<ExtractClassCandidateRefactoring> otherSet = new TreeSet<ExtractClassCandidateRefactoring>(other.conceptClusters);
+        TreeSet<ExtractClassCandidateRefactoring> thisSet = new TreeSet<>(this.conceptClusters);
+        TreeSet<ExtractClassCandidateRefactoring> otherSet = new TreeSet<>(other.conceptClusters);
         ExtractClassCandidateRefactoring thisFirst = thisSet.first();
         ExtractClassCandidateRefactoring otherFirst = otherSet.first();
         return thisFirst.compareTo(otherFirst);

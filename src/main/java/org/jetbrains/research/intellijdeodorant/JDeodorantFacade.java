@@ -14,18 +14,10 @@ import java.util.*;
 
 public class JDeodorantFacade {
 
-    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator) {
+    public static List<MoveMethodCandidateRefactoring> getMoveMethodRefactoringOpportunities(ProjectInfo project, ProgressIndicator indicator, Set<String> classNamesToBeExamined) {
         new ASTReader(project, indicator);
-        Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(ASTReader.getSystemObject().getClassObjects());
-
-        Set<String> classNamesToBeExamined = new LinkedHashSet<>();
-        for (ClassObject classObject : classObjectsToBeExamined) {
-            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
-                classNamesToBeExamined.add(classObject.getName());
-        }
         MySystem system = new MySystem(ASTReader.getSystemObject(), false);
         DistanceMatrix distanceMatrix = new DistanceMatrix(system);
-
         List<MoveMethodCandidateRefactoring> candidateRefactoring =
                 distanceMatrix.getMoveMethodCandidateRefactoringsByAccess(classNamesToBeExamined, indicator);
         List<MoveMethodCandidateRefactoring> moveMethodCandidateList = new ArrayList<>(candidateRefactoring);
@@ -38,9 +30,9 @@ public class JDeodorantFacade {
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
-            Set<String> classNamesToBeExamined = new LinkedHashSet<String>();
+            Set<String> classNamesToBeExamined = new LinkedHashSet<>();
             for (ClassObject classObject : classObjectsToBeExamined) {
-                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator())
+                if (!classObject.isEnum() && !classObject.isInterface())
                     classNamesToBeExamined.add(classObject.getName());
             }
             MySystem system = new MySystem(systemObject, true);
@@ -76,7 +68,7 @@ public class JDeodorantFacade {
             Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
 
             for (ClassObject classObject : classObjectsToBeExamined) {
-                if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenenator()) {
+                if (!classObject.isEnum() && !classObject.isInterface()) {
                     ListIterator<MethodObject> methodIterator = classObject.getMethodIterator();
                     while (methodIterator.hasNext()) {
                         MethodObject methodObject = methodIterator.next();
@@ -163,7 +155,7 @@ public class JDeodorantFacade {
 
         Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>();
         for (ClassObject classObject : systemObject.getClassObjects()) {
-            if (!classObject.isEnum() && !classObject.isInterface() && !classObject.isGeneratedByParserGenerator()) {
+            if (!classObject.isEnum() && !classObject.isInterface()) {
                 classObjectsToBeExamined.add(classObject);
             }
         }

@@ -1,25 +1,27 @@
 package org.jetbrains.research.intellijdeodorant.core.ast.decomposition;
 
 import com.intellij.psi.PsiExpression;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformation;
-import org.jetbrains.research.intellijdeodorant.core.ast.ASTInformationGenerator;
+import com.intellij.psi.SmartPsiElementPointer;
+
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 
 import java.util.List;
 
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
+
 public class AbstractExpression extends AbstractMethodFragment {
+    private final SmartPsiElementPointer<PsiExpression> expression;
 
-    private final ASTInformation expression;
-
-    public AbstractExpression(PsiExpression expression) {
+    public AbstractExpression(@NotNull PsiExpression expression) {
         super(null);
-        this.expression = ASTInformationGenerator.generateASTInformation(expression);
+        this.expression = toPointer(expression);
         processExpression(expression);
     }
 
-    public AbstractExpression(PsiExpression expression, AbstractMethodFragment parent) {
+    public AbstractExpression(@NotNull PsiExpression expression, AbstractMethodFragment parent) {
         super(parent);
-        this.expression = ASTInformationGenerator.generateASTInformation(expression);
+        this.expression = toPointer(expression);
         processExpression(expression);
     }
 
@@ -36,7 +38,7 @@ public class AbstractExpression extends AbstractMethodFragment {
     }
 
     private PsiExpression getExpression() {
-        return (PsiExpression) this.expression.recoverASTNode();
+        return this.expression.getElement();
     }
 
     @Override
@@ -44,7 +46,7 @@ public class AbstractExpression extends AbstractMethodFragment {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((expression == null) ? 0 : expression.hashCode());
+                + ((expression == null) ? 0 : getExpression().hashCode());
         return result;
     }
 
@@ -59,7 +61,7 @@ public class AbstractExpression extends AbstractMethodFragment {
         AbstractExpression other = (AbstractExpression) obj;
         if (expression == null) {
             return other.expression == null;
-        } else return expression.equals(other.expression);
+        } else return getExpression().equals(other.getExpression());
     }
 
     public String toString() {

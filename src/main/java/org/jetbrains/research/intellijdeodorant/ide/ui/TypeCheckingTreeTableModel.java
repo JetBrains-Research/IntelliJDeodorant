@@ -12,11 +12,6 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.typeStateCheckin
 import java.util.List;
 
 public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
-    private static final String REPLACE_TYPE_CODE_WITH_STATE_STRATEGY =
-            IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.name");
-    private static final String REPLACE_CONDITIONAL_WITH_POLYMORPHISM =
-            IntelliJDeodorantBundle.message("replace.conditional.with.polymorphism.name");
-
     public TypeCheckingTreeTableModel(List<AbstractCandidateRefactoringGroup> candidateRefactoringGroups, String[] columnNames, Project project) {
         super(candidateRefactoringGroups, columnNames, new TypeCheckRefactoringType(project));
     }
@@ -35,7 +30,7 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
                 case 3:
                     return Double.toString(group.getAverageGroupSizeAtClassLevel());
                 case 4:
-                    return Double.toString(group.getAverageNumberOfStatementsInGroup());
+                    return String.format("%.2f", group.getAverageNumberOfStatementsInGroup());
             }
         }
 
@@ -47,13 +42,13 @@ public class TypeCheckingTreeTableModel extends AbstractTreeTableModel {
                     return typeCheckElimination.toString();
                 case 1:
                     if (typeCheckElimination.getExistingInheritanceTree() == null) {
-                        return REPLACE_TYPE_CODE_WITH_STATE_STRATEGY;
+                        return IntelliJDeodorantBundle.message("replace.type.code.with.state.strategy.name");
                     }
-                    return REPLACE_CONDITIONAL_WITH_POLYMORPHISM;
+                    return IntelliJDeodorantBundle.message("replace.conditional.with.polymorphism.name");
                 case 3:
                     return Integer.toString(typeCheckElimination.getGroupSizeAtClassLevel());
                 case 4:
-                    return Double.toString(typeCheckElimination.getAverageNumberOfStatements());
+                    return String.format("%.2f", typeCheckElimination.getAverageNumberOfStatements());
             }
         }
         return "";

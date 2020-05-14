@@ -1,5 +1,6 @@
 package org.jetbrains.research.intellijdeodorant;
 
+import com.intellij.analysis.AnalysisScope;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -23,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-
 
 /**
  * To add a test with the name `TestName`, directory `TestName` should be created in `src/test/resources/testdata/ide/refactoring/godclass/`
@@ -137,6 +137,33 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
         runTest("TestSOEN_Jar");
     }
 
+    public void testFinalInitialisationWithConstructorParameters() {
+        runTest("TestFinalInitialisationWithConstructorParameters");
+    }
+
+    public void testFinalInitialisationWithLocalVariable() {
+        runTest("TestFinalInitialisationWithLocalVariable");
+    }
+
+    public void testFinalInitialisationWithField() {
+        /*
+        BUG IN ORIGINAL PLUGIN.
+
+        It does not pass as a parameter a final field used as an initializer to another final field.
+         */
+        //runTest("TestFinalInitialisationWithField");
+    }
+
+    public void testFinalInitialisationWithStaticFunctionCall() {
+        /*
+        BUG IN ORIGINAL PLUGIN.
+
+        It does not support initialising extracted a final field with a static function call.
+         */
+
+        //runTest("TestFinalInitialisationWithStaticFunctionCall");
+    }
+
     public void testSOEN_StackedBarRenderer3D() {
         /*
         TEST ACTUALLY GIVES A WRONG RESULT:
@@ -167,7 +194,7 @@ public class GodClassTest extends LightJavaCodeInsightFixtureTestCase {
 
             myFixture.copyDirectoryToProject(testName + "/initial", testName + "/actual");
 
-            Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(myFixture.getProject()), fakeProgressIndicator);
+            Set<ExtractClassCandidateGroup> candidateGroups = JDeodorantFacade.getExtractClassRefactoringOpportunities(new ProjectInfo(new AnalysisScope(myFixture.getProject()), false), fakeProgressIndicator);
 
             assertTrue(candidateGroups.size() > 0);
 

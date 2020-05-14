@@ -7,16 +7,17 @@ import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.psi.util.PsiUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.ExpressionExtractor;
 import org.jetbrains.research.intellijdeodorant.core.ast.util.StatementExtractor;
+import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.inheritance.InheritanceTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
 
 public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring {
-    private PsiVariable returnedVariable;
-    private Set<PsiClassType> thrownExceptions;
+    private final PsiVariable returnedVariable;
+    private final Set<PsiClassType> thrownExceptions;
     private PsiVariable typeVariable;
-    private PsiMethodCallExpression typeMethodInvocation;
+    private final PsiMethodCallExpression typeMethodInvocation;
 
     public ReplaceConditionalWithPolymorphism(PsiFile sourceFile,
                                               Project project,
@@ -37,6 +38,9 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
     public void apply() {
         modifyInheritanceHierarchy();
         modifyClient();
+        IntelliJDeodorantCounterCollector.getInstance().typeStateCheckingRefactoringApplied(project,
+                typeCheckElimination.getTotalCaseStatementsCount(),
+                typeCheckElimination.getAverageNumberOfStatements());
     }
 
     private void modifyClient() {
@@ -123,7 +127,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
     private void modifyInheritanceHierarchy() {
         String abstractClassFullyQualifiedName = typeCheckElimination.getAbstractClassName();
         PsiClass abstractClass = ClassUtil.findPsiClass(PsiManager.getInstance(project), abstractClassFullyQualifiedName);
-        PsiFile abstractClassFile = abstractClass.getContainingFile();
 
         Set<PsiField> accessedFields = typeCheckElimination.getAccessedFields();
         Set<PsiField> assignedFields = typeCheckElimination.getAssignedFields();
@@ -131,7 +134,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
         Set<PsiMethod> superAccessedMethods = typeCheckElimination.getSuperAccessedMethods();
         Set<PsiField> superAccessedFields = typeCheckElimination.getSuperAccessedFieldBindings();
         Set<PsiField> superAssignedFields = typeCheckElimination.getSuperAssignedFieldBindings();
-        Set<PsiType> requiredImportDeclarationsBasedOnSignature = getRequiredImportDeclarationsBasedOnSignature();
 
         if (!typeCheckElimination.getSubclassNames().contains(abstractClassFullyQualifiedName)) {
             boolean isAbstract = abstractClass.getModifierList().hasExplicitModifier(PsiModifier.ABSTRACT);
@@ -158,7 +160,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
         }
 
         for (int i = 0; i < subclassNames.size(); i++) {
-            ArrayList<PsiStatement> statements = null;
+            ArrayList<PsiStatement> statements;
             DefaultMutableTreeNode remainingIfStatementExpression = null;
             if (i < typeCheckStatements.size()) {
                 statements = typeCheckStatements.get(i);
@@ -168,8 +170,6 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                 statements = typeCheckElimination.getDefaultCaseStatements();
             }
             PsiClass subClass = ClassUtil.findPsiClass(PsiManager.getInstance(project), subclassNames.get(i));
-            PsiFile subClassFile = subClass.getContainingFile();
-
             PsiMethod concreteMethod = createPolymorphicMethodHeader();
             PsiCodeBlock concreteMethodBody = concreteMethod.getBody();
             ExpressionExtractor expressionExtractor = new ExpressionExtractor();
@@ -225,7 +225,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
                     }
                     if (sourceTypeRequiredForExtraction()) {
                         String parameterName = sourceTypeDeclaration.getName();
-                        parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
+                        parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
                         superMethodInvocationArgumentRewrite.add(elementFactory.createExpressionFromText(parameterName, null));
                     }
                     if (returnedVariable != null) {
@@ -374,7 +374,7 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
 
         if (sourceTypeRequiredForExtraction()) {
             String parameterName = sourceTypeDeclaration.getName();
-            parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1, parameterName.length());
+            parameterName = parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
             PsiType parameterType = PsiTypesUtil.getClassType(sourceTypeDeclaration);
             abstractMethodParameters.add(elementFactory.createParameter(parameterName, parameterType));
         }
@@ -470,39 +470,5 @@ public class ReplaceConditionalWithPolymorphism extends PolymorphismRefactoring 
             }
             j++;
         }
-    }
-
-    private Set<PsiType> getRequiredImportDeclarationsBasedOnSignature() {
-        Set<PsiType> typeBindings = new LinkedHashSet<>();
-        if (returnedVariable != null) {
-            PsiType returnType = returnedVariable.getType();
-            typeBindings.add(returnType);
-        }
-
-        Set<PsiParameter> parameters = typeCheckElimination.getAccessedParameters();
-        for (PsiParameter parameter : parameters) {
-            if (!parameter.equals(returnedVariable) && !parameter.equals(typeVariable)) {
-                PsiType parameterType = parameter.getType();
-                typeBindings.add(parameterType);
-            }
-        }
-
-        Set<PsiVariable> accessedLocalVariables = typeCheckElimination.getAccessedLocalVariables();
-        for (PsiVariable fragment : accessedLocalVariables) {
-            if (!fragment.equals(returnedVariable) && !fragment.equals(typeVariable)) {
-                PsiType variableType = fragment.getType();
-                typeBindings.add(variableType);
-            }
-        }
-
-        if (typeCheckElimination.getAccessedFields().size() > 0 || typeCheckElimination.getAssignedFields().size() > 0 ||
-                typeCheckElimination.getAccessedMethods().size() > 0 || typeCheckElimination.getSuperAccessedMethods().size() > 0 ||
-                typeCheckElimination.getSuperAccessedFieldBindings().size() > 0 || typeCheckElimination.getSuperAssignedFieldBindings().size() > 0) {
-            typeBindings.add(PsiTypesUtil.getClassType(sourceTypeDeclaration));
-        }
-
-        typeBindings.addAll(thrownExceptions);
-
-        return typeBindings;
     }
 }

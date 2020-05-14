@@ -14,11 +14,6 @@ public class StatementExtractor {
 
     private StatementInstanceChecker instanceChecker;
 
-    public List<PsiStatement> getConstructorInvocations(PsiStatement statement) {
-        instanceChecker = new InstanceOfConstructorInvocation();
-        return getStatements(statement);
-    }
-
     public List<PsiStatement> getVariableDeclarationStatements(PsiElement statement) {
         instanceChecker = new InstanceOfVariableDeclarationStatement();
         return getStatements(statement);
@@ -89,11 +84,6 @@ public class StatementExtractor {
         return getStatements(statement);
     }
 
-    public List<PsiStatement> getTypeDeclarationStatements(PsiStatement statement) {
-        instanceChecker = new InstanceOfTypeDeclarationStatement();
-        return getStatements(statement);
-    }
-
     private List<PsiStatement> getStatements(PsiStatement[] statements) {
         List<PsiStatement> result = new ArrayList<>();
         for (PsiStatement statement : statements) {
@@ -145,8 +135,6 @@ public class StatementExtractor {
             statementList.addAll(getStatements(doStatement.getBody()));
             if (instanceChecker.instanceOf(doStatement))
                 statementList.add(doStatement);
-        } else if (statement instanceof PsiExpressionStatement) {
-            PsiExpressionStatement expressionStatement = (PsiExpressionStatement) statement;
         } else if (statement instanceof PsiSwitchStatement) {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
             if (switchStatement.getBody() != null) {
@@ -156,8 +144,6 @@ public class StatementExtractor {
             }
             if (instanceChecker.instanceOf(switchStatement))
                 statementList.add(switchStatement);
-        } else if (statement instanceof PsiAssertStatement) {
-            PsiAssertStatement assertStatement = (PsiAssertStatement) statement;
         } else if (statement instanceof PsiLabeledStatement) {
             PsiLabeledStatement labeledStatement = (PsiLabeledStatement) statement;
             statementList.addAll(getStatements(labeledStatement.getStatement()));
@@ -167,9 +153,7 @@ public class StatementExtractor {
                 statementList.add(returnStatement);
         } else if (statement instanceof PsiSynchronizedStatement) {
             PsiSynchronizedStatement synchronizedStatement = (PsiSynchronizedStatement) statement;
-            statementList.addAll(getStatements(synchronizedStatement));
-        } else if (statement instanceof PsiThrowStatement) {
-            PsiThrowStatement throwStatement = (PsiThrowStatement) statement;
+            statementList.addAll(getStatements(synchronizedStatement.getBody()));
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             PsiCodeBlock tryBlock = tryStatement.getTryBlock();
@@ -239,8 +223,8 @@ public class StatementExtractor {
             statementCounter += 1;
         } else if (statement instanceof PsiSwitchStatement) {
             PsiSwitchStatement switchStatement = (PsiSwitchStatement) statement;
+            statementCounter += getNumberOfStatementsInsideCodeBlock(switchStatement.getBody());
             statementCounter += 1;
-            statementCounter += getTotalNumberOfStatements(switchStatement);
         } else if (statement instanceof PsiAssertStatement) {
             statementCounter += 1;
         } else if (statement instanceof PsiLabeledStatement) {
@@ -252,32 +236,34 @@ public class StatementExtractor {
         } else if (statement instanceof PsiSynchronizedStatement) {
             PsiSynchronizedStatement synchronizedStatement = (PsiSynchronizedStatement) statement;
             statementCounter += 1;
-            statementCounter += getTotalNumberOfStatements(synchronizedStatement);
+            statementCounter += getNumberOfStatementsInsideCodeBlock(synchronizedStatement.getBody());
         } else if (statement instanceof PsiThrowStatement) {
             statementCounter += 1;
         } else if (statement instanceof PsiTryStatement) {
             PsiTryStatement tryStatement = (PsiTryStatement) statement;
             statementCounter += 1;
-            statementCounter += getTotalNumberOfStatements(tryStatement);
+            statementCounter += getNumberOfStatementsInsideCodeBlock(tryStatement.getTryBlock());
             PsiCodeBlock[] catchClauses = tryStatement.getCatchBlocks();
             for (PsiCodeBlock catchClause : catchClauses) {
-                PsiStatement[] statementArray = catchClause.getStatements();
-                for (PsiStatement statement1 : statementArray) {
-                    statementCounter += getTotalNumberOfStatements(statement1);
-                }
+                statementCounter += getNumberOfStatementsInsideCodeBlock(catchClause);
             }
-            PsiCodeBlock finallyBlock = tryStatement.getFinallyBlock();
-            if (finallyBlock != null) {
-                PsiStatement[] finallyStatements = finallyBlock.getStatements();
-                for (PsiStatement statement1 : finallyStatements)
-                    statementCounter += getTotalNumberOfStatements(statement1);
-            }
+            statementCounter += getNumberOfStatementsInsideCodeBlock(tryStatement.getFinallyBlock());
         } else if (statement instanceof PsiDeclarationStatement) {
             statementCounter += 1;
         } else if (statement instanceof PsiBreakStatement) {
             statementCounter += 1;
         } else if (statement instanceof PsiContinueStatement) {
             statementCounter += 1;
+        }
+        return statementCounter;
+    }
+
+    private int getNumberOfStatementsInsideCodeBlock(PsiCodeBlock block) {
+        int statementCounter = 0;
+        if (block != null) {
+            for (PsiStatement psiStatement : block.getStatements()) {
+                statementCounter += getTotalNumberOfStatements(psiStatement);
+            }
         }
         return statementCounter;
     }

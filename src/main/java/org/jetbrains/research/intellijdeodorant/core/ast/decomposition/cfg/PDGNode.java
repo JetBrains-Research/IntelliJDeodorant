@@ -12,11 +12,11 @@ import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.isPrimitiv
 
 public class PDGNode extends GraphNode implements Comparable<PDGNode> {
     private CFGNode cfgNode;
-    Set<AbstractVariable> declaredVariables;
-    protected Set<AbstractVariable> definedVariables;
-    protected Set<AbstractVariable> usedVariables;
-    Set<CreationObject> createdTypes;
-    Set<String> thrownExceptionTypes;
+    final Set<AbstractVariable> declaredVariables;
+    protected final Set<AbstractVariable> definedVariables;
+    protected final Set<AbstractVariable> usedVariables;
+    final Set<CreationObject> createdTypes;
+    final Set<String> thrownExceptionTypes;
     private Set<VariableDeclarationObject> variableDeclarationsInMethod;
     private Set<FieldObject> fieldsAccessedInMethod;
     private Set<AbstractVariable> originalDefinedVariables;
@@ -46,67 +46,8 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         this.thrownExceptionTypes = new LinkedHashSet<>();
     }
 
-    public Iterator<AbstractVariable> getDeclaredVariableIterator() {
-        return declaredVariables.iterator();
-    }
-
-    public Iterator<AbstractVariable> getDefinedVariableIterator() {
-        return definedVariables.iterator();
-    }
-
-    public Iterator<AbstractVariable> getUsedVariableIterator() {
-        return usedVariables.iterator();
-    }
-
     public CFGNode getCFGNode() {
         return cfgNode;
-    }
-
-    public Set<String> getThrownExceptionTypes() {
-        return thrownExceptionTypes;
-    }
-
-    public Iterator<GraphEdge> getDependenceIterator() {
-        Set<GraphEdge> allEdges = new LinkedHashSet<>();
-        allEdges.addAll(incomingEdges);
-        allEdges.addAll(outgoingEdges);
-        return allEdges.iterator();
-    }
-
-    public Iterator<GraphEdge> getOutgoingDependenceIterator() {
-        return outgoingEdges.iterator();
-    }
-
-    public Iterator<GraphEdge> getIncomingDependenceIterator() {
-        return incomingEdges.iterator();
-    }
-
-    public Set<PDGNode> getControlDependentNodes() {
-        Set<PDGNode> nodes = new LinkedHashSet<>();
-        for (GraphEdge edge : outgoingEdges) {
-            PDGDependence dependence = (PDGDependence) edge;
-            if (dependence instanceof PDGControlDependence) {
-                PDGControlDependence controlDependence = (PDGControlDependence) dependence;
-                PDGNode dstNode = (PDGNode) controlDependence.getDst();
-                nodes.add(dstNode);
-            }
-        }
-        return nodes;
-    }
-
-    public Set<PDGNode> getTrueControlDependentNodes() {
-        Set<PDGNode> nodes = new LinkedHashSet<>();
-        for (GraphEdge edge : outgoingEdges) {
-            PDGDependence dependence = (PDGDependence) edge;
-            if (dependence instanceof PDGControlDependence) {
-                PDGControlDependence controlDependence = (PDGControlDependence) dependence;
-                if (controlDependence.isTrueControlDependence()) {
-                    PDGNode dstNode = (PDGNode) controlDependence.getDst();
-                    nodes.add(dstNode);
-                }
-            }
-        }
-        return nodes;
     }
 
     public PDGNode getControlDependenceParent() {
@@ -114,36 +55,6 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             PDGDependence dependence = (PDGDependence) edge;
             if (dependence instanceof PDGControlDependence) {
                 return (PDGNode) dependence.src;
-            }
-        }
-        return null;
-    }
-
-    private boolean isControlDependentOnNode(PDGNode node) {
-        PDGNode parent = this.getControlDependenceParent();
-        while (parent != null) {
-            if (parent.equals(node)) {
-                return true;
-            }
-            parent = parent.getControlDependenceParent();
-        }
-        return false;
-    }
-
-    public boolean isControlDependentOnOneOfTheNodes(Set<PDGNode> nodes) {
-        for (PDGNode node : nodes) {
-            if (this.isControlDependentOnNode(node)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public PDGControlDependence getIncomingControlDependence() {
-        for (GraphEdge edge : incomingEdges) {
-            PDGDependence dependence = (PDGDependence) edge;
-            if (dependence instanceof PDGControlDependence) {
-                return (PDGControlDependence) dependence;
             }
         }
         return null;
@@ -159,27 +70,6 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             }
         }
         return false;
-    }
-
-    public Set<AbstractVariable> incomingDataDependencesFromNodesDeclaringOrDefiningVariables() {
-        Set<AbstractVariable> dataDependences = new LinkedHashSet<>();
-        for (GraphEdge edge : incomingEdges) {
-            PDGDependence dependence = (PDGDependence) edge;
-            if (dependence instanceof PDGDataDependence) {
-                PDGDataDependence dataDependence = (PDGDataDependence) dependence;
-                PDGNode srcNode = (PDGNode) dependence.src;
-                if (srcNode.declaresLocalVariable(dataDependence.getData()) || srcNode.definesLocalVariable(dataDependence.getData())) {
-                    dataDependences.add(dataDependence.getData());
-                }
-            } else if (dependence instanceof PDGOutputDependence) {
-                PDGOutputDependence outputDependence = (PDGOutputDependence) dependence;
-                PDGNode srcNode = (PDGNode) dependence.src;
-                if (srcNode.declaresLocalVariable(outputDependence.getData()) || srcNode.definesLocalVariable(outputDependence.getData())) {
-                    dataDependences.add(outputDependence.getData());
-                }
-            }
-        }
-        return dataDependences;
     }
 
     boolean declaresLocalVariable(AbstractVariable variable) {
@@ -266,35 +156,35 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
         return Integer.compare(this.getId(), node.getId());
     }
 
-    public String getAnnotation() {
-        return "Def = " + definedVariables + " , Use = " + usedVariables;
-    }
-
     void updateReachingAliasSet(ReachingAliasSet reachingAliasSet) {
         Set<VariableDeclarationObject> variableDeclarations = new LinkedHashSet<>();
         variableDeclarations.addAll(variableDeclarationsInMethod);
         variableDeclarations.addAll(fieldsAccessedInMethod);
         PsiElement statement = getASTStatement();
         if (statement instanceof PsiDeclarationStatement) {
-            PsiVariable vDStatement = (PsiVariable) ((PsiDeclarationStatement) statement).getDeclaredElements()[0];
-            if (!isPrimitive(vDStatement.getType())) {
-                PsiExpression initializer = vDStatement.getInitializer();
-                PsiElement initializerSimpleName = null;
-                if (initializer != null) {
-                    if (initializer instanceof PsiReferenceExpression) {
-                        initializerSimpleName = ((PsiReferenceExpression) initializer).resolve();
-                    }
-                    if (initializerSimpleName != null) {
-                        PsiVariable initializerVariableDeclaration = null;
-                        for (VariableDeclarationObject declarationObject : variableDeclarations) {
-                            PsiVariable declaration = declarationObject.getVariableDeclaration();
-                            if (declaration.equals((initializerSimpleName))) {
-                                initializerVariableDeclaration = declaration;
-                                break;
-                            }
+            PsiDeclarationStatement declarationStatement = (PsiDeclarationStatement) statement;
+            PsiElement[] declaredElements = declarationStatement.getDeclaredElements();
+            if (declaredElements.length > 0 && declaredElements[0] instanceof PsiVariable) {
+                PsiVariable declaredVariable = (PsiVariable) declaredElements[0];
+                if (!isPrimitive(declaredVariable.getType())) {
+                    PsiExpression initializer = declaredVariable.getInitializer();
+                    PsiElement initializerSimpleName = null;
+                    if (initializer != null) {
+                        if (initializer instanceof PsiReferenceExpression) {
+                            initializerSimpleName = ((PsiReferenceExpression) initializer).resolve();
                         }
-                        if (initializerVariableDeclaration != null) {
-                            reachingAliasSet.insertAlias(vDStatement, initializerVariableDeclaration);
+                        if (initializerSimpleName != null) {
+                            PsiVariable initializerVariableDeclaration = null;
+                            for (VariableDeclarationObject declarationObject : variableDeclarations) {
+                                PsiVariable declaration = declarationObject.getVariableDeclaration();
+                                if (declaration.equals((initializerSimpleName))) {
+                                    initializerVariableDeclaration = declaration;
+                                    break;
+                                }
+                            }
+                            if (initializerVariableDeclaration != null) {
+                                reachingAliasSet.insertAlias(declaredVariable, initializerVariableDeclaration);
+                            }
                         }
                     }
                 }
@@ -454,18 +344,6 @@ public class PDGNode extends GraphNode implements Comparable<PDGNode> {
             }
         }
         return classInstantiationMap;
-    }
-
-    public boolean changesStateOfVariable(PlainVariable plainVariable) {
-        for (AbstractVariable abstractVariable : definedVariables) {
-            if (abstractVariable instanceof CompositeVariable) {
-                CompositeVariable compositeVariable = (CompositeVariable) abstractVariable;
-                if (compositeVariable.getInitialVariable().equals(plainVariable)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     boolean changesStateOfReference(PsiVariable variableDeclaration) {

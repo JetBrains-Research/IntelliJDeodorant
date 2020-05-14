@@ -1,22 +1,40 @@
-<idea-plugin>
+<idea-plugin url="https://github.com/JetBrains-Research/IntelliJDeodorant">
     <name>IntelliJDeodorant</name>
-    <version>1.0</version>
-    <vendor email="zarina.kurbatova@gmail.com">Zarina Kurbatova</vendor>
+    <version>2020.1-1.1</version>
+    <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
-    <description><![CDATA[An IntelliJ IDEA plugin that detects code smells and recommends appropriate refactorings to resolve them. Based on tsantalis/JDeodorant.
-        <p>Currently, the plugin supports following code smells:
+    <description><![CDATA[Detects code smells in Java code and recommends appropriate refactorings to resolve them.
+        <p>Supports following code smells:
             <ul>
-               <li>Feature Envy problems can be resolved by appropriate Move Method refactorings</li>
-               <li>Long Method problems can be resolved by appropriate Extract Method refactorings</li>
-               <li>Type Checking problems can be resolved by appropriate Replace Conditional with Polymorphism refactorings</li>
-               <li>State Checking problems can be resolved by appropriate Replace Type code with State/Strategy refactorings</li>
-               <li>God Class problems can be resolved by appropriate Extract Class refactorings</li>
+               <li>Feature Envy problems can be resolved by Move Method refactorings;</li>
+               <li>Long Method problems can be resolved by Extract Method refactorings;</li>
+               <li>Type Checking problems can be resolved by Replace Conditional with Polymorphism refactorings;</li>
+               <li>State Checking problems can be resolved by Replace Type code with State/Strategy refactorings;</li>
+               <li>God Class problems can be resolved by Extract Class refactorings.</li>
             </ul>
         </p>
+        <br/>Based on tsantalis/JDeodorant.
          ]]>
     </description>
 
+    <change-notes><![CDATA[
+        <h4>2020.1-1.1</h4>
+        <ul>
+            <li>Make it possible to choose a search scope to detect code smells</li>
+            <li>Redesign the panel</li>
+            <li>Minor bug fixes</li>
+        </ul>
+    ]]>
+    </change-notes>
+
+    <depends>com.intellij.modules.java</depends>
+
+    <idea-version since-build="192.7142.36"/>
+
     <extensions defaultExtensionNs="com.intellij">
+        <statistic.eventLog.eventLoggerProvider
+                implementation="org.jetbrains.research.intellijdeodorant.ide.fus.IntelliJDeodorantLoggerProvider"/>
+
         <toolWindow id="IntelliJDeodorant" secondary="true" anchor="bottom"
                     factoryClass="org.jetbrains.research.intellijdeodorant.ide.ui.RefactoringsToolWindowFactory"/>
 

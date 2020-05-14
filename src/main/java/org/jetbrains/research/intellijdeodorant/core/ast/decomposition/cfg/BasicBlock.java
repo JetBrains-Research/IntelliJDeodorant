@@ -5,10 +5,10 @@ import java.util.List;
 
 public class BasicBlock {
     private static int blockNum = 0;
-    private int id;
-    private CFGNode leader;
-    private List<CFGNode> nodes;
-    private List<CFGTryNode> tryNodes;
+    private final int id;
+    private final CFGNode leader;
+    private final List<CFGNode> nodes;
+    private final List<CFGTryNode> tryNodes;
     private BasicBlock previousBasicBlock;
     private BasicBlock nextBasicBlock;
 
@@ -63,10 +63,6 @@ public class BasicBlock {
     public void addTryNode(CFGTryNode tryNode) {
         tryNodes.add(tryNode);
         tryNode.setBasicBlock(this);
-    }
-
-    public BasicBlock getPreviousBasicBlock() {
-        return previousBasicBlock;
     }
 
     public void setPreviousBasicBlock(BasicBlock previousBasicBlock) {

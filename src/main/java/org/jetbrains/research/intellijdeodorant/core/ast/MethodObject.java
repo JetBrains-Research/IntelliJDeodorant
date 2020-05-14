@@ -2,6 +2,7 @@ package org.jetbrains.research.intellijdeodorant.core.ast;
 
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.research.intellijdeodorant.core.ast.association.Association;
@@ -15,8 +16,9 @@ import org.jetbrains.research.intellijdeodorant.core.ast.util.MethodDeclarationU
 
 import java.util.*;
 
-public class MethodObject implements AbstractMethodDeclaration {
+import static org.jetbrains.research.intellijdeodorant.utils.PsiUtils.toPointer;
 
+public class MethodObject implements AbstractMethodDeclaration {
     private TypeObject returnType;
     private boolean _abstract;
     private boolean _static;
@@ -25,7 +27,7 @@ public class MethodObject implements AbstractMethodDeclaration {
     private final ConstructorObject constructorObject;
     private boolean testAnnotation;
     private volatile int hashCode = 0;
-    private final PsiMethod psiMethod;
+    private final SmartPsiElementPointer<PsiElement> psiMethod;
 
     public MethodObject(PsiMethod psiMethod, ConstructorObject co) {
         this.constructorObject = co;
@@ -34,11 +36,11 @@ public class MethodObject implements AbstractMethodDeclaration {
         this._synchronized = false;
         this._native = false;
         this.testAnnotation = false;
-        this.psiMethod = psiMethod;
+        this.psiMethod = toPointer(psiMethod);
     }
 
     private PsiMethod getPsiMethod() {
-        return this.psiMethod;
+        return (PsiMethod) this.psiMethod.getElement();
     }
 
     public void setReturnType(TypeObject returnType) {
@@ -425,22 +427,24 @@ public class MethodObject implements AbstractMethodDeclaration {
     }
 
     public boolean containsNullCheckForTargetObject(ClassObject targetClass) {
-        List<LiteralObject> literals = getLiterals();
-        for (LiteralObject literal : literals) {
-            if (literal != null && (LiteralType.NULL).equals(literal.getLiteralType())) {
-                PsiExpression nullLiteral = literal.getLiteral();
-                if (nullLiteral.getParent() instanceof PsiBinaryExpression) {
-                    PsiBinaryExpression infixExpression = (PsiBinaryExpression) nullLiteral.getParent();
-                    PsiExpression leftOperand = infixExpression.getLOperand();
-                    PsiElement psiElement = leftOperand.getLastChild().getOriginalElement();
-                    if (psiElement.getParent() instanceof PsiReferenceExpression) {
-                        PsiElement resolvedElement = ((PsiReferenceExpression) psiElement.getParent()).resolve();
-                        if (resolvedElement instanceof PsiVariable && !(resolvedElement instanceof PsiLocalVariable)) {
-                            PsiVariable psiVariable = (PsiVariable) resolvedElement;
-                            IElementType variableType = infixExpression.getOperationSign().getTokenType();
-                            if (targetClass.getName().equals(psiVariable.getType().getCanonicalText())
-                                    && (JavaTokenType.EQEQ.equals(variableType) || JavaTokenType.NE.equals(variableType))) {
-                                return true;
+        List<PsiExpression> literals = getLiterals();
+        for (PsiExpression literal : literals) {
+            if (literal instanceof PsiLiteralExpressionImpl) {
+                PsiLiteralExpressionImpl literalExpression = (PsiLiteralExpressionImpl) literal;
+                if (JavaTokenType.NULL_KEYWORD.equals(literalExpression.getLiteralElementType())) {
+                    if (literal.getParent() instanceof PsiBinaryExpression) {
+                        PsiBinaryExpression infixExpression = (PsiBinaryExpression) literal.getParent();
+                        PsiExpression leftOperand = infixExpression.getLOperand();
+                        PsiElement psiElement = leftOperand.getLastChild().getOriginalElement();
+                        if (psiElement.getParent() instanceof PsiReferenceExpression) {
+                            PsiElement resolvedElement = ((PsiReferenceExpression) psiElement.getParent()).resolve();
+                            if (resolvedElement instanceof PsiVariable && !(resolvedElement instanceof PsiLocalVariable)) {
+                                PsiVariable psiVariable = (PsiVariable) resolvedElement;
+                                IElementType variableType = infixExpression.getOperationSign().getTokenType();
+                                if (targetClass.getName().equals(psiVariable.getType().getCanonicalText())
+                                        && (JavaTokenType.EQEQ.equals(variableType) || JavaTokenType.NE.equals(variableType))) {
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -460,10 +464,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getClassName();
     }
 
-    public ListIterator<CommentObject> getCommentListIterator() {
-        return constructorObject.getCommentListIterator();
-    }
-
     public ListIterator<ParameterObject> getParameterListIterator() {
         return constructorObject.getParameterListIterator();
     }
@@ -478,10 +478,6 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public List<SuperMethodInvocationObject> getSuperMethodInvocations() {
         return constructorObject.getSuperMethodInvocations();
-    }
-
-    public List<ConstructorInvocationObject> getConstructorInvocations() {
-        return constructorObject.getConstructorInvocations();
     }
 
     public List<FieldInstructionObject> getFieldInstructions() {
@@ -504,7 +500,7 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getCreations();
     }
 
-    public List<LiteralObject> getLiterals() {
+    public List<PsiExpression> getLiterals() {
         return constructorObject.getLiterals();
     }
 
@@ -636,10 +632,6 @@ public class MethodObject implements AbstractMethodDeclaration {
         return constructorObject.getParametersPassedAsArgumentsInSuperMethodInvocations();
     }
 
-    public Map<PlainVariable, LinkedHashSet<ConstructorInvocationObject>> getParametersPassedAsArgumentsInConstructorInvocations() {
-        return constructorObject.getParametersPassedAsArgumentsInConstructorInvocations();
-    }
-
     public boolean containsSuperMethodInvocation() {
         return constructorObject.containsSuperMethodInvocation();
     }
@@ -731,12 +723,12 @@ public class MethodObject implements AbstractMethodDeclaration {
 
     public boolean containsFieldAccessOfEnclosingClass() {
         //check for field access like SegmentedTimeline.this.segmentsIncluded
-        if (psiMethod.getBody() == null) {
+        if (getPsiMethod().getBody() == null) {
             return false;
         }
 
         ExpressionExtractor expressionExtractor = new ExpressionExtractor();
-        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(psiMethod.getBody().getStatements());
+        List<PsiExpression> fieldAccesses = expressionExtractor.getVariableInstructions(getPsiMethod().getBody().getStatements());
         for (PsiExpression expression : fieldAccesses) {
             PsiReferenceExpression fieldReference = (PsiReferenceExpression) expression;
             Collection<PsiElement> psiElements = PsiTreeUtil.findChildrenOfType(fieldReference, PsiThisExpression.class);

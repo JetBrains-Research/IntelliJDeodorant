@@ -5,7 +5,6 @@ import com.intellij.psi.PsiMember;
 import com.intellij.psi.PsiMethod;
 import com.intellij.ui.BooleanTableCellRenderer;
 import com.intellij.ui.JBColor;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.moveMethod.MoveMethodRefactoring;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
@@ -21,20 +20,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 class MoveMethodTableModel extends AbstractTableModel {
-    private static final String METHOD_COLUMN_TITLE_KEY = "method.column.title";
-    private static final String MOVE_TO_COLUMN_TITLE_KEY = "move.to.column.title";
-    private static final String DEPENDENCIES_COLUMN_TITLE_KEY = "dependencies.column.title";
-
     static final int SELECTION_COLUMN_INDEX = 0;
-    private static final int ENTITY_COLUMN_INDEX = 1;
-    private static final int MOVE_TO_COLUMN_INDEX = 2;
+    static final int ENTITY_COLUMN_INDEX = 1;
+    static final int MOVE_TO_COLUMN_INDEX = 2;
     private static final int ACCESSED_MEMBERS_COUNT_INDEX = 3;
     private static final int COLUMNS_COUNT = 4;
 
     private final List<MoveMethodRefactoring> refactorings = new ArrayList<>();
     private final List<Integer> virtualRows = new ArrayList<>();
     private boolean[] isSelected;
-    private boolean[] isActive;
 
     MoveMethodTableModel(List<MoveMethodRefactoring> refactorings) {
         updateTable(refactorings);
@@ -44,8 +38,6 @@ class MoveMethodTableModel extends AbstractTableModel {
         this.refactorings.clear();
         this.refactorings.addAll(refactorings);
         isSelected = new boolean[refactorings.size()];
-        isActive = new boolean[refactorings.size()];
-        Arrays.fill(isActive, true);
         IntStream.range(0, refactorings.size())
                 .forEachOrdered(virtualRows::add);
         fireTableDataChanged();
@@ -55,7 +47,6 @@ class MoveMethodTableModel extends AbstractTableModel {
         this.refactorings.clear();
         this.virtualRows.clear();
         isSelected = new boolean[0];
-        isActive = new boolean[0];
         fireTableDataChanged();
     }
 
@@ -75,27 +66,18 @@ class MoveMethodTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-
-    void setAppliedRefactorings(@NotNull Set<MoveMethodRefactoring> accepted) {
+    void updateRows() {
         virtualRows.forEach(i -> {
-            if (accepted.contains(refactorings.get(i))) {
-                isActive[i] = false;
+            if (!refactorings.get(i).getOptionalMethod().isPresent()) {
                 isSelected[i] = false;
             }
         });
         fireTableDataChanged();
     }
 
-    List<MoveMethodRefactoring> pullSelectable() {
-        return virtualRows.stream()
-                .filter(i -> isActive[i])
-                .map(refactorings::get)
-                .collect(Collectors.toList());
-    }
-
     List<MoveMethodRefactoring> pullSelected() {
         return virtualRows.stream()
-                .filter(i -> isSelected[i] && isActive[i])
+                .filter(i -> isSelected[i] && refactorings.get(i).getOptionalMethod().isPresent())
                 .map(refactorings::get)
                 .collect(Collectors.toList());
     }
@@ -111,18 +93,18 @@ class MoveMethodTableModel extends AbstractTableModel {
             case SELECTION_COLUMN_INDEX:
                 return "";
             case ENTITY_COLUMN_INDEX:
-                return IntelliJDeodorantBundle.message(METHOD_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("method.column.title");
             case MOVE_TO_COLUMN_INDEX:
-                return IntelliJDeodorantBundle.message(MOVE_TO_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("move.to.column.title");
             case ACCESSED_MEMBERS_COUNT_INDEX:
-                return IntelliJDeodorantBundle.message(DEPENDENCIES_COLUMN_TITLE_KEY);
+                return IntelliJDeodorantBundle.message("dependencies.column.title");
         }
         throw new IndexOutOfBoundsException("Unexpected column index: " + column);
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == SELECTION_COLUMN_INDEX && isActive[rowIndex];
+        return columnIndex == SELECTION_COLUMN_INDEX && refactorings.get(rowIndex).getOptionalMethod().isPresent();
     }
 
     @Override
@@ -135,7 +117,6 @@ class MoveMethodTableModel extends AbstractTableModel {
         return virtualRows.size();
     }
 
-
     @Override
     public void setValueAt(Object value, int virtualRow, int columnIndex) {
         final int rowIndex = virtualRows.get(virtualRow);
@@ -146,7 +127,7 @@ class MoveMethodTableModel extends AbstractTableModel {
     }
 
     private void setValueAtRowIndex(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
-        if (!isActive[rowIndex]) {
+        if (!refactorings.get(rowIndex).getOptionalMethod().isPresent()) {
             return;
         }
 
@@ -160,14 +141,12 @@ class MoveMethodTableModel extends AbstractTableModel {
     }
 
     /**
-     * For all rows that conflict with the newly selected row (has the same method to refactor),
-     * deselects and disables them if user has selected this row and activates otherwise.
+     * Disables conflicting suggestions (i.e. the suggestions to move the same method) in the table.
      *
-     * @param isRowSelected          has user selected or deselected the new row
-     * @param rowIndex               index of that row
-     * @param forceSelectInConflicts if false isRowSelected is true, in case of conflicts given row
-     *                               shouldn't be selected and other rows won't be updated.
-     * @return is there any conflicts with the initial row.
+     * @param isRowSelected          true if the row is selected, false if the row is deselected.
+     * @param rowIndex               index of row.
+     * @param forceSelectInConflicts if true and there are any conflicts, the row shouldn't be marked as selected.
+     * @return true if there are conflicting suggestions with the initial row, false otherwise.
      */
     private boolean updateConflictingRows(boolean isRowSelected, int rowIndex, boolean forceSelectInConflicts) {
         boolean hasConflicts = false;
@@ -184,13 +163,8 @@ class MoveMethodTableModel extends AbstractTableModel {
                     if (!forceSelectInConflicts) {
                         return true;
                     }
-
-                    isSelected[i] = false;
-                    isActive[i] = false;
-                } else {
-                    isSelected[i] = false;
-                    isActive[i] = true;
                 }
+                isSelected[i] = false;
             }
         }
 
@@ -238,14 +212,6 @@ class MoveMethodTableModel extends AbstractTableModel {
         throw new IndexOutOfBoundsException("Unexpected column index: " + column);
     }
 
-    Set<MoveMethodRefactoring> getRefactorings() {
-        return new HashSet<>(refactorings);
-    }
-
-    MoveMethodRefactoring getRefactoring(int virtualRow) {
-        return refactorings.get(virtualRows.get(virtualRow));
-    }
-
     void setupRenderer(JTable table) {
         table.setDefaultRenderer(Boolean.class, new BooleanTableCellRenderer() {
             private final JLabel EMPTY_LABEL = new JLabel();
@@ -259,26 +225,27 @@ class MoveMethodTableModel extends AbstractTableModel {
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSel, boolean hasFocus,
                                                            int row, int column) {
                 final int realRow = virtualRows.get(table.convertRowIndexToModel(row));
-                if (isActive[realRow]) {
+                if (refactorings.get(realRow).getOptionalMethod().isPresent()) {
                     return super.getTableCellRendererComponent(table, value, isSel, hasFocus, row, column);
                 } else {
                     return EMPTY_LABEL;
                 }
             }
         });
+
         table.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                            boolean hasFocus, int virtualRow, int column) {
                 final int row = virtualRows.get(table.convertRowIndexToModel(virtualRow));
-                if (!isActive[row]) {
+                if (!refactorings.get(row).getOptionalMethod().isPresent()) {
                     setBackground(JBColor.LIGHT_GRAY);
                 } else if (isSelected) {
                     setBackground(table.getSelectionBackground());
                 } else {
                     setBackground(table.getBackground());
                 }
-                setEnabled(isActive[row]);
+                setEnabled(refactorings.get(row).getOptionalMethod().isPresent());
                 return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, virtualRow, column);
             }
         });

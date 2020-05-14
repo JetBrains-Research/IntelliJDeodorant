@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 public class AssociationDetection {
     private final List<Association> associationList;
     private final List<String> acceptableOriginClassNames;
@@ -104,73 +102,6 @@ public class AssociationDetection {
             }
         }
         return null;
-    }
-
-    public boolean checkForContainerAssociation(String from, String to) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(from);
-        recurse(root);
-        DefaultMutableTreeNode firstLeaf = root.getFirstLeaf();
-        if (checkFullPathForContainerAssociation(firstLeaf, to))
-            return true;
-        DefaultMutableTreeNode leaf = firstLeaf.getNextLeaf();
-        while (leaf != null) {
-            if (checkFullPathForContainerAssociation(leaf, to))
-                return true;
-            leaf = leaf.getNextLeaf();
-        }
-        return false;
-    }
-
-    private boolean checkFullPathForContainerAssociation(DefaultMutableTreeNode leaf, String nodeName) {
-        if (leaf.getUserObject().equals(nodeName))
-            return checkPathForContainerAssociation(leaf);
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) leaf.getParent();
-        while (node != null) {
-            if (node.getUserObject().equals(nodeName))
-                return checkPathForContainerAssociation(node);
-            node = (DefaultMutableTreeNode) node.getParent();
-        }
-        return false;
-    }
-
-    // node is the target class of move operation
-    private boolean checkPathForContainerAssociation(DefaultMutableTreeNode node) {
-        while (node.getParent() != null) {
-            DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-            Association association = getAssociation((String) node.getUserObject(), (String) parent.getUserObject());
-            if (association.isContainer())
-                return true;
-            node = parent;
-        }
-        return false;
-    }
-
-    private void recurse(DefaultMutableTreeNode root) {
-        List<Association> endingAssociations = getAssociationsEndingTo((String) root.getUserObject());
-        for (Association association : endingAssociations) {
-            Object[] pathFromRoot = root.getUserObjectPath();
-            boolean cycle = false;
-            for (Object node : pathFromRoot) {
-                if (association.getFrom().equals(node)) {
-                    cycle = true;
-                    break;
-                }
-            }
-            if (!cycle) {
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(association.getFrom());
-                root.add(node);
-                recurse(node);
-            }
-        }
-    }
-
-    private List<Association> getAssociationsEndingTo(String to) {
-        List<Association> list = new ArrayList<>();
-        for (Association association : associationList) {
-            if (association.getTo().equals(to))
-                list.add(association);
-        }
-        return list;
     }
 
     public Association getAssociation(String from, String to) {
