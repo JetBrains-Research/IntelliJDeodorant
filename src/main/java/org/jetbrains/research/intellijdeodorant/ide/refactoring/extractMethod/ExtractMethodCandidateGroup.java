@@ -17,7 +17,8 @@ public class ExtractMethodCandidateGroup implements Refactoring {
     SmartPsiElementPointer<PsiElement> method;
     private @NotNull
     final ArrayList<ASTSlice> candidates;
-    private final String qualifiedMethodName;
+    private final @NotNull
+    String qualifiedMethodName;
 
     /**
      * Creates refactoring instance.

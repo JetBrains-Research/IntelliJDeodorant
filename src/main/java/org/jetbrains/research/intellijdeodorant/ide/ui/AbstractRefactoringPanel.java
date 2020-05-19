@@ -54,6 +54,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -303,6 +304,7 @@ public abstract class AbstractRefactoringPanel extends JPanel {
                         candidates = new ArrayList<>();
                     }
                     logFound(project, candidates.size());
+                    candidates.sort(Comparator.comparing(o -> o.getCandidates().get(0).getSourceClass().getQualifiedName()));
                     model.setCandidateRefactoringGroups(candidates);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
                 });

@@ -213,6 +213,7 @@ class ExtractMethodPanel extends JPanel {
                                             .collect(toSet()))
                             .filter(set -> !set.isEmpty())
                             .map(ExtractMethodCandidateGroup::new)
+                            .sorted(Comparator.comparing(ExtractMethodCandidateGroup::getDescription))
                             .collect(toList());
                     treeTableModel.setCandidateRefactoringGroups(extractMethodCandidateGroups);
                     ApplicationManager.getApplication().invokeLater(() -> showRefactoringsTable());
