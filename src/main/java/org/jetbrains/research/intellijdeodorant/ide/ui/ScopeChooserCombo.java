@@ -64,7 +64,7 @@ public class ScopeChooserCombo extends ComboboxWithBrowseButton {
 
     private AnalysisScope getOpenedFilesScope() {
         VirtualFile[] files = FileEditorManager.getInstance(project).getOpenFiles();
-        return new AnalysisScope(project, Arrays.asList(files));
+        return files.length == 0 ? null : new AnalysisScope(project, Arrays.asList(files));
     }
 
     private AnalysisScope getCurrentFileScope() {

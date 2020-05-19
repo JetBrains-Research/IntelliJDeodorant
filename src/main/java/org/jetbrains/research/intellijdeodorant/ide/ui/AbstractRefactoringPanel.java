@@ -280,8 +280,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
         }
-        showEmptyPanel();
-        calculateRefactorings();
+        if (scopeChooserCombo.getScope() != null) {
+            showEmptyPanel();
+            calculateRefactorings();
+        }
     }
 
     /**
