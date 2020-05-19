@@ -136,8 +136,8 @@ public class SystemObject {
             return -1;
     }
 
-    public Set<ClassObject> getClassObjects() {
-        return new LinkedHashSet<>(classList);
+    public List<ClassObject> getClassObjects() {
+        return classList;
     }
 
     public List<String> getClassNames() {
