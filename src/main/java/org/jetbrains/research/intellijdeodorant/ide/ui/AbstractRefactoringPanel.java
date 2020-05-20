@@ -79,6 +79,8 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     private static Notification errorNotification;
     private final int refactorDepth;
 
+    private boolean isPreviewUsage;
+
     public AbstractRefactoringPanel(@NotNull AnalysisScope scope,
                                     String detectIndicatorStatusTextKey,
                                     RefactoringType refactoringType,
@@ -207,8 +209,10 @@ public abstract class AbstractRefactoringPanel extends JPanel {
      * Adds a listener that invalidates found refactoring opportunities if the structure of PSI is changed.
      */
     private void registerPsiModificationListener() {
-        MessageBus projectMessageBus = scope.getProject().getMessageBus();
-        projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, () -> ApplicationManager.getApplication().invokeLater(this::showRefreshingProposal));
+        if (!isPreviewUsage) {
+            MessageBus projectMessageBus = scope.getProject().getMessageBus();
+            projectMessageBus.connect().subscribe(PsiModificationTracker.TOPIC, () -> ApplicationManager.getApplication().invokeLater(this::showRefreshingProposal));
+        }
     }
 
     /**
@@ -431,5 +435,9 @@ public abstract class AbstractRefactoringPanel extends JPanel {
     public static void showCompilationErrorNotification(Project project) {
         errorNotification = NOTIFICATION_GROUP.createNotification(IntelliJDeodorantBundle.message("compilation.error.notification.text"), MessageType.ERROR);
         Notifications.Bus.notify(errorNotification, project);
+    }
+
+    public void setPreviewUsage(boolean previewUsage) {
+        isPreviewUsage = previewUsage;
     }
 }

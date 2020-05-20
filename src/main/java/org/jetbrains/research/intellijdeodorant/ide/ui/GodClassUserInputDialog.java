@@ -1,20 +1,21 @@
 package org.jetbrains.research.intellijdeodorant.ide.ui;
 
+import com.intellij.diff.DiffContentFactory;
+import com.intellij.diff.DiffDialogHints;
+import com.intellij.diff.actions.impl.MutableDiffRequestChain;
+import com.intellij.diff.contents.DiffContent;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiPackage;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
-import com.intellij.refactoring.RefactorJBundle;
 import com.intellij.refactoring.ui.RefactoringDialog;
-import com.intellij.ui.components.JBLabelDecorator;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 import org.jetbrains.research.intellijdeodorant.ide.fus.collectors.IntelliJDeodorantCounterCollector;
 import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoring;
+import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.ExtractClassRefactoringType.AbstractExtractClassRefactoring;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -26,7 +27,8 @@ import java.util.regex.Pattern;
 
 public class GodClassUserInputDialog extends RefactoringDialog {
     private static final int MAIN_PANEL_VERTICAL_GAP = 5;
-    private final ExtractClassRefactoring refactoring;
+    private ExtractClassRefactoring refactoring;
+    private AbstractExtractClassRefactoring abstractRefactoring;
     @Nullable
     private final PsiPackage parentPackage;
     private final List<String> javaLangClassNames = new ArrayList<>(Arrays.asList(
@@ -35,15 +37,15 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             "Runtime", "Short", "String", "StringBuffer", "StringBuilder", "System", "Thread", "Void"));
     private JPanel mainPanel;
     private final JTextField extractedClassNameField = new JTextField();
-    private final JButton restoreButton = new JButton();
+    private AbstractRefactoringPanel godClassPanel;
 
-    public GodClassUserInputDialog(ExtractClassRefactoring refactoring) {
-        super(refactoring.getSourceFile().getProject(), true);
-
-        this.refactoring = refactoring;
+    public GodClassUserInputDialog(AbstractExtractClassRefactoring abstractRefactoring, AbstractRefactoringPanel godClassPanel) {
+        super(abstractRefactoring.getRefactoring().getSourceFile().getProject(), true);
+        this.abstractRefactoring = abstractRefactoring;
+        this.refactoring = abstractRefactoring.getRefactoring();
         String packageName = PsiUtil.getPackageName(refactoring.getSourceClass());
         parentPackage = JavaPsiFacade.getInstance(refactoring.getProject()).findPackage(packageName);
-
+        this.godClassPanel = godClassPanel;
         initialiseControls();
         setTitle(IntelliJDeodorantBundle.message("god.class.dialog.title"));
         init();
@@ -81,29 +83,11 @@ public class GodClassUserInputDialog extends RefactoringDialog {
             }
         });
 
-        restoreButton.setText(IntelliJDeodorantBundle.message("god.class.dialog.restore.default"));
-
-        restoreButton.addActionListener(e -> extractedClassNameField.setText(refactoring.getDefaultExtractedTypeName()));
-
         handleInputChanged(extractedClassNameField);
     }
 
     private void placeControlsOnPanel() {
-        FormBuilder builder = FormBuilder.createFormBuilder()
-                .addComponent(
-                        JBLabelDecorator.createJBLabelDecorator(RefactorJBundle.message("extract.class.from.label", PsiTreeUtil.findChildOfType(refactoring.getSourceFile(), PsiClass.class)))
-                                .setBold(true))
-                .addLabeledComponent(RefactorJBundle.message("name.for.new.class.label"), extractedClassNameField, UIUtil.LARGE_VGAP);
-
-        JComponent emptyComponent = new JComponent() {
-            @Override
-            public void setInheritsPopupMenu(boolean value) {
-                super.setInheritsPopupMenu(value);
-            }
-        };
-
-        builder.addLabeledComponent(restoreButton, emptyComponent);
-
+        FormBuilder builder = FormBuilder.createFormBuilder().addLabeledComponent(IntelliJDeodorantBundle.message("god.class.preview.new.class.name"), extractedClassNameField, UIUtil.LARGE_VGAP);
         mainPanel = builder.addVerticalGap(MAIN_PANEL_VERTICAL_GAP).getPanel();
     }
 
@@ -141,23 +125,42 @@ public class GodClassUserInputDialog extends RefactoringDialog {
 
     @Override
     protected void doAction() {
-        closeOKAction();
-        refactoring.setExtractedTypeName(extractedClassNameField.getText());
-        WriteCommandAction.runWriteCommandAction(refactoring.getProject(), refactoring::apply);
-        IntelliJDeodorantCounterCollector.getInstance().extractClassRefactoringApplied(refactoring.getProject(),
-                refactoring.getExtractedFieldFragmentsCount(),
-                refactoring.getExtractedMethodsCount(),
-                refactoring.getSourceClass().getFields().length,
-                refactoring.getSourceClass().getMethods().length);
+        if (isPreviewUsages()) {
+            godClassPanel.setPreviewUsage(true);
+
+            DiffContentFactory contentFactory = DiffContentFactory.getInstance();
+            DiffContent c1 = contentFactory.create("");
+            DiffContent c2 = contentFactory.create("");
+
+            MutableDiffRequestChain chain = new MutableDiffRequestChain(c1, c2);
+
+            refactoring.setPreviewUsage();
+
+            WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+                refactoring.apply();
+            });
+
+            GodClassPreviewResultDialog previewResultDialog = new GodClassPreviewResultDialog(getProject(), chain, DiffDialogHints.DEFAULT, refactoring.getPreviewProcessor());
+            previewResultDialog.show();
+
+            refactoring = abstractRefactoring.renewRefactoring();
+
+            setPreviewResults(false);
+            godClassPanel.setPreviewUsage(false);
+        } else {
+            closeOKAction();
+            refactoring.setExtractedTypeName(extractedClassNameField.getText());
+            WriteCommandAction.runWriteCommandAction(refactoring.getProject(), refactoring::apply);
+            IntelliJDeodorantCounterCollector.getInstance().extractClassRefactoringApplied(refactoring.getProject(),
+                    refactoring.getExtractedFieldFragmentsCount(),
+                    refactoring.getExtractedMethodsCount(),
+                    refactoring.getSourceClass().getFields().length,
+                    refactoring.getSourceClass().getMethods().length);
+        }
     }
 
     @Override
     protected boolean hasHelpAction() {
-        return false;
-    }
-
-    @Override
-    protected boolean hasPreviewButton() {
         return false;
     }
 }

@@ -13,7 +13,7 @@ import org.jetbrains.research.intellijdeodorant.ide.refactoring.extractClass.Ext
 import java.util.Collections;
 
 /**
- * Panel for God Class Checking refactorings.
+ * Panel for God Class refactoring.
  */
 public class GodClassPanel extends AbstractRefactoringPanel {
     private static final String[] COLUMN_NAMES = new String[]{IntelliJDeodorantBundle.message("god.class.panel.source.class"),
@@ -42,7 +42,7 @@ public class GodClassPanel extends AbstractRefactoringPanel {
         Project project = scope.getProject();
         ApplicationManager.getApplication().invokeAndWait(() -> {
             removeHighlighters(project);
-            GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring.getRefactoring());
+            GodClassUserInputDialog dialog = new GodClassUserInputDialog(abstractRefactoring, this);
             dialog.show();
             if (dialog.isOK()) {
                 showRefreshingProposal();
