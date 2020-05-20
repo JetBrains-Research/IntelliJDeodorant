@@ -23,7 +23,7 @@ public class MySystem {
     }
 
     private void generateSystem() {
-        Set<ClassObject> classObjects = systemObject.getClassObjects();
+        List<ClassObject> classObjects = systemObject.getClassObjects();
         for (ClassObject co : classObjects) {
             MyClass myClass = new MyClass(co.getName());
             myClass.setClassObject(co);

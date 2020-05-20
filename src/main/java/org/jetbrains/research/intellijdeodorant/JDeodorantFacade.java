@@ -29,7 +29,7 @@ public class JDeodorantFacade {
         new ASTReader(project, indicator);
         SystemObject systemObject = ASTReader.getSystemObject();
         if (systemObject != null) {
-            Set<ClassObject> classObjectsToBeExamined = new LinkedHashSet<>(systemObject.getClassObjects());
+            List<ClassObject> classObjectsToBeExamined = systemObject.getClassObjects();
             Set<String> classNamesToBeExamined = new LinkedHashSet<>();
             for (ClassObject classObject : classObjectsToBeExamined) {
                 if (!classObject.isEnum() && !classObject.isInterface())

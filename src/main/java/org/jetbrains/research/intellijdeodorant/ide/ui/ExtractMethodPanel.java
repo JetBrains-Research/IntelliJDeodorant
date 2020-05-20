@@ -186,11 +186,13 @@ class ExtractMethodPanel extends JPanel {
         if (editor != null) {
             editor.getMarkupModel().removeAllHighlighters();
         }
-        doRefactorButton.setEnabled(false);
-        exportButton.setEnabled(false);
-        refreshButton.setEnabled(false);
-        scrollPane.setVisible(false);
-        calculateRefactorings();
+        if (scopeChooserCombo.getScope() != null) {
+            doRefactorButton.setEnabled(false);
+            exportButton.setEnabled(false);
+            refreshButton.setEnabled(false);
+            scrollPane.setVisible(false);
+            calculateRefactorings();
+        }
     }
 
     /**

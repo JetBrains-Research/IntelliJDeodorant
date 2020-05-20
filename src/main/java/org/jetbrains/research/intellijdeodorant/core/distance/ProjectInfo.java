@@ -20,7 +20,7 @@ public class ProjectInfo {
     private final List<PsiMethod> psiMethods;
     private final Project project;
 
-    public ProjectInfo(AnalysisScope scope, boolean analyseAllFiles) {
+    public ProjectInfo(@NotNull AnalysisScope scope, boolean analyseAllFiles) {
         this.project = scope.getProject();
         List<PsiJavaFile> psiFiles = analyseAllFiles ? PsiUtils.extractFiles(project) : PsiUtils.extractFiles(project).stream().filter(scope::contains).collect(Collectors.toList());
         this.psiClasses = psiFiles.stream()

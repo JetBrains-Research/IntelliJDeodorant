@@ -154,11 +154,13 @@ class MoveMethodPanel extends JPanel {
     }
 
     private void refreshPanel() {
-        refactorings.clear();
-        model.clearTable();
-        disableAllButtons();
-        scrollPane.setVisible(false);
-        calculateRefactorings();
+        if (scopeChooserCombo.getScope() != null) {
+            refactorings.clear();
+            model.clearTable();
+            disableAllButtons();
+            scrollPane.setVisible(false);
+            calculateRefactorings();
+        }
     }
 
     private void calculateRefactorings() {
