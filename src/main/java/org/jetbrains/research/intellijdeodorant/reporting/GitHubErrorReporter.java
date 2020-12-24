@@ -19,14 +19,17 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.Consumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.research.intellijdeodorant.IntelliJDeodorantBundle;
 
 import java.awt.*;
 
 public class GitHubErrorReporter extends ErrorReportSubmitter {
     @Override
-    public boolean submit(@NotNull IdeaLoggingEvent[] events, String additionalInfo, @NotNull Component parentComponent,
-                          @NotNull Consumer<SubmittedReportInfo> consumer) {
+    public boolean submit(IdeaLoggingEvent @NotNull [] events,
+                          @Nullable String additionalInfo,
+                          @NotNull Component parentComponent,
+                          @NotNull Consumer<? super SubmittedReportInfo> consumer) {
         GitHubErrorBean errorBean = new GitHubErrorBean(events[0].getThrowable(), IdeaLogger.ourLastActionId);
         return doSubmit(events[0], parentComponent, consumer, errorBean, additionalInfo);
     }
@@ -34,7 +37,7 @@ public class GitHubErrorReporter extends ErrorReportSubmitter {
     @SuppressWarnings("BooleanMethodNameMustStartWithQuestion")
     private static boolean doSubmit(final IdeaLoggingEvent event,
                                     final Component parentComponent,
-                                    final Consumer<SubmittedReportInfo> callback,
+                                    final Consumer<? super SubmittedReportInfo> callback,
                                     final GitHubErrorBean bean,
                                     final String description) {
         final DataContext dataContext = DataManager.getInstance().getDataContext(parentComponent);
@@ -90,10 +93,10 @@ public class GitHubErrorReporter extends ErrorReportSubmitter {
      */
     static class CallbackWithNotification implements Consumer<SubmittedReportInfo> {
 
-        private final Consumer<SubmittedReportInfo> myOriginalConsumer;
+        private final Consumer<? super SubmittedReportInfo> myOriginalConsumer;
         private final Project myProject;
 
-        CallbackWithNotification(Consumer<SubmittedReportInfo> originalConsumer, Project project) {
+        CallbackWithNotification(Consumer<? super SubmittedReportInfo> originalConsumer, Project project) {
             this.myOriginalConsumer = originalConsumer;
             this.myProject = project;
         }

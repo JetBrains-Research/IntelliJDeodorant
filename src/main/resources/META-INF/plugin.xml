@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains-Research/IntelliJDeodorant">
     <name>IntelliJDeodorant</name>
-    <version>2020.1-1.2</version>
+    <version>2020.3-1.0</version>
     <vendor url="https://research.jetbrains.org/">Jetbrains-Research</vendor>
 
     <description><![CDATA[Detects code smells in Java code and recommends appropriate refactorings to resolve them.
@@ -18,6 +18,11 @@
     </description>
 
     <change-notes><![CDATA[
+        <h4>2020.3-1.0</h4>
+        <ul>
+            <li>Add compatibility with IDEA 2020.3</li>
+        </ul>
+
         <h4>2020.1-1.1</h4>
         <ul>
             <li>Make it possible to choose a search scope to detect code smells</li>

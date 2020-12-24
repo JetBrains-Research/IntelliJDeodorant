@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.16'
+    id 'org.jetbrains.intellij' version '0.6.5'
 }
 
 repositories {
@@ -8,13 +8,11 @@ repositories {
     jcenter()
 }
 
-sourceCompatibility = 1.8
-
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
-    version '2020.1'
+    version '2020.3'
     plugins 'java'
     pluginName 'IntelliJDeodorant'
     downloadSources true
